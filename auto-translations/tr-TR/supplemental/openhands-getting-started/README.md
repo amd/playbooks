@@ -18,42 +18,62 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands), kod yazabilen, komut çalıştırabilen, web'de gezinebilen ve gerçek bir çalışma alanında dosyaları düzenleyebilen bir yapay zeka yazılım aracısıdır (agent). Bir sohbet penceresinden önerileri kopyalamak yerine, aracıyı bir proje klasörüne yönlendirir ve işi onun yapmasına izin verirsiniz: bir özellik uygulamak, bir hatayı düzeltmek, testler yazmak veya bir kod tabanını açıklamak gibi.
+[OpenHands](https://github.com/All-Hands-AI/OpenHands), gerçek bir çalışma
+alanında kod yazabilen, komut çalıştırabilen, web'de gezinebilen ve dosyaları
+düzenleyebilen bir yapay zeka yazılım ajanıdır. Bir sohbet penceresinden
+önerileri kopyalamak yerine, ajanı bir proje klasörüne yönlendirir ve işi
+yapmasına izin verirsiniz: bir özellik uygulamak, bir hatayı düzeltmek, test
+yazmak veya bir kod tabanını açıklamak gibi.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas), OpenHands'i çalıştırmak için önerilen tarayıcı arayüzüdür. Tek bir `agent-canvas` komutu, aracı sunucusunu, otomasyon arka ucunu ve web ön yüzünü birlikte başlatır; böylece tarayıcınızdan aracıyla bir sohbet yürütebilirsiniz.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas), OpenHands'i
+çalıştırmak için önerilen tarayıcı kullanıcı arayüzüdür. Tek bir `agent-canvas`
+komutu, ajan sunucusunu, otomasyon arka ucunu ve web ön ucunu birlikte
+başlatır, böylece tarayıcınızdan ajanla bir sohbeti yönetebilirsiniz.
 
-Her şeyi AMD sisteminizde tutmak için aracı, Lemonade Server tarafından sunulan yerel bir modelle konuşur. Lemonade, bu modeli OpenAI uyumlu bir API üzerinden sunar; böylece Agent Canvas onu diğer OpenAI tarzı uç noktalar gibi yapılandırabilirken model, kodunuz ve sohbet bağlamı makinenizde kalır.
+Her şeyi AMD sisteminizde tutmak için ajan, Lemonade Server tarafından sunulan
+yerel bir modelle konuşur. Lemonade bu modeli OpenAI uyumlu bir API üzerinden
+sunar, böylece Agent Canvas onu diğer OpenAI tarzı uç noktalar gibi
+yapılandırabilirken model, kodunuz ve sohbet bağlamının tümü makinenizde
+kalır.
 
-Bu kılavuzda, yerel bir model başlatacak, Agent Canvas'ı başlatacak, onu bu modele yönlendirecek ve gerçek bir proje klasöründe ilk kodlama görevinizi çalıştıracaksınız.
+Bu kılavuzda, yerel bir model başlatacak, Agent Canvas'ı çalıştıracak, onu bu
+modele yönlendirecek ve gerçek bir proje klasörüne karşı ilk kodlama
+görevinizi çalıştıracaksınız.
 
 ## Neler Öğreneceksiniz
 
-- Lemonade Server'ı nasıl başlatacağınızı ve yerel bir modelin sohbet isteklerine yanıt verdiğini nasıl doğrulayacağınızı
+- Lemonade Server'ı nasıl başlatacağınızı ve yerel bir modelin sohbet
+  isteklerine yanıt verdiğini nasıl doğrulayacağınızı
 - Agent Canvas'ı npm paketinden nasıl kuracağınızı ve başlatacağınızı
-- Agent Canvas'ı LLM olarak yerel bir Lemonade modelini kullanacak şekilde nasıl yapılandıracağınızı
-- Bir OpenHands sohbeti nasıl başlatacağınızı ve aracının bir çalışma alanında dosyaları düzenlemesini ve komutları çalıştırmasını nasıl izleyeceğinizi
-- Aracının neyi değiştirdiğini nasıl inceleyeceğinizi ve takip mesajlarıyla onu nasıl yönlendireceğinizi
+- Agent Canvas'ı LLM olarak yerel bir Lemonade modelini kullanacak şekilde
+  nasıl yapılandıracağınızı
+- Bir OpenHands sohbeti nasıl başlatacağınızı ve ajanın bir çalışma alanında
+  dosyaları düzenlemesini ve komutları çalıştırmasını nasıl izleyeceğinizi
+- Ajanın neyi değiştirdiğini nasıl gözden geçireceğinizi ve takip mesajlarıyla
+  onu nasıl yönlendireceğinizi
 
 ## Temel Kavramlar
 
 | Kavram | Nedir | Bu kılavuzdaki yeri |
 | --- | --- | --- |
-| Lemonade Server | AMD donanımı için oluşturulmuş, OpenAI uyumlu bir API sunan yerel bir LLM sunum platformu. Verileriniz asla makinenizden çıkmaz. | Aracıyı çalıştıran modeli barındırır. |
-| OpenHands | Dosyaları okuyan ve düzenleyen, kabuk komutları çalıştıran ve bir çalışma alanı içinde web'de gezinen bir yapay zeka yazılım aracısı. | Sohbet üzerinden yönettiğiniz aracı. |
-| Agent Canvas | OpenHands sohbetlerini çalıştıran ve araç çağrılarını ile dosya değişikliklerini gösteren tarayıcı arayüzü ve arka uç. | Yığını başlatır ve sohbetinize ev sahipliği yapar. |
-| Çalışma Alanı | Aracının okumasına ve değiştirmesine izin verilen proje klasörü. | Aracının düzenlemelerinin ve komutlarının hedefi. |
+| Lemonade Server | AMD donanımı için geliştirilmiş, OpenAI uyumlu bir API sunan yerel bir LLM sunum platformu. Verileriniz asla makinenizden çıkmaz. | Ajanı güçlendiren modeli çalıştırır. |
+| OpenHands | Dosyaları okuyup düzenleyen, kabuk komutları çalıştıran ve bir çalışma alanı içinde web'de gezinen bir yapay zeka yazılım ajanı. | Sohbetten yönettiğiniz ajan. |
+| Agent Canvas | OpenHands sohbetlerini çalıştıran ve araç çağrılarını ve dosya değişikliklerini gösteren tarayıcı kullanıcı arayüzü ve arka ucu. | Yığını başlatır ve sohbetinizi barındırır. |
+| Çalışma Alanı | Ajanın okumasına ve değiştirmesine izin verilen proje klasörü. | Ajanın düzenlemelerinin ve komutlarının hedefi. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Kodlama aracısı iş akışları daha büyük bir model ve bağlam penceresinden faydalanır. En az 32 GB sistem belleği kullanın ve daha büyük GGUF modelleri için 64 GB veya daha fazlasını tercih edin.
+> Kodlama ajanı iş akışları, daha büyük bir model ve bağlam penceresinden
+> yararlanır. En az 32 GB sistem belleği kullanın ve daha büyük GGUF modelleri
+> için 64 GB veya daha fazlasını tercih edin.
 <!-- @device:end -->
 
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
+## Yazılım Güncellemelerini Kontrol Edin
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -62,27 +82,42 @@ Bu kılavuzda, yerel bir model başlatacak, Agent Canvas'ı başlatacak, onu bu 
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so the host needs only Docker and the model.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:docker,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
 Şunlara ihtiyacınız var:
 
-- Aşağıdaki modeli sunmaya hazır, kurulmuş bir Lemonade Server.
+- Aşağıdaki modeli sunabilecek şekilde kurulmuş Lemonade Server.
 
 <!-- @os:linux -->
-- Node.js 22.12 veya üstü ve `npm` (`agent-canvas` CLI tarafından kullanılır).
-- Agent Canvas'ın aracı sunucusu ortamını yönetmek için kullandığı Python paket yöneticisi `uv`. Sisteminizde zaten yoksa, Agent Canvas'ı başlatmadan önce [uv kurulum kılavuzundan](https://docs.astral.sh/uv/getting-started/installation/) kurun.
+- Node.js 22.12 veya üzeri ve `npm` (`agent-canvas` CLI'si tarafından
+  kullanılır).
+- `uv`, Agent Canvas'ın ajan sunucusu ortamını yönetmek için kullandığı Python
+  paket yöneticisi. Sisteminizde zaten yoksa, Agent Canvas'ı başlatmadan önce
+  [uv kurulum kılavuzundan](https://docs.astral.sh/uv/getting-started/installation/)
+  kurun.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- Kurulu ve çalışır durumda [Windows için Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/). Windows'ta, Agent Canvas yığını, Node.js, `uv` ve `@openhands/agent-canvas` paketini içeren yayınlanmış Docker imajından çalışır; bu nedenle bunları ana bilgisayara kurmanız gerekmez.
+- Kurulu ve çalışır durumda
+  [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
+  Windows'ta, Agent Canvas yığını, Node.js, `uv` ve `@openhands/agent-canvas`
+  paketini bir arada bulunduran yayımlanmış Docker görüntüsünden çalışır, bu
+  nedenle bunları ana makinenize kurmanız gerekmez.
 <!-- @os:end -->
 
-- Üzerinde çalışılacak bir proje klasörü. Bu, aracının üzerinde çalışmasını istediğiniz herhangi bir yerel git deposu veya kod dizini olabilir.
+- Üzerinde çalışacağınız bir proje klasörü. Bu, ajanın üzerinde çalışmasını
+  istediğiniz herhangi bir yerel git deposu veya kod dizini olabilir.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -126,9 +161,9 @@ Write-Host "OK: lemonade and docker are available"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 1. Lemonade Server'ı Başlatma
+## 1. Lemonade Server'ı Başlatın
 
-Modeli Lemonade CLI'dan başlatın:
+Modeli Lemonade CLI üzerinden başlatın:
 
 ```bash
 lemonade config set llamacpp.backend=vulkan
@@ -136,9 +171,14 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Donanımınıza uygun bir model seçin.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) güçlü bir kodlama modelidir ancak büyük bir bellek havuzu gerektirir. Cihazınızın belleği veya GPU VRAM'i sınırlıysa, bunun yerine Lemonade model kitaplığından daha küçük bir GGUF modeli seçin ve bu kılavuz boyunca o model kimliğini kullanın.
+> **Donanımınıza uygun bir model seçin.** `Qwen3.6-35B-A3B-GGUF` (~20 GB)
+> güçlü bir kodlama modelidir ancak büyük bir bellek havuzu gerektirir.
+> Cihazınızın belleği veya GPU VRAM'ı sınırlıysa, bunun yerine Lemonade model
+> kitaplığından daha küçük bir GGUF modeli seçin ve bu kılavuz boyunca o model
+> kimliğini kullanın.
 
-> **Not:** İlk `lemonade run` çalıştırması, model henüz mevcut değilse onu indirir; bu, model boyutuna ve bağlantınıza bağlı olarak biraz zaman alabilir.
+> **Not:** İlk `lemonade run` komutu, model henüz mevcut değilse onu indirir;
+> bu, modelin boyutuna ve bağlantınıza bağlı olarak biraz zaman alabilir.
 
 Lemonade, OpenAI uyumlu bir API'yi şu adreste sunar:
 
@@ -146,7 +186,7 @@ Lemonade, OpenAI uyumlu bir API'yi şu adreste sunar:
 http://127.0.0.1:13305/api/v1
 ```
 
-## 2. Yerel Modeli Doğrulama
+## 2. Yerel Modeli Doğrulayın
 
 Lemonade'in seçilen modeli sunabildiğini doğrulayın:
 
@@ -289,10 +329,10 @@ finally {
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-## 3. Agent Canvas'ı Kurun ve Başlatın
+## 3. Agent Canvas'ı Kurma ve Başlatma
 
 <!-- @os:linux -->
-Yayınlanan Agent Canvas paketini global olarak kurun:
+Yayınlanan Agent Canvas paketini genel olarak kurun:
 
 ```bash
 npm install -g @openhands/agent-canvas
@@ -317,27 +357,27 @@ echo "OK: agent-canvas CLI is on PATH"
 ```
 <!-- @test:end -->
 
-Ardından tüm yığını bir terminalden başlatın:
+Ardından bir terminalden tüm yığını başlatın:
 
 ```bash
 agent-canvas
 ```
 
-Agent Canvas varsayılan olarak `http://localhost:8000` adresinde başlar. Bu
-URL'yi tarayıcınızda açın. Port özel bir değer değildir — eğer 8000 zaten
-kullanımdaysa, Agent Canvas'ı başlatırken `--port` (veya `-p`) ile herhangi
-boş bir port belirtebilirsiniz:
+Varsayılan olarak Agent Canvas `http://localhost:8000` adresinde başlar. Bu
+URL'yi tarayıcınızda açın. Bu port özel değildir; 8000 zaten kullanılıyorsa,
+Agent Canvas'ı başlatırken `--port` (veya `-p`) ile başka boş bir port
+belirtebilirsiniz:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Ardından bunun yerine `http://localhost:3000` adresini açın. Varsayılan yerel
-backend, ana ekranda sağlıklı olarak görünmelidir.
+Ardından `http://localhost:3000` adresini açın. Varsayılan yerel arka uç ana
+ekranda sağlıklı olarak görünmelidir.
 
-`agent-canvas` komutu; agent sunucusunu, otomasyon backend'ini ve web
-frontend'ini birlikte başlatır. OpenHands'i yerel olarak çalıştırmak için
-yalnızca bu tek komuta ihtiyacınız vardır.
+`agent-canvas` komutu, agent sunucusunu, otomasyon arka ucunu ve web ön ucunu
+birlikte başlatır. OpenHands'i yerel olarak çalıştırmak için yalnızca bu tek
+komuta ihtiyacınız vardır.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -391,12 +431,11 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windows'ta, yayınlanan Agent Canvas container görüntüsünü Docker Desktop ile
-çalıştırın. Bu görüntü, Agent Server, otomasyon backend'i ve web frontend'ini
-bir arada barındırır; bu nedenle ana makineye Node.js, `uv` veya CLI'ı
-kurmanız gerekmez.
+Windows'ta, Docker Desktop ile yayınlanan Agent Canvas konteyner görüntüsünü
+çalıştırın. Bu görüntü, Agent Server, otomasyon arka ucu ve web ön ucunu bir
+arada içerir; bu nedenle ana makineye Node.js, `uv` veya CLI kurmanız gerekmez.
 
-Öncelikle, container'ın bağlayacağı yapılandırma ve çalışma alanı klasörlerini
+Öncelikle konteynerin bağlayacağı yapılandırma ve çalışma alanı klasörlerini
 oluşturun:
 
 ```powershell
@@ -404,7 +443,8 @@ $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Yayınlanan görüntüyü indirin (herkese açıktır, giriş yapmanız gerekmez):
+Yayınlanan görüntüyü indirin (herkese açıktır, bu nedenle giriş yapmanız
+gerekmez):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -420,16 +460,16 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Tarayıcınızda `http://localhost:8000/canvas` adresini açın. 8000 numaralı port
-zaten kullanımdaysa, farklı bir ana makine portu eşleyin, örneğin
-`-p 8080:8000`, ve bunun yerine `http://localhost:8080/canvas` adresini açın.
+Tarayıcınızda `http://localhost:8000/canvas` adresini açın. 8000 portu zaten
+kullanılıyorsa, farklı bir ana makine portu eşleyin, örneğin `-p 8080:8000`,
+ve bunun yerine `http://localhost:8080/canvas` adresini açın.
 
-> **Not:** İlk başlatma, container içinde Agent Server'ı başlattığından,
-> backend'in sağlıklı olarak raporlanması bir veya iki dakika sürebilir.
+> **Not:** İlk başlatma, konteyner içinde Agent Server'ı başlattığından, arka
+> ucun sağlıklı olarak raporlanması bir iki dakika sürebilir.
 
-`.openhands` bağlantısı, LLM profilinizi ve ayarlarınızı container yeniden
-başlatmaları arasında kalıcı hale getirir. Bu kılavuzun geri kalanı, her şeyi
-tarayıcınızdaki Agent Canvas kullanıcı arayüzü üzerinden yapılandırır.
+`.openhands` bağlama noktası, konteyner yeniden başlatmaları arasında LLM
+profilinizi ve ayarlarınızı korur. Bu kılavuzun geri kalanı, her şeyi
+tarayıcınızdaki Agent Canvas arayüzü üzerinden yapılandırır.
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -479,56 +519,56 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 4. Yerel LLM'i Yapılandırın
+## 4. Yerel LLM'yi Yapılandırma
 
-İlk başlatmada, Agent Canvas bir tanıtım akışı açar. Bu akışta:
+İlk başlatmada, Agent Canvas bir ilk kullanım akışı (onboarding) açar. Bu
+akışta:
 
-1. **OpenHands**'in agent olarak seçili kalmasına izin verin ve **Next**'e
+1. **OpenHands**'in agent olarak seçili kalmasını sağlayın ve **Next**'e
    tıklayın.
 2. **Set up your LLM** ekranında **Advanced**'i seçin.
-3. **Authentication**'ı **API key** olarak bırakın.
+3. **Authentication**'ın **API key** olarak kalmasını sağlayın.
 4. **Custom Model**'i `openai/Qwen3.6-35B-A3B-GGUF` olarak ayarlayın.
-5. **Base URL**'i `http://127.0.0.1:13305/api/v1` olarak ayarlayın.
+5. **Base URL**'yi `http://127.0.0.1:13305/api/v1` olarak ayarlayın.
    <!-- @os:windows -->
-   > Windows'ta yığın bir container içinde çalışır ve bu container ana makineye
-   > `127.0.0.1` üzerinden erişemez. Bunun yerine
-   > `http://host.docker.internal:13305/api/v1` kullanın, böylece
-   > container'daki agent, Windows ana makinesinde çalışan Lemonade'e
-   > ulaşabilir.
+   > Windows'ta yığın bir konteyner içinde çalışır ve bu nedenle ana makineye
+   > `127.0.0.1` üzerinden ulaşamaz. Bunun yerine, konteynerleştirilmiş agent'ın
+   > Windows ana makinesinde çalışan Lemonade'e ulaşabilmesi için
+   > `http://host.docker.internal:13305/api/v1` kullanın.
    <!-- @os:end -->
-6. **API Key** için, `lemonade-local` gibi boş olmayan herhangi bir yer
-   tutucu değer girin. Lemonade gerçek bir anahtar gerektirmez, ancak
-   OpenHands istemcisinin göndermesi gereken bir değer vardır.
+6. **API Key** için `lemonade-local` gibi boş olmayan herhangi bir yer
+   tutucu girin. Lemonade gerçek bir anahtar gerektirmez, ancak OpenHands
+   istemcisinin gönderecek bir değere ihtiyacı vardır.
 7. **Next**'e tıklayın.
 
-Tamamlanmış Advanced ayarları şu şekilde görünmelidir. API anahtarı alanı
-kullanıcı arayüzü tarafından maskelenmiştir.
+Tamamlanmış Advanced ayarları şöyle görünmelidir. API anahtarı alanı arayüz
+tarafından maskelenir.
 
-![Lemonade modeli ve yerel base URL ile Agent Canvas ilk kullanım LLM Advanced ayarları](assets/01-llm-advanced-settings.png)
+![Lemonade modeli ve yerel temel URL ile Agent Canvas ilk kullanım LLM Advanced ayarları](assets/01-llm-advanced-settings.png)
 
 Agent Canvas bu değerleri bir LLM profili olarak kaydeder. Sürümünüz bu
-profile bir isim vermenizi isterse, `lemonade-local` gibi boşluk içermeyen
-bir isim kullanın. Daha sonra modelleri değiştirirseniz, **Settings > LLM**'i
-açın ve aynı Advanced alanlarını güncelleyin. Kaydedilmiş profiller arasında
-sohbet giriş alanından `/model` komutuyla geçiş yapabilirsiniz.
+profile bir ad vermenizi isterse, `lemonade-local` gibi boşluk içermeyen bir
+ad kullanın. Modelleri daha sonra değiştirirseniz, **Settings > LLM**'i açın
+ve aynı Advanced alanlarını güncelleyin. Kayıtlı profiller arasında sohbet
+girdisinden `/model` komutuyla geçiş yapabilirsiniz.
 
-## 5. Bir Çalışma Alanı Açın
+## 5. Bir Çalışma Alanı Açma
 
-Agent yalnızca sizin seçtiğiniz bir çalışma alanı içindeki dosyaları
-okuyabilir ve değiştirebilir. Bir göreve başlamadan önce, Agent Canvas'ı
-proje klasörünüze yönlendirin:
+Agent yalnızca sizin seçtiğiniz bir çalışma alanı içindeki dosyaları okuyabilir
+ve değiştirebilir. Bir göreve başlamadan önce, Agent Canvas'ı proje
+klasörünüze yönlendirin:
 
 1. Ana ekrandan **Open Workspace**'i seçin.
 2. Projenizi içeren klasörü seçin (örneğin, agent'ın üzerinde çalışmasını
    istediğiniz bir git deposu).
 3. O çalışma alanında yeni bir konuşma başlatın.
 
-Agent'ın yaptığı her şey—dosyaları okuma, komutları çalıştırma, kodu
-düzenleme—o çalışma alanıyla sınırlıdır.
+Agent'ın yaptığı her şey—dosyaları okumak, komutları çalıştırmak, kodu
+düzenlemek—bu çalışma alanıyla sınırlıdır.
 
-![Tanıtımdan sonra Agent Canvas ana ekranı](assets/02-agent-canvas-home.png)
+![Onboarding sonrası Agent Canvas ana ekranı](assets/02-agent-canvas-home.png)
 
-## 6. İlk Kodlama Görevinizi Çalıştırın
+## 6. İlk Kodlama Görevinizi Çalıştırma
 
 Çalışma alanı açıkken ve yerel LLM seçiliyken, sohbete somut bir görev yazın.
 İyi bir ilk görev küçük ve doğrulanabilir olmalıdır, örneğin:
@@ -541,46 +581,45 @@ when run as a script.
 
 Konuşma zaman çizelgesini izleyin. OpenHands şunları yapacaktır:
 
-- Düzeni anlamak için çalışma alanını okur.
+- Düzenini anlamak için çalışma alanını okur.
 - İstenen fonksiyonu ve test bloğunu içeren `hello.py` dosyasını oluşturur.
 - İsteğe bağlı olarak çıktıyı doğrulamak için `python3 hello.py` komutunu
   çalıştırır.
-- Yaptıklarını ve varsa komut çıktısını sohbette bildirir.
+- Ne yaptığını ve varsa komut çıktısını sohbette raporlar.
 
-Yeni dosyanın çalışma alanında göründüğünü görmelisiniz ve agent'ın son
-mesajı yaptığı değişikliği açıklamalıdır. Bu, en önemli andır: agent projenizin
-klasöründe gerçek kod yazmış ve çalıştırmıştır.
+Çalışma alanında yeni dosyanın göründüğünü ve agent'ın son mesajının yaptığı
+değişikliği açıkladığını görmelisiniz. Bu, kazanç anıdır: agent projenizde
+gerçek kod yazdı ve çalıştırdı.
 
-## 7. Agent'ı Gözden Geçirin ve Yönlendirin
+## 7. Agent'ı Gözden Geçirme ve Yönlendirme
 
-Agent bir adımı tamamladıktan sonra, bir sonraki adımı kabul etmeden önce
+Agent bir adımı tamamladıktan sonra, bir sonrakini kabul etmeden önce
 çalışmasını gözden geçirin:
 
-- **Dosya değişiklikleri**: agent'ın tam olarak neyi eklediğini, değiştirdiğini
-  veya sildiğini görmek için çalışma alanı dosya tarayıcısını veya agent'ın
-  diff görünümünü kullanın.
-- **Komut çıktısı**: agent'ın çalıştırdığı herhangi bir komutu genişleterek
-  stdout, stderr ve çıkış kodunu görün.
-- **Devam eden adımlar**: sonuç istediğiniz gibi değilse, aynı konuşmada bir
+- **Dosya değişiklikleri**: tam olarak neyin eklendiğini, değiştirildiğini
+  veya silindiğini görmek için çalışma alanı dosya tarayıcısını veya agent'ın
+  fark (diff) görünümünü kullanın.
+- **Komut çıktısı**: stdout, stderr ve çıkış kodunu görmek için agent'ın
+  çalıştırdığı herhangi bir komutu genişletin.
+- **Takip mesajları**: sonuç istediğiniz gibi değilse, aynı konuşmada bir
   düzeltmeyle yanıt verin. Agent önceki bağlamı korur ve aynı dosyalar
   üzerinde yinelemeye devam eder.
 
-Örneğin, test beklenen selamlamayı yazdırmadıysa, şu şekilde yanıt verin:
+Örneğin, test beklenen selamlamayı yazdırmadıysa, şöyle yanıt verin:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Agent, dosyayı yeniden okuyacak, komutu çalıştıracak, sorunu teşhis edecek ve
+Agent dosyayı yeniden okuyacak, komutu çalıştıracak, sorunu teşhis edecek ve
 dosyayı tekrar düzenleyecektir—hepsi aynı konuşma içinde.
 ## Sorun Giderme
 
 <!-- @os:linux -->
 - **`agent-canvas` PATH üzerinde değil:** `npm install -g @openhands/agent-canvas`
-  komutuyla yeniden yükleyin ve `agent-canvas` yeni bir terminalden
-  başlatılabilmeden önce npm genel ikili dosya dizininin PATH üzerinde
-  olduğunu doğrulayın.
+  ile yeniden yükleyin ve `agent-canvas` yeni bir terminalden başlatılabilmeden
+  önce npm genel ikili dizininin PATH üzerinde olduğundan emin olun.
 - **`npm install -g` izin hatasıyla başarısız oluyor:** kullanıcıya ait bir
   genel npm dizini yapılandırın, ardından terminali yeniden açıp Agent Canvas'ı
   tekrar yükleyin.
@@ -593,55 +632,49 @@ dosyayı tekrar düzenleyecektir—hepsi aynı konuşma içinde.
   npm install -g @openhands/agent-canvas
   ```
 - **`uv` eksik:** [uv kurulum kılavuzundan](https://docs.astral.sh/uv/getting-started/installation/)
-  yükleyin. Agent Canvas, ajan sunucusunun Python ortamını yönetmek için
-  `uv` kullanır.
+  yükleyin. Agent Canvas, agent sunucusu Python ortamını yönetmek için `uv` kullanır.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - **`docker pull` veya `docker run` bağlanamıyor:** Docker Desktop'ın çalıştığından
-  (sistem tepsisindeki balina simgesi) ve motorun başlatma işlemini
-  tamamladığından emin olun. `docker version` hem bir Client hem de bir Server
-  bölümü yazdırmalıdır.
-- **Konteyner başlıyor ancak arka uç asla sağlıklı hale gelmiyor:** ilk
-  başlatma, konteyner içinde Agent Server'ı başlatır; bir iki dakika bekleyin,
-  ardından hataları görmek için `docker logs <container>` komutunu kontrol
-  edin.
-- **Konteyner Lemonade'e erişemiyor:** konteyner, ana bilgisayara
-  `host.docker.internal` üzerinden erişir. Lemonade'in Windows ana
-  bilgisayarında `lemonade status` ile hizmet verdiğini doğrulayın ve LLM'i
-  yapılandırırken Base URL olarak `http://host.docker.internal:13305/api/v1`
-  kullanın.
+  (balina simgesi sistem tepsisinde olmalı) ve motorun başlatmayı tamamladığından
+  emin olun. `docker version` hem bir Client hem de bir Server bölümü yazdırmalıdır.
+- **Konteyner başlıyor ancak arka uç hiçbir zaman sağlıklı hale gelmiyor:** ilk
+  başlatma, Agent Server'ı konteyner içinde başlatır; bir veya iki dakika bekleyin,
+  ardından hatalar için `docker logs <container>` komutunu kontrol edin.
+- **Konteyner Lemonade'e ulaşamıyor:** konteyner ana makineye
+  `host.docker.internal` üzerinden ulaşır. Lemonade'in Windows ana makinesinde
+  `lemonade status` ile sunum yaptığını doğrulayın ve LLM'i yapılandırırken
+  Base URL olarak `http://host.docker.internal:13305/api/v1` kullanın.
 <!-- @os:end -->
 
-- **Arayüz yükleniyor ancak arka uç sağlıksız görünüyor:** ajan sunucusunun
-  başlamayı tamamlaması için bir iki dakika bekleyin, ardından yenileyin.
-  Sağlıksız kalmaya devam ederse yığını yeniden başlatın ve hataları görmek
-  için günlükleri kontrol edin.
+- **Arayüz yükleniyor ancak arka uç sağlıksız görünüyor:** agent sunucusunun
+  başlamayı bitirmesi için bir veya iki dakika bekleyin, ardından sayfayı
+  yenileyin. Sağlıksız kalmaya devam ederse, yığını yeniden başlatın ve
+  hatalar için günlükleri kontrol edin.
 - **Lemonade sohbet istekleri bağlantı hatasıyla başarısız oluyor:**
   `curl -fsS "http://127.0.0.1:13305/api/v1/health"` komutunun başarılı
-  olduğunu ve Lemonade'in modeli hâlâ `lemonade status` ile sunduğunu
+  olduğunu ve Lemonade'in modeli hâlâ sunduğunu `lemonade status` ile
   doğrulayın.
-- **Ajan bir bağlam uzunluğu veya belirteç sınırı mesajıyla hata veriyor:**
-  ajanın aşırı büyük bir geçmiş taşımaması için yeni bir konuşma başlatın.
-  Bu durum tekrar ederse, bellek uygunsa Lemonade'i varsayılan 65536 değerinden
-  daha büyük bir `ctx_size` ile yeniden başlatın (örneğin `ctx_size=131072`).
-- **Ajan düşük kaliteli veya eksik düzenlemeler üretiyor:** Lemonade'de daha
-  büyük bir modele geçin veya ajana daha küçük, daha somut bir görev verip
+- **Agent, bağlam uzunluğu veya belirteç sınırı mesajıyla hata veriyor:**
+  agent'ın aşırı büyük bir geçmiş taşımaması için yeni bir konuşma başlatın.
+  Devam ederse, bellek elverdiği ölçüde Lemonade'i varsayılan 65536 değerinden
+  daha büyük bir `ctx_size` ile (örneğin `ctx_size=131072`) yeniden başlatın.
+- **Agent düşük kaliteli veya eksik düzenlemeler üretiyor:** Lemonade'de daha
+  büyük bir modele geçin veya agent'a daha küçük, daha somut bir görev verip
   bir sonraki değişikliği istemeden önce bitirmesine izin verin.
 
 ## Sonraki Adımlar
 
 - Aynı çalışma alanında birim test dosyası eklemek veya bilinen bir hatayı
   düzeltmek gibi daha büyük bir görevi deneyin ve değişikliği tutmadan önce
-  ajanın diff'ini inceleyin.
-- Ajanın çalışırken sorunları okuyabilmesi veya güncellemeleri
-  paylaşabilmesi için **Customize** altında GitHub veya Slack gibi bir MCP
-  sunucusu bağlayın.
-- Birkaç LLM profili kaydedin (hızlı küçük bir model ve daha güçlü büyük bir
-  model) ve konuşma sırasında `/model` komutuyla aralarında geçiş yapın.
-- Tekrarlayan geliştirme döngülerini zamanlanmış veya olay tetiklemeli ajan
-  çalıştırmalarına dönüştürmek için
-  [OpenHands otomasyonlarına](https://docs.openhands.dev/openhands/usage/automations/overview) geçin.
+  agent'ın diff'ini inceleyin.
+- Agent'ın çalışırken sorunları okuyabilmesi veya güncellemeler yayınlayabilmesi
+  için **Customize** altında GitHub veya Slack gibi bir MCP sunucusu bağlayın.
+- Birden fazla LLM profili kaydedin (hızlı küçük bir model ve daha güçlü büyük
+  bir model) ve konuşma sırasında `/model` ile bunlar arasında geçiş yapın.
+- Tekrar eden geliştirme döngülerini zamanlanmış veya olay tetiklemeli agent
+  çalıştırmalarına dönüştürmek için [OpenHands otomasyonlarına](https://docs.openhands.dev/openhands/usage/automations/overview) geçin.
 
 ## Kaynaklar
 

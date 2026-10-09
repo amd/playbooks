@@ -18,49 +18,34 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) je AI softverski agent
-koji može da piše kod, pokreće komande, pretražuje veb i uređuje fajlove u pravom
-radnom okruženju. Umesto da kopirate predloge iz prozora za ćaskanje, usmerite
-agenta na fasciklu projekta i pustite ga da obavi posao: implementira funkciju,
-otkloni grešku, napiše testove ili objasni kodnu bazu.
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) je AI softverski agent koji može da piše kod, pokreće komande, pretražuje veb i uređuje fajlove u pravom radnom prostoru. Umesto kopiranja predloga iz prozora za ćaskanje, usmeravate agenta na fasciklu projekta i prepuštate mu posao: implementaciju funkcije, popravku greške, pisanje testova ili objašnjenje koda.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) je preporučeni
-interfejs u pregledaču za pokretanje OpenHands-a. Jedna komanda `agent-canvas`
-pokreće server agenta, backend za automatizaciju i veb frontend zajedno, tako da
-možete voditi razgovor sa agentom iz svog pregledača.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) je preporučeni veb interfejs za pokretanje OpenHands-a. Jedna komanda `agent-canvas` pokreće server agenta, pozadinski sistem za automatizaciju i veb frontend zajedno, tako da možete voditi razgovor sa agentom iz svog pregledača.
 
-Da bi sve ostalo na vašem AMD sistemu, agent razgovara sa lokalnim modelom koji
-opslužuje Lemonade Server. Lemonade izlaže taj model kroz API kompatibilan sa
-OpenAI-jem, tako da Agent Canvas može da ga konfiguriše kao bilo koju drugu
-krajnju tačku u OpenAI stilu, dok model, vaš kod i kontekst razgovora ostaju na
-vašem računaru.
+Da bi sve ostalo na vašem AMD sistemu, agent komunicira sa lokalnim modelom koji opslužuje Lemonade Server. Lemonade izlaže taj model putem API-ja kompatibilnog sa OpenAI, tako da Agent Canvas može da ga konfiguriše kao bilo koju drugu krajnju tačku u OpenAI stilu, dok model, vaš kod i kontekst razgovora ostaju na vašem računaru.
 
-U ovom vodiču ćete pokrenuti lokalni model, pokrenuti Agent Canvas, usmeriti ga
-na taj model i pokrenuti svoj prvi zadatak pisanja koda nad pravom fasciklom
-projekta.
+U ovom vodiču ćete pokrenuti lokalni model, pokrenuti Agent Canvas, usmeriti ga na taj model i izvršiti svoj prvi zadatak kodiranja nad pravom fasciklom projekta.
 
 ## Šta ćete naučiti
 
 - Kako da pokrenete Lemonade Server i potvrdite da lokalni model odgovara na zahteve za ćaskanje
 - Kako da instalirate i pokrenete Agent Canvas iz npm paketa
 - Kako da konfigurišete Agent Canvas da koristi lokalni Lemonade model kao LLM
-- Kako da pokrenete OpenHands razgovor i posmatrate kako agent uređuje fajlove i pokreće
-  komande u radnom okruženju
-- Kako da pregledate šta je agent promenio i usmerite ga naknadnim porukama
+- Kako da pokrenete OpenHands razgovor i posmatrate kako agent uređuje fajlove i pokreće komande u radnom prostoru
+- Kako da pregledate šta je agent promenio i usmerite ga dodatnim porukama
 
 ## Osnovni koncepti
 
 | Koncept | Šta je to | Gde se uklapa u ovaj vodič |
 | --- | --- | --- |
-| Lemonade Server | Lokalna platforma za opsluživanje LLM-ova napravljena za AMD hardver koja izlaže API kompatibilan sa OpenAI-jem. Vaši podaci nikada ne napuštaju vaš računar. | Pokreće model koji pokreće agenta. |
-| OpenHands | AI softverski agent koji čita i uređuje fajlove, pokreće komande ljuske i pretražuje veb unutar radnog okruženja. | Agent kojim upravljate iz ćaskanja. |
-| Agent Canvas | Interfejs u pregledaču i backend koji pokreće OpenHands razgovore i prikazuje pozive alata i promene fajlova. | Pokreće sistem i hostuje vaš razgovor. |
-| Radno okruženje | Fascikla projekta koju agent sme da čita i menja. | Cilj agentovih izmena i komandi. |
+| Lemonade Server | Lokalna platforma za opsluživanje LLM-ova izgrađena za AMD hardver koja izlaže API kompatibilan sa OpenAI. Vaši podaci nikada ne napuštaju vaš računar. | Pokreće model koji pokreće agenta. |
+| OpenHands | AI softverski agent koji čita i uređuje fajlove, pokreće komande ljuske i pretražuje veb unutar radnog prostora. | Agent kojim upravljate iz ćaskanja. |
+| Agent Canvas | Veb interfejs i pozadinski sistem koji pokreće OpenHands razgovore i prikazuje pozive alata i izmene fajlova. | Pokreće celokupan sistem i ugošćava vaš razgovor. |
+| Radni prostor | Fascikla projekta koju agent sme da čita i menja. | Meta agentovih izmena i komandi. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Radni tokovi agenta za pisanje koda imaju koristi od većeg modela i prozora konteksta. Koristite
-> najmanje 32 GB sistemske memorije, a poželjno je 64 GB ili više za veće GGUF modele.
+> Radni tokovi agenata za kodiranje imaju koristi od većeg modela i prozora konteksta. Koristite najmanje 32 GB sistemske memorije, a za veće GGUF modele preporučuje se 64 GB ili više.
 <!-- @device:end -->
 
 ## Podešavanje konfiguracije memorije
@@ -77,11 +62,17 @@ projekta.
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so the host needs only Docker and the model.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:docker,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
 Potrebno vam je:
@@ -89,22 +80,19 @@ Potrebno vam je:
 - Instaliran Lemonade Server koji može da opslužuje model naveden ispod.
 
 <!-- @os:linux -->
-- Node.js 22.12 ili noviji i `npm` (koje koristi `agent-canvas` CLI).
-- `uv`, Python menadžer paketa koji Agent Canvas koristi za upravljanje okruženjem
-  servera agenta. Ako ga vaš sistem već nema, instalirajte ga sa
-  [uv vodiča za instalaciju](https://docs.astral.sh/uv/getting-started/installation/)
-  pre nego što pokrenete Agent Canvas.
+- Node.js 22.12 ili noviji i `npm` (koristi ih `agent-canvas` CLI).
+- `uv`, Python menadžer paketa koji Agent Canvas koristi za upravljanje okruženjem servera agenta. Ako vaš sistem još uvek nema instaliran, instalirajte ga prema [vodiču za instalaciju uv-a](https://docs.astral.sh/uv/getting-started/installation/) pre pokretanja Agent Canvas-a.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
-  instaliran i pokrenut. Na Windows-u, sistem Agent Canvas se pokreće iz
-  objavljene Docker slike, koja u sebi sadrži Node.js, `uv` i paket
-  `@openhands/agent-canvas`, tako da ih ne morate instalirati na hostu.
+- [Docker Desktop za Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  instaliran i pokrenut. Na Windows-u, Agent Canvas sistem se pokreće iz objavljene Docker
+  slike, koja uključuje Node.js, `uv` i paket
+  `@openhands/agent-canvas`, tako da te komponente ne morate da instalirate na host sistemu.
 <!-- @os:end -->
 
-- Fascikla projekta u kojoj ćete raditi. To može biti bilo koji lokalni git repozitorijum ili direktorijum
-  sa kodom nad kojim želite da agent radi.
+- Fascikla projekta u kojoj ćete raditi. To može biti bilo koji lokalni git repozitorijum ili
+  direktorijum sa kodom na kojem želite da agent radi.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -158,11 +146,11 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Izaberite model koji odgovara vašem hardveru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je snažan model za pisanje koda, ali zahteva veliki memorijski prostor. Ako vaš uređaj ima ograničenu memoriju ili GPU VRAM, umesto toga izaberite manji GGUF model iz Lemonade biblioteke modela i koristite taj ID modela u ostatku ovog vodiča.
+> **Izaberite model koji odgovara vašem hardveru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je snažan model za kodiranje, ali zahteva veliki memorijski prostor. Ako vaš uređaj ima ograničenu memoriju ili GPU VRAM, umesto toga izaberite manji GGUF model iz Lemonade biblioteke modela i koristite taj ID modela kroz ceo ovaj vodič.
 
-> **Napomena:** Prvo pokretanje `lemonade run` preuzima model ako još uvek nije prisutan, što može potrajati u zavisnosti od veličine modela i vaše konekcije.
+> **Napomena:** Prvo pokretanje `lemonade run` preuzima model ako već nije prisutan, što može potrajati u zavisnosti od veličine modela i brzine vaše veze.
 
-Lemonade izlaže API kompatibilan sa OpenAI-jem na:
+Lemonade izlaže API kompatibilan sa OpenAI na adresi:
 
 ```text
 http://127.0.0.1:13305/api/v1
@@ -311,10 +299,10 @@ finally {
 ```
 <!-- @test:end -->
 <!-- @os:end -->
-## 3. Instaliranje i pokretanje Agent Canvas-a
+## 3. Instalirajte i pokrenite Agent Canvas
 
 <!-- @os:linux -->
-Instalirajte objavljeni paket Agent Canvas globalno:
+Instalirajte objavljeni Agent Canvas paket globalno:
 
 ```bash
 npm install -g @openhands/agent-canvas
@@ -339,24 +327,24 @@ echo "OK: agent-canvas CLI is on PATH"
 ```
 <!-- @test:end -->
 
-Zatim pokrenite kompletan stek iz terminala:
+Zatim pokrenite ceo paket iz terminala:
 
 ```bash
 agent-canvas
 ```
 
 Podrazumevano, Agent Canvas se pokreće na `http://localhost:8000`. Otvorite taj URL u
-svom pregledaču. Port nije ničim poseban — ako je 8000 već zauzet, prosledite bilo koji
+vašem pregledaču. Port nije poseban — ako je 8000 već zauzet, prosledite bilo koji
 slobodan port pomoću `--port` (ili `-p`) kada pokrećete Agent Canvas:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Zatim otvorite `http://localhost:3000` umesto toga. Podrazumevani lokalni bekend bi trebalo da bude prikazan
+Zatim otvorite `http://localhost:3000` umesto toga. Podrazumevani lokalni bekend treba da bude prikazan
 kao ispravan na početnom ekranu.
 
-Komanda `agent-canvas` pokreće agent server, automatizacioni bekend i
+Komanda `agent-canvas` pokreće server agenta, bekend za automatizaciju i
 veb frontend zajedno. Potrebna vam je samo ova jedna komanda da pokrenete OpenHands
 lokalno.
 
@@ -412,9 +400,9 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Na Windows-u, pokrenite objavljenu Agent Canvas kontejner sliku pomoću Docker Desktop-a.
-Slika u sebi sadrži Agent Server, automatizacioni bekend i veb frontend, tako da
-ne morate da instalirate Node.js, `uv` ili CLI na host mašini.
+Na Windows-u, pokrenite objavljenu Agent Canvas kontejnersku sliku pomoću Docker Desktop-a.
+Slika uključuje Agent Server, bekend za automatizaciju i veb frontend, tako da
+ne morate da instalirate Node.js, `uv` ili CLI na hostu.
 
 Prvo, kreirajte fascikle za konfiguraciju i radni prostor koje kontejner montira:
 
@@ -423,13 +411,13 @@ $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Preuzmite objavljenu sliku (javno dostupna je, tako da prijavljivanje nije potrebno):
+Preuzmite objavljenu sliku (javna je, tako da prijavljivanje nije potrebno):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Zatim pokrenite stek:
+Zatim pokrenite paket:
 
 ```powershell
 docker run -it --rm `
@@ -439,16 +427,16 @@ docker run -it --rm `
   ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-Otvorite `http://localhost:8000/canvas` u svom pregledaču. Ako je port 8000 već
+Otvorite `http://localhost:8000/canvas` u vašem pregledaču. Ako je port 8000 već
 zauzet, mapirajte drugačiji host port, na primer `-p 8080:8000`, i otvorite
 `http://localhost:8080/canvas` umesto toga.
 
 > **Napomena:** Prvo pokretanje inicijalizuje Agent Server unutar kontejnera,
-> tako da može potrajati minut ili dva pre nego što bekend prijavi da je ispravan.
+> tako da može proći minut ili dva pre nego što bekend prijavi da je ispravan.
 
 Montiranje `.openhands` čuva vaš LLM profil i podešavanja između ponovnih pokretanja
 kontejnera. Ostatak ovog vodiča konfiguriše sve kroz Agent
-Canvas UI u vašem pregledaču.
+Canvas korisnički interfejs u vašem pregledaču.
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
 ```powershell
@@ -498,54 +486,54 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 4. Konfigurisanje lokalnog LLM-a
+## 4. Konfigurišite lokalni LLM
 
-Pri prvom pokretanju, Agent Canvas otvara tok uvodnog podešavanja (onboarding). U tom toku:
+Pri prvom pokretanju, Agent Canvas otvara tok uvođenja (onboarding). U tom toku:
 
-1. Ostavite **OpenHands** kao izabranog agenta i kliknite **Next**.
-2. Na ekranu **Set up your LLM**, izaberite **Advanced**.
-3. Ostavite **Authentication** postavljeno na **API key**.
-4. Postavite **Custom Model** na `openai/Qwen3.6-35B-A3B-GGUF`.
-5. Postavite **Base URL** na `http://127.0.0.1:13305/api/v1`.
+1. Ostavite **OpenHands** izabran kao agent i kliknite na **Next**.
+2. Na **Set up your LLM**, izaberite **Advanced**.
+3. Ostavite **Authentication** podešeno na **API key**.
+4. Podesite **Custom Model** na `openai/Qwen3.6-35B-A3B-GGUF`.
+5. Podesite **Base URL** na `http://127.0.0.1:13305/api/v1`.
    <!-- @os:windows -->
-   > Na Windows-u se stek izvršava u kontejneru, koji ne može da pristupi hostu na
-   > `127.0.0.1`. Umesto toga koristite `http://host.docker.internal:13305/api/v1` kako bi
-   > agent unutar kontejnera mogao da pristupi Lemonade-u koji radi na Windows hostu.
+   > Na Windows-u se paket izvršava u kontejneru, koji ne može da pristupi hostu na
+   > `127.0.0.1`. Umesto toga koristite `http://host.docker.internal:13305/api/v1` tako da
+   > kontejnerizovani agent može da pristupi Lemonade-u koji se izvršava na Windows hostu.
    <!-- @os:end -->
-6. Za **API Key**, unesite bilo koju vrednost koja nije prazna, na primer `lemonade-local`.
-   Lemonade-u nije potreban pravi ključ, ali OpenHands klijentu je potrebna vrednost
+6. Za **API Key**, unesite bilo koju nepraznu rezervisanu vrednost kao što je `lemonade-local`.
+   Lemonade ne zahteva pravi ključ, ali OpenHands klijentu je potrebna vrednost
    da bi je poslao.
-7. Kliknite **Next**.
+7. Kliknite na **Next**.
 
-Kompletirana Advanced podešavanja bi trebalo da izgledaju ovako. Polje za API ključ
-je maskirano od strane korisničkog interfejsa.
+Dovršena Advanced podešavanja treba da izgledaju ovako. Polje za API ključ je
+maskirano u korisničkom interfejsu.
 
-![Podešavanja Agent Canvas-a za LLM (Advanced) pri prvom korišćenju, sa Lemonade modelom i lokalnim base URL-om](assets/01-llm-advanced-settings.png)
+![Agent Canvas Advanced podešavanja LLM-a pri prvoj upotrebi sa Lemonade modelom i lokalnim base URL-om](assets/01-llm-advanced-settings.png)
 
-Agent Canvas čuva ove vrednosti kao LLM profil. Ako vaša verzija zatraži da
-imenujete taj profil, koristite ime bez razmaka, kao što je `lemonade-local`. Ako kasnije promenite
-modele, otvorite **Settings > LLM** i ažurirajte ista Advanced polja. Možete
-prebacivati sačuvane profile iz polja za unos poruke pomoću komande `/model`.
+Agent Canvas čuva ove vrednosti kao LLM profil. Ako vaša verzija traži da
+imenujete taj profil, koristite ime bez razmaka kao što je `lemonade-local`. Ako kasnije
+promenite modele, otvorite **Settings > LLM** i ažurirajte ista Advanced polja. Možete
+da prebacujete sačuvane profile iz polja za unos ćaskanja pomoću komande `/model`.
 
-## 5. Otvaranje radnog prostora
+## 5. Otvorite radni prostor
 
-Agent može da čita i menja samo fajlove unutar radnog prostora koji vi izaberete. Pre
-pokretanja zadatka, usmerite Agent Canvas na fasciklu vašeg projekta:
+Agent može samo da čita i menja fajlove unutar radnog prostora koji vi izaberete. Pre
+pokretanja zadatka, usmerite Agent Canvas na vašu fasciklu projekta:
 
 1. Sa početnog ekrana, izaberite **Open Workspace**.
 2. Izaberite fasciklu koja sadrži vaš projekat (na primer, git repozitorijum
    na kome želite da agent radi).
 3. Pokrenite novi razgovor u tom radnom prostoru.
 
-Sve što agent radi — čitanje fajlova, pokretanje komandi, izmena koda — ograničeno je
+Sve što agent radi—čitanje fajlova, pokretanje komandi, uređivanje koda—ograničeno je
 na taj radni prostor.
 
-![Početni ekran Agent Canvas-a nakon uvodnog podešavanja](assets/02-agent-canvas-home.png)
+![Agent Canvas početni ekran posle uvođenja](assets/02-agent-canvas-home.png)
 
-## 6. Pokretanje prvog zadatka za pisanje koda
+## 6. Pokrenite svoj prvi zadatak kodiranja
 
 Sa otvorenim radnim prostorom i izabranim lokalnim LLM-om, unesite konkretan zadatak u
-polje za razgovor. Dobar prvi zadatak je mali i lako proverljiv, na primer:
+ćaskanje. Dobar prvi zadatak je mali i proverljiv, na primer:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -553,28 +541,28 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-Pratite vremensku liniju razgovora. OpenHands će:
+Posmatrajte vremensku liniju razgovora. OpenHands će:
 
-- Pročitati radni prostor kako bi razumeo strukturu.
+- Pročitati radni prostor da bi razumeo strukturu.
 - Kreirati `hello.py` sa traženom funkcijom i test blokom.
-- Opciono pokrenuti `python3 hello.py` kako bi proverio izlaz.
-- Prijaviti šta je uradio i eventualni izlaz komande u razgovoru.
+- Opciono pokrenuti `python3 hello.py` da bi proverio izlaz.
+- Prijaviti šta je uradio i izlaz bilo koje komande u ćaskanju.
 
-Trebalo bi da vidite novi fajl kako se pojavljuje u radnom prostoru, a konačna
-poruka agenta bi trebalo da opiše izmenu koju je napravio. Ovo je trenutak isplativosti: agent je
-napisao i pokrenuo pravi kod u vašoj projektnoj fascikli.
+Trebalo bi da vidite da se novi fajl pojavljuje u radnom prostoru, i agentova konačna
+poruka treba da opiše promenu koju je napravio. Ovo je trenutak isplate: agent je napisao
+i pokrenuo pravi kod u vašoj fascikli projekta.
 
-## 7. Pregled i usmeravanje agenta
+## 7. Pregledajte i usmeravajte agenta
 
 Nakon što agent završi korak, pregledajte njegov rad pre nego što prihvatite sledeći:
 
-- **Izmene fajlova**: koristite pregledač fajlova radnog prostora ili prikaz razlika (diff) agenta da
-  vidite tačno šta je dodato, izmenjeno ili obrisano.
-- **Izlaz komande**: proširite bilo koju komandu koju je agent pokrenuo da vidite stdout, stderr,
+- **Izmene fajlova**: koristite pregledač fajlova radnog prostora ili agentov prikaz razlika da
+  biste videli tačno šta je dodato, promenjeno ili obrisano.
+- **Izlaz komande**: proširite bilo koju komandu koju je agent pokrenuo da biste videli stdout, stderr,
   i izlazni kod.
-- **Dopune**: ako rezultat nije onakav kakav ste želeli, odgovorite u istom
+- **Dodatni zahtevi**: ako rezultat nije onakav kakav ste želeli, odgovorite u istom
   razgovoru sa ispravkom. Agent zadržava prethodni kontekst i
-  ponavlja rad na istim fajlovima.
+  nastavlja da radi na istim fajlovima.
 
 Na primer, ako test nije ispisao očekivani pozdrav, odgovorite:
 
@@ -583,17 +571,18 @@ The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Agent će ponovo pročitati fajl, pokrenuti komandu, dijagnostikovati problem, i ponovo izmeniti
-fajl — sve u okviru istog razgovora.
+Agent će ponovo pročitati fajl, pokrenuti komandu, dijagnostikovati problem i izmeniti
+fajl ponovo—sve u istom razgovoru.
 ## Rešavanje problema
 
 <!-- @os:linux -->
-- **`agent-canvas` nije u PATH-u:** ponovo instalirajte pomoću
-  `npm install -g @openhands/agent-canvas` i proverite da li se npm globalni direktorijum
-  za binarne fajlove nalazi u PATH-u pre nego što `agent-canvas` bude moguće pokrenuti iz novog
-  terminala.
-- **`npm install -g` ne uspeva zbog greške sa dozvolama:** podesite globalni npm direktorijum
-  u vlasništvu korisnika, zatim ponovo otvorite terminal i ponovo instalirajte Agent Canvas.
+- **`agent-canvas` nije na PATH-u:** ponovo instalirajte pomoću
+  `npm install -g @openhands/agent-canvas` i proverite da li se direktorijum
+  globalnih binarnih fajlova npm-a nalazi na vašem PATH-u pre nego što
+  `agent-canvas` bude moguće pokrenuti iz novog terminala.
+- **`npm install -g` ne uspeva zbog greške sa dozvolama:** podesite globalni npm
+  direktorijum čiji ste vlasnik vi, zatim ponovo otvorite terminal i ponovo
+  instalirajte Agent Canvas.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -602,49 +591,54 @@ fajl — sve u okviru istog razgovora.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-- **`uv` nedostaje:** instalirajte ga sa
-  [vodiča za instalaciju uv-a](https://docs.astral.sh/uv/getting-started/installation/).
+- **`uv` nedostaje:** instalirajte ga prema
+  [vodiču za instalaciju uv-a](https://docs.astral.sh/uv/getting-started/installation/).
   Agent Canvas koristi `uv` za upravljanje Python okruženjem servera agenta.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **`docker pull` ili `docker run` ne uspeva da se poveže:** proverite da li je Docker Desktop
-  pokrenut (njegova ikona kita se nalazi u sistemskoj traci) i da li je motor
-  završio pokretanje. `docker version` bi trebalo da ispiše i Client i Server
-  odeljak.
-- **Kontejner se pokreće, ali pozadinski deo nikada ne postaje ispravan:** prvo
-  pokretanje inicijalizuje Agent Server unutar kontejnera; sačekajte minut ili
-  dva, zatim proverite `docker logs <container>` radi grešaka.
-- **Kontejner ne može da dosegne Lemonade:** kontejner dolazi do hosta preko
-  `host.docker.internal`. Proverite da li Lemonade radi na Windows hostu pomoću
-  `lemonade status`, i koristite `http://host.docker.internal:13305/api/v1` kao
-  Base URL prilikom podešavanja LLM-a.
+- **`docker pull` ili `docker run` ne uspevaju da se povežu:** proverite da li
+  je Docker Desktop pokrenut (njegova ikonica kita se nalazi u traci sa
+  ikonicama sistema) i da li je pokretanje mehanizma završeno. `docker version`
+  bi trebalo da ispiše i Client i Server sekciju.
+- **Kontejner se pokreće, ali bekend nikada ne postane ispravan (healthy):**
+  prvo pokretanje inicijalizuje Agent Server unutar kontejnera; sačekajte
+  minut ili dva, a zatim proverite `docker logs <container>` radi grešaka.
+- **Kontejner ne može da dosegne Lemonade:** kontejner dopire do hosta preko
+  `host.docker.internal`. Potvrdite da Lemonade opslužuje zahteve na Windows
+  hostu pomoću `lemonade status`, i koristite
+  `http://host.docker.internal:13305/api/v1` kao Base URL prilikom
+  konfigurisanja LLM-a.
 <!-- @os:end -->
 
-- **UI se učitava, ali pozadinski deo prikazuje da nije ispravan:** sačekajte minut ili
-  dva da server agenta završi pokretanje, zatim osvežite stranicu. Ako i dalje
-  nije ispravan, ponovo pokrenite stek i proverite logove radi grešaka.
-- **Lemonade zahtevi za ćaskanje ne uspevaju zbog greške u vezi:** proverite da li
-  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` uspeva i da li
-  Lemonade i dalje servira model pomoću `lemonade status`.
-- **Agent prijavljuje grešku u vezi sa dužinom konteksta ili ograničenjem tokena:** započnite
-  novi razgovor kako agent ne bi nosio preveliku istoriju. Ako se ovo
-  nastavlja, ponovo pokrenite Lemonade sa većim `ctx_size` od podrazumevanog
-  65536 (na primer `ctx_size=131072`), ako memorija to dozvoljava.
-- **Agent proizvodi izmene lošeg kvaliteta ili nepotpune izmene:** pređite na veći
-  model u Lemonade-u, ili dajte agentu manji, konkretniji zadatak i sačekajte da ga
-  završi pre nego što zatražite sledeću promenu.
+- **UI se učitava, ali bekend prikazuje da nije ispravan (unhealthy):**
+  sačekajte minut ili dva da server agenta završi pokretanje, a zatim osvežite
+  stranicu. Ako ostane neispravan, ponovo pokrenite stek i proverite logove
+  radi grešaka.
+- **Zahtevi za Lemonade ćaskanje ne uspevaju uz grešku povezivanja:** proverite
+  da li `curl -fsS "http://127.0.0.1:13305/api/v1/health"` uspeva i da li
+  Lemonade i dalje opslužuje model pomoću `lemonade status`.
+- **Agent prijavljuje grešku u vezi sa dužinom konteksta ili ograničenjem
+  broja tokena:** započnite novi razgovor kako agent ne bi nosio preveliku
+  istoriju. Ako se ovo i dalje dešava, ponovo pokrenite Lemonade sa većim
+  `ctx_size` od podrazumevanih 65536 (na primer `ctx_size=131072`), ukoliko
+  memorija to dozvoljava.
+- **Agent proizvodi izmene lošeg kvaliteta ili nepotpune izmene:** pređite na
+  veći model u Lemonade-u, ili dajte agentu manji, konkretniji zadatak i
+  sačekajte da ga završi pre nego što zatražite sledeću izmenu.
 
 ## Sledeći koraci
 
-- Probajte veći zadatak u istom radnom prostoru, kao što je dodavanje datoteke sa jediničnim testom ili
-  ispravljanje poznate greške, i pregledajte agentov diff pre nego što zadržite promenu.
-- Povežite MCP server kao što je GitHub ili Slack pod **Customize** kako bi
+- Isprobajte veći zadatak u istom radnom prostoru, kao što je dodavanje
+  fajla za jedinično testiranje ili ispravljanje poznate greške, i pregledajte
+  razliku (diff) koju je agent napravio pre nego što zadržite izmenu.
+- Povežite MCP server poput GitHub-a ili Slack-a u okviru **Customize** kako bi
   agent mogao da čita probleme ili objavljuje ažuriranja dok radi.
 - Sačuvajte nekoliko LLM profila (brz mali model i jači veliki model) i
-  prebacujte se između njih pomoću `/model` usred razgovora.
-- Pređite na [OpenHands automatizacije](https://docs.openhands.dev/openhands/usage/automations/overview) da
-  biste pretvorili ponavljajuće razvojne petlje u zakazana ili događajima pokrenuta izvršavanja agenta.
+  prebacujte se između njih pomoću `/model` tokom razgovora.
+- Pređite na [OpenHands automatizacije](https://docs.openhands.dev/openhands/usage/automations/overview) kako
+  biste ponavljajuće razvojne cikluse pretvorili u zakazana ili na događaje
+  okinuta pokretanja agenta.
 
 ## Resursi
 

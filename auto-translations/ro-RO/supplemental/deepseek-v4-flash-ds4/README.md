@@ -9,39 +9,42 @@ SPDX-License-Identifier: MIT
 > **Traducere automată.** Această pagină a fost tradusă automat din limba engleză și nu a fost revizuită de o persoană. Aceasta poate conține erori, iar anumite instrucțiuni, comenzi, descărcări, disponibilitatea produselor sau alt conținut pot varia în funcție de limbă sau regiune. În cazul oricărei neconcordanțe sau discrepanțe, versiunea originală în limba engleză a playbook-ului prevalează.
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## Prezentare generală
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) este varianta axată pe eficiență din familia DeepSeek V4 — un model Mixture of Experts cu 284 de miliarde de parametri, dintre care 13 miliarde de parametri activi. Conform [raportului tehnic al DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), acesta obține un scor de 79% pe SWE-bench Verified și 91,6% pe LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) este varianta axată pe eficiență din familia DeepSeek V4 — un model Mixture of Experts cu 284 de miliarde de parametri, din care 13 miliarde sunt parametri activi. Conform [raportului tehnic al DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash), acesta obține un scor de 79% pe SWE-bench Verified și 91,6% pe LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) este un motor de inferență dedicat, construit special pentru această arhitectură de model. În loc să fie un runtime cu scop general, ds4 vizează direct familia DeepSeek V4, cu optimizări de kernel specifice arhitecturii pentru software-ul AMD ROCm™. În prezent este una dintre cele mai performante implementări ale DeepSeek V4 Flash pe Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) este un motor de inferență dedicat, construit special pentru această arhitectură de model. În loc să fie un runtime de uz general, ds4 vizează direct familia DeepSeek V4, cu optimizări de kernel specifice arhitecturii pentru software-ul AMD ROCm™. În prezent, este una dintre cele mai performante implementări ale DeepSeek V4 Flash pe Strix Halo.
 
-Acest tutorial arată cum să folosiți `ai-toolbox-cockpit`, o interfață de tip terminal UI, pentru a configura ds4, a descărca ponderile modelului și a începe rularea locală a DeepSeek V4 Flash pe platforma AMD Ryzen™ AI Halo Developer Platform.
+Acest tutorial arată cum să folosiți `ai-toolbox-cockpit`, o interfață de terminal, pentru a configura ds4, a descărca ponderile modelului și a începe servirea locală a DeepSeek V4 Flash pe AMD Ryzen™ AI Halo Developer Platform.
 
 ## Ce veți învăța
 
-- Cum să instalați și să lansați interfața terminal `ai-toolbox-cockpit`
+- Cum să instalați și să lansați interfața de terminal `ai-toolbox-cockpit`
 - Cum să creați containerul toolbox ROCm pentru ds4
 - Descărcarea cuantizării recomandate pentru un singur nod Halo
 - Pornirea serverului de inferență ds4 și expunerea unui endpoint compatibil OpenAI
-- Conectarea unei interfețe Web sau a unui agent de codare la serverul local
+- Conectarea unui Web UI sau a unui agent de codare la serverul local
 
 ## Configurarea memoriei
 
 <!-- @require:memory-config -->
 
-## Instalarea cerințelor preliminare de software
+## Instalarea condițiilor prealabile software
 
-> **Cerințe de sistem pentru această configurație (IQ2_XXS pe un singur nod, context de 126k):**
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
+
+> **Cerințe de sistem pentru această configurație (nod unic IQ2_XXS la context de 126k):**
 > - Un sistem Strix Halo cu **cel puțin 128 GB de memorie unificată**.
-> - **Memoria VRAM dedicată din BIOS (bufferul de cadre UMA) setată la minim**, pentru ca fondul comun de memorie partajată să poată fi cât mai mare.
-> - Fondul comun de memorie partajată al GPU-ului **setat la cel puțin 110 GB**: rulați `amd-ttm --set 110` (vezi pasul de configurare a memoriei de mai sus) și reporniți sistemul. Valori mai mici pot duce la erori de tip out-of-memory atunci când modelul este încărcat cu un context de 126k. Dacă sistemul dumneavoastră are mai puțină memorie disponibilă, reduceți în schimb valoarea **Context** din Server Mode.
+> - **VRAM dedicat din BIOS (UMA frame buffer) setat la minim**, astfel încât grupul de memorie partajată să poată fi cât mai mare posibil.
+> - Grupul de **memorie partajată al GPU-ului setat la cel puțin 110 GB**: rulați `amd-ttm --set 110` (vedeți pasul de configurare a memoriei de mai sus) și reporniți. Valori mai mici pot eșua cu erori de memorie insuficientă când modelul se încarcă la un context de 126k. Dacă sistemul dvs. are mai puțină memorie disponibilă, reduceți în schimb valoarea **Context** din Server Mode.
 >
-> **Notă:** Încercați să setați **fondul comun de memorie partajată al GPU-ului** la **110 GB** ca punct de plecare. Dacă întâmpinați erori de tip out-of-memory, măriți fondul comun de memorie partajată sau reduceți dimensiunea contextului.
+> **Notă:** Încercați să setați grupul de **memorie partajată a GPU-ului** la **110 GB** ca punct de plecare. Dacă întâmpinați erori de memorie insuficientă, măriți grupul de memorie partajată sau reduceți dimensiunea contextului.
 
 ai-toolbox-cockpit folosește containere toolbox pentru a rula motorul ds4. Instalați `podman`, `distrobox` și `pipx`:
 
@@ -63,20 +66,20 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Cuantizări disponibile
 
-Autorul ds4 oferă mai multe versiuni cuantizate ale DeepSeek V4 Flash în format GGUF. Toate modelele de mai jos folosesc calibrare cu matrice de importanță (imatrix), care păstrează o precizie mai ridicată pentru părțile modelului care contează cel mai mult pentru sarcinile de codare și raționament.
+Autorul ds4 oferă mai multe versiuni cuantizate ale DeepSeek V4 Flash în format GGUF. Toate modelele de mai jos folosesc calibrare prin matrice de importanță (imatrix), care păstrează o precizie mai mare pentru părțile modelului care contează cel mai mult pentru sarcinile de codare și raționament.
 
 | Cuantizare | Dimensiune | Descriere |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Recomandat pentru un singur nod de 128 GB |
 | [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Păstrează straturile 37–42 la precizie Q4 pentru o acuratețe mai bună. Încape în 128 GB, dar lasă mai puțin spațiu pentru context |
 | [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Calitate superioară. Necesită două noduri Halo prin clustering multi-nod |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Add-on opțional pentru decodare speculativă, pentru a îmbunătăți viteza de generare |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Supliment opțional pentru decodare speculativă, pentru a îmbunătăți viteza de generare |
 
-Modelul **IQ2_XXS imatrix** este un bun punct de plecare. Încape confortabil pe un singur nod și lasă suficientă memorie pentru o fereastră de context rezonabilă.
+Modelul **IQ2_XXS imatrix** este un punct de plecare bun. Încape confortabil pe un singur nod și lasă suficientă memorie pentru o fereastră de context rezonabilă.
 
 ## Instalarea ai-toolbox-cockpit
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) este o interfață terminal ușoară, menită să faciliteze instalarea diverselor motoare de inferență AI. O vom folosi pentru a gestiona crearea containerului nostru ds4, descărcarea ponderilor modelului și pornirea serverelor. Instalați-o cu `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) este o interfață de terminal ușoară, care face mai simplă instalarea diverselor backend-uri AI. O vom folosi pentru a gestiona crearea containerului nostru ds4, descărcarea ponderilor modelului și pornirea serverelor. Instalați-o cu `pipx`:
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -101,7 +104,7 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 
 ## Pasul 1: Crearea toolbox-ului
 
-În fila **Interactive Toolboxes**, selectați cel mai recent toolbox disponibil/stabil pentru ds4 (de exemplu, `ds4-rocm-10.0`) și apăsați **Create/Update**. Această acțiune descarcă imaginea containerului și creează mediul toolbox.
+În fila **Interactive Toolboxes**, selectați cel mai recent toolbox disponibil/stabil pentru ds4 (de exemplu, `ds4-rocm-10.0`) și faceți clic pe **Create/Update**. Astfel se extrage imaginea containerului și se creează mediul toolbox.
 
 
 <p align="center">
@@ -124,9 +127,9 @@ echo "OK: ds4 toolbox container image is present"
 
 ## Pasul 2: Descărcarea modelului
 
-Accesați fila **Models**. Mai întâi, selectați backend-ul (ds4). Apoi selectați **IQ2_XXS imatrix (~80,8 GB)** din meniul derulant și apăsați **Download**. Fișierele modelului vor fi salvate implicit în `~/ds4` (puteți schimba calea de stocare).
+Accesați fila **Models**. Mai întâi, selectați backend-ul (ds4). Apoi, selectați **IQ2_XXS imatrix (~80,8 GB)** din meniul derulant și faceți clic pe **Download**. Fișierele modelului vor fi salvate implicit în `~/ds4` (puteți schimba calea de stocare).
 
-> **Notă:** Modelul IQ2_XXS are aproximativ 80 GB, deci descărcarea poate dura ceva timp, în funcție de conexiunea dumneavoastră. Puteți continua după ce se finalizează.
+> **Notă:** Modelul IQ2_XXS are aproximativ 80 GB, așa că descărcarea poate dura o vreme, în funcție de conexiunea dvs. Puteți continua după ce se finalizează.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -160,11 +163,11 @@ fi
 
 ## Pasul 3: Pornirea serverului
 
-Accesați fila **Server Mode**. Selectați modelul descărcat și toolbox-ul, apoi configurați dimensiunea contextului, gazda (host) și portul. Când sunteți gata, apăsați **Start ds4-server**.
+Accesați fila **Server Mode**. Selectați modelul descărcat și toolbox-ul, apoi configurați dimensiunea contextului, gazda (host) și portul. Când sunteți gata, faceți clic pe **Start ds4-server**.
 
-> **Sfat:** O dimensiune a contextului de `126000` este o valoare de pornire rezonabilă, care ar trebui să încapă pe un singur nod — o puteți crește dacă aveți memorie disponibilă în plus sau o puteți reduce dacă întâmpinați erori de tip out-of-memory. Portul (`8000` în acest ghid) este arbitrar; alegeți orice port liber.
+> **Sfat** O dimensiune a contextului de `126000` este o valoare de pornire rezonabilă, care ar trebui să încapă pe un singur nod — o puteți mări dacă aveți memorie în plus sau o puteți reduce dacă întâmpinați erori de memorie insuficientă. Portul (`8000` în acest ghid) este arbitrar; alegeți orice port liber.
 
-> **KV Disk Cache (opțional).** Activarea opțiunii **KV Disk Cache** transferă cache-ul KV pe disc (în **Host Cache Dir**, implicit `~/.cache/ds4-kv`), astfel încât promptu­rile de sistem repetate să fie restaurate de pe SSD în loc să fie recalculate. Este o optimizare de performanță pentru fluxurile de lucru ale agenților de codare, cu prompturi lungi și repetate, și **nu este necesară** pentru a rula serverul.
+> **Cache KV pe disc (opțional).** Activarea opțiunii **KV Disk Cache** descarcă cache-ul KV pe disc (la **Host Cache Dir**, implicit `~/.cache/ds4-kv`), astfel încât prompt-urile de sistem repetate să fie restaurate de pe SSD în loc să fie recalculate. Este o optimizare de performanță pentru fluxurile de lucru ale agenților de codare cu prompt-uri lungi și repetate și **nu este necesară** pentru a rula serverul.
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
@@ -306,7 +309,7 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
-## Conectarea unei interfețe web
+## Conectarea unei interfețe Web
 
 Puteți conecta orice interfață de chat care acceptă formatul OpenAI API. De exemplu, pentru a utiliza HuggingFace ChatUI:
 
@@ -321,13 +324,13 @@ docker run --network=host \
 
 Deschideți `http://localhost:3000` în browser pentru a începe conversația.
 
-> **Notă:** `--network=host` plasează interfața web pe rețeaua gazdei, astfel încât aceasta să poată accesa direct serverul ds4 pe `localhost`. Acest lucru menține serverul ds4 legat la loopback (nu trebuie expus pe alte interfețe).
+> **Notă:** `--network=host` plasează interfața Web pe rețeaua gazdei, astfel încât aceasta să poată accesa serverul ds4 direct pe `localhost`. Astfel, serverul ds4 rămâne legat la loopback (nu trebuie expus pe alte interfețe).
 
-> **Sfat:** Portul interfeței web (`3000` în acest caz, setat prin `PORT`) este arbitrar — alegeți orice port liber dacă `3000` este deja utilizat și deschideți acel port în browser în loc de acesta. Asigurați-vă că portul din `OPENAI_BASE_URL` corespunde portului pe care rulează serverul dvs. ds4.
+> **Sfat:** Portul interfeței Web (`3000` în acest caz, setat prin `PORT`) este arbitrar — alegeți orice port liber dacă `3000` este deja utilizat și deschideți acel port în browser. Asigurați-vă că portul din `OPENAI_BASE_URL` corespunde portului pe care rulează serverul ds4.
 
 ## Conectarea unui agent de codare
 
-Serverul ds4 expune atât endpointuri compatibile cu OpenAI, cât și cu Anthropic, astfel încât majoritatea agenților de codare se pot conecta direct la el. De exemplu, pentru a-l adăuga la agentul de codare `pi`, adăugați următorul bloc în `~/.pi/agent/models.json`:
+Serverul ds4 expune atât endpoint-uri compatibile OpenAI, cât și Anthropic, astfel încât majoritatea agenților de codare se pot conecta direct la el. De exemplu, pentru a-l adăuga la agentul de codare `pi`, adăugați următorul bloc în `~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ Serverul ds4 expune atât endpointuri compatibile cu OpenAI, cât și cu Anthrop
 }
 ```
 
-> **Sfat**: Dacă agentul dvs. de codare sau interfața web rulează pe o altă mașină decât platforma Halo, va trebui să redirecționați portul serverului (`8000` în acest caz) prin SSH:
+> **Sfat**: Dacă agentul de codare sau interfața Web rulează pe o altă mașină decât platforma Halo, va trebui să redirecționați portul serverului (`8000` în acest caz) prin SSH:
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Pașii următori
 
-- **Clustering multi-nod**: Dacă aveți două dispozitive Halo, ds4 acceptă distribuirea modelului Q4 (~153 GB) pe ambele mașini prin paralelism de pipeline. Consultați [documentația ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) pentru instrucțiuni de configurare.
-- **Decodare speculativă (MTP)**: Descărcați ponderile MTP (~3,6 GB) și transmiteți `--mtp` către server pentru o viteză de generare mai mare.
-- **Offloading pe disc al cache-ului KV**: Pentru fluxuri de lucru cu agenți de codare, activați `--kv-disk-dir` astfel încât prompturile de sistem repetate să fie restaurate de pe SSD, în loc să fie recalculate de fiecare dată.
+- **Clusterizare multi-nod**: Dacă aveți două dispozitive Halo, ds4 acceptă distribuirea modelului Q4 (~153 GB) pe ambele mașini prin paralelism de tip pipeline. Consultați [documentația ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism) pentru instrucțiuni de configurare.
+- **Decodare speculativă (MTP)**: Descărcați ponderile MTP (~3,6 GB) și transmiteți `--mtp` serverului pentru o viteză de generare mai mare.
+- **Transferul cache-ului KV pe disc**: Pentru fluxurile de lucru ale agenților de codare, activați `--kv-disk-dir` astfel încât prompturile de sistem repetate să fie restaurate de pe SSD, în loc să fie recalculate de fiecare dată.
 
-Pentru mai multe informații, consultați [depozitul ds4](https://github.com/antirez/ds4) și [ds4-cockpit toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+Pentru mai multe informații, consultați [depozitul ds4](https://github.com/antirez/ds4) și [setul de instrumente ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).

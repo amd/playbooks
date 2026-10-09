@@ -1,6 +1,6 @@
 {
   "id": "pytorch-finetuning",
-  "title": "Finjustering av LLM-er med PyTorch og AMD ROCm™-programvare",
-  "description": "Fintun store språkmodeller (LLM-er) ved hjelp av PyTorch og ROCm.",
+  "title": "Finjustering av LLM-er med PyTorch og AMD ROCm™ Software",
+  "description": "Finjuster store språkmodeller (LLM-er) med PyTorch og ROCm.",
   "auto_translated": true
 }

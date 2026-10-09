@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "Rularea modelelor LLM pe PyTorch cu software-ul AMD ROCm™",
-  "description": "Învățați cum să rulați modele lingvistice puternice pe PC-ul dvs. cu PyTorch și software-ul AMD ROCm™ pentru a rezuma documente rapid și ușor.",
+  "title": "Rularea LLM-urilor pe PyTorch cu software-ul AMD ROCm™",
+  "description": "Învață să rulezi modele de limbaj performante pe PC-ul tău cu PyTorch și software-ul AMD ROCm™ pentru a rezuma documente rapid și ușor.",
   "auto_translated": true
 }

@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "PyTorch에서 AMD ROCm™ 소프트웨어로 LLM 실행하기",
-  "description": "PyTorch와 AMD ROCm™ 소프트웨어를 사용하여 PC에서 강력한 언어 모델을 실행하고 문서를 빠르고 손쉽게 요약하는 방법을 알아보세요.",
+  "title": "PyTorch 및 AMD ROCm™ 소프트웨어에서 LLM 실행하기",
+  "description": "PyTorch 및 AMD ROCm™ 소프트웨어로 PC에서 강력한 언어 모델을 실행하여 문서를 빠르고 쉽게 요약하는 방법을 알아보세요.",
   "auto_translated": true
 }

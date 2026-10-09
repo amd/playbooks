@@ -17,13 +17,13 @@ SPDX-License-Identifier: MIT
 ## Pregled
 
 
-Želite zagnati zmogljive jezikovne modele umetne inteligence na svoji strojni opremi? Ta vodnik vam pokaže, kako.
-Ta vadnica uporablja PyTorch, ki ga poganja programska oprema AMD ROCm™, za zagon modelov, ki znajo povzemati dokumente, odgovarjati na vprašanja, ustvarjati besedilo in še več – vse to lokalno.
+Želite poganjati zmogljive jezikovne modele AI na lastni strojni opremi? Ta vodnik vam pokaže, kako.
+V tem vodniku je uporabljen PyTorch, ki ga poganja programska oprema AMD ROCm™, za zagon modelov, ki lahko povzemajo dokumente, odgovarjajo na vprašanja, ustvarjajo besedilo in še več, vse to lokalno.
 
 ## Kaj se boste naučili
 
-- Zagnati LLM-je, kot sta gpt-oss-20b in qwen3.5-4B, lokalno z uporabo PyTorch in ROCm
-- Ustvariti orodje za povzemanje dokumentov z uporabo LLM-jev
+- Lokalno poganjanje velikih jezikovnih modelov, kot sta gpt-oss-20b in qwen3.5-4B, z uporabo PyTorch in ROCm
+- Izdelava orodja za povzemanje dokumentov z uporabo velikih jezikovnih modelov
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
@@ -32,19 +32,19 @@ Ta vadnica uporablja PyTorch, ki ga poganja programska oprema AMD ROCm™, za za
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Preverjanje posodobitev programske opreme
+## Preverite posodobitve programske opreme
 > **Opomba**: Če VS Code ni nameščen, ga lahko namestite z Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev predpogojev za programsko opremo
+## Namestitev zahtev za programsko opremo
 
 ### Ustvarjanje navideznega okolja
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv), v katerem sta že nameščena ROCm in Pytorch.
+V sistemu Linux odprite terminal v imeniku po izbiri in sledite ukazom za ustvarjanje venv z že nameščenima ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -57,13 +57,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Podelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
+**Uporabniku dodelite dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv).
+V sistemu Linux odprite terminal v imeniku po izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv), v katerem sta že nameščena ROCm in Pytorch.
+V sistemu Windows odprite terminal v imeniku po izbiri in sledite ukazom za ustvarjanje venv z že nameščenima ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje navideznega okolja (venv).
+V sistemu Windows odprite terminal v imeniku po izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,7 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Nasvet**: Uporabniki sistema Windows bodo morda morali pred izvajanjem nekaterih ukazov Powershell spremeniti svoj izvedbeni pravilnik PowerShell (Execution Policy) (na primer nastaviti ga na RemoteSigned ali Unrestricted).
+> **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti svojo izvedbeno politiko PowerShell (Execution Policy) (npr.
+> nastaviti jo na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze Powershell.
 
 <!-- @os:end -->
 
@@ -111,6 +112,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -132,7 +139,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 > **Opomba:** Če se model ne naloži ali zmanjka pomnilnika, poskusite namestiti paket `kernels`, da naložite model z optimizirano kvantizacijo.
 >
 > ```bash
-> # Use this version which is compatible with the Transformers version
+> # Uporabite to različico, ki je združljiva z različico Transformers
 > pip install "kernels==0.14.1" 
 > ```
 <!-- @device:end -->
@@ -155,13 +162,13 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Hiter začetek s primeri skript
+## Hiter začetek z vzorčnimi skriptami
 
-Ta vodnik vključuje pripravljene skripte za takojšnjo uporabo. Kliknite nanje za predogled in prenos v isto mapo kot okolje, ki ste ga ustvarili.
+Ta vodnik vključuje pripravljene skripte za takojšnjo uporabo. Kliknite nanje za predogled in prenos v isti imenik kot okolje, ki ste ga ustvarili.
 
 | Skripta | Opis | Uporaba |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | Osnovno ustvarjanje besedila z LLM | `python run_llm.py` |
+| [run_llm.py](assets/run_llm.py) | Osnovno ustvarjanje besedila z velikimi jezikovnimi modeli | `python run_llm.py` |
 | [summarizer.py](assets/summarizer.py) | Povzemalnik dokumentov s podporo za Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
@@ -188,16 +195,16 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Obe skripti podpirata:
-- Izbiro modela prek zastavice `--model`
-- Oblikovanje predloge klepeta za pravilno oblikovanje pozivov za model, kar je še posebej uporabno pri povzemanju dokumentov
+- Izbiro modela z zastavico `--model`
+- Oblikovanje predlog klepeta za pravilno pozivanje modela, kar je še posebej uporabno za povzemanje dokumentov
 
-## Nalaganje in zagon vašega prvega LLM
+## Nalaganje in zagon prvega velikega jezikovnega modela
 
-Priložena skripta [run_llm.py](assets/run_llm.py) prikazuje, kako ustvarjati besedilo z LLM-ji z uporabo PyTorch in AMD ROCm.
+Priložena skripta [run_llm.py](assets/run_llm.py) prikazuje, kako ustvariti besedilo z velikimi jezikovnimi modeli z uporabo PyTorch in AMD ROCm.
 
 > **Opomba:** Ko naložite model, Hugging Face Transformers najprej preveri svoj lokalni predpomnilnik (`~/.cache/huggingface/hub` v sistemu Linux, `C:\Users\<user>\.cache\huggingface\hub` v sistemu Windows). Če model ni predpomnjen, se samodejno prenese s huggingface.co. Prvi zagon lahko traja nekaj minut, odvisno od velikosti modela in hitrosti omrežja.
 
-Spodnji izsek prikazuje, kako uporabiti model in prilagoditi zastavljena vprašanja.
+Spodnji odlomek prikazuje, kako uporabiti model in prilagoditi zastavljena vprašanja.
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -275,7 +282,7 @@ python run_llm.py --model ${hf_model}
 
 ## Izdelava povzemalnika dokumentov
 
-Zdaj, ko ste že ustvarili izhod lokalnega LLM, lahko na tem gradite naprej z izdelavo praktičnega povzemalnika dokumentov. V tem razdelku boste uporabili skripto [summarizer.py](assets/summarizer.py), da vnesete datoteko .txt in samodejno ustvarite jedrnat povzetek, vse to pa se izvaja lokalno na vašem GPU-ju.
+Zdaj, ko ste ustvarili lokalni izhod velikega jezikovnega modela, lahko na tem nadgradite tako, da izdelate praktičen povzemalnik dokumentov. V tem razdelku boste uporabili skripto [summarizer.py](assets/summarizer.py), da vnesete datoteko .txt in samodejno ustvarite jedrnat povzetek, vse to lokalno na vašem GPE.
 
 Skripta je zasnovana tako, da deluje takoj po namestitvi. Odprite skripto v urejevalniku, da raziščete kodo, prilagodite pozive in nastavite parametre, kot sta dolžina in temperatura.
 
@@ -303,25 +310,25 @@ python summarizer.py --file document.txt --max-length 400
 
 ## Spoznajte parametre ustvarjanja
 
-| Parameter | Kaj nadzira | Tipične vrednosti |
+| Parameter | Kaj nadzoruje | Tipične vrednosti |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Največjo dolžino izhoda LLM-ja | Za povzetke uporabite 50–500 žetonov (tokenov). (1 žeton je približno 0,75 angleške besede) |
-| `temperature` | Ustvarjalnost. Nizke vrednosti model naredijo osredotočen, visoke pa prinesejo več nepredvidljivosti | - **0,1–0,3**: osredotočeno, deterministično (dobro za povzetke) <br> **0,5–0,7**: uravnoteženo (splošna uporaba) <br> **0,8–1,0**: ustvarjalno, raznoliko (za viharjenje idej) |
-| `top_p` | Vzorčenje z jedrom (Nucleus Sampling) – nizke vrednosti omejijo model na ožje izhode | **0,1–0,5**: strogo, predvidljivo <br> **0,9–0,95**: (standardno, naravno, pogovorno) |
+| `max_new_tokens` | Največja dolžina izhoda velikega jezikovnega modela | Za povzetke uporabite 50–500 žetonov. (1 žeton je približno 0,75 angleške besede) |
+| `temperature` | Ustvarjalnost. Nizke vrednosti jo naredijo osredotočeno, visoke pa prinesejo več nepredvidljivosti | - **0,1–0,3**: osredotočeno, determinirano (dobro za povzetke) <br> **0,5–0,7**: uravnoteženo (splošna uporaba) <br> **0,8–1,0**: ustvarjalno, raznoliko (viharjenje možganov) |
+| `top_p` | Vzorčenje jedra (Nucleus Sampling) - nizke vrednosti omejijo model na ožje izhode | **0,1-0,5**: strogo, predvidljivo <br> **0,9-0,95**: (standardno, naravno, pogovorno) |
 
 
-## Uporaba v resničnem svetu
+## Realne aplikacije
 
-- **Analiza raziskovalnih člankov**: Izluščite ključne ugotovitve iz zapletenih publikacij za hiter pregled
-- **Zbiranje novic**: Povzemite novice v kratke dnevne izvlečke ali povzetke
-- **Zapiski sestankov**: Strnite prepise v konkretne naloge in jedrnate povzetke
-- **Pregled pravnih dokumentov**: Hitro izluščite ustrezne klavzule ali obveznosti iz dolgih pravnih besedil
-- **Dokumentacija kode**: Ustvarite jedrnate preglede repozitorijev in razlage funkcij
+- **Analiza raziskovalnih člankov**: izluščite ključne ugotovitve iz zapletenih publikacij za hiter pregled
+- **Združevanje novic**: povzemite novičarske članke v kratke dnevne povzetke ali poudarke
+- **Zapiski s sestankov**: strnite prepise v konkretne naloge in jedrnate povzetke
+- **Pregled pravnih dokumentov**: hitro izluščite ustrezne klavzule ali obveznosti iz dolgih pravnih besedil
+- **Dokumentacija kode**: ustvarite jedrnate preglede repozitorijev in razlage funkcij
 ## Naslednji koraki
 
-- **Fino prilagajanje (Fine-tuning)**: Prilagodite modele svojemu specifičnemu področju ali žargonu za boljšo natančnost (glejte Fine-tuning Playbooks)
-- **Sistemi RAG**: Združite LLM-je z iskanjem po dokumentih za kontekstualno ozaveščene odgovore in iskanje
+- **Fino prilagajanje**: Prilagodite modele svojemu specifičnemu področju ali terminologiji za boljšo natančnost (glejte Fine-tuning Playbooks)
+- **Sistemi RAG**: Združite jezikovne modele (LLM) s pridobivanjem dokumentov za kontekstualno ozaveščene odgovore in iskanje
 - **Raziskovanje modelov**: Eksperimentirajte z novimi modeli, kot so Llama 3, Phi-3 ali Qwen, za boljše rezultate
-- **Produkcijska uvedba**: Uporabite orodja, kot je vLLM, za skalabilno strežbo LLM-jev v organizacijah
+- **Produkcijska uvedba**: Uporabite orodja, kot je vLLM, za skalabilno strežbo jezikovnih modelov (LLM) v organizacijah
 
-Vaš sistem vam omogoča moč za lokalno poganjanje naprednih jezikovnih modelov. Eksperimentirajte z različnimi modeli, pozivi in parametri, da odkrijete, kaj najbolje deluje za vaše aplikacije.
+Vaš sistem vam omogoča zagon zahtevnih jezikovnih modelov lokalno. Eksperimentirajte z različnimi modeli, pozivi in parametri, da odkrijete, kaj najbolje deluje za vaše aplikacije.

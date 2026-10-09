@@ -18,42 +18,56 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Az [OpenHands](https://github.com/All-Hands-AI/OpenHands) egy olyan AI szoftverügynök, amely kódot ír, parancsokat futtat, böngészi a webet, és fájlokat szerkeszt egy valós munkaterületen. Ahelyett, hogy a javaslatokat egy chatablakból másolnád ki, az ügynököt egy projektmappára irányítod, és hagyod, hogy elvégezze a munkát: implementáljon egy funkciót, javítson egy hibát, írjon teszteket, vagy magyarázza el a kódbázist.
+Az [OpenHands](https://github.com/All-Hands-AI/OpenHands) egy AI szoftverügynök,
+amely képes kódot írni, parancsokat futtatni, böngészni az interneten, és fájlokat szerkeszteni egy valós
+munkaterületen. Ahelyett, hogy javaslatokat másolnál ki egy csevegőablakból, az
+ügynököt egy projektmappára irányítod, és hagyod, hogy elvégezze a munkát: megvalósítson egy funkciót, kijavítson
+egy hibát, teszteket írjon, vagy elmagyarázza a kódbázist.
 
-Az [Agent Canvas](https://github.com/OpenHands/agent-canvas) az ajánlott böngésző felhasználói felület az OpenHands futtatásához. Egyetlen `agent-canvas` parancs elindítja az ügynökszervert, az automatizálási háttérrendszert és a webes frontendet együtt, így a böngésződből tudsz beszélgetést folytatni az ügynökkel.
+Az [Agent Canvas](https://github.com/OpenHands/agent-canvas) az ajánlott
+böngészős felhasználói felület az OpenHands futtatásához. Egyetlen `agent-canvas`
+parancs elindítja az ügynök szervert, az automatizálási háttérrendszert és a webes frontendet együtt, így
+böngészőből folytathatsz beszélgetést az ügynökkel.
 
-Ahhoz, hogy minden a te AMD rendszereden maradjon, az ügynök egy helyi modellel kommunikál, amelyet a Lemonade Server szolgáltat. A Lemonade egy OpenAI-kompatibilis API-n keresztül teszi elérhetővé ezt a modellt, így az Agent Canvas ugyanúgy tudja konfigurálni, mint bármely más OpenAI-stílusú végpontot, miközben a modell, a kódod és a beszélgetés kontextusa mind a te gépeden marad.
+Annak érdekében, hogy minden a te AMD rendszereden maradjon, az ügynök egy, a Lemonade Server
+által kiszolgált helyi modellel kommunikál. A Lemonade ezt a modellt egy OpenAI-kompatibilis
+API-n keresztül teszi elérhetővé, így az Agent Canvas úgy konfigurálhatja, mint bármely más OpenAI-stílusú
+végpontot, miközben a modell, a kódod és a beszélgetés kontextusa mind a te
+gépeden marad.
 
-Ebben az útmutatóban elindítasz egy helyi modellt, elindítod az Agent Canvast, ráirányítod arra a modellre, és lefuttatod az első kódolási feladatodat egy valós projektmappán.
+Ebben az útmutatóban elindítasz egy helyi modellt, elindítod az Agent Canvast, ráirányítod
+arra a modellre, és futtatod az első kódolási feladatodat egy valós projektmappán.
 
-## Mit fogsz megtanulni
+## Amit tanulni fogsz
 
-- Hogyan indítsd el a Lemonade Servert, és győződj meg róla, hogy egy helyi modell válaszol a chatkérésekre
+- Hogyan indítsd el a Lemonade Servert, és hogyan győződj meg róla, hogy egy helyi modell válaszol a csevegési kérésekre
 - Hogyan telepítsd és indítsd el az Agent Canvast az npm csomagból
-- Hogyan konfiguráld az Agent Canvast, hogy egy helyi Lemonade modellt használjon LLM-ként
-- Hogyan indíts egy OpenHands beszélgetést, és figyeld meg, ahogy az ügynök fájlokat szerkeszt és parancsokat futtat egy munkaterületen
-- Hogyan tekintsd át, mit változtatott az ügynök, és hogyan irányítsd további üzenetekkel
+- Hogyan konfiguráld az Agent Canvast úgy, hogy egy helyi Lemonade modellt használjon LLM-ként
+- Hogyan indíts egy OpenHands beszélgetést, és hogyan figyeld meg, ahogy az ügynök fájlokat szerkeszt és
+  parancsokat futtat egy munkaterületen
+- Hogyan tekintsd át, mit változtatott az ügynök, és hogyan irányítsd azt további üzenetekkel
 
 ## Alapfogalmak
 
 | Fogalom | Mi ez | Hol illeszkedik ebbe az útmutatóba |
 | --- | --- | --- |
-| Lemonade Server | Egy AMD hardverre épített helyi LLM-kiszolgáló platform, amely OpenAI-kompatibilis API-t biztosít. Az adataid soha nem hagyják el a gépedet. | A modellt futtatja, amely az ügynököt hajtja. |
-| OpenHands | Egy AI szoftverügynök, amely fájlokat olvas és szerkeszt, shell parancsokat futtat, és böngészi a webet egy munkaterületen belül. | Az ügynök, amelyet a chatből irányítasz. |
-| Agent Canvas | A böngésző felhasználói felület és háttérrendszer, amely az OpenHands beszélgetéseket futtatja, és megjeleníti az eszközhívásokat és fájlváltoztatásokat. | Elindítja a rendszert, és otthont ad a beszélgetésednek. |
+| Lemonade Server | Egy AMD hardverre épített helyi LLM-kiszolgáló platform, amely egy OpenAI-kompatibilis API-t tesz elérhetővé. Az adataid soha nem hagyják el a gépedet. | A modellt futtatja, amely az ügynököt hajtja. |
+| OpenHands | Egy AI szoftverügynök, amely fájlokat olvas és szerkeszt, shell parancsokat futtat, és böngészik az interneten egy munkaterületen belül. | Az ügynök, amelyet a csevegésből irányítasz. |
+| Agent Canvas | A böngészős felhasználói felület és háttérrendszer, amely az OpenHands beszélgetéseket futtatja, és megjeleníti az eszközhívásokat és fájlváltozásokat. | Elindítja a verem (stack) elemeit, és befogadja a beszélgetésedet. |
 | Munkaterület | A projektmappa, amelyet az ügynök olvashat és módosíthat. | Az ügynök szerkesztéseinek és parancsainak célpontja. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> A kódoló ügynök munkafolyamatok nagyobb modellből és kontextusablakból profitálnak. Használj legalább 32 GB rendszermemóriát, és részesítsd előnyben a 64 GB-ot vagy annál többet a nagyobb GGUF modellekhez.
+> A kódoló-ügynök munkafolyamatok nagyobb modellből és kontextusablakból profitálnak. Használj
+> legalább 32 GB rendszermemóriát, és a nagyobb GGUF modellekhez inkább 64 GB-ot vagy többet részesíts előnyben.
 <!-- @device:end -->
 
-## A memóriakonfiguráció beállítása
+## A memória konfigurációjának beállítása
 
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->
-## Ellenőrizd a szoftverfrissítéseket
+## Szoftverfrissítések ellenőrzése
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -62,32 +76,39 @@ Ebben az útmutatóban elindítasz egy helyi modellt, elindítod az Agent Canvas
 
 
 <!-- @os:linux -->
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas), so the host needs only Docker and the model.
+     lemonade-chat-windows asserts the model is already downloaded. -->
+<!-- @prereq:docker,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
-Szükséged van a következőkre:
+Szükséged lesz:
 
-- Telepített Lemonade Server, amely képes kiszolgálni az alábbi modellt.
+- Telepített Lemonade Serverre, amely képes kiszolgálni az alábbi modellt.
 
 <!-- @os:linux -->
-- Node.js 22.12 vagy újabb, és `npm` (az `agent-canvas` CLI-hez szükséges).
-- `uv`, a Python csomagkezelő, amelyet az Agent Canvas az ügynökszerver környezetének kezelésére használ. Ha a rendszereden még nincs telepítve, telepítsd az
+- Node.js 22.12 vagy újabb verzió és `npm` (az `agent-canvas` CLI használja).
+- `uv`, a Python csomagkezelő, amelyet az Agent Canvas az ügynök szerver környezetének kezeléséhez használ. Ha a rendszereden még nincs telepítve, telepítsd az
   [uv telepítési útmutatóból](https://docs.astral.sh/uv/getting-started/installation/)
   az Agent Canvas elindítása előtt.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop Windows-hoz](https://docs.docker.com/desktop/setup/install/windows-install/),
-  telepítve és futtatva. Windows rendszeren az Agent Canvas rendszer a
-  közzétett Docker image-ből fut, amely tartalmazza a Node.js-t, az `uv`-t és a
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/),
+  telepítve és futtatva. Windows rendszeren az Agent Canvas verem a közzétett
+  Docker image-ből fut, amely tartalmazza a Node.js-t, az `uv`-t és a
   `@openhands/agent-canvas` csomagot, így ezeket nem kell telepítened a hoszton.
 <!-- @os:end -->
 
-- Egy projektmappa, amelyben dolgozni fogsz. Ez lehet bármely helyi git repository vagy kódmappa, amelyen az ügynöknek dolgoznia kell.
+- Egy projektmappa, amelyben dolgozni szeretnél. Ez lehet bármely helyi git tároló vagy kódkönyvtár,
+  amelyen szeretnéd, hogy az ügynök dolgozzon.
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -131,7 +152,7 @@ Write-Host "OK: lemonade and docker are available"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 1. Indítsd el a Lemonade Servert
+## 1. A Lemonade Server elindítása
 
 Indítsd el a modellt a Lemonade CLI-ből:
 
@@ -141,25 +162,25 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-> **Válassz a hardveredhez illő modellt.** A `Qwen3.6-35B-A3B-GGUF` (~20 GB) egy erős kódolási modell, de nagy memóriaterületet igényel. Ha az eszközöd korlátozott memóriával vagy GPU VRAM-mal rendelkezik, válassz helyette egy kisebb GGUF modellt a Lemonade modellkönyvtárból, és használd azt a modellazonosítót az útmutató további részében.
+> **Válassz a hardveredhez illeszkedő modellt.** A `Qwen3.6-35B-A3B-GGUF` (~20 GB) egy erős kódoló modell, de nagy memóriakeretre van szüksége. Ha az eszközöd memóriája vagy GPU VRAM-ja korlátozott, válassz inkább egy kisebb GGUF modellt a Lemonade modellkönyvtárból, és ennek a modellazonosítóját használd az útmutató során.
 
-> **Megjegyzés:** Az első `lemonade run` letölti a modellt, ha még nincs jelen, ami eltarthat egy ideig a modell méretétől és a kapcsolatodtól függően.
+> **Megjegyzés:** Az első `lemonade run` letölti a modellt, ha az még nincs jelen, ami eltarthat egy ideig a modell méretétől és a kapcsolatodtól függően.
 
-A Lemonade egy OpenAI-kompatibilis API-t tesz elérhetővé a következő címen:
+A Lemonade egy OpenAI-kompatibilis API-t tesz elérhetővé itt:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-## 2. Ellenőrizd a helyi modellt
+## 2. A helyi modell ellenőrzése
 
-Győződj meg róla, hogy a Lemonade ki tudja szolgálni a kiválasztott modellt:
+Erősítsd meg, hogy a Lemonade képes kiszolgálni a kiválasztott modellt:
 
 ```bash
 curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
 ```
 
-Ezután küldj egy rövid chatkérést:
+Majd küldj egy kis csevegési kérést:
 
 ```bash
 curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
@@ -174,7 +195,7 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   }' | python3 -m json.tool
 ```
 
-Ha ez egy `choices` tömböt ad vissza, a Lemonade készen áll az Agent Canvas számára.
+Ha ez egy `choices` tömböt ad vissza, a Lemonade készen áll az Agent Canvas használatára.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -297,7 +318,7 @@ finally {
 ## 3. Az Agent Canvas telepítése és indítása
 
 <!-- @os:linux -->
-Telepítse globálisan a közzétett Agent Canvas csomagot:
+Telepítse globálisan a kiadott Agent Canvas csomagot:
 
 ```bash
 npm install -g @openhands/agent-canvas
@@ -329,18 +350,19 @@ agent-canvas
 ```
 
 Alapértelmezés szerint az Agent Canvas a `http://localhost:8000` címen indul. Nyissa meg ezt az URL-t
-a böngészőjében. A port nem különleges — ha a 8000-es port már foglalt, adjon meg egy
+a böngészőjében. A port nem speciális — ha a 8000-es már foglalt, adjon meg egy
 szabad portot a `--port` (vagy `-p`) kapcsolóval az Agent Canvas indításakor:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-Ezután nyissa meg helyette a `http://localhost:3000` címet. Az alapértelmezett helyi backendnek egészségesként kell megjelennie a kezdőképernyőn.
+Ezután nyissa meg a `http://localhost:3000` címet helyette. Az alapértelmezett helyi backendnek
+egészségesként kell megjelennie a kezdőképernyőn.
 
-Az `agent-canvas` parancs egyszerre indítja el az ágensservert, az automatizálási backendet és
-a webes frontendet. Csak erre az egy parancsra van szükség az OpenHands helyi
-futtatásához.
+Az `agent-canvas` parancs együtt indítja az agent szervert, az automatizálási backendet és
+a webes frontendet. Csak erre az egyetlen parancsra van szüksége az OpenHands
+helyi futtatásához.
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
 ```bash
@@ -394,8 +416,9 @@ echo "OK: agent-canvas agent-server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windows rendszeren futtassa a közzétett Agent Canvas konténerképet Docker Desktop segítségével. A kép tartalmazza az Agent Servert, az automatizálási backendet és
-a webes frontendet, így nem kell a Node.js-t, az `uv`-t vagy a CLI-t telepítenie a hoszton.
+Windows rendszeren a kiadott Agent Canvas konténerképet a Docker Desktop segítségével futtassa. 
+A kép tartalmazza az Agent Servert, az automatizálási backendet és a webes frontendet, így
+nem kell telepítenie a Node.js-t, a `uv`-t vagy a CLI-t a gazdagépre.
 
 Először hozza létre a konfigurációs és munkaterület mappákat, amelyeket a konténer csatol:
 
@@ -404,7 +427,7 @@ $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Töltse le a közzétett képet (nyilvános, így nincs szükség bejelentkezésre):
+Töltse le a kiadott képet (nyilvános, így bejelentkezés nem szükséges):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -421,14 +444,14 @@ docker run -it --rm `
 ```
 
 Nyissa meg a `http://localhost:8000/canvas` címet a böngészőjében. Ha a 8000-es port már
-foglalt, rendeljen hozzá egy másik hoszt portot, például `-p 8080:8000`, és nyissa meg helyette a
-`http://localhost:8080/canvas` címet.
+foglalt, rendeljen hozzá egy másik gazdagép portot, például `-p 8080:8000`, és nyissa meg
+helyette a `http://localhost:8080/canvas` címet.
 
 > **Megjegyzés:** Az első indítás inicializálja az Agent Servert a konténeren belül,
-> így eltarthat egy-két percig, mire a backend egészségesként jelentkezik.
+> így eltarthat egy-két percig, mire a backend egészségesnek jelzi magát.
 
-A `.openhands` csatolás megőrzi az LLM-profilt és a beállításokat a konténer
-újraindításai között. Ennek az útmutatónak a további része mindent az Agent
+A `.openhands` csatolás megőrzi az LLM profilját és beállításait a konténer
+újraindításai között. Ennek az útmutatónak a hátralévő része mindent az Agent
 Canvas felhasználói felületén keresztül konfigurál a böngészőjében.
 
 <!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
@@ -481,51 +504,53 @@ finally {
 
 ## 4. A helyi LLM konfigurálása
 
-Első indításkor az Agent Canvas egy bevezető folyamatot indít. Ebben a folyamatban:
+Az első indításkor az Agent Canvas egy bevezető folyamatot indít. Ebben a folyamatban:
 
-1. Hagyja kiválasztva az **OpenHands** ágenst, majd kattintson a **Next** gombra.
-2. A **Set up your LLM** részen válassza az **Advanced** lehetőséget.
+1. Hagyja az **OpenHands**-t kiválasztva ügynökként, és kattintson a **Next** gombra.
+2. A **Set up your LLM** képernyőn válassza az **Advanced** opciót.
 3. Hagyja az **Authentication** beállítást **API key** értéken.
-4. Állítsa a **Custom Model** mezőt erre: `openai/Qwen3.6-35B-A3B-GGUF`.
-5. Állítsa a **Base URL** mezőt erre: `http://127.0.0.1:13305/api/v1`.
+4. Állítsa be a **Custom Model** mezőt erre: `openai/Qwen3.6-35B-A3B-GGUF`.
+5. Állítsa be a **Base URL** mezőt erre: `http://127.0.0.1:13305/api/v1`.
    <!-- @os:windows -->
-   > Windows rendszeren a stack egy konténerben fut, amely nem éri el a hosztot a
-   > `127.0.0.1` címen. Ehelyett használja a `http://host.docker.internal:13305/api/v1` címet, hogy a
-   > konteneres ágens elérje a Windows hoszton futó Lemonade-et.
+   > Windows rendszeren a stack egy konténerben fut, amely nem éri el a gazdagépet a
+   > `127.0.0.1` címen. Ehelyett használja a `http://host.docker.internal:13305/api/v1`
+   > címet, hogy a konténerizált ügynök elérje a Windows gazdagépen futó Lemonade-et.
    <!-- @os:end -->
-6. Az **API Key** mezőbe írjon be egy tetszőleges nem üres helyőrzőt, például `lemonade-local`.
-   A Lemonade-nek nincs szüksége valós kulcsra, de az OpenHands kliensnek kell egy érték
-   a küldéshez.
+6. Az **API Key** mezőbe írjon be bármilyen nem üres helyőrzőt, például `lemonade-local`.
+   A Lemonade nem igényel valódi kulcsot, de az OpenHands kliensnek szüksége van
+   egy értékre a küldéshez.
 7. Kattintson a **Next** gombra.
 
-A kitöltött Advanced beállításoknak így kell kinézniük. Az API kulcs mezőt
-a felhasználói felület elrejti.
+A kész Advanced beállításoknak így kell kinézniük. Az API key mezőt a felhasználói
+felület elrejti.
 
-![Agent Canvas első használatakor megjelenő LLM Advanced beállítások a Lemonade modellel és a helyi bázis URL-lel](assets/01-llm-advanced-settings.png)
+![Agent Canvas első használatkori LLM Advanced beállítások a Lemonade modellel és a helyi base URL-lel](assets/01-llm-advanced-settings.png)
 
-Az Agent Canvas ezeket az értékeket LLM-profilként menti el. Ha az adott verzió elnevezést kér ehhez a
-profilhoz, használjon szóköz nélküli nevet, például `lemonade-local`. Ha később
-modellt vált, nyissa meg a **Settings > LLM** menüt, és frissítse ugyanazokat az Advanced mezőket. A mentett profilok között a chat beviteli mezőből a `/model` paranccsal
-válthat.
+Az Agent Canvas LLM profilként menti ezeket az értékeket. Ha a verziója arra kéri, hogy
+nevezze el ezt a profilt, használjon egy szóközök nélküli nevet, például `lemonade-local`. Ha
+később modellt vált, nyissa meg a **Settings > LLM** menüt, és frissítse ugyanazokat az
+Advanced mezőket. A mentett profilok között a chat beviteli mezőből válthat a `/model`
+paranccsal.
 
 ## 5. Munkaterület megnyitása
 
-Az ágens csak azon a munkaterületen belüli fájlokat tudja olvasni és módosítani, amelyet Ön kiválaszt. Mielőtt
-elindít egy feladatot, irányítsa az Agent Canvast a projektmappájára:
+Az ügynök csak a Ön által kiválasztott munkaterületen belüli fájlokat tudja olvasni és
+módosítani. Mielőtt feladatot indít, irányítsa az Agent Canvast a projekt mappájára:
 
-1. A kezdőképernyőn válassza az **Open Workspace** lehetőséget.
-2. Válassza ki azt a mappát, amely a projektjét tartalmazza (például egy git repository-t,
-   amelyen szeretné, hogy az ágens dolgozzon).
-3. Indítson egy új beszélgetést abban a munkaterületben.
+1. A kezdőképernyőről válassza az **Open Workspace** lehetőséget.
+2. Válassza ki azt a mappát, amely tartalmazza a projektjét (például egy git
+   repository-t, amelyen szeretné, hogy az ügynök dolgozzon).
+3. Indítson egy új beszélgetést ebben a munkaterületben.
 
-Minden, amit az ágens tesz — fájlok olvasása, parancsok futtatása, kód szerkesztése —, arra a munkaterületre korlátozódik.
+Minden, amit az ügynök tesz — fájlok olvasása, parancsok futtatása, kód szerkesztése —
+arra a munkaterületre korlátozódik.
 
-![Agent Canvas kezdőképernyője a bevezető folyamat után](assets/02-agent-canvas-home.png)
+![Agent Canvas kezdőlap a bevezető folyamat után](assets/02-agent-canvas-home.png)
 
 ## 6. Az első kódolási feladat futtatása
 
-A munkaterület megnyitása és a helyi LLM kiválasztása után írjon be egy konkrét feladatot a
-chatbe. Egy jó első feladat kicsi és ellenőrizhető, például:
+A munkaterület megnyitásával és a helyi LLM kiválasztásával írjon be egy konkrét feladatot
+a chatbe. Egy jó első feladat kicsi és ellenőrizhető, például:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -535,45 +560,47 @@ when run as a script.
 
 Figyelje a beszélgetés idővonalát. Az OpenHands a következőket fogja tenni:
 
-- Beolvassa a munkaterületet, hogy megértse az elrendezést.
+- Beolvassa a munkaterületet az elrendezés megértéséhez.
 - Létrehozza a `hello.py` fájlt a kért függvénnyel és teszt blokkal.
-- Opcionálisan futtatja a `python3 hello.py` parancsot az eredmény ellenőrzésére.
-- Beszámol a chatben arról, hogy mit tett, és bármilyen parancs kimenetéről.
+- Opcionálisan futtatja a `python3 hello.py` parancsot a kimenet ellenőrzéséhez.
+- Beszámol arról, hogy mit tett, és minden parancskimenetről a chatben.
 
-Az új fájlnak meg kell jelennie a munkaterületen, és az ágens záró üzenetének
-le kell írnia az elvégzett módosítást. Ez a kifizetődő pillanat: az
-ágens valódi kódot írt és futtatott a projektmappájában.
+Látnia kell az új fájl megjelenését a munkaterületen, és az ügynök végső üzenetének
+le kell írnia az általa végzett módosítást. Ez a kifizetődés pillanata: az
+ügynök valódi kódot írt és futtatott a projekt mappájában.
 
-## 7. Az ágens felülvizsgálata és irányítása
+## 7. Az ügynök munkájának áttekintése és irányítása
 
-Miután az ágens befejezett egy lépést, mielőtt elfogadná a következő lépést, tekintse át a munkáját:
+Miután az ügynök befejezett egy lépést, tekintse át a munkáját, mielőtt elfogadná a
+következőt:
 
-- **Fájlmódosítások**: használja a munkaterület fájlböngészőjét vagy az ágens diff nézetét, hogy
-  pontosan lássa, mi lett hozzáadva, módosítva vagy törölve.
-- **Parancs kimenete**: bontson ki bármelyik parancsot, amelyet az ágens futtatott, hogy lássa a stdout-ot, a stderr-t
-  és a kilépési kódot.
-- **Utókövetés**: ha az eredmény nem az, amit szeretett volna, válaszoljon ugyanabban a
-  beszélgetésben egy korrekcióval. Az ágens megtartja a korábbi kontextust, és
+- **Fájlváltozások**: használja a munkaterület fájlböngészőjét vagy az ügynök diff
+  nézetét, hogy pontosan lássa, mi lett hozzáadva, módosítva vagy törölve.
+- **Parancskimenet**: bontsa ki bármely parancsot, amelyet az ügynök futtatott, hogy
+  lássa a stdout-ot, stderr-t és a kilépési kódot.
+- **Visszajelzések**: ha az eredmény nem az, amit szeretett volna, válaszoljon ugyanabban
+  a beszélgetésben egy javítással. Az ügynök megőrzi a korábbi kontextust, és
   tovább dolgozik ugyanazokon a fájlokon.
 
-Ha például a teszt nem a várt üdvözlést írta ki, válaszoljon így:
+Ha például a teszt nem írta ki a várt köszöntést, válaszoljon ezzel:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-Az ágens újra beolvassa a fájlt, futtatja a parancsot, diagnosztizálja a problémát, majd
-ismét szerkeszti a fájlt — mindezt ugyanabban a beszélgetésben.
+Az ügynök újra beolvassa a fájlt, futtatja a parancsot, diagnosztizálja a problémát, és
+újra szerkeszti a fájlt — mindezt ugyanabban a beszélgetésben.
 ## Hibaelhárítás
 
 <!-- @os:linux -->
-- **Az `agent-canvas` nincs rajta a PATH-on:** telepítse újra a
-  `npm install -g @openhands/agent-canvas` paranccsal, és győződjön meg róla, hogy az npm globális bináris
-  könyvtára szerepel a PATH-on, mielőtt az `agent-canvas` elindítható lenne egy új
-  terminálból.
-- **Az `npm install -g` engedélyezési hibával meghiúsul:** állítson be egy felhasználó tulajdonában lévő
-  globális npm könyvtárat, majd nyissa meg újra a terminált, és telepítse újra az Agent Canvas-t.
+- **Az `agent-canvas` nincs a PATH-on:** telepítse újra a
+  `npm install -g @openhands/agent-canvas` paranccsal, és győződjön meg róla, hogy
+  az npm globális binárisainak könyvtára szerepel a PATH-ban, mielőtt az
+  `agent-canvas` elindítható lenne egy új terminálból.
+- **Az `npm install -g` jogosultsági hibával meghiúsul:** állítson be egy
+  felhasználó tulajdonában lévő globális npm könyvtárat, majd nyissa meg újra a
+  terminált, és telepítse ismét az Agent Canvast.
 
   ```bash
   mkdir -p ~/.npm-global
@@ -583,54 +610,62 @@ ismét szerkeszti a fájlt — mindezt ugyanabban a beszélgetésben.
   npm install -g @openhands/agent-canvas
   ```
 - **Az `uv` hiányzik:** telepítse
-  [az uv telepítési útmutatóból](https://docs.astral.sh/uv/getting-started/installation/).
-  Az Agent Canvas a `uv`-t használja az ügynökkiszolgáló Python-környezetének kezelésére.
+  [az uv telepítési útmutatója](https://docs.astral.sh/uv/getting-started/installation/) alapján.
+  Az Agent Canvas az `uv` segítségével kezeli az agent szerver Python környezetét.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- **A `docker pull` vagy `docker run` nem tud kapcsolódni:** győződjön meg róla, hogy a Docker Desktop
-  fut (a bálna ikonja a tálcán látható), és hogy a motor elindult. A
-  `docker version` parancsnak egy Client és egy Server szakaszt is ki kell írnia.
-- **A konténer elindul, de a háttérszolgáltatás sosem lesz egészséges:** az első
-  indítás inicializálja az Agent Server-t a konténeren belül; adjon neki egy-két
-  percet, majd nézze meg a `docker logs <container>` kimenetét hibák után kutatva.
-- **A konténer nem éri el a Lemonade-et:** a konténer a hoszthoz a
-  `host.docker.internal` címen keresztül fér hozzá. Ellenőrizze, hogy a Lemonade fut-e
-  a Windows hoszton a `lemonade status` paranccsal, és az LLM konfigurálásakor
-  a `http://host.docker.internal:13305/api/v1` címet használja Base URL-ként.
+- **A `docker pull` vagy `docker run` nem tud kapcsolódni:** győződjön meg róla,
+  hogy a Docker Desktop fut (a bálna ikonja megjelenik a tálcán), és hogy a motor
+  elindult. A `docker version` parancsnak mind egy Client, mind egy Server
+  szakaszt ki kell írnia.
+- **A konténer elindul, de a háttérrendszer sosem lesz egészséges állapotú:** az
+  első indítás a konténeren belül inicializálja az Agent Servert; adjon neki egy-két
+  percet, majd ellenőrizze a `docker logs <container>` parancs kimenetét a hibák
+  miatt.
+- **A konténer nem éri el a Lemonade-ot:** a konténer a `host.docker.internal`
+  címen éri el a hosztot. Győződjön meg róla, hogy a Lemonade fut a Windows
+  hoszton a `lemonade status` paranccsal, és használja a
+  `http://host.docker.internal:13305/api/v1` címet alap URL-ként az LLM
+  konfigurálásakor.
 <!-- @os:end -->
 
-- **A felhasználói felület betöltődik, de a háttérszolgáltatás nem egészséges:** várjon egy-két
-  percet, amíg az ügynökkiszolgáló elindul, majd frissítse az oldalt. Ha továbbra sem
-  egészséges, indítsa újra a stacket, és nézze meg a naplókat hibák után kutatva.
-- **A Lemonade csevegési kérések kapcsolódási hibával meghiúsulnak:** ellenőrizze, hogy
-  a `curl -fsS "http://127.0.0.1:13305/api/v1/health"` sikeres-e, és hogy
-  a Lemonade még mindig kiszolgálja-e a modellt a `lemonade status` paranccsal.
+- **A felhasználói felület betöltődik, de a háttérrendszer állapota nem egészséges:**
+  várjon egy-két percet, amíg az agent szerver befejezi az indulást, majd
+  frissítse az oldalt. Ha továbbra is nem egészséges, indítsa újra a verem
+  szolgáltatásait, és ellenőrizze a naplókat a hibák miatt.
+- **A Lemonade csevegési kérések kapcsolódási hibával meghiúsulnak:** győződjön meg
+  róla, hogy a `curl -fsS "http://127.0.0.1:13305/api/v1/health"` parancs sikeres,
+  és hogy a Lemonade még mindig kiszolgálja a modellt a `lemonade status`
+  paranccsal ellenőrizve.
 - **Az ügynök kontextushossz- vagy tokenkorlát-üzenettel hibázik:** kezdjen új
-  beszélgetést, hogy az ügynök ne cipeljen túlméretezett előzményeket. Ha ez
-  továbbra is előfordul, indítsa újra a Lemonade-et a `ctx_size` alapértelmezett
-  65536 értékénél nagyobb beállítással (például `ctx_size=131072`), memóriakapacitás függvényében.
-- **Az ügynök alacsony minőségű vagy hiányos szerkesztéseket készít:** váltson egy nagyobb
-  modellre a Lemonade-ben, vagy adjon az ügynöknek egy kisebb, konkrétabb feladatot, és hagyja
-  befejezni, mielőtt a következő módosítást kérné.
+  beszélgetést, hogy az ügynök ne cipeljen magával túl nagy előzményt. Ha
+  rendszeresen előfordul, indítsa újra a Lemonade-ot a 65536-os alapértelmezettnél
+  nagyobb `ctx_size` értékkel (például `ctx_size=131072`), ha a memória engedi.
+- **Az ügynök rossz minőségű vagy hiányos módosításokat készít:** váltson egy
+  nagyobb modellre a Lemonade-ban, vagy adjon az ügynöknek kisebb, konkrétabb
+  feladatot, és hagyja, hogy befejezze, mielőtt a következő módosítást kéri.
 
 ## Következő lépések
 
-- Próbáljon ki egy nagyobb feladatot ugyanabban a munkaterületben, például adjon hozzá egy
-  unit teszt fájlt vagy javítson egy ismert hibát, és tekintse át az ügynök diffjét, mielőtt megtartaná a módosítást.
-- Kapcsoljon egy MCP-kiszolgálót, például GitHub-ot vagy Slack-et a **Customize** alatt, hogy
-  az ügynök olvashassa a hibajegyeket vagy közzétehessen frissítéseket munka közben.
-- Mentsen több LLM-profilt (egy gyors kis modellt és egy erősebb nagy modellt), és
-  váltson közöttük a `/model` paranccsal beszélgetés közben.
-- Lépjen tovább az [OpenHands automatizálásokhoz](https://docs.openhands.dev/openhands/usage/automations/overview), hogy
-  ismétlődő fejlesztési ciklusokat ütemezett vagy eseményvezérelt ügynökfuttatásokká alakítson.
+- Próbáljon ki egy nagyobb feladatot ugyanabban a munkaterületben, például adjon
+  hozzá egy unit teszt fájlt, vagy javítson egy ismert hibát, és tekintse át az
+  ügynök diffjét, mielőtt megtartaná a módosítást.
+- Csatlakoztasson egy MCP szervert, például GitHubot vagy Slacket a
+  **Customize** alatt, hogy az ügynök olvashasson hibajegyeket vagy
+  közzétehessen frissítéseket munka közben.
+- Mentsen el több LLM profilt (egy gyors, kis modellt és egy erősebb, nagy
+  modellt), és váltson közöttük a `/model` paranccsal a beszélgetés közben.
+- Térjen át az [OpenHands automatizálásokra](https://docs.openhands.dev/openhands/usage/automations/overview),
+  hogy az ismétlődő fejlesztési ciklusokat ütemezett vagy eseményindítású
+  ügynökfutásokká alakítsa.
 
 ## Erőforrások
 
 - [OpenHands dokumentáció](https://docs.openhands.dev/)
 - [Agent Canvas áttekintés](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
-- [Agent Canvas beállítás](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
-- [LLM-profilok és modellkonfiguráció](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
+- [Agent Canvas beállítása](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
+- [LLM profilok és modellkonfiguráció](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [Lemonade Server dokumentáció](https://lemonade-server.ai/docs)
 
 <!-- @os:linux -->

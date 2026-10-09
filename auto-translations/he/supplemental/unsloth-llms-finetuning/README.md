@@ -9,52 +9,52 @@ SPDX-License-Identifier: MIT
 > **תרגום מכונה.** דף זה תורגם באופן אוטומטי מאנגלית ולא נבדק על ידי אדם. ייתכן שהוא מכיל שגיאות, וייתכן שהוראות, פקודות, הורדות, זמינות מוצרים, או תוכן אחר מסוימים ישתנו בהתאם לשפה או לאזור. בכל מקרה של אי-התאמה או סתירה, הגרסה המקורית באנגלית של ה-playbook היא הקובעת והמחייבת.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## סקירה כללית
 
-מדריך זה מראה כיצד לבצע כוונון עדין (fine-tuning) של מודל שפה באופן מקומי באמצעות Unsloth על חומרת AMD.
+מדריך זה מראה כיצד לכוון במדויק (fine-tune) מודל שפה באופן מקומי בעזרת Unsloth על חומרת AMD.
 
-הוא משתמש בדוגמת כוונון עדין מפוקח (Supervised Fine-Tuning - SFT) קצרה עם מתאמי LoRA על `unsloth/gemma-4-E4B-it`, תוך שימוש בתת-קבוצה של מערך הנתונים `mlabonne/FineTome-100k`. המטרה היא לספק לך תהליך עבודה פשוט מקצה לקצה שמכסה הגדרה, אימון, היסק ושמירה של התוצאה המכוונת.
+המדריך משתמש בדוגמת Supervised Fine-Tuning (SFT) קצרה עם מתאמי LoRA על `unsloth/gemma-4-E4B-it`, תוך שימוש בתת-קבוצה של מערך הנתונים `mlabonne/FineTome-100k`. המטרה היא להעניק לכם תהליך עבודה פשוט מקצה לקצה הכולל הגדרה, אימון, הסקה (inference) ושמירה של התוצאה המכוונת.
 
-הדוגמה תוכננה להיות מעשית וקלה לשינוי, כך שתוכל להשתמש בה כנקודת התחלה עבור מערכי הנתונים והמודלים שלך.
+הדוגמה תוכננה להיות מעשית וקלה לשינוי, כך שתוכלו להשתמש בה כנקודת התחלה עבור מערכי הנתונים והמודלים שלכם.
 
-## מה תלמד
+## מה תלמדו
 
 - כיצד להגדיר את סביבת Unsloth
-- כיצד לבצע כוונון עדין ל-LLM באמצעות SFT עם Unsloth
+- כיצד לכוון במדויק LLM באמצעות SFT עם Unsloth
 - כיצד לשמור את התוצאה המכוונת באחסון מקומי
 
 <!-- @device:halo,stx,krk -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **64 GB של זיכרון RAM של המערכת**, כאשר לפחות **24 GB מתוכם זמינים ל-GPU** (24 GB אלה הם חלק מ-64 GB, לא בנוסף להם).
+> **הערה:** טכניקות הכוונון המדויק במדריך זה דורשות לפחות **64 GB של זיכרון מערכת (RAM)**, מתוכם לפחות **24 GB זמינים ל-GPU** (ה-24 GB הם חלק מ-64 GB, ולא בנוסף להם).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות לפחות **24 GB של זיכרון GPU כולל** ו-**32 GB של זיכרון RAM של המערכת**.
-> - ב-Windows, זיכרון ה-GPU הכולל משלב את ה-VRAM הייעודי של כרטיס הגרפיקה עם זיכרון GPU משותף (מושאל מזיכרון ה-RAM של המערכת).
+> **הערה:** טכניקות הכוונון המדויק במדריך זה דורשות לפחות **24 GB של זיכרון GPU כולל** וכן **32 GB של זיכרון מערכת (RAM)**.
+> - ב-Windows, זיכרון ה-GPU הכולל משלב את ה-VRAM הייעודי של כרטיס המסך עם זיכרון GPU משותף (הנשאל מזיכרון המערכת).
 > - לכן, כרטיסים עם פחות מ-24 GB של VRAM ייעודי עדיין יכולים להריץ מדריך זה באמצעות שימוש בזיכרון GPU משותף כדי להשלים את ההפרש.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **הערה:** טכניקות הכוונון העדין במדריך זה דורשות כרטיס גרפי עם לפחות **24 GB של זיכרון GPU ייעודי** ו-**32 GB של זיכרון RAM של המערכת**.
-> - ב-Linux, האימון פועל כולו בזיכרון ה-VRAM הייעודי של כרטיס הגרפיקה.
-> - הוא אינו חוזר לזיכרון GPU משותף (זיכרון RAM של המערכת) כאשר ה-VRAM אוזל.
-> - כרטיסים עם פחות מ-24 GB של VRAM ייעודי ייגמר להם הזיכרון במהלך האימון ב-Linux, גם אם למערכת יש הרבה זיכרון RAM.
+> **הערה:** טכניקות הכוונון המדויק במדריך זה דורשות כרטיס מסך עם לפחות **24 GB של זיכרון GPU ייעודי** וכן **32 GB של זיכרון מערכת (RAM)**.
+> - ב-Linux, האימון פועל כולו בתוך ה-VRAM הייעודי של כרטיס המסך.
+> - הוא אינו חוזר לשימוש בזיכרון GPU משותף (זיכרון המערכת) כאשר ה-VRAM אוזל.
+> - כרטיסים עם פחות מ-24 GB של VRAM ייעודי ייתקלו בחוסר זיכרון במהלך האימון ב-Linux, גם אם במערכת יש שפע של RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## מדוע Unsloth?
 
-Unsloth הופך את הכוונון העדין של LLM לקל יותר להרצה על חומרה מקומית על ידי הפחתת השימוש בזיכרון והאצת האימון בהשוואה להגדרה סטנדרטית.
+Unsloth הופכת את הכוונון המדויק של LLM לקל יותר להרצה על חומרה מקומית, על ידי הפחתת צריכת הזיכרון והאצת האימון בהשוואה להגדרה סטנדרטית.
 
-במדריך זה, אנו משתמשים ב-Unsloth יחד עם **SFT מבוסס LoRA**. משמעות הדבר היא שהמודל הבסיסי נשאר קפוא ברובו, בעוד שקבוצה קטנה בהרבה של משקלי מתאמים מאומנת. זוהי התאמה טובה לפיתוח מקומי מכיוון שהיא קלה יותר מכוונון עדין מלא ומהירה יותר לביצוע איטרציות.
+במדריך זה, אנו משתמשים ב-Unsloth יחד עם **SFT מבוסס LoRA**. המשמעות היא שהמודל הבסיסי נשאר קפוא ברובו, בעוד שקבוצה קטנה בהרבה של משקלי מתאם (adapter) מאומנת. זוהי התאמה טובה לפיתוח מקומי מכיוון שהיא קלה יותר מכוונון מדויק מלא ומהירה יותר לביצוע איטרציות.
 
-Unsloth תומכת גם בגישות אימון נוספות, כולל QLoRA ותהליכי עבודה של למידת חיזוק. מדריך זה מתמקד תחילה בנתיב הפשוט ביותר: דוגמת כוונון עדין קטנה של LoRA שמשתמשים יכולים להריץ, להבין ולהרחיב.
+Unsloth תומכת גם בגישות אימון נוספות, כולל QLoRA ותהליכי עבודה של למידת חיזוק (reinforcement learning). מדריך זה מתמקד תחילה בנתיב הפשוט ביותר: דוגמת כוונון מדויק קטנה בעזרת LoRA שמשתמשים יכולים להריץ, להבין ולהרחיב.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
@@ -64,19 +64,21 @@ Unsloth תומכת גם בגישות אימון נוספות, כולל QLoRA ו�
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
-> **הערה**: אם VS Code אינו מותקן, ניתן להתקין אותו עם Ryzen AI Developer Center.
+> **הערה**: אם VS Code אינו מותקן, ניתן להתקינו באמצעות Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות תוכנה מוקדמות
+## התקנת דרישות מוקדמות של תוכנה
+
+<!-- @prereq:hf-models-gemma-4-e4b-it,hf-datasets-finetome-100k -->
 
 ### יצירת סביבה וירטואלית
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-פתח מסוף וצור venv עם תוכנת AMD ROCm™ ו-PyTorch כבר מותקנים:
-<!-- @test:id=create-venv timeout=120 -->
+פתחו מסוף וצרו venv עם תוכנת AMD ROCm™ ו-PyTorch מותקנים מראש:
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 python3 -m venv unsloth-env --system-site-packages
@@ -87,13 +89,13 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**הענק לחשבון המשתמש שלך גישה להתקני GPU** (התנתק והתחבר מחדש כדי שהשינוי ייכנס לתוקף):
+**הענקת גישה למשתמש שלכם להתקני GPU** (יש להתנתק ולהתחבר מחדש כדי שהשינוי ייכנס לתוקף):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-פתח מסוף וצור venv:
+פתחו מסוף וצרו venv:
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -107,10 +109,10 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **הערה:** נדרש Python 3.13 עבור Windows.
+> **הערה:** נדרשת גרסת Python 3.13 עבור Windows.
 
 <!-- @device:halo_box -->
-פתח מסוף PowerShell וצור סביבה וירטואלית:
+פתחו מסוף PowerShell וצרו סביבה וירטואלית:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -121,7 +123,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-פתח מסוף PowerShell וצור סביבה וירטואלית:
+פתחו מסוף PowerShell וצרו סביבה וירטואלית:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -135,9 +137,9 @@ python -m venv unsloth-env
 ### התקנת תלויות בסיסיות
 <!-- @require:driver -->
 
-> **חשוב:** Unsloth עדיין אינה תומכת בגרסת PyTorch 2.13 שמגיעה עם ROCm 10. עבור מדריך זה, התקן **ROCm 7.14 עם PyTorch 2.12** באמצעות הפקודות שלהלן. אל תשתמש בחבילות ROCm 10 / PyTorch 2.13.
+> **חשוב:** Unsloth עדיין אינה תומכת בגרסת PyTorch 2.13 המגיעה יחד עם ROCm 10. עבור מדריך זה, התקינו **ROCm 7.14 עם PyTorch 2.12** באמצעות הפקודות שלהלן. אין להשתמש בחבילות ROCm 10 / PyTorch 2.13.
 
-**התקן את PyTorch עם תמיכת תוכנת AMD ROCm™** בסביבה הווירטואלית שנוצרה:
+**התקינו את PyTorch עם תמיכת תוכנת AMD ROCm™** בסביבה הווירטואלית שנוצרה:
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
@@ -179,7 +181,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "tor
 <!-- @test:end -->
 <!-- @device:end -->
 
-עבור התקנים אחרים, נא עיין ב-[תיעוד ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) לקבלת הוראות מלאות.
+עבור התקנים אחרים, עיינו ב-[תיעוד ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) להוראות מלאות.
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -215,10 +217,10 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **הערה:** במהלך הייבוא, Unsloth עשויה לבדוק נתיבי האצה אופציונליים של `bitsandbytes`. בגרסאות ROCm מסוימות, ייתכן שתראה הודעה כגון `bitsandbytes library load error: Configured ROCm binary not found`. מדריך זה משתמש בכוונון עדין סטנדרטי של LoRA עם `optim="adamw_torch"`, כך שאיננו מסתמכים על האופטימייזר של `bitsandbytes` או על QLoRA בן 4 סיביות. ניתן להתעלם בבטחה מהודעה זו.
+> **הערה:** במהלך הייבוא, ייתכן ש-Unsloth תבדוק נתיבי האצה אופציונליים של `bitsandbytes`. בחלק מגרסאות ROCm, ייתכן שתראו הודעה כגון `bitsandbytes library load error: Configured ROCm binary not found`. מדריך זה משתמש בכוונון מדויק סטנדרטי של LoRA עם `optim="adamw_torch"`, ולכן איננו תלויים באופטימייזר `bitsandbytes` או ב-QLoRA ברזולוציית 4-bit. ניתן להתעלם בבטחה מהודעה זו.
 
 <!-- @os:windows -->
-> **הערה:** ב-Windows ROCm, Unsloth תדפיס מספר אזהרות בעת ההפעלה — ראה [אזהרות ידועות](#known-warnings) למטה. ניתן להתעלם מכולן בבטחה; האימון פועל כראוי.
+> **הערה:** ב-Windows ROCm, Unsloth תדפיס מספר אזהרות בעת ההפעלה — ראו [אזהרות ידועות](#known-warnings) להלן. כולן בטוחות להתעלמות; האימון פועל כראוי.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -241,11 +243,11 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## הורדת סקריפט הכוונון העדין של Unsloth
+## הורדת סקריפט הכוונון המדויק של Unsloth
 
-במקום לבצע כל שלב באופן ידני, מדריך זה מספק סקריפט נקי מקצה לקצה כאן: [test_unsloth.py](assets/test_unsloth.py).
+במקום להריץ ידנית כל שלב, מדריך זה מספק סקריפט נקי מקצה לקצה כאן: [test_unsloth.py](assets/test_unsloth.py).
 
-הרץ את הקוד הבא כדי להריץ את הסקריפט:
+הריצו את הקוד הבא כדי להפעיל את הסקריפט:
 
 ```bash
 python test_unsloth.py
@@ -278,20 +280,20 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-יתר המדריך יעבור באופן מושגי על כל שלב מרכזי בסקריפט.
+שאר המדריך יעבור באופן עקרוני על כל שלב מרכזי בסקריפט.
 
-## כיצד זה עובד
+## כיצד זה פועל
 
-הסקריפט test_unsloth.py מבצע את השלבים הבאים:
+סקריפט test_unsloth.py מבצע את השלבים הבאים:
 * **טעינת מודל**: טוען את unsloth/gemma-4-E4B-it באמצעות FastModel.
-* **הכנת נתונים**: מתקנן את מערך הנתונים (למשל, FineTome-100k) ומחיל את תבנית הצ'אט של Gemma-4.
-* **החלת LoRA**: מוסיף מתאמים למודולי שפה, תשומת לב (attention) ו-MLP לצורך אימון יעיל.
-* **אימון**: משתמש ב-SFTTrainer עם מיסוך הפסד (loss masking) של תגובה בלבד.
-* **היסק**: מריץ בדיקת ייצור מהירה כדי לאמת ביצועים.
-* **שמירה**: מייצא מתאמי LoRA באופן מקומי.
-## הגדרות תצורה עיקריות
+* **הכנת נתונים**: מתקנן (standardizes) את מערך הנתונים (למשל, FineTome-100k) ומחיל את תבנית הצ'אט של Gemma-4.
+* **החלת LoRA**: מוסיף מתאמים (adapters) למודולי שפה, קשב (attention) ו-MLP לצורך אימון יעיל.
+* **אימון**: משתמש ב-SFTTrainer עם מיסוך הפסד (loss masking) המוגבל לתגובות בלבד.
+* **הסקה (Inference)**: מריץ בדיקת ייצור מהירה לאימות ביצועים.
+* **שמירה**: מייצא את מתאמי LoRA באופן מקומי.
+## תצורת מפתח
 
-ניתן לשנות את הקבועים הבאים כדי להתאים אישית את הריצה:
+ניתן לשנות את הקבועים הבאים כדי להתאים אישית את ההרצה:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -311,18 +313,18 @@ OUTPUT_DIR = "gemma_4_lora"
 mlabonne/FineTome-100k
 ```
 מערך הנתונים:
-* מומר לפורמט צ'אט
-* מעובד באמצעות תבנית הצ'אט Gemma-4
-* מנוקה כדי להסיר אסימוני BOS כפולים
+* הומר לפורמט צ'אט
+* עובד באמצעות תבנית הצ'אט Gemma-4
+* נוקה מטוקני BOS כפולים
 
 ## אימון המודל
 
 הסקריפט מריץ הדגמת אימון קצרה, עם הפרמטרים הבאים:
-- כ-50 שלבים
+- כ-50 צעדים
 - גודל אצווה קטן
 - צבירת גרדיאנטים
 
-במהלך האימון, יופיעו יומני רישום כגון:
+במהלך האימון, תראו יומנים כגון:
 
 ![alt text](assets/training.png)
 
@@ -331,7 +333,7 @@ mlabonne/FineTome-100k
 
 ### שמירה מקומית (LoRA)
 
-הסקריפט שומר אוטומטית את מתאמי LoRA לתוך OUTPUT_DIR.
+הסקריפט שומר אוטומטית את מתאמי LoRA ל-OUTPUT_DIR.
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -370,10 +372,10 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### שמירת מודל ממוזג (עבור vLLM)
+### שמירת מודל ממוזג (עבור vLLM) 
 
 <!-- @os:windows -->
-> **הערה:** vLLM אינו תומך ב-Windows. כדי לפרוס את המודל המכוונן על Windows, השתמשו ב-llama.cpp (ראו [ייצוא GGUF](#export-gguf-for-llamacpp) בהמשך) או העבירו את המודל הממוזג למחשב Linux המריץ vLLM.
+> **הערה:** vLLM אינו תומך ב-Windows. כדי לפרוס את המודל המכוונן שלכם ב-Windows, השתמשו ב-llama.cpp (ראו [ייצוא GGUF](#export-gguf-for-llamacpp) למטה) או העבירו את המודל הממוזג למחשב Linux המריץ vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -417,7 +419,7 @@ print("PASS: Merged model output looks correct")
 
 ### ייצוא GGUF (עבור llama.cpp)
 
-המרה ישירה ל-GGUF להסקה מקומית:
+המירו ישירות ל-GGUF עבור הסקה מקומית:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
@@ -425,31 +427,31 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## אזהרות ידועות
 
-אזהרות אלו מודפסות על ידי Unsloth בעת ההפעלה ב-Windows ROCm וניתן להתעלם מכולן בבטחה:
+אזהרות אלה מודפסות על ידי Unsloth בעת ההפעלה ב-Windows ROCm וכולן בטוחות להתעלמות:
 
 | אזהרה | סיבה | בטוח להתעלם? |
 |---|---|---|
-| `bitsandbytes library load error` | ל-bitsandbytes אין בנייה עבור Windows ROCm | כן — מדריך זה משתמש ב-`adamw_torch`, לא ב-bnb |
-| `No ROCm platform found for torch.distributed` | ל-ROCm על Windows חסרה תמיכה באימון מבוזר | כן — אימון על GPU בודד אינו מושפע |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth מסמן בניות שאינן Linux | כן — Windows ROCm עובד עבור SFT על GPU בודד |
-| `triton is not available` | ל-Triton אין בנייה עבור Windows | כן — Unsloth חוזר לשימוש בקרנלים של PyTorch |
+| `bitsandbytes library load error` | ל-bitsandbytes אין בנייה עבור Windows ROCm | כן — ספר ההדרכה הזה משתמש ב-`adamw_torch`, לא ב-bnb |
+| `No ROCm platform found for torch.distributed` | ל-ROCm על Windows אין תמיכה באימון מבוזר | כן — אימון עם GPU יחיד אינו מושפע |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth מסמן בניות שאינן Linux | כן — Windows ROCm עובד עבור SFT עם GPU יחיד |
+| `triton is not available` | ל-Triton אין בנייה עבור Windows | כן — Unsloth חוזר לליבות PyTorch |
 
-האימון יתבצע כראוי למרות אזהרות אלו.
+האימון יתקדם כראוי למרות אזהרות אלה.
 <!-- @os:end -->
 
-## הצעדים הבאים
-- נסו את [Unsloth Studio](https://unsloth.ai/docs/new/studio), ממשק גרפי אינטואיטיבי עבור Unsloth
-- אמנו על מערכי נתונים ספציפיים משלכם
-- נסו כוונון עדין עם היפרפרמטרים שונים
+## השלבים הבאים
+- נסו את [Unsloth Studio](https://unsloth.ai/docs/new/studio), ממשק משתמש גרפי אינטואיטיבי עבור Unsloth
+- אמנו על מערכי הנתונים הספציפיים שלכם
+- נסו כוונון עדין עם היפר-פרמטרים שונים
 - פרסו עם vLLM או llama.cpp
-- נסו QLoRA להגדרה בעלת צריכת זיכרון נמוכה יותר
+- נסו QLoRA להגדרה חסכונית יותר בזיכרון
 
 ## משאבים
 
-להלן כמה משאבים נוספים ללמידה נוספת על Unsloth וכוונון עדין:
+להלן כמה משאבים נוספים כדי ללמוד עוד על Unsloth וכוונון עדין:
 
 * [תיעוד Unsloth](https://docs.unsloth.ai)
 
-* [Unsloth GitHub](https://github.com/unslothai/unsloth)
+* [GitHub של Unsloth](https://github.com/unslothai/unsloth)
 
-* [מדריך הכוונון העדין של Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [מדריך כוונון עדין של Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

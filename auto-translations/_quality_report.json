@@ -1,182 +1,182 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
-      "mean": 93.0,
+      "files_scored": 100,
+      "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
-      "mean": 92.3,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 93.2,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
-      "mean": 92.5,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 93.5,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
-      "mean": 93.1,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 94.4,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 100,
+      "mean": 92.7,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
-      "mean": 92.8,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "fi-FI": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 100,
+      "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
+    "fi-FI": {
+      "files_scored": 100,
+      "mean": 92.2,
+      "min": 70,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "fr-CA": {
-      "files_scored": 80,
-      "mean": 90.7,
-      "min": 72,
+      "files_scored": 100,
+      "mean": 91.5,
+      "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 100,
+      "mean": 93.7,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.2,
+      "files_scored": 100,
+      "mean": 92.6,
       "min": 60,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
-      "mean": 92.1,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 92.2,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
-      "mean": 93.9,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 94.5,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 100,
+      "mean": 93.5,
       "min": 20,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
-      "mean": 93.5,
-      "min": 82,
+      "files_scored": 100,
+      "mean": 93.9,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 100,
+      "mean": 92.3,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
-      "mean": 92.6,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 92.8,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 100,
+      "mean": 93.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 80,
-      "mean": 93.7,
-      "min": 82,
+      "files_scored": 100,
+      "mean": 94.6,
+      "min": 85,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-PT": {
-      "files_scored": 80,
-      "mean": 92.9,
+      "files_scored": 100,
+      "mean": 93.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 100,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 80,
-      "mean": 92.9,
-      "min": 88,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "sk-SK": {
-      "files_scored": 80,
-      "mean": 91.6,
-      "min": 82,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "sl-SI": {
-      "files_scored": 80,
-      "mean": 90.5,
-      "min": 68,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "sr-Latn": {
-      "files_scored": 80,
-      "mean": 91.1,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "sv-SE": {
-      "files_scored": 80,
+      "files_scored": 100,
       "mean": 93.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
+    "sk-SK": {
+      "files_scored": 100,
+      "mean": 92.2,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "sl-SI": {
+      "files_scored": 100,
+      "mean": 91.2,
+      "min": 72,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "sr-Latn": {
+      "files_scored": 100,
+      "mean": 91.5,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "sv-SE": {
+      "files_scored": 100,
+      "mean": 93.4,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "th-TH": {
-      "files_scored": 80,
-      "mean": 92.7,
+      "files_scored": 100,
+      "mean": 93.3,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
-      "mean": 92.4,
-      "min": 80,
+      "files_scored": 100,
+      "mean": 92.9,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
-      "mean": 92.6,
+      "files_scored": 100,
+      "mean": 93.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
-      "min": 78,
+      "files_scored": 100,
+      "mean": 93.9,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 100,
+      "mean": 93.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -195,16 +195,10 @@
       "issues": "Title left mostly untranslated ('Clustering Two Ryzen AI Halos'); rest is accurate and fluent."
     },
     {
-      "locale": "ja-JP",
-      "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
-      "score": 68,
-      "issues": "OpenHands mistranslated as OpenHats; inconsistent spacing around terms"
-    },
-    {
-      "locale": "sl-SI",
+      "locale": "fi-FI",
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 68,
-      "issues": "Redundant English parentheticals; inconsistent 'fino prilagajanje' vs 'fino nastavite'; awkward 'LLaMA-Factory' hyphenation differs from title."
+      "score": 70,
+      "issues": "Second sentence mistranslated: 'fine-tune LLMs' became 'fine-tune using LLMs'; awkward phrasing, meaning distorted."
     },
     {
       "locale": "th-TH",
@@ -213,16 +207,22 @@
       "issues": "Left 'Local Computer Vision' and 'perception' untranslated; inconsistent localization reduces fluency."
     },
     {
-      "locale": "fr-CA",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 72,
-      "issues": "Trademark symbol misplaced (belongs to Unsloth, not LLM); 'affinés' vs 'réglage fin' terminology inconsistency; awkward phrasing."
-    },
-    {
       "locale": "he",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 72,
       "issues": "Title 'AiCluster' is mistranslation/garbled; 'Clustering' not properly rendered. Rest accurate and fluent."
+    },
+    {
+      "locale": "hu-HU",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 72,
+      "issues": "Title mistranslates 'Fine-Tuning LLMs' as 'with LLMs'; trademark symbol misplaced vs source."
+    },
+    {
+      "locale": "it-IT",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 72,
+      "issues": "Trademark™ misplaced (should be on Unsloth); 'fine-tuned' rendered as 'ottimizzati', slightly imprecise terminology."
     },
     {
       "locale": "ja-JP",
@@ -231,10 +231,22 @@
       "issues": "Added 'Ryzen AI Max+' not in source; 'integrated GPU' loosely rendered as iGPU."
     },
     {
-      "locale": "sl-SI",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "locale": "ko-KR",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 72,
-      "issues": "Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'."
+      "issues": "Inconsistent terminology (파인튜닝 vs 미세 조정); trademark misplaced—™ belongs to Unsloth, not LLMs; awkward phrasing"
+    },
+    {
+      "locale": "nl-NL",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
+      "score": 72,
+      "issues": "Inconsistent terminology: 'Fijnafstemmen' in title vs 'Fine-tune' in body; mixing creates incoherence."
+    },
+    {
+      "locale": "nl-NL",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 72,
+      "issues": "Title 'Running' left untranslated (should be 'DeepSeek V4 Flash draaien'); otherwise accurate."
     },
     {
       "locale": "sl-SI",
@@ -243,28 +255,22 @@
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
     },
     {
-      "locale": "cs-CZ",
+      "locale": "sl-SI",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate."
+      "score": 72,
+      "issues": "Inconsistent terminology (prilagajanje vs nastavljene); awkward phrasing; trademark symbol misplaced vs source placement on LLMs."
     },
     {
-      "locale": "da-DK",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'."
+      "locale": "tr-TR",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 72,
+      "issues": "Title mistranslated: 'Running DeepSeek V4 Flash with ds4' reversed meaning. 'Dağıtın' slightly off for deploy."
     },
     {
-      "locale": "de-DE",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb."
-    },
-    {
-      "locale": "de-DE",
+      "locale": "zh-CN",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced (should follow Unsloth, not LLMs); minor stylistic awkwardness in 'feinabgestimmte'."
+      "score": 72,
+      "issues": "Second line awkward phrasing; trademark symbol misplaced; 'memory-efficient fine-tuned LLMs' rendered unnaturally in Chinese."
     },
     {
       "locale": "el-GR",
@@ -276,13 +282,13 @@
       "locale": "el-GR",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 78,
-      "issues": "Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact."
+      "issues": "Second sentence uses 'Βελτιστοποιήστε' (optimize) instead of fine-tune; inconsistent with title's 'Μικρορύθμιση'."
     },
     {
-      "locale": "es-LA",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "locale": "el-GR",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
-      "issues": "Inconsistent formality (Cree vs Configura); 'digest' left untranslated in title while translated later as 'resumen'."
+      "issues": "Trademark symbol misplaced (should follow Unsloth brand, not LLM); slightly awkward phrasing but adequate and intact."
     },
     {
       "locale": "fr-CA",
@@ -294,49 +300,43 @@
       "locale": "fr-CA",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 78,
-      "issues": "Title drops speech-to-speech nuance; 'voix-à-voix' awkward calque, 'traduction vocale directe' preferred."
+      "issues": "Omits 'speech-to-speech' nuance (voice-to-voice); 'Traduction vocale' acceptable but slightly loses source-target speech distinction."
+    },
+    {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 78,
+      "issues": "Inconsistent terminology: 'Réglage fin' vs 'affinés'; trademark ™ misplaced—belongs on Unsloth brand, not after 'mémoire'."
+    },
+    {
+      "locale": "fr-FR",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
+      "score": 78,
+      "issues": "'Affinage/Affinez' unusual; 'Fine-tuning' typically kept or 'réglage fin'. 'des grands' should be 'de grands'."
     },
     {
       "locale": "fr-FR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
-      "issues": "Trademark symbol misplaced (belongs after LLMs); 'à mémoire optimisée' slightly awkward, inconsistent terminology (réglage fin vs affinés)."
+      "issues": "Trademark symbol misplaced (should be after LLMs, not LLM™); 'ajustement fin' vs 'affinés' inconsistent terminology; otherwise fluent."
     },
     {
-      "locale": "hu-HU",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "\"Nagynyelvi modellek\" awkward for LLMs; trademark symbol placement shifted; otherwise accurate and fluent."
-    },
-    {
-      "locale": "it-IT",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced (should follow LLMs). 'Fine-tuned' rendered as 'ottimizzati'; slightly imprecise but acceptable."
-    },
-    {
-      "locale": "ja-JP",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
-      "score": 78,
-      "issues": "Second sentence restructured awkwardly; relative clause placement makes it read as if models are the server."
-    },
-    {
-      "locale": "ja-JP",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced: source has 'LLMs™', translation attached ™ to Unsloth instead."
-    },
-    {
-      "locale": "nl-NL",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent 'fijnafstemmen'/'verfijn'; incorrect hyphenation 'LLaMA-Factory-' alters brand; slight mistranslation of technique scope."
-    },
-    {
-      "locale": "nl-NL",
+      "locale": "he",
       "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
       "score": 78,
-      "issues": "Untranslated 'Running' in title; otherwise accurate and fluent."
+      "issues": "Inconsistent verb forms: title uses plural, body uses singular imperative."
+    },
+    {
+      "locale": "ja-JP",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 78,
+      "issues": "Omits 'speech-to-speech' nuance; title '音声対音声' awkward, body just '音声翻訳' loses source-to-target meaning."
+    },
+    {
+      "locale": "ja-JP",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 78,
+      "issues": "Trademark symbol misplaced; source has 'LLMs™' but translation moved ™ to Unsloth, altering meaning."
     },
     {
       "locale": "pl-PL",
@@ -345,10 +345,22 @@
       "issues": "Product name 'AMD Sync' mistranslated as 'synchronizacją AMD' in title; otherwise accurate and fluent."
     },
     {
+      "locale": "pl-PL",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 78,
+      "issues": "'Digest' mistranslated as 'cyfrowy biuletyn'; 'local-LLM digest' means digest by local LLM, slightly ambiguous rendering"
+    },
+    {
       "locale": "ro-RO",
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 78,
       "issues": "'Primii' typo (should be 'Primii/Primii pași→Primii'), 'serverea' is an invented/incorrect term for 'serving'."
+    },
+    {
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 78,
+      "issues": "Title mistranslated as 'I am running' (Spúšťam); 'Nasadite' missing diacritic (should be Nasaďte)."
     },
     {
       "locale": "sl-SI",
@@ -358,15 +370,27 @@
     },
     {
       "locale": "sl-SI",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 78,
-      "issues": "Trademark ™ misplaced (belongs to Unsloth/LLMs brand); inconsistent terminology 'fino prilagajanje' vs 'fino nastavljanje'."
+      "issues": "Inconsistent fine-tuning rendering; 'Fino prilagajanje/nastavite' awkward; otherwise accurate, brands intact."
     },
     {
       "locale": "sr-Latn",
-      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 78,
-      "issues": "Awkward 'Hermes Agent autonomnog AI agenta' redundancy; inconsistent brand formatting with hyphens."
+      "issues": "Title omits 'speech-to-speech' nuance; 'govor u govor' slightly awkward but acceptable."
+    },
+    {
+      "locale": "sr-Latn",
+      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
+      "score": 78,
+      "issues": "Inconsistent 'digest' translation (izveštaj vs digest); 'GitHub-to-Slack' kept English, awkward phrasing."
+    },
+    {
+      "locale": "sv-SE",
+      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
+      "score": 78,
+      "issues": "'öppen källkod-lokal AI-server' awkward; should be 'lokal AI-server med öppen källkod'"
     },
     {
       "locale": "th-TH",
@@ -375,28 +399,34 @@
       "issues": "Title 'กำลังสร้าง' implies ongoing action; should be 'การสร้าง'. Slightly awkward 'ภาพที่สร้างโดย AI'."
     },
     {
+      "locale": "th-TH",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 78,
+      "issues": "Title left partly untranslated ('Running'); otherwise accurate, fluent, terms intact."
+    },
+    {
       "locale": "uk-UA",
       "file": "playbooks/core/n8n-automation-gpt-oss/playbook.json",
       "score": 78,
       "issues": "\"саммарайзер\" is an awkward transliteration; \"засіб підсумовування новин\" preferred. Otherwise accurate."
     },
     {
-      "locale": "uk-UA",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark ™ misplaced (belongs to LLMs term); inconsistent terminology 'тонке'/'точне налаштування'; slightly awkward phrasing."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced onto LLM instead of Unsloth; slight rephrasing but adequate."
-    },
-    {
       "locale": "zh-TW",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 78,
       "issues": "Title omits 'with RCCL'; 'Clustering' left untranslated in heading, reducing fluency."
+    },
+    {
+      "locale": "zh-TW",
+      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "score": 78,
+      "issues": "Inconsistent: '本地'/'本機' mixed; 'Hermes 代理' vs 'Hermes Agent' inconsistent brand handling in title."
+    },
+    {
+      "locale": "ro-RO",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 80,
+      "issues": "Trademark symbol misplaced (should follow LLMs™ brand concept); otherwise accurate and fluent."
     },
     {
       "locale": "tr-TR",
@@ -408,7 +438,7 @@
       "locale": "ar",
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
-      "issues": "Title omits 'Fine' nuance; inconsistent LLaMA Factory vs LLaMA-Factory hyphenation; otherwise accurate and fluent."
+      "issues": "Inconsistent terminology for LLMs; 'ضبط' alone underspecifies fine-tuning (ضبط دقيق preferred). Otherwise accurate, intact terms."
     },
     {
       "locale": "cs-CZ",
@@ -430,6 +460,12 @@
     },
     {
       "locale": "cs-CZ",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 82,
+      "issues": "'™' misplaced; redundant 'jazykových modelů LLM'; 'jemné dolaďování' slightly verbose but acceptable."
+    },
+    {
+      "locale": "cs-CZ",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 82,
       "issues": "Added 'AMD' not in source; 'Clustrování' is awkward anglicism; otherwise accurate, terms/code intact."
@@ -441,64 +477,40 @@
       "issues": "Grammatical gender error: 'Lokal' should be 'Lokalt' for neuter 'computersyn'. Otherwise accurate, terms/brands intact."
     },
     {
-      "locale": "da-DK",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 82,
-      "issues": "Gender agreement error: 'et...udviklingsoversigt' should be 'en'; 'udgiver' slightly off for 'posts'."
-    },
-    {
       "locale": "de-DE",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
-      "score": 82,
-      "issues": "Omitted 'Gen AI' (Gen KI); translated as generic 'KI-Modelle', losing generative AI specificity."
-    },
-    {
-      "locale": "de-DE",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent register (Erstelle vs Konfigurieren Sie); 'ein Digest' gender debatable, minor fluency issues"
-    },
-    {
-      "locale": "el-GR",
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
-      "issues": "Inconsistent fine-tune rendering (Βελτιστοποίηση vs Συντονίστε); minor terminology awkwardness but adequate, brands/acronyms intact."
-    },
-    {
-      "locale": "el-GR",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Trademark ™ likely belongs to Unsloth, not LLM; slightly awkward phrasing. Terminology otherwise accurate."
+      "issues": "LLaMA Factory hyphenated incorrectly; 'LLaMA-Factory-Techniken' misattributes Factory as technique, altering meaning slightly."
     },
     {
       "locale": "el-GR",
       "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
       "score": 82,
-      "issues": "\"πράκτορα κωδικοποίησης\" awkward; \"coding agent\" better as \"προγραμματισμού\". Otherwise accurate, brands intact."
+      "issues": "'πράκτορα κωδικοποίησης' awkward; 'coding agent' better as 'πράκτορα προγραμματισμού/κώδικα'. Otherwise accurate, brands intact."
     },
     {
       "locale": "es-LA",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
-      "issues": "Trademark symbol misplaced; 'LLMs™' brand term altered; slightly verbose but adequate and fluent."
+      "issues": "Trademark symbol misplaced in translation; '™' should follow Unsloth product, not LLMs. Otherwise accurate, fluent."
     },
     {
       "locale": "fi-FI",
-      "file": "playbooks/supplemental/lemonade-getting-started/playbook.json",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
-      "issues": "Title awkward 'Aloita käytön kanssa'; otherwise accurate and fluent."
+      "issues": "\"Running...Locally\" slightly off; \"OpenClaw-itsenäinen\" compound awkward, better \"itsenäinen OpenClaw-tekoälyagentti\"."
+    },
+    {
+      "locale": "fi-FI",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Trademark symbol misplaced onto LLM instead of staying with Unsloth brand per source."
     },
     {
       "locale": "fr-CA",
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 82,
       "issues": "Inconsistent 'diffusion'/'servir' for 'serving'; 'de grands modèles' preferred over 'des grands modèles'."
-    },
-    {
-      "locale": "fr-CA",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Slight inconsistency: 'Réglage fin' vs 'Ajustez avec précision' for fine-tune; otherwise accurate, fluent, terms intact."
     },
     {
       "locale": "fr-CA",
@@ -514,21 +526,15 @@
     },
     {
       "locale": "fr-FR",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent terminology: 'Réglage fin' vs 'Affinez'; 'de grands modèles' preferred over 'des grands'."
-    },
-    {
-      "locale": "fr-FR",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent terminology: 'noyaux' in title vs 'kernels' in body for same term."
     },
     {
       "locale": "he",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
       "score": 82,
-      "issues": "Trademark placement shifted (LLMs™ vs LLM™); 'memory-efficient' rendering slightly awkward but acceptable."
+      "issues": "Awkward 'ה-agent הקידוד' phrasing; 'מבית OpenHands' slightly off for 'OpenHands coding agent'."
     },
     {
       "locale": "hu-HU",
@@ -537,28 +543,34 @@
       "issues": "Title mistranslates 'first agent with GAIA' as 'GAIA's first agent'; otherwise accurate and fluent."
     },
     {
+      "locale": "hu-HU",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 82,
+      "issues": "Title reformatted awkwardly with colon; 'ds4-gyel' suffix unusual. Otherwise accurate, fluent, terms intact."
+    },
+    {
+      "locale": "it-IT",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Title redundant 'Ottimizzazione fine-tuning'; LLaMA Factory is a tool, not a technique—phrasing slightly misleading."
+    },
+    {
       "locale": "it-IT",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
-      "issues": "Title omits 'speech-to-speech' nuance; 'voce-voce' awkward, 'da voce a voce' preferred."
-    },
-    {
-      "locale": "ja-JP",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Awkward '音声対音声'; more natural rendering like '音声から音声への' preferred; otherwise accurate."
+      "issues": "Omits 'speech-to-speech' nuance; 'traduzione vocale' slightly generic but adequate and fluent."
     },
     {
       "locale": "ko-KR",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
-      "issues": "Inconsistent term (음성 대 음성 vs 음성-음성); 'speech-to-speech' better as 음성 간; otherwise accurate and fluent."
+      "issues": "Inconsistent terminology: '음성 간' vs '음성 대 음성'; otherwise accurate and fluent."
     },
     {
       "locale": "ko-KR",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
       "score": 82,
-      "issues": "Second line incomplete; source verb 'Use...for' rendered awkwardly, missing predicate. Terminology fine, ™ intact."
+      "issues": "Title '실행 중' (progressive) misrenders gerund 'Running'; should be '실행하기'."
     },
     {
       "locale": "nb-NO",
@@ -574,33 +586,21 @@
     },
     {
       "locale": "nb-NO",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 82,
-      "issues": "Gender agreement error: 'en...utviklingssammendrag' should be 'et'; otherwise accurate and fluent."
-    },
-    {
-      "locale": "nb-NO",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 82,
       "issues": "Added 'AMD' not in source; 'Clustering' left untranslated; 'Halo-er' awkward pluralization."
     },
     {
-      "locale": "pt-BR",
+      "locale": "nl-NL",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
-      "issues": "Trademark symbol misplaced (should be on Unsloth); redundant '(fine-tuned)' gloss slightly awkward but acceptable."
+      "issues": "Trademark symbol misplaced in source; 'gefinetunede' awkward neologism but understandable; otherwise accurate."
     },
     {
       "locale": "pt-PT",
-      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
       "score": 82,
-      "issues": "Gerund 'Executando' is Brazilian; pt-PT prefers 'A executar'. 'Agente Hermes'/'Hermes Agent' inconsistent."
-    },
-    {
-      "locale": "pt-PT",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Terminology inconsistency: title uses 'Fala para Fala' but body uses 'voz-a-voz'; minor fluency."
+      "issues": "'Executando' is Brazilian gerund style; pt-PT prefers 'Executar/A executar'. Otherwise accurate, fluent, terms intact."
     },
     {
       "locale": "ro-RO",
@@ -616,12 +616,6 @@
     },
     {
       "locale": "ro-RO",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Trademark symbol misplaced; slightly awkward phrasing; overall accurate and fluent."
-    },
-    {
-      "locale": "ro-RO",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 82,
       "issues": "\"Clustering\" left untranslated (anglicism); \"unități\" odd for \"Halos\"; otherwise accurate, terms/code intact."
@@ -633,10 +627,34 @@
       "issues": "Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate."
     },
     {
-      "locale": "sl-SI",
-      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/open-webui-chat/playbook.json",
       "score": 82,
-      "issues": "Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency."
+      "issues": "Redundant 'LLM modelmi' (LLM already means model); 'Rozprávanie' slightly informal vs 'Chatovanie'."
+    },
+    {
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Title omits 'speech-to-speech' nuance; otherwise accurate and fluent."
+    },
+    {
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Trademark symbol ™ misplaced (belongs to Unsloth, not LLM); otherwise accurate and fluent."
+    },
+    {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent 'fine-tuning' rendering between title and body; 'fino prilagajanje' awkward but acceptable; terms intact."
+    },
+    {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Title term 'govorno-govorno' awkward; rest fluent and accurate."
     },
     {
       "locale": "sr-Latn",
@@ -646,21 +664,15 @@
     },
     {
       "locale": "sr-Latn",
-      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
-      "score": 82,
-      "issues": "Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement)."
-    },
-    {
-      "locale": "sr-Latn",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent 'kernela' vs 'jezgra' terminology; otherwise accurate, brands intact."
     },
     {
       "locale": "sr-Latn",
-      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
       "score": 82,
-      "issues": "\"rasporedite\" awkward for deploy; \"inferentni\" unusual; otherwise accurate, brands intact"
+      "issues": "Grammar: 'sa Lemonade Server' should be 'sa Lemonade Serverom'; otherwise accurate, fluent."
     },
     {
       "locale": "th-TH",
@@ -670,15 +682,9 @@
     },
     {
       "locale": "th-TH",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
-      "issues": "Title omits speech-to-speech nuance (just 'speech translation'); otherwise accurate and fluent."
-    },
-    {
-      "locale": "th-TH",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Trademark symbol misplaced; 'fine-tuned' rendering slightly awkward but meaning preserved and terms intact."
+      "issues": "LLaMA-Factory inconsistent hyphenation vs source; otherwise accurate and fluent."
     },
     {
       "locale": "tr-TR",
@@ -688,15 +694,15 @@
     },
     {
       "locale": "tr-TR",
-      "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
-      "score": 82,
-      "issues": "Minor grammar: 'ince ayar yapın' should be 'ince ayar yapın modelleri' or 'ince ayarlayın'; slightly awkward phrasing."
-    },
-    {
-      "locale": "tr-TR",
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 82,
       "issues": "Added 'AMD' not in source; otherwise accurate and fluent."
+    },
+    {
+      "locale": "tr-TR",
+      "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
+      "score": 82,
+      "issues": "Added 'AMD' before OpenHands (not in source); otherwise accurate and fluent."
     },
     {
       "locale": "uk-UA",
@@ -705,16 +711,46 @@
       "issues": "Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent."
     },
     {
+      "locale": "uk-UA",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Awkward 'мовлення-в-мовлення' parenthetical; 'Побудуйте' slightly literal but acceptable."
+    },
+    {
+      "locale": "uk-UA",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent terminology (доналаштування vs тонкого налаштування); trademark ™ misplaced from 'fine-tuned LLMs' to LLM"
+    },
+    {
+      "locale": "uk-UA",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 82,
+      "issues": "\"механізму виведення\" is suboptimal for 'inference engine'; better 'рушій інференсу'. Otherwise accurate, brands intact."
+    },
+    {
       "locale": "zh-CN",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 82,
       "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
     },
     {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent 'Lemonade Server' rendering (服务器 vs Server); title phrasing slightly awkward but accurate."
+    },
+    {
       "locale": "zh-TW",
       "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
       "score": 82,
       "issues": "Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate."
+    },
+    {
+      "locale": "fi-FI",
+      "file": "playbooks/dependencies/ds4_toolbox_image.md",
+      "score": 84,
+      "issues": "Awkward 'säilötuvan' coinage for toolbox; 'kuvan' for image acceptable but mixed terminology. Otherwise accurate, code intact."
     },
     {
       "locale": "ro-RO",
@@ -727,12 +763,6 @@
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 84,
       "issues": "\"strežba\" is awkward for serving LLMs; \"strežnik\"/\"gostovanje\" preferred, otherwise accurate."
-    },
-    {
-      "locale": "sr-Latn",
-      "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
-      "score": 84,
-      "issues": "Inconsistent term: 'sažetak' vs untranslated 'digest'; otherwise accurate and fluent."
     }
   ]
 }

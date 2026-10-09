@@ -9,25 +9,25 @@ SPDX-License-Identifier: MIT
 > **機械翻訳。** このページは英語から自動的に翻訳されたものであり、人による確認は行われていません。誤りが含まれている場合や、特定の手順、コマンド、ダウンロード、製品の提供状況、その他のコンテンツが言語や地域によって異なる場合があります。内容に矛盾または相違がある場合は、playbookの原文である英語版が優先されるものとします。
 <!-- auto-translated-disclaimer:end -->
 
-# <!-- @github-only -->
+<!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## 概要
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) は、DeepSeek V4 ファミリーの効率性に重点を置いたバリアントであり、2840 億パラメータの Mixture of Experts モデルで、アクティブパラメータは 130 億です。[DeepSeek のテクニカルレポート](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) によると、SWE-bench Verified で 79%、LiveCodeBench で 91.6% のスコアを記録しています。
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) は、DeepSeek V4 ファミリーの効率重視バリアントであり、2840 億パラメータの Mixture of Experts モデルで、アクティブパラメータ数は 130 億です。[DeepSeek のテクニカルレポート](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash)によると、SWE-bench Verified で 79%、LiveCodeBench で 91.6% のスコアを記録しています。
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) は、このモデルアーキテクチャ専用に構築された推論エンジンです。汎用ランタイムではなく、ds4 は DeepSeek V4 ファミリーを直接ターゲットとし、AMD ROCm™ ソフトウェア向けにアーキテクチャ固有のカーネル最適化を施しています。現時点では、Strix Halo 上での DeepSeek V4 Flash の実装として最も優れたものの一つです。
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) は、このモデルアーキテクチャ専用に構築された推論エンジンです。汎用ランタイムではなく、ds4 は AMD ROCm™ ソフトウェア向けのアーキテクチャ固有のカーネル最適化を用いて、DeepSeek V4 ファミリーを直接ターゲットとしています。現在、Strix Halo 上での DeepSeek V4 Flash の実装としては、最もパフォーマンスの高いものの一つです。
 
 このチュートリアルでは、ターミナル UI である `ai-toolbox-cockpit` を使用して ds4 をセットアップし、モデルの重みをダウンロードして、AMD Ryzen™ AI Halo Developer Platform 上でローカルに DeepSeek V4 Flash の提供を開始する方法を説明します。
 
-## 学習内容
+## このチュートリアルで学べること
 
-- `ai-toolbox-cockpit` ターミナル UI のインストールと起動方法
-- ds4 ROCm ツールボックスコンテナの作成方法
-- 単一の Halo ノード向けに推奨される量子化のダウンロード
-- ds4 推論サーバーの起動と OpenAI 互換エンドポイントの公開
+- `ai-toolbox-cockpit` ターミナル UI をインストールして起動する方法
+- ds4 ROCm ツールボックスコンテナを作成する方法
+- 単一の Halo ノード向けに推奨される量子化をダウンロードする方法
+- ds4 推論サーバーを起動し、OpenAI 互換のエンドポイントを公開する方法
 - Web UI またはコーディングエージェントをローカルサーバーに接続する方法
 
 ## メモリ構成の設定
@@ -36,14 +36,17 @@ SPDX-License-Identifier: MIT
 
 ## ソフトウェア前提条件のインストール
 
-> **この構成(単一ノードの IQ2_XXS、126k コンテキスト)のシステム要件:**
-> - **少なくとも 128 GB の統合メモリ** を搭載した Strix Halo システム。
-> - **BIOS の専用 VRAM(UMA フレームバッファ)を最小に設定**し、共有メモリプールをできる限り大きくできるようにします。
-> - GPU の **共有メモリプールを少なくとも 110 GB に設定**: `amd-ttm --set 110` を実行し(上記のメモリ構成手順を参照)、再起動します。値が低すぎると、126k コンテキストでモデルをロードする際にメモリ不足エラーが発生する可能性があります。システムのメモリがそれより少ない場合は、代わりにサーバーモードの **Context** 値を下げてください。
->
-> **注:** まずは **GPU 共有メモリプール** を **110 GB** に設定してみてください。メモリ不足エラーが発生した場合は、共有メモリプールを増やすか、コンテキストサイズを下げてください。
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
 
-ai-toolbox-cockpit は、コンテナツールボックスを使用して ds4 エンジンを実行します。`podman`、`distrobox`、`pipx` をインストールしてください:
+> **この構成（126k コンテキストでの単一ノード IQ2_XXS）のシステム要件:**
+> - **少なくとも 128 GB のユニファイドメモリ**を搭載した Strix Halo システム。
+> - **BIOS 専用 VRAM（UMA フレームバッファ）を最小値に設定**し、共有メモリプールをできるだけ大きくすること。
+> - GPU の **共有メモリプールを少なくとも 110 GB に設定**すること: `amd-ttm --set 110` を実行し（上記のメモリ構成手順を参照）、再起動します。値を低く設定すると、126k コンテキストでモデルをロードする際にメモリ不足になることがあります。システムで利用可能なメモリが少ない場合は、代わりにサーバーモードの **Context** 値を下げてください。
+>
+> **注:** 出発点として、**GPU 共有メモリプール**を **110 GB** に設定してみてください。メモリ不足エラーが発生した場合は、共有メモリプールを増やすか、コンテキストサイズを小さくしてください。
+
+ai-toolbox-cockpit はコンテナツールボックスを使用して ds4 エンジンを実行します。`podman`、`distrobox`、`pipx` をインストールしてください:
 
 ```bash
 sudo apt update
@@ -63,20 +66,20 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## 利用可能な量子化
 
-ds4 の作者は、GGUF 形式で DeepSeek V4 Flash のいくつかの量子化バージョンを提供しています。以下のモデルはすべて、重要度行列(imatrix)キャリブレーションを使用しており、コーディングや推論タスクにとって最も重要なモデル部分について、より高い精度を維持しています。
+ds4 の作者は、GGUF 形式で DeepSeek V4 Flash のいくつかの量子化バージョンを提供しています。以下のモデルはすべて importance matrix (imatrix) キャリブレーションを使用しており、コーディングや推論タスクにとって最も重要なモデル部分の精度をより高く保っています。
 
 | 量子化 | サイズ | 説明 |
 |-------------|------|-------------|
-| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約 80.8 GB | 単一の 128 GB ノード向けに推奨 |
-| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約 97 GB | 精度向上のためレイヤー 37〜42 を Q4 精度に維持。128 GB に収まるが、コンテキスト用の余裕は少なくなる |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約 153 GB | より高品質。マルチノードクラスタリングを介した 2 台の Halo ノードが必要 |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | 約 3.6 GB | 生成速度を向上させる投機的デコード用のオプションアドオン |
+| [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約80.8 GB | 128 GB の単一ノードに推奨 |
+| [Hybrid Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約97 GB | 精度向上のためレイヤー 37〜42 を Q4 精度で保持。128 GB に収まるが、コンテキスト用の余裕は少なくなる |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | 約153 GB | より高品質。マルチノードクラスタリングを介して 2 つの Halo ノードが必要 |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | 約3.6 GB | 生成速度を向上させる投機的デコーディング用のオプションアドオン |
 
-**IQ2_XXS imatrix** モデルは良い出発点です。単一ノードに問題なく収まり、妥当なコンテキストウィンドウのための十分なメモリが残ります。
+**IQ2_XXS imatrix** モデルは、出発点として適しています。単一ノードに無理なく収まり、十分なコンテキストウィンドウ用のメモリも確保できます。
 
 ## ai-toolbox-cockpit のインストール
 
-[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) は、さまざまな AI バックエンドのインストールを容易にする軽量なターミナル UI です。これを使用して、ds4 コンテナの作成、モデルの重みのダウンロード、サーバーの起動を行います。`pipx` でインストールします:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) は、さまざまな AI バックエンドのインストールを簡単にするための軽量ターミナル UI です。これを使って、ds4 コンテナの作成、モデルの重みのダウンロード、サーバーの起動を行います。`pipx` でインストールしてください:
 
 <!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
@@ -84,7 +87,7 @@ pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
 <!-- @test:end -->
 
-cockpit を起動します:
+コックピットを起動します:
 ```bash
 ai-toolbox-cockpit
 ```
@@ -99,9 +102,9 @@ echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## ステップ 1: ツールボックスの作成
+## ステップ1: ツールボックスの作成
 
-**Interactive Toolboxes** タブで、ds4 用に利用可能な最新の安定版ツールボックス(例: `ds4-rocm-10.0`)を選択し、**Create/Update** をクリックします。これにより、コンテナイメージがプルされ、ツールボックス環境が作成されます。
+**Interactive Toolboxes** タブで、ds4 用に利用可能な最新の安定版ツールボックス（例: `ds4-rocm-10.0`）を選択し、**Create/Update** をクリックします。これによりコンテナイメージがプルされ、ツールボックス環境が作成されます。
 
 
 <p align="center">
@@ -122,11 +125,11 @@ echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## ステップ 2: モデルのダウンロード
+## ステップ2: モデルのダウンロード
 
-**Models** タブに移動します。まずバックエンド(ds4)を選択します。次に、ドロップダウンから **IQ2_XXS imatrix (~80.8 GB)** を選択し、**Download** をクリックします。モデルファイルはデフォルトで `~/ds4` に保存されます(保存先パスは変更可能です)。
+**Models** タブに移動します。まずバックエンド（ds4）を選択します。次に、ドロップダウンから **IQ2_XXS imatrix (~80.8 GB)** を選択し、**Download** をクリックします。モデルファイルはデフォルトで `~/ds4` に保存されます（保存先パスは変更可能です）。
 
-> **注:** IQ2_XXS モデルは約 80 GB あるため、接続速度によってはダウンロードにかなり時間がかかる場合があります。完了したら次に進んでください。
+> **注:** IQ2_XXS モデルはおよそ 80 GB あるため、ダウンロードには接続状況によって時間がかかる場合があります。完了したら次に進むことができます。
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
@@ -158,13 +161,13 @@ fi
 ```
 <!-- @test:end -->
 
-## ステップ 3: サーバーの起動
+## ステップ3: サーバーの起動
 
-**Server Mode** タブに移動します。ダウンロードしたモデルとツールボックスを選択し、コンテキストサイズ、ホスト、ポートを設定します。準備ができたら **Start ds4-server** をクリックします。
+**Server Mode** タブに移動します。ダウンロード済みのモデルとツールボックスを選択し、コンテキストサイズ、ホスト、ポートを設定します。準備ができたら、**Start ds4-server** をクリックします。
 
-> **ヒント** コンテキストサイズ `126000` は、単一ノードに収まるはずの妥当な初期値です。メモリに余裕があればより高い値に設定でき、メモリ不足エラーが発生する場合は下げることができます。ポート(このガイドでは `8000`)は任意です。空いているポートを自由に選んでください。
+> **ヒント** コンテキストサイズ `126000` は、単一ノードに収まる妥当な初期値です。メモリに余裕があればさらに高く設定することもでき、メモリ不足エラーが発生する場合は低くすることもできます。ポート（本ガイドでは `8000`）は任意であり、空いているポートを選んでください。
 
-> **KV ディスクキャッシュ(オプション)。** **KV Disk Cache** を有効にすると、KV キャッシュがディスク(**Host Cache Dir**、デフォルトは `~/.cache/ds4-kv`)にオフロードされ、繰り返されるシステムプロンプトが再計算されるのではなく SSD から復元されるようになります。これは、長く繰り返されるプロンプトを伴うコーディングエージェントのワークフロー向けのパフォーマンス最適化であり、サーバーを実行するために **必須ではありません**。
+> **KV ディスクキャッシュ（任意）。** **KV Disk Cache** を有効にすると、KV キャッシュがディスク（**Host Cache Dir**、デフォルトは `~/.cache/ds4-kv`）にオフロードされ、繰り返しのシステムプロンプトが再計算ではなく SSD から復元されるようになります。これは、長く繰り返されるプロンプトを使うコーディングエージェントのワークフロー向けのパフォーマンス最適化であり、サーバーの実行には**必須ではありません**。
 
 <p align="center">
   <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
@@ -172,7 +175,7 @@ fi
 
 サーバーが起動し、ポート 8000 でリッスンを開始し、`http://localhost:8000/v1` で OpenAI 互換の API エンドポイントを公開します。
 
-**簡易テスト:**
+**簡単なテスト:**
 ```bash
 curl http://127.0.0.1:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -308,7 +311,7 @@ echo "OK: ds4 server test complete; server stopped and GPU memory released"
 <!-- @test:end -->
 ## Web UI の接続
 
-OpenAI API 形式をサポートする任意のチャットインターフェースを接続できます。例えば、HuggingFace ChatUI を使用する場合:
+OpenAI API 形式をサポートする任意のチャットインターフェースを接続できます。例えば、HuggingFace ChatUI を使用する場合は次のようにします。
 
 ```bash
 docker run --network=host \
@@ -319,15 +322,15 @@ docker run --network=host \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-ブラウザで `http://localhost:3000` を開いてチャットを開始してください。
+ブラウザで `http://localhost:3000` を開いてチャットを開始します。
 
-> **注:** `--network=host` は Web UI をホストのネットワーク上に配置するため、`localhost` 上の ds4 サーバーに直接アクセスできるようになります。これにより、ds4 サーバーはループバックにバインドされたままになります(他のインターフェースに公開する必要がありません)。
+> **注:** `--network=host` は Web UI をホストのネットワークに配置するため、`localhost` 上の ds4 サーバーに直接アクセスできます。これにより、ds4 サーバーはループバックにバインドされたままとなり(他のインターフェースに公開する必要がありません)。
 
-> **ヒント:** Web UI のポート(ここでは `PORT` によって設定された `3000`)は任意です。`3000` が既に使用されている場合は、空いている任意のポートを選択し、代わりにそのポートをブラウザで開いてください。`OPENAI_BASE_URL` 内のポートが、ds4 サーバーが実行されているポートと一致していることを確認してください。
+> **ヒント:** Web UI のポート(ここでは `PORT` で設定された `3000`)は任意です。`3000` が既に使用されている場合は、空いている別のポートを選択し、ブラウザでそのポートを開いてください。`OPENAI_BASE_URL` 内のポートが、ds4 サーバーが実行されているポートと一致していることを確認してください。
 
 ## コーディングエージェントの接続
 
-ds4 サーバーは OpenAI と Anthropic 互換の両方のエンドポイントを公開しているため、ほとんどのコーディングエージェントは直接接続できます。例えば、`pi` コーディングエージェントに追加する場合は、`~/.pi/agent/models.json` に以下のブロックを追加します:
+ds4 サーバーは OpenAI 互換と Anthropic 互換の両方のエンドポイントを公開しているため、ほとんどのコーディングエージェントが直接接続できます。例えば、`pi` コーディングエージェントに追加するには、次のブロックを `~/.pi/agent/models.json` に追加します。
 
 ```json
 "ds4": {
@@ -367,15 +370,15 @@ ds4 サーバーは OpenAI と Anthropic 互換の両方のエンドポイント
 }
 ```
 
-> **ヒント**: コーディングエージェントや Web UI が Halo プラットフォームとは異なるマシンで動作している場合は、SSH 経由でサーバーポート(ここでは `8000`)を転送する必要があります:
+> **ヒント**: コーディングエージェントまたは Web UI が Halo プラットフォームとは別のマシンで実行されている場合、SSH 経由でサーバーのポート(ここでは `8000`)をフォワードする必要があります。
 > ```bash
 > ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## 次のステップ
 
-- **マルチノードクラスタリング**: Halo デバイスを2台お持ちの場合、ds4 はパイプライン並列処理により Q4 モデル(約153GB)を両方のマシンに分散させることをサポートしています。セットアップ手順については、[ds4-toolbox のドキュメント](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism)を参照してください。
-- **投機的デコーディング(MTP)**: MTP の重み(約3.6GB)をダウンロードし、サーバーに `--mtp` を渡すことで生成速度を高速化できます。
-- **KV キャッシュのディスクオフロード**: コーディングエージェントのワークフローでは、`--kv-disk-dir` を有効にすることで、繰り返し使用されるシステムプロンプトを毎回再計算するのではなく SSD から復元できるようにします。
+- **マルチノードクラスタリング**: Halo デバイスが2台ある場合、ds4 はパイプライン並列処理により Q4 モデル(約153 GB)を両方のマシンに分散させることができます。セットアップ手順については [ds4-toolbox のドキュメント](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism)を参照してください。
+- **投機的デコーディング(MTP)**: MTP の重み(約3.6 GB)をダウンロードし、サーバーに `--mtp` を渡すことで生成速度を向上させることができます。
+- **KV キャッシュのディスクオフロード**: コーディングエージェントのワークフローでは、`--kv-disk-dir` を有効にすることで、繰り返し使用されるシステムプロンプトを毎回再計算するのではなく SSD から復元できるようになります。
 
-詳細については、[ds4 リポジトリ](https://github.com/antirez/ds4)と[ds4-cockpit ツールボックス](https://github.com/kyuz0/strix-halo-ds4-toolbox)を参照してください。
+詳細については、[ds4 リポジトリ](https://github.com/antirez/ds4)および [ds4-cockpit toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox) を参照してください。

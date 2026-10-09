@@ -8,33 +8,33 @@ SPDX-License-Identifier: MIT
 > **Gépi fordítás.** Ez az oldal automatikusan lett lefordítva angol nyelvről, és emberi ellenőrzésen nem esett át. Hibákat tartalmazhat, és bizonyos utasítások, parancsok, letöltések, termékelérhetőség vagy egyéb tartalmak nyelvenként vagy régiónként eltérhetnek. Bármilyen eltérés vagy ellentmondás esetén a playbook eredeti angol nyelvű változata az irányadó.
 <!-- auto-translated-disclaimer:end -->
 
-# OpenClaw futtatása Lemonade Server háttérrendszerrel
+# OpenClaw futtatása Lemonade Server háttérszolgáltatással
 
 ## Áttekintés
 
-Az [**OpenClaw**](https://openclaw.ai/) egy autonóm AI-ügynök, amely kódot tud írni és futtatni, fájlokat kezel, és összetett, több lépésből álló feladatokat old meg az Ön nevében. Ellentétben egy csevegő asszisztenssel, amely csupán kérdésekre válaszol, az OpenClaw valós műveleteket hajt végre a rendszerén, ami azt jelenti, hogy egy gyors, képes AI háttérrendszerre van szüksége, amely lépést tud tartani egy igényes ügynökhurokkal.
+A [**OpenClaw**](https://openclaw.ai/) egy autonóm AI-ügynök, amely képes kódot írni és futtatni, fájlokat kezelni, valamint összetett, több lépésből álló feladatokat elvégezni a nevedben. Egy csevegőasszisztenssel ellentétben, amely csak kérdésekre válaszol, az OpenClaw valódi műveleteket hajt végre a rendszereden, ami azt jelenti, hogy egy gyors, nagy teljesítményű AI háttérszolgáltatásra van szüksége, amely lépést tud tartani egy igényes ügynöki ciklussal.
 
-A [**Lemonade Server**](https://lemonade-server.ai/) ez a háttérrendszer. Ez egy nyílt forráskódú helyi következtetési szerver, amely közvetlenül az Ön hardverén futtatja a GenAI modelleket, és az iparági szabványnak számító OpenAI API-n keresztül teszi őket elérhetővé.
+A [**Lemonade Server**](https://lemonade-server.ai/) ez a háttérszolgáltatás. Ez egy nyílt forráskódú, helyi következtetési szerver, amely közvetlenül a hardvereden futtatja a GenAI modelleket, és az iparági szabványnak számító OpenAI API-n keresztül teszi elérhetővé azokat.
 
-Együtt egy teljesen helyi AI-ügynök verempakot alkotnak: a Lemonade végzi a modell-következtetést, az OpenClaw pedig biztosítja azt az ügynökhurkot, amely a modell kimeneteit valós műveletekké alakítja.
+Együtt egy teljesen helyi AI-ügynöki rendszert alkotnak: a Lemonade végzi a modellek következtetését, az OpenClaw pedig biztosítja azt az ügynöki ciklust, amely a modell kimeneteit valódi műveletekké alakítja.
 
-> **Mielőtt folytatná:** Az OpenClaw egy erősen autonóm AI-ügynök. Ha bármely AI-ügynöknek hozzáférést ad a rendszeréhez, az kiszámíthatatlan vagy nem szándékolt eredményekhez vezethet. Csak akkor folytassa, ha megérti a kockázatokat, és elfogadja, hogy az Ön nevében autonóm szoftver cselekszik.
+> **Mielőtt folytatnád:** Az OpenClaw egy rendkívül autonóm AI-ügynök. Ha bármely AI-ügynöknek hozzáférést adsz a rendszeredhez, az kiszámíthatatlan vagy nem szándékolt eredményekhez vezethet. Csak akkor folytasd, ha megérted a kockázatokat, és elfogadod, hogy autonóm szoftver cselekszik a nevedben.
 
 ---
 
-## Mit fog megtanulni
+## Mit fogsz megtanulni
 
-Ennek a playbooknak a végére képes lesz:
+Ennek az útmutatónak a végére képes leszel:
 
-- Megismerkedni a **Lemonade Server**-rel
-- **Telepíteni az OpenClaw-t**, és **a Lemonade Server-re irányítani** azt AI háttérrendszerként.
-- **Elindítani az OpenClaw gateway-t**, és megerősíteni, hogy az ügynök készen áll a munkára.
-- **Kommunikációs csatornát csatlakoztatni** (Discord vagy Telegram), hogy bármely eszközről beszélgethessen az ügynökével.
+- Megismerni a **Lemonade Server**-t
+- **Telepíteni az OpenClaw-ot**, és **beállítani, hogy a Lemonade Server-t** használja AI háttérszolgáltatásként.
+- **Elindítani az OpenClaw gateway-t**, és megerősíteni, hogy az ügynököd készen áll a munkára.
+- **Csatlakoztatni egy kommunikációs csatornát** (Discord vagy Telegram), hogy bármely eszközről csevegni tudj az ügynököddel.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## A memória konfigurálása
+## A memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -45,23 +45,29 @@ Ennek a playbooknak a végére képes lesz:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftveres előfeltételek telepítése
+## A szükséges szoftverek telepítése
 
 <!-- @os:linux -->
-- Egy PC, amelyen **Ubuntu 24.04+** vagy egy kompatibilis, `apt-get`-et használó Debian-alapú Linux disztribúció fut
+- Egy **Ubuntu 24.04+** vagy egy kompatibilis, `apt-get`-et használó, Debian-alapú Linux disztribúciót futtató PC
 - Legalább **12 GB RAM** (nagyobb modellekhez 64 GB+ ajánlott)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Opcionális, az OpenClaw homokozózásához)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (opcionális, az OpenClaw sandboxoláshoz)
 - **~10–30 GB szabad lemezterület** a modellsúlyokhoz
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- Egy PC, amelyen **Windows 10/11** fut
+- Egy **Windows 10/11** rendszert futtató PC
 - Legalább **12 GB RAM** (nagyobb modellekhez 64 GB+ ajánlott)
 - **~10–30 GB szabad lemezterület** a modellsúlyokhoz
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Opcionális, az OpenClaw homokozózásához)
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (opcionális, az OpenClaw sandboxoláshoz)
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @os:linux -->
+<!-- @prereq:nodejs -->
+<!-- @os:end -->
+<!-- On Windows OpenClaw runs in WSL, so its Node.js is covered by the openclaw prereq. -->
+<!-- @prereq:docker,openclaw,lemonade-models-qwen3-6-35b-a3b,lemonade -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -75,13 +81,13 @@ lemonade --version
 
 ## Az ajánlott modell letöltése és betöltése
 
-Ehhez a playbookhoz ajánlott modell a **Qwen3.6-35B-A3B-GGUF** az Unsloth-tól, egy erős MoE modell 263k tokenes kontextusablakkal, amely kiválóan alkalmas ügynöki munkaterhelésekhez. Ez a modell UD-Q4_K_XL kvantálást használ. Töltse le most:
+Ehhez az útmutatóhoz az ajánlott modell a **Qwen3.6-35B-A3B-GGUF**, az Unsloth kínálatából, egy erős MoE modell 263k tokenes kontextusablakkal, amely kiválóan alkalmas ügynöki munkaterhelésekhez. Ez a modell UD-Q4_K_XL kvantálást használ. Töltsd le most:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Ezután töltse be nagy kontextusablakkal, és mentse el ezt a beállítást a jövőbeli futtatásokhoz:
+Ezután töltsd be egy nagy kontextusablakkal, és mentsd el ezt a beállítást a jövőbeli futtatásokhoz:
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -91,9 +97,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-A modell alapértelmezett kontextushossza 262 144 token. Ha memóriahiány (OOM) hibákat tapasztal, fontolja meg a kontextusablak csökkentését. Mivel azonban a Qwen3.6 kiterjesztett kontextust használ az összetett feladatokhoz, javasoljuk, hogy legalább 128K tokenes kontextushosszt tartson fenn a gondolkodási képességek megőrzése érdekében.
+A modell alapértelmezett kontextushossza 262 144 token. Ha memóriahiány (OOM) hibákba ütközöl, fontold meg a kontextusablak csökkentését. Mivel azonban a Qwen3.6 kibővített kontextust használ az összetett feladatokhoz, azt javasoljuk, hogy legalább 128K tokenes kontextushosszt tarts meg a gondolkodási képességek megőrzése érdekében.
 
-> **Tipp: Kapcsolja ki a gondolkodást a gyorsabb ügynöki válaszokért:** A Qwen3.6-35B-A3B alapértelmezés szerint gondolkodási módban fut, ami minden válasz előtt késleltetést okoz. Ügynökhurkok esetén ez a többletidő gyorsan felhalmozódik. A [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tárolóban található egy kész konfiguráció, amely kikapcsolja a gondolkodást. A használatához töltse le a fájlt, és importálja:
+> **Tipp: Kapcsold ki a gondolkodást a gyorsabb ügynöki válaszokért:** A Qwen3.6-35B-A3B alapértelmezés szerint gondolkodási módban fut, ami minden válasz előtt késleltetést ad hozzá. Ügynöki ciklusok esetén ez a többletterhelés gyorsan felhalmozódik. A [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tárolóban található egy kész konfiguráció, amely kikapcsolja a gondolkodást. A használatához töltsd le a fájlt, és importáld:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -236,25 +242,25 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## A WSL beállítása
 
-Az OpenClaw-t a WSL-en belül futtatjuk (Ajánlott), és a natívan Windows alatt futó Lemonade-hoz csatlakoztatjuk. Ez Linux shell környezetet biztosít az OpenClaw számára, miközben a Lemonade GPU-gyorsítása a Windows oldalon marad.
+Az OpenClaw-ot WSL-en belül futtatjuk (ajánlott), és a natívan Windows alatt futó Lemonade-hez csatlakoztatjuk. Ez egy Linux parancssori környezetet biztosít az OpenClaw számára, miközben a Lemonade GPU-gyorsítása Windows oldalon marad.
 
 ### A WSL és az Ubuntu telepítése
 
-Nyissa meg a PowerShellt rendszergazdaként, és telepítse a WSL kernelt:
+Nyisd meg a PowerShell-t rendszergazdaként, és telepítsd a WSL kernelt:
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-Ezután telepítse az Ubuntut:
+Ezután telepítsd az Ubuntut:
 
 ```powershell
 wsl --install -d Ubuntu-24.04
 ```
 
-### A systemd engedélyezése a WSL-ben
+### A systemd engedélyezése WSL-ben
 
-Futtassa ezt az Ubuntu terminálban:
+Futtasd ezt az Ubuntu terminálon belül:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -263,7 +269,7 @@ systemd=true
 EOF
 ```
 
-Lépjen ki a WSL-ből, és indítsa újra:
+Lépj ki a WSL-ből, majd indítsd újra:
 
 ```powershell
 exit
@@ -271,37 +277,37 @@ wsl --shutdown
 wsl
 ```
 
-### A Lemonade áthidalása a Windowsból a WSL-be
+### A Lemonade áthidalása Windows-ról WSL-be
 
-A WSL2 egy virtuális hálózatban fut. A Windows alatt futó Lemonade a `127.0.0.1` címhez kötődik, amelyet a WSL nem tud közvetlenül elérni. Egy Windows portproxy továbbítja a forgalmat a WSL átjáró IP-címéről a Windows localhostjára.
+A WSL2 egy virtuális hálózatban fut. A Windows alatt futó Lemonade a `127.0.0.1` címhez kapcsolódik, amelyet a WSL nem tud közvetlenül elérni. A Windows portproxy továbbítja a forgalmat a WSL átjáró IP-címéről a Windows localhost felé.
 
-**Keresse meg a WSL átjáró IP-címét** (futtassa a WSL-en belül):
+**Keresd meg a WSL átjáró IP-címét** (futtasd a WSL-en belül):
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Adja hozzá a portproxyt** (futtassa a PowerShellben rendszergazdaként, cserélje ki a `<WSL-Gateway-IP>` értéket a saját WSL átjáró IP-címére):
+**Add hozzá a portproxyt** (futtasd rendszergazdaként a PowerShell-ben, a `<WSL-Gateway-IP>` helyére írd be a saját WSL átjáró IP-címedet):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
-> Megjegyzés: Ha `netsh: command not found` hibát tapasztal, próbálja meg helyette az explicit futtatható fájl nevét használni - `netsh.exe`
+> Megjegyzés: Ha `netsh: command not found` hibát tapasztalsz, próbáld meg helyette az explicit végrehajtható fájlnevet használni - `netsh.exe`
 
-**Adjon hozzá egy tűzfalszabályt** (ugyanabban az emelt jogosultságú PowerShellben):
+**Adj hozzá egy tűzfalszabályt** (ugyanabban az emelt jogosultságú PowerShell-ben):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**Ellenőrizze a WSL-ből**:
+**Ellenőrizd a WSL-ből**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Ha az előző lépésben már betöltötte a Qwen3.6-35B-A3B-GGUF modellt, akkor a következőhöz hasonló JSON kimenetet kell látnia:
+Ha az előző lépésben már betöltötted a Qwen3.6-35B-A3B-GGUF modellt, akkor ehhez hasonló JSON kimenetet kell látnod:
 
 ```json
 {
@@ -321,20 +327,20 @@ Ha az előző lépésben már betöltötte a Qwen3.6-35B-A3B-GGUF modellt, akkor
 
 #### A híd működésének fenntartása újraindítás után
 
-A `netsh portproxy` szabály túléli az újraindításokat, de a WSL átjáró IP-címe megváltozhat a `wsl --shutdown` parancs kiadása vagy egy újraindítás után. Ha ez megtörténik, a proxy még mindig a régi IP-címre mutat, és a Lemonade elérhetetlenné válik a WSL számára. Ha ez történik, használja az alábbi lehetőségek egyikét.
+A `netsh portproxy` szabály túléli az újraindításokat, de a WSL átjáró IP-címe megváltozhat a `wsl --shutdown` parancs vagy egy újraindítás után. Ha ez történik, a proxy még mindig a régi IP-címre mutat, és a Lemonade elérhetetlenné válik a WSL-ből. Ha ez bekövetkezik, használja az alábbi lehetőségek egyikét.
 
-**1. lehetőség (ajánlott) — A híd automatikus javítása.** Hogy ne kelljen ezt minden alkalommal kézzel elvégezni, használjon egy ütemezett feladatot, amely minden indításkor és bejelentkezéskor ellenőrzi a hidat, és csak akkor építi újra, ha az átjáró IP-címe megváltozott. Lásd a [Lemonade WSL híd automatikus javítási útmutatóját](assets/RepairLemonadeWslBridge.md).
+**1. lehetőség (ajánlott) — A híd automatikus javítása.** Hogy ne kelljen ezt minden alkalommal kézzel elvégeznie, használjon egy ütemezett feladatot, amely minden indításkor és bejelentkezéskor ellenőrzi a hidat, és csak akkor építi újra, ha az átjáró IP-címe megváltozott. Lásd a [Lemonade WSL híd automatikus javítási útmutatóját](assets/RepairLemonadeWslBridge.md).
 
 
-**2. lehetőség — A híd manuális javítása.** Először szerezze be a jelenlegi WSL átjáró IP-címét az alábbi parancs WSL-en belüli futtatásával:
+**2. lehetőség — A híd kézi javítása.** Először szerezze meg az aktuális WSL átjáró IP-címét az alábbi parancs futtatásával a WSL-en belül:
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-Másolja ki ezt az értéket; ezt fogja használni a `<new-WSL-Gateway-IP>` helyén az alábbiakban.
+Másolja ki ezt az értéket; ezt fogja használni a `<new-WSL-Gateway-IP>` helyett lentebb.
 
-Ezután egy **emelt jogosultságú PowerShellben** (rendszergazdaként futtatva) listázza ki a meglévő szabályokat, törölje csak az elavult Lemonade szabályt, és adjon hozzá egy újat a jelenlegi IP-címmel:
+Ezután egy **emelt jogosultságú PowerShellben** (rendszergazdaként futtatva) listázza ki a meglévő szabályokat, törölje csak az elavult Lemonade szabályt, és adjon hozzá egy újat az aktuális IP-címmel:
 
 ```powershell
 netsh interface portproxy show all
@@ -342,13 +348,13 @@ netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> liste
 netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-A `show all` kimenetében az elavult Lemonade szabály az a bejegyzés, amelynek kapcsolódási címe `127.0.0.1` a `13305`-ös porton; a figyelési (listen) címe a `<old-WSL-Gateway-IP>`. Ha ezen cím alapján törli, csak ez az egy szabály törlődik, a gépen lévő összes többi port-proxy szabály érintetlen marad.
+A `show all` kimenetében az elavult Lemonade szabály az a bejegyzés, amelynek kapcsolódási címe `127.0.0.1` a `13305` porton; a figyelési címe a `<old-WSL-Gateway-IP>`. Ha ezen cím alapján törli, csak ez az egy szabály szűnik meg, a gépen lévő többi port-proxy szabály érintetlen marad.
 
-A beállítás során hozzáadott tűzfalszabály a `13305`-ös porthoz (nem az IP-címhez) van kötve, így az továbbra is működik, és nem kell újra létrehozni.
+A beállítás során hozzáadott tűzfalszabály a `13305` porthoz van kötve (nem az IP-címhez), így az továbbra is működik, és nem kell újra létrehozni.
 
-> **Javaslat:** Az átjáróval kapcsolatos problémák elkerülése érdekében erősen javasoljuk az alábbi shell-konfigurációt:
-> - A **Windows parancsokat** **PowerShellben** kell futtatni
-> - A **WSL disztribúció parancsait** egy **parancssorban** (Command Prompt) kell futtatni, **rendszergazdaként** (Administrator) futtatva
+> **Javaslat:** Az átjáróval kapcsolatos problémák elkerülése érdekében a következő shell-konfigurációt javasoljuk:
+> - A **Windows-parancsokat** **PowerShell**-ben kell futtatni
+> - A **WSL disztribúció parancsait** egy **parancssorban** (Command Prompt) kell futtatni (**rendszergazdaként** futtatva)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -408,25 +414,25 @@ finally {
 
 ### Az OpenClaw telepítése
 <!-- @os:windows -->
-> A jelen szakaszban szereplő parancsokat a **WSL terminálban** futtassa.
+> A szakaszban szereplő parancsokat a **WSL terminálban** futtassa.
 <!-- @os:end -->
 ```bash
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-A `--no-onboard` jelölő kihagyja az interaktív beállítási varázslót; a modell háttérrendszerét a következő lépésben manuálisan fogja konfigurálni, ami pontos irányítást biztosít afölött, hogy melyik modell és szerver kerül felhasználásra.
+A `--no-onboard` jelző kihagyja az interaktív beállítási varázslót, a modell háttérrendszerét a következő lépésben manuálisan fogja beállítani, ami pontos ellenőrzést biztosít afölött, hogy melyik modellt és szervert használja.
 
-Nyisson meg egy új terminált, és erősítse meg a telepítést:
+Nyisson egy új terminált, és erősítse meg a telepítést:
 
 ```bash
 openclaw --version
 ```
 
-> **Tipp:** Ha a telepítés után `command not found` üzenetet lát, adja hozzá az npm globális bin könyvtárát a PATH-hoz:
+> **Tipp:** Ha a telepítés után a `command not found` üzenetet látja, adja hozzá az npm globális bin könyvtárát a PATH-hoz:
 > ```bash
 > export PATH="$HOME/.npm-global/bin:$PATH"
 > ```
-> Ahhoz, hogy ez tartós legyen, adja hozzá a fenti sort a `~/.bashrc` vagy `~/.zshrc` fájljához.
+> Ahhoz, hogy ez maradandó legyen, adja hozzá a fenti sort a `~/.bashrc` vagy `~/.zshrc` fájlhoz.
 
 <!-- @os:linux -->
 <!-- @test:id=openclaw-version-linux timeout=120 hidden=True -->
@@ -482,9 +488,9 @@ finally {
 <!-- @os:end -->
 
 
-### Az OpenClaw konfigurálása a Lemonade használatához
+### Az OpenClaw konfigurálása a Lemonade használatára
 
-Futtassa az OpenClaw nem interaktív bevezető beállítását.
+Futtassa az OpenClaw nem interaktív onboarding folyamatát.
 <!-- @os:linux -->
 ```bash
 openclaw onboard \
@@ -524,9 +530,9 @@ openclaw onboard \
 ```
 <!-- @os:end -->
 
-Ez a parancs kiírja az OpenClaw konfigurációját a `~/.openclaw/openclaw.json` fájlba.
+Ez a parancs megírja az OpenClaw konfigurációját a `~/.openclaw/openclaw.json` fájlba.
 
-> **OpenClaw kontextusablak-méretezés:** Az OpenClaw tömörítése (compaction) akkor lép működésbe, amikor `contextTokens > contextWindow − reserveTokens`. Az alapértelmezett `reserveTokensFloor` érték 20 000 token, ami egy alsó korlát, amely felülírja a `reserveTokens` értékét, ha az alacsonyabb lenne, így minden ~37k alatti modell-kontextus végtelen tömörítési ciklust indít el. Állítson be egy alacsony tartalékot, és tiltsa le az alsó korlátot egyszer a konfigurációjában, és ez minden modellre érvényes lesz, modellenkénti beállításra nincs szükség:
+> **OpenClaw kontextusablak-méretezés:** Az OpenClaw tömörítése akkor indul el, amikor `contextTokens > contextWindow − reserveTokens`. Az alapértelmezett `reserveTokensFloor` érték 20 000 token, egy alsó korlát, amely felülírja a `reserveTokens` értéket, ha az alacsonyabb, így minden olyan modell-kontextus, amely ~37k alatt van, végtelen tömörítési ciklust indít el. Állítson be egy alacsony tartalékot, és tiltsa le az alsó korlátot egyszer a konfigurációjában, és ez minden modellre vonatkozni fog, modellenkénti finomhangolásra nincs szükség:
 >
 > ```json
 > "compaction": {
@@ -535,13 +541,13 @@ Ez a parancs kiírja az OpenClaw konfigurációját a `~/.openclaw/openclaw.json
 > }
 > ```
 >
-> A `reserveTokensFloor` egy *alsó korlát* (minimum védelem), nem maga a tartalék; ha csak az alsó korlátot állítja be, annak nincs hatása. A `reserveTokensFloor: 0` letiltja ezt a védelmet, így az alacsonyabb `reserveTokens` érték elfogadásra kerül.
+> A `reserveTokensFloor` egy *alsó korlát* (minimum védelem), nem maga a tartalék; ha csak az alsó korlátot állítja be, annak nincs hatása. A `reserveTokensFloor: 0` letiltja a védelmet, így az alacsonyabb `reserveTokens` érték érvénybe lép.
 >
-> **Mikor alkalmazza ezt:** Használja ezt a konfigurációt, ha a modell tényleges kontextusablaka ~37k alatt van, akár azért, mert a modell kicsi (pl. 8k, 16k, 32k), akár azért, mert szándékosan alacsonyabb értékre korlátozta (pl. egy 128k-s modellt tölt be, de a kontextust 16k-ra állítja a Lemonade-ben). Ennek hiányában az OpenClaw indításkor végtelen tömörítési ciklusba kerül.
+> **Mikor alkalmazza ezt:** Használja ezt a konfigurációt, ha a modell tényleges kontextusablaka ~37k alatt van, akár azért, mert a modell kicsi (pl. 8k, 16k, 32k), akár azért, mert szándékosan alacsonyabb értékre korlátozta (pl. egy 128k-s modellt tölt be, de a kontextust 16k-ra állítja a Lemonade-ben). Enélkül az OpenClaw végtelen tömörítési ciklusba kerül indításkor.
 >
-> **Nagy kontextusú modellek teljes kontextussal:** Ezt teljesen kihagyhatja. Az alapértelmezett beállítások jól működnek, a tömörítés jóval az ablak megtelte előtt beindul, és a modellnek bőven van helye hosszú válaszok generálására. Ha mégis alkalmazza, vegye figyelembe, hogy a `reserveTokens: 4096` a válasz hosszát ~4k tokenre korlátozza, ami levághatja a hosszú fájlgenerálást vagy a részletes terveket.
+> **Nagy kontextusú modellek teljes kontextussal:** Ezt teljesen kihagyhatja. Az alapértelmezett beállítások jól működnek, a tömörítés jóval azelőtt elindul, hogy az ablak megtelne, és a modellnek bőven van helye hosszú válaszok generálására. Ha mégis alkalmazza, vegye figyelembe, hogy a `reserveTokens: 4096` a válasz hosszát ~4k tokenre korlátozza, ami megszakíthatja a hosszú fájlgenerálást vagy a részletes terveket.
 >
-> **Hová adja hozzá:** Helyezze el a `compaction` blokkot az `agents.defaults` alá az `openclaw.json` fájlban (általában itt: `~/.openclaw/openclaw.json`):
+> **Hová adja hozzá:** Helyezze el a `compaction` blokkot az `agents.defaults` részen belül az `openclaw.json` fájlban (általában a `~/.openclaw/openclaw.json` útvonalon):
 >
 > ```json
 > {
@@ -560,12 +566,12 @@ Ez a parancs kiírja az OpenClaw konfigurációját a `~/.openclaw/openclaw.json
 > }
 > ```
 >
-> A konfiguráció többi része (gateway, channels, models stb.) változatlan marad, csak a `compaction` kulcsot kell hozzáadni.
+> A konfiguráció többi része (gateway, csatornák, modellek stb.) változatlan marad, csak a `compaction` kulcsot kell hozzáadni.
 ### (Ajánlott) Docker sandboxing engedélyezése
 
-Az OpenClaw képes az összes ágens fájl- és kódműveletét egy izolált Docker konténeren keresztül irányítani, ahelyett, hogy közvetlenül a hoszton futtatná őket. Ez a nem szándékolt műveletek hatókörét a sandboxra korlátozza, így a hoszt fájlrendszere és hálózata érintetlen marad.
+Az OpenClaw képes az összes ügynöki fájl- és kódműveletet egy izolált Docker konténeren keresztül irányítani ahelyett, hogy közvetlenül a hoszton futtatná azokat. Ez a nem szándékolt műveletek hatókörét a sandboxra korlátozza, így a hoszt fájlrendszere és hálózata érintetlen marad.
 
-Építsd meg egyszer a sandbox image-et (a Dockernek telepítve kell lennie):
+Építsd fel egyszer a sandbox image-et (a Dockernek telepítve kell lennie):
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -670,7 +676,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Futtasd ezt, hogy hozzáadd a `sandbox` kulcsot a meglévő `agents.defaults` blokkhoz a `~/.openclaw/openclaw.json` fájlban:
+Futtasd ezt a `sandbox` kulcs hozzáadásához a meglévő `agents.defaults` blokkon belül a `~/.openclaw/openclaw.json` fájlban:
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -689,11 +695,11 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-A sandbox konténereknek alapértelmezés szerint **nincs hálózati hozzáférésük**. A bind mountokért és hálózati felülbírálásokért lásd a [sandboxing referenciát](https://docs.openclaw.ai/gateway/sandboxing).
+A sandbox konténerek alapértelmezés szerint **nem rendelkeznek hálózati hozzáféréssel**. A bind mountokkal és a hálózati felülírásokkal kapcsolatban lásd a [sandboxing referenciát](https://docs.openclaw.ai/gateway/sandboxing).
 
-> #### Hibaelhárítás: Docker Permission Denied
+> #### Hibaelhárítás: Docker engedély megtagadva
 > 
-> Ha "permission denied" hibát kapsz Docker parancsok futtatásakor:
+> Ha „permission denied” hibát kapsz Docker parancsok futtatásakor:
 > 
 > **1. lépés: Add hozzá a felhasználódat a docker csoporthoz**
 > 
@@ -941,16 +947,16 @@ finally {
 <!-- @os:linux -->
 ## (Ajánlott) OpenClaw integráció Firecrawl szolgáltatásokkal
 
-A [Firecrawl](https://docs.firecrawl.dev/introduction) egy önállóan üzemeltethető webes crawling és tartalomkinyerő szolgáltatást biztosít, amely képes megkerülni ezeket a kihívásokat, és kibontakoztatja az OpenClaw automatizálás teljes potenciálját.
+A [Firecrawl](https://docs.firecrawl.dev/introduction) egy önállóan üzemeltetett webes bejárási és tartalomkinyerési szolgáltatást biztosít, amely képes megkerülni ezeket a kihívásokat, és kiaknázni az OpenClaw automatizálás teljes potenciálját.
 
-Ebben a beállításban az OpenClaw egy sor Docker konténerként fut, Podman segítségével kezelve. Az életciklus-kezelés és az automatikus indítás egyszerűsítése érdekében a Firecrawl-t egy felhasználói szintű `systemd` szolgáltatásként regisztráljuk, amely az alatta lévő Podman Compose stacket vezérli. Ez lehetővé teszi, hogy az OpenClaw a szabványos `systemctl --user` parancsokkal indítsa a gatewayt, állítsa le, és ellenőrizze a Firecrawl szolgáltatást ahelyett, hogy közvetlenül a konténerekkel kellene kommunikálnia.
+Ebben a konfigurációban az OpenClaw Docker konténerek halmazaként fut, amelyeket Podman kezel. Az életciklus-kezelés és az automatikus indítás egyszerűsítése érdekében a Firecrawl-t felhasználói szintű `systemd` szolgáltatásként regisztráljuk, amely az alapul szolgáló Podman Compose stacket vezérli. Ez lehetővé teszi, hogy az OpenClaw a gateway-t standard `systemctl --user` parancsokkal indítsa, állítsa le és ellenőrizze a Firecrawl szolgáltatást, ahelyett hogy közvetlenül a konténerekkel kellene interakcióba lépni.
 
 Az egyszerűség kedvéért a teljes folyamatot négy lépésre bontottuk:
 
 ---
 
 ### 1. A rendszerszolgáltatás regisztrálása
-Navigálj a systemd felhasználói konfigurációs könyvtárába:
+Navigálj a systemd felhasználói konfigurációs könyvtárba:
 ```bash
 cd ~/.config/systemd/user
 ```
@@ -1003,15 +1009,15 @@ Győződj meg róla, hogy a fájlnév pontosan megegyezik a fent létrehozottal,
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-Ha sikeres volt, a következő kimenetet kell látnod:
+Sikeres végrehajtás esetén a következő kimenetet kell látnod:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-A `default.target.wants/` szimbolikus linkeket tartalmaz azokhoz a szolgáltatásokhoz, amelyek automatikus indításra vannak konfigurálva.
+A `default.target.wants/` szimbolikus linkeket tartalmaz azokra a szolgáltatásokra, amelyek automatikus indításra vannak konfigurálva.
 
 ### 2. A Firecrawl konfigurálása
 
-A [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) ideális azoknak, akiknek teljes irányításra van szükségük a scraping és adatfeldolgozási környezetük felett, de ez extra karbantartási és konfigurációs erőfeszítésekkel jár.
+A [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) ideális azok számára, akiknek teljes körű irányításra van szükségük a scraping és adatfeldolgozási környezetük felett, de ez további karbantartási és konfigurációs ráfordítással jár.
 
 Kezdd a repository klónozásával:
 ```bash
@@ -1026,53 +1032,53 @@ HOST=0.0.0.0
 # ===== Firecrawl =====
 # FIRECRAWL_API_KEY="" # optional
 ```
-### 3. Az OpenClaw telepítése Podman Compose-zal
+### 3. Az OpenClaw telepítése Podman Compose segítségével
 
-Mielőtt továbblépnél, győződj meg róla, hogy letöltötted a legfrissebb OpenClaw Docker image-et:
+Mielőtt továbblépnél, győződj meg róla, hogy letöltötted a legújabb OpenClaw Docker image-et:
 ```bash
 podman pull ghcr.io/openclaw/openclaw:latest
 ```
-Ha ez megvan, töltsd le az OpenClaw Compose fájlt [openclaw-compose.yaml](assets/openclaw-compose.yaml), és helyezd el a gyökér `/firecrawl` könyvtárban:
+Ha ez megtörtént, töltsd le az OpenClaw Compose fájlt [openclaw-compose.yaml](assets/openclaw-compose.yaml) és helyezd el a `/firecrawl` gyökérkönyvtárban:
 
-> Erre a konvencióra azért van szükség, hogy a `systemd` megfelelően megtalálja és elindítsa a szolgáltatást, ahogy azt a `WorkingDirectory=${HOME}/firecrawl` beállítás megköveteli.
+> Erre a konvencióra azért van szükség, hogy a `systemd` a `WorkingDirectory=${HOME}/firecrawl` beállításnak megfelelően megtalálja és el tudja indítani a szolgáltatást.
 
-> Bármikor bővítheted a stacket további Firecrawl szolgáltatások hozzáadásával, igény szerint. Az elérhető szolgáltatások teljes listája megtalálható a hivatalos [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) fájlban.
+> A stacket bármikor bővítheted további Firecrawl szolgáltatások hozzáadásával, igény szerint. Az elérhető szolgáltatások teljes listája a hivatalos [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) fájlban található.
 
 ### 4. Az OpenClaw szolgáltatás elindítása a Firecrawl-on keresztül
 
-Mielőtt átadnád az irányítást a `systemd`-nek, ellenőrizd, hogy minden megfelelően működik-e a stack manuális futtatásával:
+Mielőtt átadnád az irányítást a `systemd`-nek, ellenőrizd, hogy minden megfelelően működik, a stack manuális futtatásával:
 ```bash
 podman compose -f openclaw-compose.yaml up -d
 ```
-Ha minden helyesen van konfigurálva, látnod kell, ahogy az OpenClaw konténer elindul, és a parancssori kimenetnek nagyjából így kell kinéznie:
+Ha minden helyesen van konfigurálva, látnod kell, hogy az OpenClaw konténer elindul, és a parancssori kimenetednek valahogy így kell kinéznie:
 <p align="center">
   <img src="assets/openclaw_health_verification.png" width="500" height="400" />
 </p>
 
-Az ellenőrzés után a folytatás előtt állítsd le a stacket:
+Ellenőrzés után a továbblépés előtt állítsd le újra a stacket:
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
-A szolgáltatás elindítása előtt biztosítanod kell a megfelelő tulajdonjogot és jogosultságokat a `firecrawl` könyvtáron és annak `.env` fájlján.
-Ez elengedhetetlen ahhoz, hogy a szolgáltatás indításkor kiírhassa a hitelesítő adataidat.
+A szolgáltatás elindítása előtt győződj meg róla, hogy a `firecrawl` könyvtáron és a `.env` fájlon a megfelelő tulajdonjog és jogosultságok vannak beállítva.
+Ez elengedhetetlen ahhoz, hogy a szolgáltatás indításkor ki tudja írni a hitelesítő adataidat.
 ```bash
 sudo chown ${USER}:${USER} ~/firecrawl/.env
 chmod 644 ~/firecrawl/.env
 ```
-Most, hogy minden ellenőrizve van, indítsd el a szolgáltatást a `systemd` segítségével:
+Most, hogy minden ellenőrizve van, indítsd el a szolgáltatást a `systemd`-en keresztül:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Az OpenClaw Actions](https://docs.openclaw.ai/) elérhető az interaktív konténeren belülről, a Web Dashboard pedig ugyanazon a hoszton és porton érhető el a http://127.0.0.1:18789 címen.
+[Az OpenClaw Actions](https://docs.openclaw.ai/) elérhető az interaktív konténeren belülről, és a Web Dashboard ugyanazon a hoszton és porton érhető el: http://127.0.0.1:18789.
 <p align="center">
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
 
 ### Az `OPENCLAW_GATEWAY_TOKEN` beszerzése
 
-Miután a szolgáltatás elindult és fut, egy új `.openclaw` könyvtárat fogsz találni a felhasználói mappádban (~/.openclaw). Ez a könyvtár alapértelmezés szerint zárolva van, ezért fel kell oldanod a zárolást ahhoz, hogy megkapd a gateway tokenedet.
+Miután a szolgáltatás elindult és fut, egy új `.openclaw` könyvtárat fogsz találni a saját mappádban (~/.openclaw). Ez a könyvtár alapértelmezés szerint zárolva van, ezért a gateway token lekéréséhez fel kell oldanod a zárolást.
 
-1. Adj hozzáférést a könyvtárhoz:
+1. Add meg a hozzáférést a könyvtárhoz:
 ```bash
 sudo chmod 777 ~/.openclaw/
 ```
@@ -1090,9 +1096,9 @@ systemctl --user stop firecrawl.service
 ```
 <!-- @os:end -->
 ---
-## Az OpenClaw Gateway indítása
+## Indítsd el az OpenClaw Gateway-t
 
-A gateway az az OpenClaw folyamat, amely az ágens hurkot kezeli és a vezérlőpultot szolgálja ki:
+A gateway az az OpenClaw folyamat, amely kezeli az ügynök hurkot (agent loop), és kiszolgálja a műszerfalat (dashboard):
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
@@ -1223,37 +1229,37 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-A vezérlőpult megnyitásához futtasd ezt egy második terminálban, miközben a gateway még fut:
+A műszerfal megnyitásához futtasd ezt egy második terminálban, miközben a gateway továbbra is fut:
 
 ```bash
 openclaw dashboard
 ```
 
-Mivel a gateway a loopback interfészhez kötődik, a vezérlőpult automatikusan hitelesíti magát, ha ugyanarról a gépről nyitod meg, így a helyi hozzáféréshez nincs szükség token megadására vagy eszközjóváhagyásra. A vezérlőpulton meg kell jelennie az OpenClaw irányítópultnak, a Lemonade modellel mint aktív háttérrendszerrel felsorolva.
+Mivel a gateway a loopback-re csatlakozik, a műszerfal automatikusan hitelesít, amikor ugyanarról a gépről nyitod meg, nincs szükség token megadására vagy eszközjóváhagyásra helyi hozzáférés esetén. A megjelenő OpenClaw műszerfalon a Lemonade modelled aktív háttérrendszerként (backend) kell, hogy szerepeljen.
 
-> Ha bekapcsoltad a sandboxolást, ellenőrizheted úgy, hogy megkéred az ágenst, hogy futtassa a `run hostname` parancsot a vezérlőpultról. Ha a géped hostneve helyett egy rövid konténer-azonosítót látsz, a sandbox megfelelően működik.
+> Ha engedélyezted a sandboxolást, ezt úgy ellenőrizheted, hogy megkéred az ügynököt a `run hostname` futtatására a műszerfalról. Ha egy rövid konténer-azonosítót látsz a géped hosztneve helyett, a sandbox megfelelően működik.
 
-**Gratulálunk, létrehoztál egy teljesen helyi AI ágens csomagot a nulláról.**
+**Gratulálunk, egy teljesen helyi AI ügynök-stacket építettél fel a semmiből.**
 
-> **Szükséged van a gateway tokenre?** Futtasd az `openclaw dashboard --no-open` parancsot, hogy kiírja a vezérlőpult URL-jét a tokennel együtt beágyazva (ez emellett megpróbálja a vágólapra másolni is). Alternatívaként a token a `gateway.auth.token` alatt található a `~/.openclaw/openclaw.json` fájlban.
+> **Szükséged van a gateway tokenjére?** Futtasd az `openclaw dashboard --no-open` parancsot, hogy kiírja a műszerfal URL-jét a beágyazott tokennel együtt (emellett megpróbálja a vágólapra is másolni). Alternatívaként a token megtalálható a `gateway.auth.token` alatt a `~/.openclaw/openclaw.json` fájlban.
 
-**A vezérlőpult elérése egy másik eszközről (SSH-alagúton keresztül)**
+**A műszerfal elérése egy másik eszközről (SSH alagúton keresztül)**
 
-Ha az OpenClaw egy távoli gépen fut, elérheted a vezérlőpultját a helyi gépedről egy SSH-alagúton keresztül. Az alagút továbbítja a gateway portot (`18789`), így a helyi böngésződ tud kommunikálni a távoli gateway-jel a `127.0.0.1`-en keresztül.
+Ha az OpenClaw egy távoli gépen fut, elérheted a műszerfalát a helyi gépedről egy SSH alagúton keresztül. Az alagút továbbítja a gateway portot (`18789`), így a helyi böngésződ a `127.0.0.1` címen keresztül tud kommunikálni a távoli gateway-vel.
 
-1. A **helyi gépedről** csatlakozz egyszer a távoli géphez, és fogadd el az ujjlenyomat-kérést, hogy a hoszt bekerüljön az ismert hosztok közé:
+1. A **helyi gépeden** csatlakozz egyszer a távoli géphez, és fogadd el az ujjlenyomat (fingerprint) felszólítást, hogy a hoszt bekerüljön az ismert hosztok közé:
 
    ```bash
    ssh user@<host-ip>
    ```
 
-2. Még mindig a **helyi gépeden**, nyisd meg az SSH-alagutat:
+2. Még mindig a **helyi gépeden**, nyisd meg az SSH alagutat:
 
    ```bash
    ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
    ```
 
-   > **Megjegyzés:** Miután megadtad a jelszavadat, a terminál nem mutat kimenetet, és úgy tűnik, mintha lefagyott volna. Ez így van rendjén: a `-N` kapcsoló utasítja az SSH-t, hogy ne futtasson semmilyen távoli parancsot, egyszerűen csak nyitva tartja az alagutat. Hagyd ezt a terminált futni.
+   > **Megjegyzés:** A jelszó megadása után a terminál nem mutat semmilyen kimenetet, és úgy tűnik, lefagyott. Ez normális: a `-N` jelző utasítja az SSH-t, hogy ne futtasson semmilyen távoli parancsot, így egyszerűen nyitva tartja az alagutat. Hagyd futni ezt a terminált.
 
 3. A **helyi gépeden** nyiss meg egy böngészőt, és menj a `http://127.0.0.1:18789` címre.
 
@@ -1263,9 +1269,9 @@ Ha az OpenClaw egy távoli gépen fut, elérheted a vezérlőpultját a helyi g�
    openclaw dashboard --no-open
    ```
 
-   Ez kiírja a vezérlőpult URL-jét a tokennel beágyazva; másold ki a tokent a bejelentkezéshez. (A token a `gateway.auth.token` alatt is tárolva van a `~/.openclaw/openclaw.json` fájlban.)
+   Ez kiírja a műszerfal URL-jét a beágyazott tokennel; másold ki a tokent a bejelentkezéshez. (A token a `gateway.auth.token` alatt is tárolva van a `~/.openclaw/openclaw.json` fájlban.)
 
-> **Egy távoli eszköz jóváhagyása:** Amikor egy másik gépről vagy telefonról nyitod meg a vezérlőpultot, a böngésző megjeleníthet egy kérésazonosítót. A **távoli gépen** listázd a függőben lévő kéréseket:
+> **Egy távoli eszköz jóváhagyása:** Amikor egy másik gépről vagy telefonról nyitod meg a műszerfalat, a böngésző megjeleníthet egy kérés-azonosítót (request ID). A **távoli gépen** listázd a függőben lévő kéréseket:
 > ```bash
 > openclaw devices list
 > ```
@@ -1273,7 +1279,7 @@ Ha az OpenClaw egy távoli gépen fut, elérheted a vezérlőpultját a helyi g�
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Erre csak távoli vagy másodlagos eszközök esetén van szükség; az ugyanarról a gépről történő loopback hozzáférés automatikusan hitelesíti magát. További részletekért lásd a [Remote Access](https://docs.openclaw.ai/gateway/remote) dokumentációt.
+> Erre csak távoli vagy másodlagos eszközök esetén van szükség; a loopback hozzáférés ugyanarról a gépről automatikusan hitelesít. Bővebben lásd a [Remote Access](https://docs.openclaw.ai/gateway/remote) dokumentációt.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1283,47 +1289,47 @@ Ha az OpenClaw egy távoli gépen fut, elérheted a vezérlőpultját a helyi g�
 
 ## Opcionális: Kommunikációs csatorna csatlakoztatása
 
-Miután a gateway fut, bármely eszközről elérheted a helyi ágensedet. Válaszd ki a beállításodhoz illő opciót. Az OpenClaw támogatja a [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) és más csatornákat, a teljes listát a [docs.openclaw.ai](https://docs.openclaw.ai) oldalon találod.
+Amint a gateway fut, bármelyik eszközödről elérheted a helyi ügynöködet. Válaszd ki a beállításodnak megfelelő opciót. Az OpenClaw támogatja a [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) és más csatornákat, lásd a teljes listát a [docs.openclaw.ai](https://docs.openclaw.ai) oldalon.
 
 ---
 
 ### A opció: Discord
 
-A Discordhoz szükséges egy szerver, ahol **rendelkezel adminisztrátori hozzáféréssel** egy bot hozzáadásához. Ha csak megosztott szervereid vannak, de nem te vagy a tulajdonosuk, használd inkább a B opciót (Telegram).
+A Discordhoz szükség van egy szerverre, ahol **adminisztrátori hozzáféréssel rendelkezel** egy bot hozzáadásához. Ha osztozol szervereken, de nincs saját szervered, használd a B opciót (Telegram) helyette.
 
 #### Discord fiók és szerver létrehozása
 
-Ha nincs Discord fiókod, regisztrálj a [discord.com](https://discord.com) oldalon. Szükséged van egy szerverre is, ahol adminisztrátor vagy, hozz létre egyet a Discord oldalsávjában lévő **+** ikonra kattintva, és válaszd a **Create My Own** opciót. Egy privát szerver is megfelel.
+Ha nincs Discord fiókod, regisztrálj a [discord.com](https://discord.com) oldalon. Szükséged van egy szerverre is, ahol adminisztrátor vagy; hozz létre egyet a **+** ikonra kattintva a Discord oldalsávjában, majd válaszd a **Create My Own** lehetőséget. Egy privát szerver megfelelő.
 
 #### Discord alkalmazás és bot létrehozása
 
-1. Menj a [Discord Developer Portal](https://discord.com/developers/applications) oldalra, és kattints a **New Application** gombra. Adj neki egy nevet (pl. "openclaw-bot").
-2. Az oldalsávon kattints a **Bot** menüpontra. Állíts be egy felhasználónevet a botnak.
-3. Még a Bot oldalon, görgess le a **Privileged Gateway Intents** részhez, és engedélyezd:
+1. Menj a [Discord Developer Portal](https://discord.com/developers/applications) oldalra, és kattints a **New Application** gombra. Adj neki egy nevet (pl. „openclaw-bot”).
+2. Az oldalsávban kattints a **Bot** fülre. Állíts be egy felhasználónevet a botnak.
+3. Még mindig a Bot oldalon, görgess le a **Privileged Gateway Intents** részhez, és engedélyezd:
    - **Message Content Intent** (kötelező)
    - **Server Members Intent** (ajánlott)
-4. Görgess vissza fel, és kattints a **Reset Token** gombra a bot tokened generálásához. Másold ki.
+4. Görgess vissza és kattints a **Reset Token** gombra a bot tokened generálásához. Másold ki.
 
 #### A bot hozzáadása a szerveredhez
 
-1. Az oldalsávon kattints az **OAuth2/ URL Generator** menüpontra.
+1. Az oldalsávban kattints az **OAuth2/ URL Generator** fülre.
 2. A **Scopes** alatt engedélyezd a `bot` és `applications.commands` opciókat.
 3. A **Bot Permissions** alatt engedélyezd: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Másold ki a generált URL-t, illeszd be a böngésződbe, válaszd ki a szervered, és erősítsd meg. A botnak most már meg kell jelennie a szervered tagjai között.
+4. Másold ki a generált URL-t, illeszd be a böngésződbe, válaszd ki a szervered, és erősítsd meg. A botnak most meg kell jelennie a szervered tagjainak listájában.
 
 #### Az azonosítóid összegyűjtése
 
-Engedélyezd a fejlesztői módot a Discordban (**User Settings/ Advanced/ Developer Mode**), majd:
+Engedélyezd a Fejlesztői módot (Developer Mode) a Discordban (**User Settings/ Advanced/ Developer Mode**), majd:
 - Kattints jobb gombbal a szervered ikonjára: **Copy Server ID**
 - Kattints jobb gombbal a saját avatárodra: **Copy User ID**
 
-#### Privát üzenetek engedélyezése a szerver tagjaitól
+#### Közvetlen üzenetek engedélyezése a szerver tagjaitól
 
 Kattints jobb gombbal a szervered ikonjára/ **Privacy Settings**/ kapcsold be a **Direct Messages** opciót. Ez lehetővé teszi, hogy a bot privát üzenetet küldjön neked, ami szükséges a párosítási lépéshez.
 
-#### Az OpenClaw beállítása Discordhoz
+#### Az OpenClaw konfigurálása Discordhoz
 
-Tárold a bot tokened környezeti változóként, majd hozz létre egyetlen patch fájlt, amely engedélyezi a Discordot, hivatkozik a tokenre, és engedélyezőlistára veszi a szervered. Cseréld ki a `<server_id>` és `<user_id>` értékeket a fent összegyűjtött azonosítókra.
+Tárold a bot tokenedet környezeti változóként, majd hozz létre egyetlen patch fájlt, amely engedélyezi a Discordot, hivatkozik a tokenre, és engedélyezőlistára (allowlist) teszi a szervered. Cseréld ki a `<server_id>` és `<user_id>` értékeket a fent összegyűjtött azonosítókra.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1349,7 +1355,7 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Ne bízz abban, hogy megkéred az ágenst ennek beállítására.** Ha a sandboxolás engedélyezve van, az ágens nem tud írni a `~/.openclaw/openclaw.json` fájlba a sandboxon belülről, ehelyett használd a fenti CLI parancsokat a hoszton.
+> **Ne hagyatkozz arra, hogy megkéred az ügynököt ennek konfigurálására.** Ha a sandboxolás engedélyezve van, az ügynök nem tud írni a `~/.openclaw/openclaw.json` fájlba a sandboxon belülről, ehelyett használd a fenti CLI parancsokat a hoszton.
 
 Indítsd újra a gateway-t, hogy felvegye az új csatorna konfigurációt:
 
@@ -1358,22 +1364,22 @@ openclaw gateway run --bind loopback --port 18789
 ```
 
 Néhány másodpercen belül meg kell jelennie a `logged in to discord as <bot-name>` üzenetnek a gateway kimenetében.
-#### Párosítsd a Discord-fiókodat
+#### Discord-fiók párosítása
 
-Küldj privát üzenetet a botnak Discordon. Egy rövid párosítási kóddal fog válaszolni.
+Küldj DM-et a botnak Discordon. Egy rövid párosítási kóddal fog válaszolni.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
 </p>
 
-Hagyd jóvá az OpenClaw-t futtató gépen:
+Hagyd jóvá azon a gépen, amelyen az OpenClaw fut:
 ```bash
 openclaw pairing approve discord <CODE>
 ```
 
 > A párosítási kódok egy óra után lejárnak.
 
-Mostantól közvetlenül Discordból tudsz csevegni az ügynököddel, és a helyi hardveredre tudsz feladatokat áthárítani.
+Most már közvetlenül Discordról cseveghetsz az ügynököddel, és a feladatokat áthelyezheted a helyi hardveredre.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1383,14 +1389,14 @@ Mostantól közvetlenül Discordból tudsz csevegni az ügynököddel, és a hel
 
 ### B lehetőség: Telegram
 
-A Telegram egyszerűbb a legtöbb felhasználó számára, mint a Discord, mivel nem igényel se szervert, se admin hozzáférést.
+A Telegram a legtöbb felhasználó számára egyszerűbb, mint a Discord, nincs szükség sem szerverre, sem rendszergazdai hozzáférésre.
 
-#### Hozz létre egy Telegram botot
+#### Telegram bot létrehozása
 
-1. Nyisd meg a Telegramot, és írj üzenetet a **@BotFather**-nek.
+1. Nyisd meg a Telegramot, és küldj üzenetet a **@BotFather**-nek.
 2. Küldd el a `/newbot` parancsot, és kövesd az utasításokat. Mentsd el a kapott bot tokent.
 
-#### Az OpenClaw beállítása Telegramhoz
+#### Az OpenClaw konfigurálása Telegramhoz
 
 Tárold a tokent környezeti változóként:
 
@@ -1398,7 +1404,7 @@ Tárold a tokent környezeti változóként:
 export TELEGRAM_BOT_TOKEN="YOUR_BOT_TOKEN"
 ```
 
-Add hozzá a csatorna konfigurációját a `~/.openclaw/openclaw.json` fájlhoz (vagy módosítsd a dashboardon keresztül):
+Add hozzá a csatorna konfigurációját a `~/.openclaw/openclaw.json` fájlhoz (vagy javítsd a panelen keresztül):
 
 ```json
 {
@@ -1412,26 +1418,26 @@ Add hozzá a csatorna konfigurációját a `~/.openclaw/openclaw.json` fájlhoz 
 }
 ```
 
-Indítsd újra a gateway-t, majd küldj a botodnak egy tetszőleges üzenetet Telegramon. Hagyd jóvá a párosítást:
+Indítsd újra a gatewayt, majd küldj a botodnak egy üzenetet Telegramon. Hagyd jóvá a párosítást:
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-A párosítási kódok egy óra után lejárnak. Mostantól a Telegram DM-en keresztül tudsz csevegni az ügynököddel.
+A párosítási kódok egy óra után lejárnak. Most már cseveghetsz az ügynököddel a Telegram DM-en keresztül.
 
 ---
 
 ## Következő lépések
 
-Most, hogy az ügynököd képes parancsokat fogadni a telefonodról, és cselekedni a helyi gépeden, íme három irány, amelyeket érdemes megfontolni:
+Most, hogy az ügynököd parancsokat tud fogadni a telefonodról, és végrehajtja azokat a helyi gépeden, íme három irány, amelyet érdemes felfedezni:
 
-1. **Tőzsdei összefoglaló**: Ütemezd be az OpenClaw-t, hogy fix időközönként lekérje az adatokat pénzügyi API-kból, foglalja össze a nap mozgásait a helyi modelleddel, és küldjön egy összefoglalót a telefonodra minden reggel a kiválasztott csatornán keresztül.
+1. **Tőzsdei összefoglaló**: Ütemezd be az OpenClaw-t, hogy fix időközönként adatokat kérjen le pénzügyi API-kból, foglalja össze a nap mozgásait a helyi modellel, és minden reggel küldjön egy kivonatot a telefonodra a választott csatornán keresztül.
 
-2. **Finomhangolás-figyelő**: Indíts el egy tanítási feladatot távolról Telegramon vagy Discordon keresztül, majd hagyd, hogy az ügynök kövesse a tanítási naplót, és időszakosan visszajelentse a loss értékeket, a GPU kihasználtságot és a lemezhasználatot a telefonodra. Ha a futás leáll, vagy a VRAM-használat megugrik, azonnal értesülsz róla, anélkül, hogy a gépnél kellene lenned.
+2. **Finomhangolás-figyelő**: Indíts el egy tanítási feladatot távolról Telegramon vagy Discordon keresztül, majd az ügynök kövesse nyomon a tanítási naplót, és jelentse vissza a telefonodra az időszakos veszteségértékeket, a GPU-kihasználtságot és a lemezhasználatot. Ha a futás megakad vagy a VRAM-használat megugrik, azonnal értesülsz róla anélkül, hogy a gépnél kellene lenned.
 
-3. **IOT egy helyi VLM-mel**: Irányíts egy kamerát a bejárati ajtódra, futtass egy látásmodellt Lemonade-en, és kérd meg az OpenClaw-t, hogy elemezze a képkockákat igény szerint vagy egy eseményre reagálva. Kérdezd meg a telefonodról, hogy „érkezett-e ma csomag?”, és kapj egyenes választ a saját hardveredtől.
+3. **IOT helyi VLM-mel**: Irányíts egy kamerát a bejárati ajtódra, futtass egy látásmodellt a Lemonade-en, és az OpenClaw igény szerint vagy egy kiváltó esemény alapján elemezze a képkockákat. Kérdezd meg a telefonodról, hogy „érkezett-e ma csomag?”, és egyenes választ kapsz a saját hardveredtől.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

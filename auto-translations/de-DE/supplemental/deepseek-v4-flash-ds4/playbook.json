@@ -1,6 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
   "title": "Ausführen von DeepSeek V4 Flash mit ds4",
-  "description": "Setzen Sie DeepSeek V4 Flash mithilfe der ds4-Inferenz-Engine lokal ein und verwalten Sie Modelle interaktiv mit ds4-cockpit.",
+  "description": "Stellen Sie DeepSeek V4 Flash lokal mit der ds4-Inferenz-Engine bereit und verwalten Sie Modelle interaktiv mit ds4-cockpit.",
   "auto_translated": true
 }

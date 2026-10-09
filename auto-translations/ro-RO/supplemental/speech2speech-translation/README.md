@@ -16,21 +16,21 @@ SPDX-License-Identifier: MIT
 
 ## Prezentare generală
 
-Stack-ul software AMD ROCm™ și PyTorch creează un ecosistem unificat pentru AI on-device. Funcționează atât pe Windows, cât și pe Linux, cu suport oficial pentru o gamă largă de dispozitive, inclusiv APU-uri Ryzen™ AI și GPU-uri Radeon™.
+Stiva software AMD ROCm™ și PyTorch creează un ecosistem unificat pentru AI pe dispozitiv. Funcționează atât pentru Windows, cât și pentru Linux, cu suport oficial pentru o gamă largă de dispozitive, inclusiv APU-uri Ryzen™ AI și GPU-uri Radeon™.
 
-Acest playbook vă va învăța cum să rulați traducere vorbire-în-vorbire cu latență redusă, expresivă și privată, în întregime pe edge.
+Acest ghid practic vă va învăța cum să rulați traducere vorbire-în-vorbire cu latență redusă, expresivă și privată, integral la nivelul dispozitivului local (edge).
 
 ## Ce veți învăța
 
-- Cum să configurați mediul pentru speech-to-speech
+- Cum să configurați mediul pentru vorbire-în-vorbire
 - Cum să scrieți cod Python pentru a încărca și utiliza modele vorbire-în-vorbire
 - Cum să rulați și să experimentați cu interfața Gradio UI
 
 ## De ce să folosiți traducerea vorbire-în-vorbire în timp real?
 
-- Elimină fricțiunea dintre traducere și barierele lingvistice
+- Elimină fricțiunile dintre traducere și barierele lingvistice
 - Transmite tonul, emoția și intenția fără pauze stânjenitoare
-- Permite colaborarea globală și luarea deciziilor mai rapid
+- Permite colaborarea globală și luarea mai rapidă a deciziilor
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Configurarea memoriei
@@ -47,7 +47,7 @@ Acest playbook vă va învăța cum să rulați traducere vorbire-în-vorbire cu
 
 ## Instalarea cerințelor preliminare software
 
-### Creați un mediu virtual
+### Crearea unui mediu virtual
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Acordați utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca aceasta să aibă efect):
+**Acordați-i utilizatorului dvs. acces la dispozitivele GPU** (deconectați-vă și reconectați-vă pentru ca acest lucru să intre în vigoare):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalate:
+Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv cu ROCm+Pytorch deja instalate:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Sfat**: Este posibil ca utilizatorii Windows să trebuiască să modifice Politica de Execuție PowerShell (de exemplu,
+> **Sfat**: Utilizatorii Windows ar putea fi nevoiți să modifice Politica de Execuție PowerShell (de exemplu,
 > setând-o la RemoteSigned sau Unrestricted) înainte de a rula unele comenzi PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Pe Windows, deschideți un terminal în directorul ales și urmați comenzile pentru a crea un venv:
+Pe Windows, deschideți un terminal în directorul dorit și urmați comenzile pentru a crea un venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,7 +113,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Sfat**: Este posibil ca utilizatorii Windows să trebuiască să modifice Politica de Execuție PowerShell (de exemplu,
+> **Sfat**: Utilizatorii Windows ar putea fi nevoiți să modifice Politica de Execuție PowerShell (de exemplu,
 > setând-o la RemoteSigned sau Unrestricted) înainte de a rula unele comenzi PowerShell.
 
 <!-- @device:end -->
@@ -126,13 +126,14 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### Dependențe suplimentare
 
 Instalați dependențele m4t folosind pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,9 +203,9 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Configurați demo-ul speech-to-speech
+## Configurarea demo-ului vorbire-în-vorbire
 
-#### Aflați despre seamless-m4t-v2
+#### Aflați mai multe despre seamless-m4t-v2
 
 Consultați [fișa modelului](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) pe Hugging Face pentru mai multe informații.
 Aceasta este arhitectura tehnică a modelelor vorbire-în-vorbire:
@@ -214,23 +215,23 @@ Aceasta este arhitectura tehnică a modelelor vorbire-în-vorbire:
 
 #### Descărcarea scripturilor
 
-Acest playbook include scripturi gata de utilizare. Vă rugăm să le descărcați pe toate în același director cu mediul pe care l-ați creat.
+Acest ghid practic include scripturi gata de utilizare. Vă rugăm să le descărcați pe toate în același director cu mediul pe care l-ați creat.
 
 | Script | Descriere | Utilizare |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Generare de bază de text LLM | `python infer.py` |
+| [infer.py](assets/infer.py) | Generare de text LLM de bază | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Fișier audio exemplu | N/A |
-| [lang_list.py](assets/lang_list.py) | Fișier de suport lingvistic | N/A |
+| [lang_list.py](assets/lang_list.py) | Fișier de suport pentru limbi | N/A |
 | [gradio_demo.py](assets/gradio_demo.py) | Interfață intuitivă pentru traducerea vorbirii | `python gradio_demo.py --no-share` |
 
 
-### Începeți cu infer.py
+### Începând cu infer.py
 
 Pentru a executa scriptul, rulați 
 ```bash
 python infer.py
 ```
-> **Notă**: Este posibil să vedeți unele avertismente. Acest lucru este așteptat.
+> **Notă**: Este posibil să vedeți unele avertismente. Acest lucru este normal.
  
   
 #### Explicarea codului
@@ -261,7 +262,7 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Fragment 2: Încărcarea modelelor de pe HuggingFace**
+**Fragment 2: Încărcarea modelelor din HuggingFace**
 
 Această funcție primește un ID de model și descarcă modelul dacă nu este deja descărcat. Apoi returnează procesorul și modelul pentru a fi utilizate de funcția următoare.
 ```python
@@ -282,9 +283,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Fragment 3: Introduceți clipul audio, fișierul .wav, și preprocesați-l**
+**Fragment 3: Introducerea unui fișier audio .wav și preprocesarea acestuia**
 
-Această funcție încarcă clipul audio și îl reeșantionează la rata țintă.
+Această funcție încarcă fișierul audio și îl reeșantionează la rata țintă.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,7 +305,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Fragment 4: Rulați inferența**
+**Fragment 4: Rularea inferenței**
 
 Această funcție rulează inferența cu modelul și returnează rezultatul generat.
 ```python
@@ -334,7 +335,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**Fragment 5: Salvați fișierul tradus**
+**Fragment 5: Salvarea fișierului tradus**
 
 Această funcție salvează matricea audio într-un fișier .WAV. 
 ```python
@@ -401,14 +402,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### Rularea demo-ului Gradio UI:
 
-Acum că ați rulat un exemplu de script de bază, instrucțiunile următoare oferă o interfață utilă care se bazează pe codul pe care l-am scris și facilitează traducerea vorbire-în-vorbire în timp real.
+Acum că ați rulat un exemplu de script de bază, instrucțiunile următoare oferă o interfață utilă care se bazează pe codul scris și facilitează traducerea vorbire-în-vorbire în timp real.
 
 #### Rulați Gradio local
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Apoi, deschideți browser-ul web la `http://127.0.0.1:7860` pentru a accesa interfața.
+Apoi, deschideți browserul web la `http://127.0.0.1:7860` pentru a accesa interfața.
 
 
 ### Exemplu de interfață Gradio UI:
@@ -530,12 +531,12 @@ PY
 
 ## Pașii următori
 
-- Combinați zeci de limbi pentru traducere rapidă. 
-- Distribuiți demo-ul dvs. altora: Adăugați --share pentru a crea un link public la care oricine poate accesa de la distanță, sau implementați-l permanent folosind Hugging Face Spaces
+- Combinați zeci de limbi pentru traducere rapidă.
+- Partajați demo-ul cu alte persoane: Adăugați --share pentru a crea un link public pe care oricine îl poate accesa de la distanță, sau implementați permanent folosind Hugging Face Spaces
 
 ## Resurse
 
-Mai jos găsiți câteva resurse suplimentare pentru a afla mai multe despre traducerea vorbire-în-vorbire:  
-* Repozitoriul se află aici https://huggingface.co/facebook/seamless-m4t-v2-large 
+Mai jos găsiți câteva resurse suplimentare pentru a afla mai multe despre traducerea vorbire-în-vorbire:
+* Repository-ul se află aici https://huggingface.co/facebook/seamless-m4t-v2-large
 * Cercetare academică legată de „Seamless: Multilingual Expressive and Streaming Speech Translation”
-* Partajare și implementare Gradio: [Ghid pentru partajarea aplicației dvs.](https://www.gradio.app/guides/sharing-your-app) și [Implementare pe Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Partajare și implementare Gradio: [Ghid de partajare a aplicației](https://www.gradio.app/guides/sharing-your-app) și [Implementare pe Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

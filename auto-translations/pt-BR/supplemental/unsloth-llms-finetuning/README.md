@@ -9,74 +9,76 @@ SPDX-License-Identifier: MIT
 > **Tradução automática.** Esta página foi traduzida automaticamente do inglês e não foi revisada por um ser humano. Ela pode conter erros, e determinadas instruções, comandos, downloads, disponibilidade de produtos ou outros conteúdos podem variar de acordo com o idioma ou a região. Em caso de qualquer inconsistência ou divergência, a versão original em inglês do playbook prevalecerá.
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Visão Geral
+## Visão geral
 
-Este playbook mostra como fazer o ajuste fino (fine-tuning) local de um modelo de linguagem com Unsloth em hardware AMD.
+Este playbook mostra como ajustar (fine-tune) localmente um modelo de linguagem com Unsloth em hardware AMD.
 
-Ele utiliza um exemplo curto de Ajuste Fino Supervisionado (SFT, na sigla em inglês) com adaptadores LoRA em `unsloth/gemma-4-E4B-it`, usando um subconjunto do dataset `mlabonne/FineTome-100k`. O objetivo é fornecer um fluxo de trabalho simples de ponta a ponta que abrange configuração, treinamento, inferência e salvamento do resultado ajustado.
+Ele usa um exemplo curto de Supervised Fine-Tuning (SFT) com adaptadores LoRA no `unsloth/gemma-4-E4B-it`, utilizando um subconjunto do dataset `mlabonne/FineTome-100k`. O objetivo é fornecer um fluxo de trabalho simples de ponta a ponta que abrange configuração, treinamento, inferência e salvamento do resultado ajustado.
 
 O exemplo foi projetado para ser prático e fácil de modificar, para que você possa usá-lo como ponto de partida para seus próprios datasets e modelos.
 
-## O Que Você Vai Aprender
+## O que você vai aprender
 
 - Como configurar o ambiente Unsloth
-- Como fazer o ajuste fino de um LLM usando SFT com Unsloth
-- Como salvar o resultado ajustado em armazenamento local
+- Como ajustar um LLM usando SFT com Unsloth
+- Como salvar o resultado do fine-tuning em armazenamento local
 
 <!-- @device:halo,stx,krk -->
-> **Observação:** As técnicas de ajuste fino descritas neste playbook exigem pelo menos **64 GB de RAM do sistema**, com pelo menos **24 GB disponíveis para a GPU** (os 24 GB fazem parte dos 64 GB, e não são adicionais a eles).
+> **Observação:** As técnicas de fine-tuning descritas neste playbook exigem pelo menos **64 GB de RAM do sistema**, com pelo menos **24 GB disponíveis para a GPU** (os 24 GB fazem parte dos 64 GB, e não são adicionais a eles).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Observação:** As técnicas de ajuste fino descritas neste playbook exigem pelo menos **24 GB de memória total de GPU** e **32 GB de RAM do sistema**.
-> - No Windows, a memória total de GPU combina a VRAM dedicada da placa gráfica com a memória de GPU compartilhada (emprestada da RAM do sistema).
+> **Observação:** As técnicas de fine-tuning descritas neste playbook exigem pelo menos **24 GB de memória total de GPU** e **32 GB de RAM do sistema**.
+> - No Windows, a memória total de GPU combina a VRAM dedicada da placa de vídeo com a memória de GPU compartilhada (emprestada da RAM do sistema).
 > - Portanto, placas com menos de 24 GB de VRAM dedicada ainda podem executar este playbook usando memória de GPU compartilhada para compensar a diferença.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Observação:** As técnicas de ajuste fino descritas neste playbook exigem uma placa gráfica com pelo menos **24 GB de memória de GPU dedicada** e **32 GB de RAM do sistema**.
-> - No Linux, o treinamento é executado inteiramente na VRAM dedicada da placa gráfica.
-> - Não há retorno para memória de GPU compartilhada (RAM do sistema) quando a VRAM se esgota.
+> **Observação:** As técnicas de fine-tuning descritas neste playbook exigem uma placa de vídeo com pelo menos **24 GB de memória de GPU dedicada** e **32 GB de RAM do sistema**.
+> - No Linux, o treinamento é executado inteiramente na VRAM dedicada da placa de vídeo.
+> - Ele não recorre à memória de GPU compartilhada (RAM do sistema) quando a VRAM se esgota.
 > - Placas com menos de 24 GB de VRAM dedicada ficarão sem memória durante o treinamento no Linux, mesmo que o sistema tenha bastante RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Por Que Unsloth?
+## Por que usar o Unsloth?
 
-O Unsloth facilita a execução do ajuste fino de LLMs em hardware local, reduzindo o uso de memória e acelerando o treinamento em comparação a uma configuração padrão.
+O Unsloth facilita a execução do fine-tuning de LLMs em hardware local, reduzindo o uso de memória e acelerando o treinamento em comparação com uma configuração padrão.
 
-Neste playbook, usamos o Unsloth junto com **SFT baseado em LoRA**. Isso significa que o modelo base permanece majoritariamente congelado, enquanto um conjunto muito menor de pesos de adaptador é treinado. Essa abordagem é adequada para desenvolvimento local porque é mais leve que o ajuste fino completo e mais rápida de iterar.
+Neste playbook, usamos o Unsloth em conjunto com **SFT baseado em LoRA**. Isso significa que o modelo base permanece em grande parte congelado, enquanto um conjunto muito menor de pesos de adaptador é treinado. Essa abordagem é ideal para desenvolvimento local, pois é mais leve do que um fine-tuning completo e permite iterações mais rápidas.
 
-O Unsloth também suporta outras abordagens de treinamento, incluindo QLoRA e fluxos de trabalho de aprendizado por reforço. Este playbook foca primeiro no caminho mais simples: um pequeno exemplo de ajuste fino LoRA que os usuários podem executar, entender e expandir.
+O Unsloth também oferece suporte a outras abordagens de treinamento, incluindo QLoRA e fluxos de trabalho de aprendizado por reforço. Este playbook foca primeiro no caminho mais simples: um pequeno exemplo de fine-tuning com LoRA que os usuários podem executar, entender e expandir.
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Configurando a Memória
+## Definindo a configuração de memória
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Verificar Atualizações de Software
+## Verificar atualizações de software
 > **Observação**: Se o VS Code não estiver instalado, você pode instalá-lo com o Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalando os Pré-requisitos de Software
+## Instalando os pré-requisitos de software
 
-### Criar um Ambiente Virtual
+<!-- @prereq:hf-models-gemma-4-e4b-it,hf-datasets-finetome-100k -->
+
+### Criar um ambiente virtual
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Abra um terminal e crie um venv com o software AMD ROCm™ e o PyTorch já instalados:
-<!-- @test:id=create-venv timeout=120 -->
+Abra um terminal e crie um venv com o AMD ROCm™ software e o PyTorch já instalados:
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 python3 -m venv unsloth-env --system-site-packages
@@ -87,7 +89,7 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Conceda ao seu usuário acesso aos dispositivos de GPU** (é necessário sair e entrar novamente na sessão para que isso tenha efeito):
+**Conceda ao seu usuário acesso aos dispositivos de GPU** (saia e entre novamente na sessão para que isso tenha efeito):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -107,10 +109,10 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Observação:** O Python 3.13 é necessário para o Windows.
+> **Observação:** O Python 3.13 é obrigatório no Windows.
 
 <!-- @device:halo_box -->
-Abra um terminal PowerShell e crie um ambiente virtual:
+Abra um terminal do PowerShell e crie um ambiente virtual:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -121,7 +123,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Abra um terminal PowerShell e crie um ambiente virtual:
+Abra um terminal do PowerShell e crie um ambiente virtual:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -132,12 +134,12 @@ python -m venv unsloth-env
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Instalando as Dependências Básicas
+### Instalando dependências básicas
 <!-- @require:driver -->
 
-> **Importante:** O Unsloth ainda não suporta a build do PyTorch 2.13 que acompanha o ROCm 10. Para este playbook, instale o **ROCm 7.14 com PyTorch 2.12** usando os comandos abaixo. Não use os pacotes do ROCm 10 / PyTorch 2.13.
+> **Importante:** O Unsloth ainda não oferece suporte ao build do PyTorch 2.13 que acompanha o ROCm 10. Para este playbook, instale o **ROCm 7.14 com PyTorch 2.12** usando os comandos abaixo. Não use os pacotes ROCm 10 / PyTorch 2.13.
 
-**Instale o PyTorch com suporte ao software AMD ROCm™** no ambiente virtual criado:
+**Instale o PyTorch com suporte ao AMD ROCm™ software** no ambiente virtual criado:
 
 <!-- @device:halo,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
@@ -179,7 +181,7 @@ python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "tor
 <!-- @test:end -->
 <!-- @device:end -->
 
-Para outros dispositivos, consulte a [Documentação do ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) para instruções completas.
+Para outros dispositivos, consulte a [documentação do ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) para instruções completas.
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -197,7 +199,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
 
-### Dependências Adicionais
+### Dependências adicionais
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
@@ -215,10 +217,10 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Observação:** Durante a importação, o Unsloth pode verificar caminhos de aceleração opcionais do `bitsandbytes`. Em algumas versões do ROCm, você pode ver uma mensagem como `bitsandbytes library load error: Configured ROCm binary not found`. Este playbook usa ajuste fino LoRA padrão com `optim="adamw_torch"`, portanto não dependemos do otimizador `bitsandbytes` nem do QLoRA de 4 bits. Essa mensagem pode ser ignorada com segurança.
+> **Observação:** Durante a importação, o Unsloth pode testar caminhos opcionais de aceleração do `bitsandbytes`. Em algumas versões do ROCm, você pode ver uma mensagem como `bitsandbytes library load error: Configured ROCm binary not found`. Este playbook usa fine-tuning padrão com LoRA e `optim="adamw_torch"`, portanto não dependemos do otimizador `bitsandbytes` nem do QLoRA de 4 bits. Essa mensagem pode ser ignorada com segurança.
 
 <!-- @os:windows -->
-> **Observação:** No Windows com ROCm, o Unsloth exibirá vários avisos ao iniciar — veja [Avisos Conhecidos](#known-warnings) abaixo. Todos podem ser ignorados com segurança; o treinamento funciona corretamente.
+> **Observação:** No Windows com ROCm, o Unsloth exibirá vários avisos na inicialização — veja [Avisos conhecidos](#known-warnings) abaixo. Todos podem ser ignorados com segurança; o treinamento funciona corretamente.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -241,7 +243,7 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Baixe o Script de Ajuste Fino do Unsloth
+## Baixe o script de fine-tuning do Unsloth
 
 Em vez de executar manualmente cada etapa, este playbook disponibiliza um script limpo e completo aqui: [test_unsloth.py](assets/test_unsloth.py).
 
@@ -278,14 +280,14 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-O restante do playbook percorrerá conceitualmente cada etapa principal do script.
+O restante do playbook percorrerá conceitualmente cada etapa principal do script. 
 
-## Como Funciona
+## Como funciona
 
 O script test_unsloth.py executa as seguintes etapas:
-* **Carregar Modelo**: Carrega o unsloth/gemma-4-E4B-it usando FastModel.
-* **Preparar Dados**: Padroniza o dataset (por exemplo, FineTome-100k) e aplica o template de chat do Gemma-4.
-* **Aplicar LoRA**: Adiciona adaptadores aos módulos de linguagem, atenção e MLP para um treinamento eficiente.
+* **Carregar o modelo**: Carrega o unsloth/gemma-4-E4B-it usando o FastModel.
+* **Preparar os dados**: Padroniza o dataset (por exemplo, FineTome-100k) e aplica o template de chat do Gemma-4.
+* **Aplicar o LoRA**: Adiciona adaptadores aos módulos de linguagem, atenção e MLP para um treinamento eficiente.
 * **Treinar**: Usa o SFTTrainer com mascaramento de perda apenas na resposta.
 * **Inferência**: Executa um teste rápido de geração para verificar o desempenho.
 * **Salvar**: Exporta os adaptadores LoRA localmente.
@@ -304,7 +306,7 @@ Exemplo da mensagem de boas-vindas do Unsloth e da saída ao carregar os pesos d
 
 ![alt text](assets/welcome.png)
 
-## Preparar Dataset
+## Preparar o Dataset
 
 Usamos um subconjunto de:
 ```text
@@ -312,17 +314,17 @@ mlabonne/FineTome-100k
 ```
 O dataset é: 
 * Convertido para o formato de chat
-* Processado usando o template de chat Gemma-4
+* Processado usando o template de chat do Gemma-4
 * Limpo para remover tokens BOS duplicados
 
 ## Treinar o Modelo
 
-O script executa uma demonstração de treinamento curta, com os seguintes parâmetros:
+O script executa uma breve demonstração de treinamento, com os seguintes parâmetros:
 - ~50 etapas
 - Tamanho de lote pequeno
-- Acumulação de gradiente
+- Acúmulo de gradiente
 
-Durante o treinamento, você verá logs como:
+Durante o treinamento, você verá logs como estes:
 
 ![alt text](assets/training.png)
 
@@ -373,7 +375,7 @@ print(f"Found adapter weights: {adapter_weights}")
 ### Salvar modelo mesclado (para vLLM) 
 
 <!-- @os:windows -->
-> **Observação:** o vLLM não é compatível com Windows. Para implantar seu modelo ajustado no Windows, use o llama.cpp (veja [Exportar GGUF](#export-gguf-for-llamacpp) abaixo) ou transfira o modelo mesclado para uma máquina Linux executando vLLM.
+> **Observação:** o vLLM não é compatível com Windows. Para implantar seu modelo ajustado no Windows, use o llama.cpp (consulte [Exportar GGUF](#export-gguf-for-llamacpp) abaixo) ou transfira o modelo mesclado para uma máquina Linux executando vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -425,14 +427,14 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Avisos Conhecidos
 
-Esses avisos são exibidos pelo Unsloth na inicialização no Windows ROCm e todos são seguros para ignorar:
+Estes avisos são exibidos pelo Unsloth na inicialização no Windows ROCm e todos podem ser ignorados com segurança:
 
-| Aviso | Motivo | Seguro para ignorar? |
+| Aviso | Motivo | Seguro ignorar? |
 |---|---|---|
-| `bitsandbytes library load error` | O bitsandbytes não possui build para Windows ROCm | Sim — este playbook usa `adamw_torch`, não bnb |
-| `No ROCm platform found for torch.distributed` | O ROCm no Windows não possui treinamento distribuído | Sim — o treinamento com uma única GPU não é afetado |
+| `bitsandbytes library load error` | O bitsandbytes não possui build para Windows ROCm | Sim — este playbook usa `adamw_torch`, não o bnb |
+| `No ROCm platform found for torch.distributed` | O ROCm no Windows não oferece suporte a treinamento distribuído | Sim — o treinamento com uma única GPU não é afetado |
 | `Unsloth: WARNING! You are using an unsupported platform` | O Unsloth sinaliza builds não Linux | Sim — o Windows ROCm funciona para SFT com uma única GPU |
-| `triton is not available` | O Triton não possui build para Windows | Sim — o Unsloth recorre aos kernels do PyTorch |
+| `triton is not available` | O Triton não possui build para Windows | Sim — o Unsloth volta a usar os kernels do PyTorch |
 
 O treinamento prosseguirá corretamente apesar desses avisos.
 <!-- @os:end -->
@@ -440,16 +442,16 @@ O treinamento prosseguirá corretamente apesar desses avisos.
 ## Próximos Passos
 - Experimente o [Unsloth Studio](https://unsloth.ai/docs/new/studio), uma GUI intuitiva para o Unsloth
 - Treine com seus próprios datasets específicos
-- Experimente o fine-tuning com diferentes hiperparâmetros
+- Experimente o ajuste fino com diferentes hiperparâmetros
 - Implante com vLLM ou llama.cpp
 - Experimente o QLoRA para uma configuração com menor uso de memória
 
 ## Recursos
 
-Abaixo estão alguns recursos adicionais para saber mais sobre Unsloth e fine-tuning:
+Abaixo estão alguns recursos adicionais para saber mais sobre o Unsloth e o ajuste fino:
 
 * [Documentação do Unsloth](https://docs.unsloth.ai)
 
-* [Unsloth GitHub](https://github.com/unslothai/unsloth)
+* [Unsloth no GitHub](https://github.com/unslothai/unsloth)
 
-* [Guia de Fine-tuning do Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [Guia de Ajuste Fino do Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

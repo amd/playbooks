@@ -17,45 +17,45 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-מפתחים מבלים זמן רב בלולאות קטנות וחוזרות: סקירת בקשות משיכה (pull requests) מתויגות, מענה לתגובות ב-GitHub, מיון (triaging) בעיות חדשות, הפיכת שרשורי Slack לעדכוני סטטוס יומיים או למעקבי תקריות, ומעקב אחר שחרורים או אותות מחקר.
-כל לולאה מוכרת, אך היא עדיין דורשת שיקול דעת: לאסוף את ההקשר הנכון, להחליט מה חשוב, ולפרסם עדכון ברור במקום שבו הצוות כבר עובד.
+מפתחים מבלים זמן רב בלולאות חוזרות וקטנות: סקירת בקשות משיכה (pull requests) מתויגות, מענה לתגובות ב-GitHub, מיון בעיות חדשות, הפיכת שרשורי Slack לתקצירי סטטוס יומי או מעקבי תקריות, ומעקב אחר אותות שחרור או מחקר.
+כל לולאה מוכרת, אך עדיין דורשת שיקול דעת: איסוף ההקשר הנכון, החלטה מה חשוב, ופרסום עדכון ברור במקום שבו הצוות כבר עובד.
 
-[אוטומציות OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) הופכות את הלולאות הללו לשיחות סוכן (agent) מתוזמנות או מופעלות על ידי אירוע: הרצות שבהן סוכן תוכנה מבוסס AI יכול לקרוא הקשר, לקרוא לכלים, ולהפיק עדכון.
-תבניות האוטומציה המשותפות בקטלוג ההרחבות של OpenHands עוקבות אחר תבנית זו עבור סקירת בקשות משיכה ב-GitHub, ניטור מאגר קוד, מיון בעיות ב-Linear, ניתוחי תקריות בדיעבד, תקצירי עמידה יומית ב-Slack, ותקצירי מחקר: אוטומציה מתעוררת, משתמשת באינטגרציות מוגדרות כגון GitHub או Slack כדי לאחזר הקשר, מנמקת על ההקשר הזה עם מודל שפה גדול (LLM), וכותבת בחזרה תוצאה.
+[אוטומציות של OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) הופכות לולאות אלו לשיחות סוכן מתוזמנות או מופעלות באירוע: ריצות שבהן סוכן תוכנה מבוסס בינה מלאכותית יכול לקרוא הקשר, לקרוא לכלים, וליצור עדכון.
+תבניות האוטומציה המשותפות בקטלוג ההרחבות של OpenHands עוקבות אחר דפוס זה עבור סקירת בקשות משיכה ב-GitHub, מעקב אחר מאגרים, מיון בעיות ב-Linear, סיכומי תקריות, תקצירי סטטוס יומי ב-Slack, ותקצירי מחקר: אוטומציה מתעוררת, משתמשת באינטגרציות מוגדרות כגון GitHub או Slack כדי לאחזר הקשר, מנתחת את ההקשר הזה באמצעות מודל שפה גדול (LLM), וכותבת בחזרה תוצאה.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) הוא מישור הבקרה המקומי לבניית ובדיקת האוטומציות הללו.
-במדריך זה הוא מריץ OpenHands Agent Server, תהליך הרקע שמבצע שיחות סוכן, ומחבר את הסוכן לשירותים חיצוניים כגון GitHub ו-Slack.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) הוא מישור הבקרה המקומי לבניית ובדיקת אוטומציות אלו.
+במדריך זה הוא מריץ OpenHands Agent Server, תהליך הקצה האחורי שמבצע שיחות סוכן, ומחבר את הסוכן לשירותים חיצוניים כגון GitHub ו-Slack.
 
-כדי לשמור על זרימת העבודה במערכת ה-AMD שלכם, הסוכן מדבר עם מודל מקומי המוגש על ידי Lemonade Server.
-Lemonade חושף את המודל הזה דרך API תואם OpenAI, כך ש-Agent Canvas יכול להגדיר אותו כמו נקודת קצה מרוחקת בסגנון OpenAI, בעוד המודל, ההנחיה (prompt) והקשר זרימת העבודה נשארים מקומיים.
+כדי לשמור על זרימת העבודה במערכת ה-AMD שלך, הסוכן מדבר עם מודל מקומי המוגש על ידי Lemonade Server.
+Lemonade חושף את המודל הזה דרך API תואם-OpenAI, כך ש-Agent Canvas יכול להגדיר אותו כנקודת קצה מרוחקת בסגנון OpenAI, בעוד שהמודל, ה-prompt, והקשר זרימת העבודה נשארים מקומיים.
 
-במדריך זה, תבנו אוטומציה קונקרטית אחת: תקציר פיתוח מתוזמן מ-GitHub ל-Slack.
-הוא משתמש ב-GitHub כדי לבדוק פעילות מאגר קוד עדכנית, ב-Slack כדי לפרסם את התקציר, בקריאות API של Agent Canvas כדי להגדיר ולבדוק את האוטומציה, וב-Lemonade כדי להריץ את ה-LLM באופן מקומי.
+במדריך זה, תבנה אוטומציה קונקרטית אחת: תקציר פיתוח מתוזמן מ-GitHub ל-Slack.
+הוא משתמש ב-GitHub כדי לבדוק פעילות מאגר אחרונה, ב-Slack כדי לפרסם את התקציר, בקריאות API של Agent Canvas כדי להגדיר ולבדוק את האוטומציה, וב-Lemonade כדי להריץ את ה-LLM מקומית.
 
 ![תרשים ארכיטקטורה המציג GitHub MCP, אוטומציית OpenHands, Lemonade Server, ו-Slack MCP](assets/00-architecture-overview.png)
 
-## מה תלמדו
+## מה תלמד
 
 - כיצד להפעיל את Lemonade Server ולוודא שמודל מקומי עונה לבקשות צ'אט
-- כיצד להשיק את Agent Canvas ולהצביע את ה-Agent Server שלו למודל LLM מקומי
-- כיצד להתקין שרתי Model Context Protocol (MCP) של GitHub ו-Slack דרך ה-API של Agent Server
-- כיצד ליצור ולשגר אוטומציית OpenHands מתוזמנת שמפרסמת תקציר פיתוח ל-Slack
-- כיצד לפתור את כשלי המודל המקומי והאוטומציה הנפוצים ביותר
+- כיצד להפעיל את Agent Canvas ולהצביע את Agent Server שלו למודל LLM מקומי
+- כיצד להתקין שרתי Model Context Protocol (MCP) עבור GitHub ו-Slack דרך ה-API של Agent Server
+- כיצד ליצור ולהפעיל אוטומציית OpenHands מתוזמנת שמפרסמת תקציר פיתוח ל-Slack
+- כיצד לפתור את הכשלים הנפוצים ביותר הקשורים למודל מקומי ואוטומציה
 
-## מושגי ליבה
+## מושגי יסוד
 
 | מושג | מה זה | היכן זה משתלב במדריך זה |
 | --- | --- | --- |
-| Lemonade Server | פלטפורמת הגשה מקומית ל-LLM שנבנתה עבור חומרת AMD וחושפת API תואם OpenAI. הנתונים שלכם לעולם לא עוזבים את המחשב שלכם. | מריץ את המודל שמפעיל את הסוכן. |
-| OpenHands Agent Server | תהליך הרקע שמבצע שיחות סוכן של OpenHands. | מארח את הסוכן, פרופיל ה-LLM שלו, ושרתי ה-MCP שלו. |
-| Agent Canvas | מישור הבקרה המקומי עבור OpenHands שמריץ Agent Server וממשק משתמש לבדיקת הרצות סוכן. | משיק את שרתי הרקע ומספק את ה-API שאתם קוראים לו. |
-| שרת MCP | שרת Model Context Protocol שמעניק לסוכן כלים עבור שירות חיצוני כגון GitHub או Slack. | מאפשר לסוכן לקרוא מ-GitHub ולכתוב ל-Slack. |
-| אוטומציית OpenHands | שיחת סוכן מתוזמנת או מופעלת על ידי אירוע שמאחזרת הקשר, מנמקת עליו, וכותבת תוצאה למקום כלשהו. | תקציר ה-GitHub-ל-Slack שאתם בונים כאן. |
+| Lemonade Server | פלטפורמת הגשת LLM מקומית שנבנתה עבור חומרת AMD וחושפת API תואם-OpenAI. הנתונים שלך לעולם לא יוצאים מהמכונה שלך. | מריץ את המודל שמפעיל את הסוכן. |
+| OpenHands Agent Server | תהליך הקצה האחורי שמבצע שיחות סוכן של OpenHands. | מארח את הסוכן, פרופיל ה-LLM שלו, ושרתי ה-MCP שלו. |
+| Agent Canvas | מישור הבקרה המקומי של OpenHands שמריץ את Agent Server וממשק משתמש לבדיקת ריצות סוכן. | מפעיל את הקצוות האחוריים ומספק את ה-API שאתה קורא לו. |
+| שרת MCP | שרת Model Context Protocol שנותן לסוכן כלים עבור שירות חיצוני כגון GitHub או Slack. | מאפשר לסוכן לקרוא מ-GitHub ולכתוב ל-Slack. |
+| אוטומציית OpenHands | שיחת סוכן מתוזמנת או מופעלת באירוע שמאחזרת הקשר, מנתחת אותו, וכותבת תוצאה לאנשהו. | תקציר ה-GitHub-ל-Slack שאתה בונה כאן. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> זרימות עבודה של סוכן קידוד נהנות ממודל גדול יותר וחלון הקשר גדול יותר.
-> השתמשו לפחות ב-32 ג'יגה-בייט של זיכרון מערכת, ועדיפו 64 ג'יגה-בייט או יותר עבור מודלי GGUF גדולים יותר.
+> זרימות עבודה של סוכן קידוד נהנות ממודל גדול יותר וחלון הקשר רחב יותר.
+> השתמש לפחות ב-32 ג'יגה-בייט זיכרון מערכת, ועדיף 64 ג'יגה-בייט או יותר עבור מודלי GGUF גדולים יותר.
 <!-- @device:end -->
 
 ## הגדרת תצורת הזיכרון
@@ -70,36 +70,42 @@ Lemonade חושף את המודל הזה דרך API תואם OpenAI, כך ש-Age
 
 ## דרישות מוקדמות
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas); host npm is only used by CI to resolve the MCP packages. -->
+<!-- @prereq:docker,nodejs,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
-אתם זקוקים ל:
+עליך:
 
-- Lemonade Server מותקן בהתאם ל[מדריך ההתקנה הרגיל של Lemonade](https://lemonade-server.ai/docs/guide/install/).
+- להתקין את Lemonade Server על ידי ביצוע [מדריך ההתקנה הסטנדרטי של Lemonade](https://lemonade-server.ai/docs/guide/install/).
 
 <!-- @os:linux -->
-- Node.js 22.12 ואילך ו-`npm`, המשמשים להתקנת ה-CLI המפורסם של Agent Canvas ולהרצת שרתי MCP באמצעות `npx`.
-- `uv`, מנהל חבילות ה-Python ש-Agent Canvas משתמש בו לבניית סביבת ה-Agent Server. אם הוא עדיין לא מותקן, התקינו אותו מ[מדריך ההתקנה של uv](https://docs.astral.sh/uv/getting-started/installation/).
-- חבילת `@openhands/agent-canvas` מפורסמת ועדכנית עם הגדרות סוכן מבוססות סכימה, `LLMSummarizingCondenserSettings.max_tokens`, ותמיכה ב-LLM `custom_tokenizer`.
-- חבילת ה-Python `transformers` זמינה בסביבת ה-Agent Server. היא נדרשת לספירת אסימונים (tokens) של תבנית צ'אט כאשר `custom_tokenizer` מוגדר.
+- Node.js 22.12 ומעלה ו-`npm`, המשמשים להתקנת ה-CLI המפורסם של Agent Canvas ולהרצת שרתי MCP באמצעות `npx`.
+- `uv`, מנהל חבילות ה-Python ש-Agent Canvas משתמש בו כדי לבנות את סביבת Agent Server. אם הוא עדיין לא מותקן, התקן אותו מתוך [מדריך ההתקנה של uv](https://docs.astral.sh/uv/getting-started/installation/).
+- חבילת `@openhands/agent-canvas` מפורסמת ועדכנית עם הגדרות סוכן מבוססות סכמה, `LLMSummarizingCondenserSettings.max_tokens`, ותמיכה ב-`custom_tokenizer` של LLM.
+- חבילת ה-Python `transformers` זמינה בסביבת Agent Server. היא נדרשת לספירת אסימונים (token) של תבניות צ'אט כאשר `custom_tokenizer` מוגדר.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/), מותקן ופועל. ב-Windows, ערימת Agent Canvas פועלת מתוך תמונת ה-Docker המפורסמת, שכוללת Node.js, `uv`, `transformers`, וחבילת `@openhands/agent-canvas`, כך שאין צורך להתקין אותם על המארח.
+- [Docker Desktop עבור Windows](https://docs.docker.com/desktop/setup/install/windows-install/), מותקן ופועל. ב-Windows, ערימת Agent Canvas פועלת מתוך תמונת ה-Docker המפורסמת, הכוללת את Node.js, `uv`, `transformers`, וחבילת `@openhands/agent-canvas`, כך שאינך צריך להתקין אותם במארח.
 <!-- @os:end -->
 
-- אסימון (token) GitHub עם גישת קריאה למאגר הקוד שברצונכם לסכם.
-- אסימון בוט Slack (`xoxb-...`) עם `chat:write` וגישת קריאה לערוץ.
+- טוקן GitHub עם גישת קריאה למאגר שברצונך לסכם.
+- טוקן בוט Slack (`xoxb-...`) עם `chat:write` וגישת קריאה לערוץ.
 - מזהה צוות Slack (`T...`).
 - מזהה ערוץ Slack (`C...`) שבו יש לפרסם את התקציר.
 
-הזמינו את אפליקציית ה-Slack לערוץ היעד לפני בדיקת האוטומציה.
-## המשתנים בהם נעשה שימוש במדריך זה
+הזמן את אפליקציית Slack לערוץ היעד לפני בדיקת האוטומציה.
+## משתנים המשמשים במדריך זה
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -117,8 +123,8 @@ $env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
 ```
 <!-- @os:end -->
 
-שני המשתנים הללו משמשים בפקודות האימות שבהמשך.
-המודל, הטוקנייזר והגדרות ה-LLM האחרות מוזנים ישירות בממשק Agent Canvas UI בשלבים מאוחרים יותר, כך שהערכים המילוליים שלהם מוצגים בטקסט במקום שבו הם נדרשים.
+שני משתנים אלה משמשים בפקודות האימות שלהלן.
+המודל, ה-tokenizer והגדרות LLM אחרות מוזנות ישירות בממשק Agent Canvas UI בשלבים מאוחרים יותר, כך שהערכים המילוליים שלהם מוצגים inline במקום שבו תזדקקו להם.
 
 הערכים הבאים מוזנים בממשק Agent Canvas UI בשלבים מאוחרים יותר.
 הגדירו אותם כאן כדי שתוכלו להעתיק אותם:
@@ -139,8 +145,8 @@ $env:DIGEST_TIMEZONE = "America/New_York"
 ```
 <!-- @os:end -->
 
-השתמשו בערך מפורש בפורמט `owner/repo` עבור `GITHUB_REPO_FILTER`.
-תווי-כלל רחבים ברמת הארגון עלולים להחזיר יותר מדי הקשר MCP עבור מודלים מקומיים.
+השתמשו בערך מפורש בצורת `owner/repo` עבור `GITHUB_REPO_FILTER`.
+תווי wildcard רחבים ברמת הארגון עלולים להחזיר יותר מדי הקשר MCP עבור מודלים מקומיים.
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -148,9 +154,9 @@ lemonade --version
 ```
 <!-- @test:end -->
 
-## 1. הפעלת Lemonade Server
+## 1. הפעלת שרת Lemonade
 
-הפעילו את המודל מה-Lemonade CLI:
+הפעילו את המודל מתוך ה-Lemonade CLI:
 
 <!-- @os:linux -->
 ```bash
@@ -168,19 +174,19 @@ lemonade run "$env:LEMONADE_MODEL"
 ```
 <!-- @os:end -->
 
-> **בחרו מודל המתאים לחומרה שלכם.** `Qwen3.6-35B-A3B-GGUF` (כ-20 GB) הוא מודל חזק עבור זרימת עבודה זו, אך דורש מאגר זיכרון גדול.
-> אם למכשיר שלכם יש זיכרון מוגבל או VRAM מוגבל של ה-GPU, בחרו מודל GGUF קטן יותר מספריית המודלים של Lemonade והשתמשו במזהה המודל הזה (וב-tokenizer המתאים לו) לאורך כל המדריך.
+> **בחרו מודל המתאים לחומרה שלכם.** `Qwen3.6-35B-A3B-GGUF` (כ-20GB) הוא מודל חזק לתהליך עבודה זה אך דורש מאגר זיכרון גדול.
+> אם למכשיר שלכם יש זיכרון מוגבל או VRAM מוגבל של ה-GPU, בחרו מודל GGUF קטן יותר מספריית המודלים של Lemonade והשתמשו במזהה המודל הזה (ובה-tokenizer המתאים לו) לאורך כל המדריך הזה.
 
-> **הערה:** הפעלת ה-`lemonade run` הראשונה מורידה את המודל אם הוא עדיין לא קיים, מה שעשוי לקחת זמן מה בהתאם לגודל המודל ולחיבור שלכם.
+> **הערה:** ההרצה הראשונה של `lemonade run` מורידה את המודל אם הוא עדיין לא קיים, מה שעשוי לקחת זמן מה בהתאם לגודל המודל ולחיבור שלכם.
 
-Lemonade חושף API תואם OpenAI בכתובת:
+Lemonade חושף API תואם-OpenAI בכתובת:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-אופציונלי: אם Agent Canvas או מריץ האוטומציה אינם על אותה מכונה, פרסמו את נקודת הקצה (endpoint) של Lemonade באמצעות מנהרה מאובטחת והשתמשו בכתובת ה-HTTPS ככתובת הבסיס של ה-LLM.
-[ngrok](https://ngrok.com/) חושף פורט מקומי לאינטרנט דרך כתובת HTTPS מאובטחת; הדבר דורש חשבון ngrok חינמי, ואתם מחליפים את `YOUR_NGROK_DOMAIN.ngrok-free.dev` בדומיין השמור שלכם:
+אופציונלי: אם Agent Canvas או מריץ האוטומציה אינם על אותה מכונה, פרסמו את ה-endpoint של Lemonade דרך מנהרה מאובטחת והשתמשו בכתובת ה-HTTPS ככתובת הבסיס (base URL) של ה-LLM.
+[ngrok](https://ngrok.com/) חושף פורט מקומי לאינטרנט דרך כתובת HTTPS מאובטחת; הוא דורש חשבון ngrok חינמי, ואתם מחליפים את `YOUR_NGROK_DOMAIN.ngrok-free.dev` בדומיין השמור שלכם:
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -190,7 +196,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 ## 2. אימות המודל המקומי
 
-ודאו ש-Lemonade יכול להגיש את המודל שנבחר:
+ודאו ש-Lemonade יכול להגיש את המודל הנבחר:
 
 <!-- @os:linux -->
 ```bash
@@ -354,45 +360,45 @@ npm -v
 ## 3. הפעלת Agent Canvas
 
 <!-- @os:linux -->
-התקינו את חבילת Agent Canvas שפורסמה והפעילו את המחסנית המלאה:
+התקינו את חבילת Agent Canvas המפורסמת והפעילו את כל המחסנית (stack):
 
 ```bash
 npm install -g @openhands/agent-canvas
 agent-canvas
 ```
 
-אם התקנת ה-npm הגלובלית נכשלת עם שגיאת הרשאות, עיינו בערך פתרון בעיות הרשאות ה-npm שבהמשך.
+אם התקנת ה-npm הגלובלית נכשלת עם שגיאת הרשאות, עיינו בפריט פתרון בעיות הרשאות npm שלהלן.
 
 כברירת מחדל, Agent Canvas מופעל בכתובת `http://localhost:8000`.
 פתחו את הכתובת הזו בדפדפן שלכם.
-הפורט אינו מיוחד—אם הפורט 8000 כבר בשימוש, העבירו כל פורט פנוי באמצעות `--port` (או `-p`).
-המערכת המקומית המוגדרת כברירת מחדל אמורה להופיע כתקינה (healthy) במסך הבית.
+הפורט אינו מיוחד—אם 8000 כבר תפוס, העבירו כל פורט פנוי באמצעות `--port` (או `-p`).
+הבק-אנד המקומי כברירת מחדל אמור להופיע כתקין במסך הבית.
 
-> **הערה:** ההפעלה הראשונה בונה את סביבת ה-Python המנוהלת על ידי `uv` של Agent Server, כך שהדבר עשוי לקחת מספר דקות לפני שהמערכת האחורית (backend) תדווח כתקינה.
+> **הערה:** ההפעלה הראשונה בונה את סביבת הפייתון המנוהלת על ידי `uv` של Agent Server, כך שזה עשוי לקחת כמה דקות לפני שהבק-אנד יתעד כתקין.
 
-הפקודה `agent-canvas` מפעילה יחד את שרת הסוכן, את מערכת האוטומציה האחורית ואת חזית האינטרנט (web frontend).
-דרושה לכם רק פקודה אחת זו כדי להריץ את OpenHands באופן מקומי.
-שאר המדריך הזה מגדיר הכול דרך ממשק Agent Canvas UI בדפדפן שלכם.
+הפקודה `agent-canvas` מפעילה את שרת הסוכן, בק-אנד האוטומציה, ואת ה-frontend של האתר יחד.
+אתם זקוקים רק לפקודה אחת זו כדי להריץ את OpenHands באופן מקומי.
+שאר המדריך הזה מגדיר את הכול דרך ממשק Agent Canvas UI בדפדפן שלכם.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-ב-Windows, הריצו את תמונת מכולת Agent Canvas שפורסמה עם Docker Desktop.
-התמונה כוללת את שרת הסוכן, את מערכת האוטומציה האחורית ואת חזית האינטרנט, כך שאין צורך להתקין Node.js, `uv`, או ה-CLI על המארח.
+ב-Windows, הריצו את תמונת הקונטיינר המפורסמת של Agent Canvas עם Docker Desktop.
+התמונה כוללת את Agent Server, בק-אנד האוטומציה, ואת ה-frontend של האתר, כך שאינכם צריכים להתקין Node.js, `uv`, או ה-CLI על המארח.
 
-ראשית, צרו את תיקיות התצורה וסביבת העבודה שהמכולה מעגנת (mounts):
+ראשית, צרו את תיקיות התצורה וסביבת העבודה שהקונטיינר מצמיד (mounts):
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-משכו את התמונה שפורסמה (כ-6 GB; היא ציבורית, כך שלא נדרשת התחברות):
+משכו את התמונה המפורסמת (כ-6GB; היא ציבורית, כך שאין צורך בהתחברות):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-לאחר מכן הפעילו את המחסנית:
+לאחר מכן הפעילו את המחסנית (stack):
 
 ```powershell
 docker run -it --rm `
@@ -403,12 +409,12 @@ docker run -it --rm `
 ```
 
 פתחו את `http://localhost:8000/canvas` בדפדפן שלכם.
-אם הפורט 8000 כבר בשימוש, מפו פורט מארח אחר, לדוגמה `-p 8080:8000`, ופתחו במקום זאת את `http://localhost:8080/canvas`.
+אם פורט 8000 כבר תפוס, מפו פורט מארח אחר, לדוגמה `-p 8080:8000`, ופתחו במקום זאת את `http://localhost:8080/canvas`.
 
-> **הערה:** ההפעלה הראשונה בונה את סביבת Agent Server בתוך המכולה, כך שהדבר עשוי לקחת מספר דקות לפני שהמערכת האחורית תדווח כתקינה.
+> **הערה:** ההפעלה הראשונה בונה את סביבת Agent Server בתוך הקונטיינר, כך שזה עשוי לקחת כמה דקות לפני שהבק-אנד יתעד כתקין.
 
-עיגון ה-`.openhands` שומר את פרופיל ה-LLM שלכם, שרתי MCP והאוטומציות שלכם לאורך הפעלות מחדש של המכולה.
-שאר המדריך הזה מגדיר הכול דרך ממשק Agent Canvas UI בדפדפן שלכם בכתובת `http://localhost:8000/canvas`.
+ההצמדה (mount) `.openhands` שומרת על פרופיל ה-LLM שלכם, שרתי ה-MCP, והאוטומציות שלכם לאורך הפעלות מחדש של הקונטיינר.
+שאר המדריך הזה מגדיר את הכול דרך ממשק Agent Canvas UI בדפדפן שלכם בכתובת `http://localhost:8000/canvas`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -548,17 +554,17 @@ finally {
 3. השאירו את **Authentication** מוגדר ל-**API key**.
 4. הגדירו את **Custom Model** לערך `openai/Qwen3.6-35B-A3B-GGUF`.
 5. הגדירו את **Base URL** לערך `http://127.0.0.1:13305/api/v1`.
-6. עבור **API Key**, הזינו placeholder כלשהו שאינו ריק, כגון `lemonade-local`. Lemonade אינו דורש מפתח אמיתי, אך לקוח OpenHands זקוק לערך כדי לשלוח אותו.
+6. עבור **API Key**, הזינו placeholder כלשהו שאינו ריק, כגון `lemonade-local`. Lemonade אינו דורש מפתח אמיתי, אבל לקוח ה-OpenHands זקוק לערך כלשהו כדי לשלוח.
 
 <!-- @os:windows -->
-> **Windows (Docker):** ה-Agent Server פועל בתוך הקונטיינר, לכן הגדירו את **Base URL** לערך `http://host.docker.internal:13305/api/v1` במקום `http://127.0.0.1:13305/api/v1`.
-> מתוך הקונטיינר, `127.0.0.1` מפנה לקונטיינר עצמו; `host.docker.internal` מגיע ל-Lemonade הפועל על מארח ה-Windows, ו-Docker Desktop מספק את שם המארח הזה באופן אוטומטי.
+> **Windows (Docker):** שרת ה-Agent פועל בתוך הקונטיינר, לכן הגדירו את **Base URL** לערך `http://host.docker.internal:13305/api/v1` במקום `http://127.0.0.1:13305/api/v1`.
+> מתוך הקונטיינר, `127.0.0.1` מתייחס לקונטיינר עצמו; `host.docker.internal` מגיע ל-Lemonade הרץ על מארח ה-Windows, ו-Docker Desktop מספק את שם המארח הזה אוטומטית.
 <!-- @os:end -->
 
 שדות החיבור אמורים להיראות כך.
-שדה מפתח ה-API מוסתר על ידי הממשק.
+שדה ה-API key מוסתר על ידי הממשק.
 
-![הגדרות LLM Advanced בשימוש ראשון ב-Agent Canvas עם מודל Lemonade וכתובת בסיס מקומית](assets/01-llm-advanced-settings.png)
+![הגדרות LLM Advanced בשימוש ראשון ב-Agent Canvas עם מודל Lemonade וכתובת base URL מקומית](assets/01-llm-advanced-settings.png)
 
 לאחר מכן בחרו **All** והגדירו את שדות המודל המקומי הנוספים:
 
@@ -566,9 +572,9 @@ finally {
 2. גללו אל **LiteLLM Extra Body** והגדירו אותו לערך `{"enable_thinking": true}`.
 3. לחצו על **Next**.
 
-![לשונית LLM All בשימוש ראשון ב-Agent Canvas עם ה-tokenizer המותאם של Qwen](assets/02-llm-all-tokenizer-settings.png)
+![כרטיסיית LLM All בשימוש ראשון ב-Agent Canvas עם ה-custom tokenizer של Qwen](assets/02-llm-all-tokenizer-settings.png)
 
-![לשונית LLM All בשימוש ראשון ב-Agent Canvas עם extra body מוגדר עבור LiteLLM](assets/03-llm-all-extra-body-settings.png)
+![כרטיסיית LLM All בשימוש ראשון ב-Agent Canvas עם LiteLLM extra body מוגדר](assets/03-llm-all-extra-body-settings.png)
 
 הגדרות ה-LLM אמורות להציג:
 
@@ -579,22 +585,22 @@ finally {
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
 | LiteLLM extra body | `{"enable_thinking": true}` |
 
-הקידומת `openai/` מודיעה ל-LiteLLM להשתמש בפורמט בקשות תואם-OpenAI מול נקודת הקצה של Lemonade.
-ה-tokenizer המותאם הוא ה-tokenizer המקורי של Hugging Face עבור מודל ה-GGUF; הוא מאפשר ל-OpenHands לספור את אותם טוקנים של תבנית הצ'אט שרואה שרת המודל המקומי.
-טופס ה-LLM הנוכחי לשימוש ראשון אינו מציג הגדרות condenser.
-אם גרסת ה-Agent Canvas שלכם חושפת הגדרות condenser מאוחר יותר תחת **Settings > LLM**, השתמשו ב-`llm_summarizing` והגדירו מספר טוקנים מקסימלי מתחת לחלון ההקשר (context window) של Lemonade, כגון `56000`.
+הקידומת `openai/` מורה ל-LiteLLM להשתמש בפורמט בקשות תואם OpenAI מול נקודת הקצה של Lemonade.
+ה-custom tokenizer הוא ה-tokenizer המקורי של Hugging Face עבור מודל ה-GGUF; הוא מאפשר ל-OpenHands לספור את אותם טוקנים של chat-template שרואה שרת המודל המקומי.
+טופס ה-LLM הנוכחי בשימוש ראשון אינו מציג הגדרות condenser.
+אם גרסת ה-Agent Canvas שלכם חושפת הגדרות condenser בהמשך תחת **Settings > LLM**, השתמשו ב-`llm_summarizing` והגדירו מספר טוקנים מקסימלי מתחת לחלון ההקשר של Lemonade, כגון `56000`.
 
-## 5. התקנת שרתי MCP עבור GitHub ו-Slack
+## 5. התקנת שרתי MCP של GitHub ו-Slack
 
 בממשק המשתמש של Agent Canvas, פתחו את **Customize** (או **Settings > MCP**) כדי להוסיף את שרתי ה-MCP שמעניקים לסוכן כלים עבור GitHub ו-Slack.
-ערכי הטוקן נשלחים רק אל ה-Agent Server המקומי שלכם ונשמרים כהגדרות מוצפנות.
+ערכי הטוקן נשלחים רק לשרת ה-Agent המקומי שלכם ונשמרים כהגדרות מוצפנות.
 
 <!-- @os:windows -->
-> **Windows (Docker):** פקודות שרת ה-MCP של `npx` להלן פועלות בתוך הקונטיינר, שכולל כבר Node.js, כך שלא מותקן דבר נוסף במארח.
-> מכיוון ש-`.openhands` מחובר (mounted), שרתי ה-MCP והטוקנים שלהם נשמרים גם לאחר הפעלה מחדש של הקונטיינר.
+> **Windows (Docker):** פקודות שרת ה-MCP מסוג `npx` שלהלן פועלות בתוך הקונטיינר, שכבר כולל Node.js, כך שלא מותקן דבר נוסף על המארח.
+> מכיוון ש-`.openhands` מחובר (mounted), שרתי ה-MCP והטוקנים שלהם נשמרים גם לאחר הפעלות מחדש של הקונטיינר.
 <!-- @os:end -->
 
-### שרת MCP עבור GitHub
+### שרת ה-MCP של GitHub
 
 הוסיפו שרת MCP חדש עם ההגדרות הבאות:
 
@@ -603,11 +609,11 @@ finally {
 | Name | `github` |
 | Command | `npx` |
 | Args | `-y @modelcontextprotocol/server-github` |
-| Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = הטוקן שלכם ל-GitHub |
+| Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = טוקן ה-GitHub שלכם |
 
-השתמשו בטוקן GitHub עם הרשאת קריאה למאגר שברצונכם לסכם.
+השתמשו בטוקן GitHub עם הרשאת קריאה ל-repository שברצונכם לסכם.
 
-### שרת MCP עבור Slack
+### שרת ה-MCP של Slack
 
 הוסיפו שרת MCP שני עם ההגדרות הבאות:
 
@@ -618,14 +624,14 @@ finally {
 | Args | `-y @modelcontextprotocol/server-slack` |
 | Env | `SLACK_BOT_TOKEN` = `xoxb-...` |
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
-| Env | `SLACK_CHANNEL_IDS` = מזהה ערוץ הדיגסט שלכם |
+| Env | `SLACK_CHANNEL_IDS` = מזהה ערוץ ה-digest שלכם |
 
-הגדירו את `SLACK_CHANNEL_IDS` למזהה ערוץ הדיגסט (אותו ערך כמו `SLACK_DIGEST_CHANNEL`) כדי שהסוכן לא יצטרך לעבור על כל ערוץ Slack.
+הגדירו את `SLACK_CHANNEL_IDS` למזהה ערוץ ה-digest (אותו ערך כמו `SLACK_DIGEST_CHANNEL`) כדי שהסוכן לא יצטרך לעבור על כל ערוצי ה-Slack.
 
-לאחר הוספת שני השרתים, השתמשו בכפתור **Test** בכל אחד מהם כדי לוודא שהוא מתחבר וחושף כלים.
+לאחר הוספת שני השרתים, השתמשו בכפתור **Test** בכל אחד מהם כדי לאשר שהוא מתחבר ומפרסם כלים (tools).
 שרת ה-GitHub אמור להציג כלי GitHub, ושרת ה-Slack אמור להציג כלי Slack.
 
-![עמוד MCP של Agent Canvas עם שרתי GitHub ו-Slack מותקנים](assets/04-mcp-servers-installed.png)
+![עמוד MCP ב-Agent Canvas עם שרתי GitHub ו-Slack מותקנים](assets/04-mcp-servers-installed.png)
 
 <!-- @test:id=mcp-packages-resolve timeout=300 hidden=True -->
 ```bash
@@ -636,13 +642,13 @@ npm view @modelcontextprotocol/server-slack version
 ```
 <!-- @test:end -->
 
-## 6. יצירת אוטומציית הדיגסט
+## 6. יצירת אוטומציית ה-Digest
 
-בממשק המשתמש של Agent Canvas, פתחו את עמוד **Automations** וצרו אוטומציה חדשה:
+בממשק המשתמש של Agent Canvas, פתחו את עמוד ה-**Automations** וצרו אוטומציה חדשה:
 
-1. בחרו **Create automation** ובחרו בסוג **Prompt preset**.
-2. הגדירו את **Name** לערך `GitHub Development Digest to Slack`.
-3. הגדירו את **Prompt** לטקסט הבא, תוך החלפת ה-placeholders של המאגר והערוץ בערכים שלכם:
+1. בחרו **Create automation** ובחרו את הסוג **Prompt preset**.
+2. הגדירו את ה-**Name** לערך `GitHub Development Digest to Slack`.
+3. הגדירו את ה-**Prompt** לטקסט הבא, תוך החלפת ה-placeholder-ים של ה-repository והערוץ בערכים שלכם:
 
    ```text
    Use the GitHub MCP server for exactly one repository: your-org/your-repo.
@@ -659,38 +665,38 @@ npm view @modelcontextprotocol/server-slack version
    environment variables, or unrelated Slack messages.
    ```
 
-4. הגדירו את **Trigger** לערך **Cron** עם לוח הזמנים `0 9 * * 1-5` (9 בבוקר בימי חול) והגדירו את **Timezone** לאזור הזמן שלכם, לדוגמה `America/New_York`.
-5. הגדירו את **Timeout** לערך `900` שניות.
+4. הגדירו את ה-**Trigger** ל-**Cron** עם לוח הזמנים `0 9 * * 1-5` (9 בבוקר בימי חול) והגדירו את ה-**Timezone** לאזור הזמן שלכם, לדוגמה `America/New_York`.
+5. הגדירו את ה-**Timeout** לערך `900` שניות.
 6. שמרו את האוטומציה.
 
-עמוד פרטי האוטומציה מציג את האוטומציה החדשה עם ה-trigger מסוג cron ונקודת הכניסה (entrypoint) שנוצרה עבור ה-prompt preset.
+עמוד פרטי האוטומציה מציג את האוטומציה החדשה עם ה-trigger מסוג cron וה-entrypoint שנוצר מסוג prompt-preset.
 
-![עמוד פרטי האוטומציה ב-Agent Canvas לאחר היצירה](assets/05-automation-created.png)
+![עמוד פרטי אוטומציה ב-Agent Canvas לאחר יצירה](assets/05-automation-created.png)
 ## 7. בדיקת האוטומציה
 
 מדף הפרטים של האוטומציה בממשק Agent Canvas UI:
 
 1. לחצו על **Run now** (או **Dispatch**) כדי להריץ את האוטומציה פעם אחת באופן מיידי.
-2. עקבו אחר רשימת ההרצות באותו הדף. ההרצה האחרונה אמורה לעבור למצב `COMPLETED`.
-3. פתחו את ערוץ ה-Slack היעד שלכם. הוא אמור להכיל את התקציר שנוצר.
+2. עקבו אחר רשימת ההרצות באותו עמוד. ההרצה האחרונה אמורה לעבור למצב `COMPLETED`.
+3. פתחו את ערוץ ה-Slack היעד שלכם. הוא אמור להכיל את הדיגסט שנוצר.
 
-אין צורך להמתין להפעלת לוח הזמנים של ה-cron—**Run now** מפעיל הרצה לפי דרישה כך שתוכלו לוודא שה-prompt, חיבורי ה-MCP, והפרסום ל-Slack כולם עובדים לפני שתסתמכו על לוח הזמנים.
+אין צורך להמתין להפעלת לוח הזמנים של cron—**Run now** מפעיל הרצה לפי דרישה כך שתוכלו לוודא שה-prompt, חיבורי ה-MCP, והפרסום ב-Slack כולם עובדים לפני ההסתמכות על לוח הזמנים.
 
-![הרצת אוטומציה ב-Agent Canvas שהושלמה בהצלחה](assets/06-automation-run-completed.png)
+![הרצת אוטומציה ב-Agent Canvas הושלמה בהצלחה](assets/06-automation-run-completed.png)
 
-![ערוץ Slack המציג את תקציר ה-OpenHands שנוצר](assets/07-slackbot-message.png)
+![ערוץ Slack מציג את הדיגסט שנוצר עבור OpenHands](assets/07-slackbot-message.png)
 
 ## פתרון בעיות
 
 <!-- @os:windows -->
-- **פורט 8000 של Docker כבר בשימוש:** מפו פורט מארח אחר, לדוגמה `docker run ... -p 8080:8000 ...`, ופתחו את `http://localhost:8080/canvas`.
-- **`docker pull` נכשל עם שגיאת אישורים** (לדוגמה, "A specified logon session does not exist"): הריצו את הפעולה מסשן Windows אינטראקטיבי, או משכו את התמונה מראש. התמונה ציבורית, כך שאין צורך ב-`docker login`.
-- **הממשק נטען אך השרת האחורי אינו תקין:** ההפעלה הראשונה בונה את סביבת Agent Server בתוך הקונטיינר. המתינו דקה ורעננו, ולאחר מכן בדקו את `docker logs <container>` להתקדמות.
-- **Agent Canvas לא מצליח להגיע ל-Lemonade מהקונטיינר:** הגדירו את ה-**Base URL** של ה-LLM ל-`http://host.docker.internal:13305/api/v1` (לא `127.0.0.1`), וודאו ש-Lemonade רץ על מארח Windows.
+- **פורט Docker 8000 כבר בשימוש:** מפו פורט מארח אחר, למשל `docker run ... -p 8080:8000 ...`, ופתחו את `http://localhost:8080/canvas`.
+- **`docker pull` נכשל עם שגיאת אישורים** (לדוגמה, "A specified logon session does not exist"): הריצו את ה-pull מתוך סשן Windows אינטראקטיבי, או בצעו pull מראש לאימג'. האימג' ציבורי, כך שאין צורך ב-`docker login`.
+- **הממשק נטען אך ה-backend אינו תקין:** ההפעלה הראשונה בונה את סביבת ה-Agent Server בתוך הקונטיינר. המתינו דקה ורעננו, ואז בדקו את `docker logs <container>` להתקדמות.
+- **Agent Canvas אינו מצליח להגיע ל-Lemonade מתוך הקונטיינר:** הגדירו את ה-**Base URL** של ה-LLM ל-`http://host.docker.internal:13305/api/v1` (לא `127.0.0.1`), ואמתו ש-Lemonade פועל על מארח Windows.
 <!-- @os:end -->
 
-- **Lemonade לא פעיל:** הפעילו אותו מחדש עם הפקודה `lemonade run "${LEMONADE_MODEL}"` משלב 1, ולאחר מכן הריצו שוב את בדיקת התקינות.
-- **`npm install -g` נכשל עם שגיאת הרשאות:** ב-Linux או WSL, הגדירו תיקיית npm גלובלית בבעלות המשתמש, הוסיפו אותה לקובץ ההפעלה של ה-shell שלכם, ולאחר מכן התקינו את Agent Canvas שוב:
+- **Lemonade לא פועל:** הפעילו אותו מחדש עם הפקודה `lemonade run "${LEMONADE_MODEL}"` משלב 1, ואז הריצו שוב את בדיקת התקינות.
+- **`npm install -g` נכשל עם שגיאת הרשאות:** ב-Linux או WSL, הגדירו תיקיית npm גלובלית בבעלות המשתמש, הוסיפו אותה לקובץ ההפעלה של ה-shell שלכם, ולאחר מכן התקינו שוב את Agent Canvas:
 
   ```bash
   mkdir -p ~/.npm-global
@@ -701,25 +707,25 @@ npm view @modelcontextprotocol/server-slack version
   ```
 
 אם אתם משתמשים ב-`zsh`, הוסיפו את אותה שורת `export PATH=...` ל-`~/.zshrc` במקום ל-`~/.bashrc`.
-- **Agent Canvas דוחה את הגדרות ה-LLM לאחר הגדרת `custom_tokenizer`:** התקינו את `transformers` בסביבת Python של Agent Server, הפעילו מחדש את Agent Canvas במידת הצורך, ונסו שוב לשמור את הגדרות ה-LLM. OpenHands דורש את Transformers כדי לטעון את תבנית הצ'אט של ה-tokenizer כאשר `custom_tokenizer` מוגדר.
-- **Agent Canvas לא מצליח להגיע ל-Lemonade:** ודאו `curl -fsS "${LEMONADE_BASE_URL}/health"` וודאו שכתובת ה-Base URL שהוזנה בטופס ה-LLM בשימוש הראשוני או ב-**Settings > LLM** תואמת לנקודת הקצה המקומית הפעילה או למנהרת HTTPS.
-- **הגדרות ה-LLM לא נשמרו:** ודאו שלחצתם על **Next** לאחר הזנת הערכים. פתחו מחדש את **Settings > LLM** כדי לוודא שהערכים נשמרו.
-- **GitHub MCP לא רואה מאגרים פרטיים:** ודאו שלטוקן ה-GitHub יש הרשאת קריאה למאגר היעד ושכפתור ה-**Test** של ה-MCP ב-**Customize** מציג כלי GitHub.
-- **Slack יכול לקרוא ערוצים אך לא יכול לפרסם:** הזמינו את אפליקציית ה-Slack לערוץ היעד וודאו שלבוט יש `chat:write`.
-- **האוטומציה מציגה יותר מדי ערוצי Slack:** השתמשו במזהה ערוץ Slack והגדירו `SLACK_CHANNEL_IDS` בשרת ה-Slack MCP תחת **Customize**.
-- **הרצת האוטומציה נכשלת או חורגת מהקונטקסט:** ודאו ש-Lemonade הופעל עם `ctx_size=65536`, ודאו של-LLM של OpenHands מוגדר `custom_tokenizer`, והשתמשו במאגר מפורש עם קבוצות תוצאות GitHub המוגבלות ל-3 עד 5 פריטים. אם גרסת ה-Agent Canvas שלכם חושפת הגדרות condenser, הגדירו את המקסימום של טוקני ה-condenser מתחת לחלון הקונטקסט של Lemonade.
+- **Agent Canvas דוחה את הגדרות ה-LLM לאחר הגדרת `custom_tokenizer`:** התקינו `transformers` בסביבת ה-Python של ה-Agent Server, הפעילו מחדש את Agent Canvas אם נדרש, ונסו שוב לשמור את הגדרות ה-LLM. OpenHands דורש את Transformers כדי לטעון את תבנית הצ'אט של ה-tokenizer כאשר `custom_tokenizer` מוגדר.
+- **Agent Canvas אינו מצליח להגיע ל-Lemonade:** אמתו `curl -fsS "${LEMONADE_BASE_URL}/health"` ווודאו שה-base URL שהוזן בטופס ה-LLM בשימוש הראשון או ב-**Settings > LLM** תואם לנקודת הקצה המקומית הפועלת או למנהרת HTTPS.
+- **הגדרות ה-LLM לא נשמרו:** ודאו שלחצתם על **Next** לאחר הזנת הערכים. פתחו מחדש את **Settings > LLM** כדי לאמת שהערכים נשמרו.
+- **GitHub MCP אינו רואה מאגרים פרטיים:** אמתו שלטוקן GitHub יש גישת קריאה למאגר היעד ושכפתור ה-**Test** של ה-MCP ב-**Customize** מפרסם כלי GitHub.
+- **Slack יכול לקרוא ערוצים אך לא יכול לפרסם:** הזמינו את אפליקציית ה-Slack לערוץ היעד ואמתו שלבוט יש `chat:write`.
+- **האוטומציה מציגה רשימה ארוכה מדי של ערוצי Slack:** השתמשו במזהה ערוץ Slack והגדירו `SLACK_CHANNEL_IDS` בשרת ה-Slack MCP ב-**Customize**.
+- **הרצת האוטומציה נכשלת או חורגת מההקשר:** אמתו ש-Lemonade הופעל עם `ctx_size=65536`, אמתו של-LLM של OpenHands מוגדר `custom_tokenizer`, והשתמשו במאגר מפורש עם סטים של תוצאות GitHub מוגבלים ל-3 עד 5 פריטים. אם בגרסת ה-Agent Canvas שלכם קיימות הגדרות condenser, הגדירו את מספר הטוקנים המקסימלי של ה-condenser מתחת לחלון ההקשר של Lemonade.
 
 ## הצעדים הבאים
 
-- הוסיפו תקציר שבועי המתמקד בשחרורים בלבד.
+- הוסיפו דיגסט שבועי המיועד רק לשחרורי גרסאות (release-only).
 - הוסיפו אוטומציה המופעלת על ידי אירועי GitHub להתראות מהירות יותר על PR או push.
-- נתבו את אותו תקציר לתוך Notion, Linear, או כלי אחר המבוסס על MCP.
+- נתבו את אותו דיגסט ל-Notion, Linear, או כלי אחר מבוסס MCP.
 
 ## משאבים
 
-- [AMD AI Playbooks](https://developer.amd.com/playbooks/)
+- [ספרי המשחק של AMD AI](https://developer.amd.com/playbooks/)
 - [תיעוד Lemonade Server](https://lemonade-server.ai/docs)
-- [מאגר התוספים של OpenHands](https://github.com/OpenHands/extensions)
+- [מאגר ההרחבות של OpenHands](https://github.com/OpenHands/extensions)
 - [שרתי Model Context Protocol](https://github.com/modelcontextprotocol/servers)
 - [חבילת Slack MCP](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
 

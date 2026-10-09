@@ -1,6 +1,6 @@
 {
   "id": "pytorch-rocm-llms",
-  "title": "A executar LLMs no PyTorch com o software AMD ROCm™",
-  "description": "Aprenda a executar modelos de linguagem avançados no seu PC com PyTorch e software AMD ROCm™ para resumir documentos de forma rápida e simples.",
+  "title": "Executar LLMs em PyTorch com o software AMD ROCm™",
+  "description": "Aprenda a executar modelos de linguagem avançados no seu PC com PyTorch e software AMD ROCm™ para resumir documentos de forma rápida e fácil.",
   "auto_translated": true
 }

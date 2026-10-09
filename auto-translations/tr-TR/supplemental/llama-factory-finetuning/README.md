@@ -11,42 +11,42 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-Verimli ince ayar (fine-tuning), büyük dil modellerinin (LLM'lerin) alt görevlere uyarlanması açısından hayati önem taşır. LLaMA Factory, büyük dil modellerinin ve çok modlu modellerin eğitim ve ince ayar süreçlerini kolaylaştıran açık kaynaklı ve kullanıcı dostu bir platformdur. Kullanıcıların minimum kodlamayla yüzlerce önceden eğitilmiş modeli yerel olarak özelleştirmesine olanak tanır.
+Verimli ince ayar (fine-tuning), büyük dil modellerini (LLM'ler) alt görevlere uyarlamak için hayati önem taşır. LLaMA Factory, büyük dil modellerinin ve çok modlu modellerin eğitim ve ince ayar süreçlerini kolaylaştıran açık kaynaklı ve kullanıcı dostu bir platformdur. Kullanıcıların minimum kodlama ile yüzlerce önceden eğitilmiş modeli yerel olarak özelleştirmesine olanak tanır.
 
-Bu playbook, yerel AMD donanımınızda LLaMA Factory kullanarak LLM'lerde nasıl ince ayar yapılacağını öğretir.
+Bu kılavuz, yerel AMD donanımınızda LLaMA Factory kullanarak LLM'lere nasıl ince ayar yapacağınızı öğretir.
 
 <!-- @device:stx,krk -->
-> **Not:** Bu playbook'taki ince ayar teknikleri en az **32 GB sistem RAM'i** gerektirir; bunun en az **16 GB'ı GPU'ya ayrılmış olmalıdır** (bu 16 GB, 32 GB'ın bir parçasıdır, ek olarak değildir).
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **32 GB sistem RAM'i** gerektirir ve bunun en az **16 GB'ı GPU'ya ayrılmış olmalıdır** (bu 16 GB, 32 GB'ın bir parçasıdır, ek değildir).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Not:** Bu playbook'taki ince ayar teknikleri en az **16 GB toplam GPU belleği** ve **32 GB sistem RAM'i** gerektirir.
-> - Windows'ta, toplam GPU belleği, grafik kartının özel VRAM'ini sistem RAM'inden ödünç alınan paylaşılan GPU belleğiyle birleştirir.
-> - Bu nedenle, 16 GB'dan daha az özel VRAM'e sahip kartlar, farkı kapatmak için paylaşılan GPU belleğini kullanarak bu playbook'u yine de çalıştırabilir.
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **16 GB toplam GPU belleği** ve **32 GB sistem RAM'i** gerektirir.
+> - Windows'ta toplam GPU belleği, grafik kartının ayrılmış VRAM'ini sistem RAM'inden ödünç alınan paylaşımlı GPU belleğiyle birleştirir.
+> - Bu nedenle, 16 GB'ın altında ayrılmış VRAM'e sahip kartlar, farkı kapatmak için paylaşımlı GPU belleğini kullanarak bu kılavuzu yine de çalıştırabilir.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Not:** Bu playbook'taki ince ayar teknikleri en az **16 GB özel GPU belleğine** ve **32 GB sistem RAM'ine** sahip bir grafik kartı gerektirir.
-> - Linux'ta eğitim tamamen grafik kartının özel VRAM'i içinde çalışır.
-> - VRAM tükendiğinde paylaşılan GPU belleğine (sistem RAM'i) geri dönmez.
-> - 16 GB'dan daha az özel VRAM'e sahip kartlar, sistemde bol miktarda RAM olsa bile Linux'ta eğitim sırasında bellek yetersizliği yaşayacaktır.
+> **Not:** Bu kılavuzdaki ince ayar teknikleri en az **16 GB ayrılmış GPU belleğine** ve **32 GB sistem RAM'ine** sahip bir grafik kartı gerektirir.
+> - Linux'ta, eğitim tamamen grafik kartının ayrılmış VRAM'i içinde çalışır.
+> - VRAM tükendiğinde paylaşımlı GPU belleğine (sistem RAM'i) geri dönmez.
+> - 16 GB'ın altında ayrılmış VRAM'e sahip kartlar, sistemde bolca RAM olsa bile Linux'ta eğitim sırasında bellek yetersizliği yaşayacaktır.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Bu Playbook'ta Öğrenecekleriniz
+## Neler Öğreneceksiniz
 
-- LLaMA Factory'yi AMD ROCm™ yazılımıyla nasıl kuracağınız
-- LLM ince ayar parametrelerini nasıl yapılandıracağınız (örnek olarak Qwen/Qwen3-4B-Instruct-2507 kullanılarak)
-- LLaMA Factory ince ayarını nasıl çalıştıracağınız
-- İnce ayarlı model ile çıkarımı (inference) nasıl çalıştıracağınız
-- İnce ayarlı modeli nasıl dışa aktaracağınız 
+- LLaMA Factory'yi AMD ROCm™ yazılımıyla nasıl kuracağınızı
+- LLM ince ayar parametrelerini nasıl yapılandıracağınızı (örnek olarak Qwen/Qwen3-4B-Instruct-2507 kullanılarak)
+- LLaMA Factory ince ayarını nasıl çalıştıracağınızı
+- İnce ayarlı modelle çıkarım (inference) nasıl çalıştırılacağını
+- İnce ayarlı modeli nasıl dışa aktaracağınızı
 
 ## Tahmini Süre
 
-- Süre: Bu playbook'u çalıştırmak yaklaşık 60 dakika sürecektir (model/veri kümesi boyutunuza ve ağ hızınıza bağlı olarak).
-- Daha fazla bilgi için [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) sayfasına bakın.
+- Süre: Bu kılavuzu çalıştırmak yaklaşık 60 dakika sürecektir (model/veri kümesi boyutunuza ve ağ hızınıza bağlı olarak).
+- Daha fazla bilgi için [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) sayfasına göz atın.
 
 <!-- @device:halo_box,halo,stx,krk -->
 ## Bellek Yapılandırmasını Ayarlama
@@ -60,7 +60,9 @@ Bu playbook, yerel AMD donanımınızda LLaMA Factory kullanarak LLM'lerde nası
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarının Kurulumu
+## Yazılım Ön Koşullarını Kurma
+
+<!-- @prereq:hf-models-qwen3-4b-instruct-2507 -->
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -96,7 +98,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Kullanıcınıza GPU cihazlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp tekrar açın):
+**Kullanıcınıza GPU cihazlarına erişim izni verin** (bunun etkili olması için çıkış yapıp tekrar giriş yapmanız gerekir):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -109,7 +111,7 @@ sudo apt install -y python3-venv
 python3 -m venv llamafactory-env
 source llamafactory-env/bin/activate
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 <!-- @os:end -->
@@ -121,8 +123,8 @@ source llamafactory-env/bin/activate
 python -m venv llamafactory-env --system-site-packages
 llamafactory-env\Scripts\activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -131,12 +133,12 @@ llamafactory-env\Scripts\activate
 python -m venv llamafactory-env
 llamafactory-env\Scripts\activate
 ```
-<!-- @test:end --> 
-<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
+<!-- @test:end -->
+<!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" -->
 <!-- @device:end -->
 <!-- @os:end -->
 
-### Temel Bağımlılıkların Kurulumu
+### Temel Bağımlılıkları Kurma
 
 <!-- @require:pytorch,driver -->
 
@@ -156,7 +158,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
 
-### Ek Bağımlılıkların Kurulumu
+### Ek Bağımlılıkları Kurma
 
 > **Not**: Python sürümünün 3.11, 3.12 veya 3.13 olduğundan emin olun
 
@@ -179,12 +181,12 @@ python3 -m pip install huggingface_hub
 python -m pip install --upgrade pip
 python -m pip install huggingface_hub
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
-### LLaMA Factory Kurulumu
+### LLaMA Factory'yi Kurma
 
-LLaMA Factory, PyTorch'a bağımlıdır. Yukarıdaki gereksinimlere göre bunu zaten kurmuş olmanız gerekir.
+LLaMA Factory, PyTorch'a bağımlıdır. Yukarıdaki gereksinimlere göre bunu zaten kurmuş olmalısınız.
 
 Kaynak kodunu [LLaMA Factory resmi GitHub deposundan](https://github.com/hiyouga/LlamaFactory) indirin ve bağımlılıklarını kurun.
 
@@ -197,7 +199,7 @@ pip install setuptools --break-system-packages
 pip install -e . --break-system-packages
 pip install -r requirements/metrics.txt --break-system-packages
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -208,7 +210,7 @@ cd LlamaFactory
 pip install -e .
 pip install -r requirements/metrics.txt 
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @device:end -->
 
 `llamafactory-cli` komutunun çalıştırılabilir olup olmadığını doğrulayın.
@@ -221,7 +223,7 @@ llamafactory-cli version || python -m llamafactory.cli version || true
 echo "llamafactory-cli is available"
 command -v llamafactory-cli
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -235,7 +237,7 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
     Write-Host "llamafactory-cli is not available"
 }
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 Örnek çıktı:
@@ -244,26 +246,26 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-LLaMA Factory'yi başarıyla kurduğumuza göre, şimdi üzerinde ince ayarı çalıştıralım.
+LLaMA Factory'yi başarıyla kurduğunuza göre, şimdi üzerinde ince ayar çalıştıralım.
 
-## İnce Ayar İçin LLaMA Factory CLI Kullanımı 
+## İnce Ayar İçin LLaMA Factory CLI Kullanma
 
-Bu bölümde, ince ayar veri kümelerinin nasıl hazırlanacağı, LoRA/QLoRA parametrelerinin nasıl yapılandırılacağı ve LoRA ince ayarının nasıl çalıştırılacağı ele alınacaktır.
+Bu bölüm, ince ayar veri kümelerinin nasıl hazırlanacağını, LoRA/QLoRA parametrelerinin nasıl yapılandırılacağını ve LoRA ince ayarının nasıl çalıştırılacağını ele alacaktır.
 
 ### Veri Kümesi Hazırlığı
 
-LLaMA Factory, Alpaca formatı ve ShareGPT formatındaki ince ayar veri kümelerini destekler. Mevcut tüm veri kümeleri [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) dosyasında tanımlanmıştır. Özel bir veri kümesi kullanıyorsanız, lütfen `dataset_info.json` dosyasına bir veri kümesi açıklaması eklediğinizden ve eğitimden önce veri kümesi adını belirttiğinizden emin olun. Ayrıntılar [buradaki](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html) dokümantasyonlarında bulunabilir.
+LLaMA Factory, Alpaca formatı ve ShareGPT formatındaki ince ayar veri kümelerini destekler. Kullanılabilir tüm veri kümeleri [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) içinde tanımlanmıştır. Özel bir veri kümesi kullanıyorsanız, lütfen `dataset_info.json` içine bir veri kümesi açıklaması eklediğinizden ve eğitimden önce veri kümesi adını belirttiğinizden emin olun. Ayrıntılar belgelerinde [burada](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html) bulunabilir.
 
-Bu playbook'ta, örnek olarak identity ve alpaca_en_demo veri kümelerini kullanacağız ve bir sonraki adımda veri kümesi bilgilerini yapılandıracağız.
-### İnce ayar parametre yapılandırması
+Bu kılavuzda, örnek olarak identity ve alpaca_en_demo veri kümelerini kullanacağız ve veri kümesi bilgilerini bir sonraki adımda yapılandıracağız.
+### Fine-tuning parametre yapılandırması
 
-LLaMA Factory birden fazla ince ayar (fine-tuning) şeması destekler.
+LLaMA Factory birden fazla fine-tuning şemasını destekler.
 
-| İnce Ayar şemaları | LLaMA Factory Örnekleri |
+| Fine-Tuning şemaları | LLaMA Factory Örnekleri |
 |-----------|------|
-| Tam Parametreli    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| LoRA ince ayarı  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
-| QLoRA ince ayarı | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+| Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| LoRA fine-tuning  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| QLoRA fine-tuning | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -286,39 +288,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Bu örnek yapılandırma dosyaları model parametrelerini, ince ayar yöntemi parametrelerini, veri kümesi parametrelerini, değerlendirme parametrelerini ve daha fazlasını belirtmiştir. Bunları kendi ihtiyaçlarınıza göre yapılandırabilirsiniz. Bu playbook'ta [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) dosyasını kullanacağız.
+Bu örnek yapılandırma dosyaları, model parametrelerini, fine-tuning yöntemi parametrelerini, veri kümesi parametrelerini, değerlendirme parametrelerini ve daha fazlasını belirtmiştir. Bunları kendi ihtiyaçlarınıza göre yapılandırabilirsiniz. Bu playbook'ta [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml) dosyasını kullanacağız. 
 
-**Önemli parametrelerin açıklaması:**
+**Açıklanan anahtar parametreler:**
 - `model_name_or_path` - Hugging Face model adı veya yerel model dosya yolu.
-- `stage` - Eğitim aşaması. Seçenekler: rm (ödül modellemesi), pt (ön eğitim), sft (Gözetimli İnce Ayar), PPO, DPO, KTO, ORPO.
+- `stage` - Eğitim aşaması. Seçenekler: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
 - `do_train` - eğitim için true, değerlendirme için false
-- `finetuning_type` - İnce ayar yöntemi. Seçenekler: freeze, lora, full
-- `lora_rank` - LoRA yönteminde kullanılan düşük ranklı matrisin boyutsallığı, tipik değerler: 4, 6, 8, 16 (daha küçük değerler = daha az parametre = daha hızlı ince ayar; daha büyük değerler = daha iyi görev uyarlaması ancak daha yüksek kaynak kullanımı).
-- `lora_target` - LoRA yöntemi için hedef modüller. Varsayılan: all.
+- `finetuning_type` - Fine-tuning yöntemi. Seçenekler: freeze, lora, full
+- `lora_rank` - LoRA'da kullanılan düşük ranklı matrisin boyutsallığı, tipik değerler: 4, 6, 8, 16 (daha küçük değerler = daha az parametre = daha hızlı fine-tuning; daha büyük değerler = daha iyi görev adaptasyonu ancak daha yüksek kaynak kullanımı).
+- `lora_target` - LoRA yöntemi için hedef moduller. Varsayılan: all.
 - `dataset` - Kullanılacak veri kümesi(leri). Birden fazla veri kümesini ayırmak için "," kullanın
-- `output_dir` - İnce ayar Çıktı yolu
-- `logging_steps` - Adım cinsinden günlükleme (logging) aralığı
-- `save_steps` - Model kontrol noktası (checkpoint) kaydetme aralığı.
+- `output_dir` - Fine-tuning çıktı yolu
+- `logging_steps` - Adım bazında günlükleme aralığı
+- `save_steps` - Model checkpoint kaydetme aralığı.
 - `overwrite_output_dir` - Çıktı dizininin üzerine yazılmasına izin verilip verilmeyeceği.
-- `per_device_train_batch_size` - Cihaz başına eğitim toplu iş (batch) boyutu.
-- `gradient_accumulation_steps` - Gradyan biriktirme adımlarının sayısı.
+- `per_device_train_batch_size` - Cihaz başına eğitim batch boyutu.
+- `gradient_accumulation_steps` - Gradient birikim adımlarının sayısı.
 - `learning_rate` - Öğrenme oranı
-- `num_train_epochs` - Eğitim dönem (epoch) sayısı
+- `num_train_epochs` - Eğitim epoch sayısı
 - `lr_scheduler_type` - Öğrenme oranı zamanlaması. Seçenekler: linear, cosine, polynomial, constant, vb.
-- `warmup_ratio` - Öğrenme oranı ısınma (warmup) oranı
+- `warmup_ratio` - Öğrenme oranı warmup oranı
 
 <!-- @os:linux -->
-AMD Ryzen™ ve AMD Radeon™ GPU'larda ince ayar çalıştırmak için `lora_rank` varsayılan değerini değiştireceğiz.
+AMD Ryzen™ & AMD Radeon™ GPU'larda fine-tuning çalıştırmak için `lora_rank` varsayılan değerini değiştireceğiz.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-AMD Ryzen™ ve AMD Radeon™ GPU'larla daha iyi uyumluluk için varsayılan LoRA ince ayar yapılandırmasını güncelleyeceğiz:
-- İnce ayar sırasında bellek kullanımını azaltmak için `lora_rank` değerini `8`'den `6`'ya ayarlayın.
+AMD Ryzen™ ve AMD Radeon™ GPU'larla daha iyi uyumluluk için varsayılan LoRA fine-tuning yapılandırmasını güncelleyeceğiz:
+- Fine-tuning sırasında bellek kullanımını azaltmak için `lora_rank` değerini `8`'den `6`'ya ayarlayın.
 - Daha geniş AMD GPU uyumluluğu ve daha düşük bellek kullanımı için `bf16` yerine `fp16` kullanın.
-- Çoklu işlem (multiprocessing) veri yükleme nedeniyle oluşan `"Can't pickle local object<>"` hatalarından kaçınmak için Windows'ta `dataloader_num_workers` değerini `0` olarak ayarlayın.
+- Çoklu işlemle veri yüklemenin neden olduğu `"Can't pickle local object<>"` hatalarından kaçınmak için Windows'ta `dataloader_num_workers` değerini `0` olarak ayarlayın.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -338,13 +340,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### LLaMA Factory İnce Ayarını Çalıştırma
+### LLaMA Factory Fine-Tuning Çalıştırma 
 
-**llamafactory-cli**, karmaşık kod yazmadan uçtan uca LLM iş akışlarını (veri hazırlama → ince ayar → değerlendirme → dağıtım) basitleştirmek için geliştirilmiş, LLaMA Factory için resmi komut satırı arayüzü (CLI) aracıdır.
+**llamafactory-cli**, karmaşık kod yazmadan uçtan uca LLM iş akışlarını (veri hazırlama → fine-tuning → değerlendirme → dağıtım) basitleştirmek için geliştirilen, LLaMA Factory için resmi komut satırı arayüzü (CLI) aracıdır.
 
-Eğitim/ince ayar için **llamafactory-cli train**, LLaMA Factory CLI'nın temel alt komutudur. İnce ayar iş akışlarını (veri ön işleme, hiperparametre ayarlama, donanım optimizasyonu) tek bir CLI komutunda soyutlar, birden fazla ince ayar paradigmasını (LoRA/QLoRA/Tam İnce Ayar) destekler ve düşük kaynaklı GPU'lar için optimize edilmiştir (örneğin 16GB VRAM üzerinde QLoRA).
+Eğitim/fine-tuning için **llamafactory-cli train**, LLaMA Factory CLI'nin temel alt komutudur. Fine-tuning iş akışlarını (veri ön işleme, hiperparametre ayarı, donanım optimizasyonu) tek bir CLI komutunda soyutlar, birden fazla fine-tuning paradigmasını (LoRA/QLoRA/Full Fine-Tuning) destekler ve düşük kaynaklı GPU'lar için optimize edilmiştir (örn. 16GB VRAM üzerinde QLoRA).
 
-Qwen3 LoRA ince ayarının değiştirilmiş yapılandırma dosyasına dayanan aşağıdaki komutu kullanarak LLaMA Factory ince ayarını çalıştırabilirsiniz.
+LLaMA Factory fine-tuning işlemini, Qwen3 LoRA fine-tuning için değiştirilmiş yapılandırma dosyasına dayanan aşağıdaki komutu kullanarak çalıştırabilirsiniz.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -427,7 +429,7 @@ llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 <!-- @test:end --> 
 <!-- @os:end -->
 
-LLM ince ayarını çalıştırdıktan sonra, oluşturulan tüm çıktılar model kontrol noktası dosyaları, yapılandırma dosyaları ve eğitim metrikleri dahil olmak üzere "output_dir" içinde depolanır.
+LLM fine-tuning çalıştırıldıktan sonra, oluşturulan tüm çıktılar model checkpoint dosyaları, yapılandırma dosyaları ve eğitim metrikleri dahil olmak üzere "output_dir" içinde saklanır.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -464,32 +466,32 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### İnce ayarlanmış modeli test etme
+### Fine-tuning yapılmış modeli test etme 
 
-**llamafactory-cli chat**, LLM'lerle (hem temel modeller hem de LoRA ile ince ayarlanmış modeller) etkileşimli sohbet/çıkarım (inference) için tasarlanmıştır. LLaMA Factory, [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) içinde ince ayarlanmış modellerin çıkarımını çalıştırmak için örnek yapılandırma sağlar. Çıkarım arka ucu (backend) gibi ayarları değiştirmek için bu örnek yapılandırmayı da değiştirebilirsiniz.
+**llamafactory-cli chat**, LLM'lerle (hem temel modeller hem de LoRA ile fine-tuning yapılmış modeller) etkileşimli sohbet/çıkarım için tasarlanmıştır. LLaMA Factory, fine-tuning yapılmış modellerin çıkarımını çalıştırmak için [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) içinde örnek yapılandırma sağlar. Çıkarım backend'i gibi ayarları değiştirmek için bu örnek yapılandırmayı da değiştirebilirsiniz.
 
-Qwen3 ince ayarlanmış modelini test etmek için aşağıdaki komutu kullanın:
+Qwen3 fine-tuning yapılmış modelini test etmek için aşağıdaki komutu kullanın:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-İnce ayarlanmış model kullanılarak yapılan örnek bir sohbet aşağıda gösterilmiştir:
+Fine-tuning yapılmış modeli kullanan örnek bir sohbet aşağıda gösterilmiştir:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
 </p>
 
 
-### İnce ayarlanmış modeli dışa aktarma
+### Fine-tuning yapılmış modeli dışa aktarma
 
-Üretim kullanım senaryoları için, önceden eğitilmiş model ile LoRA adaptörünün birleştirilip tek bir model olarak dışa aktarılması gerekir. Bu birleştirilmiş model, normal bir Hugging Face model dosyası gibi kullanılabilir. LLaMA Factory, [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) içinde örnek yapılandırmalar sağlar.
+Üretim kullanım senaryoları için, önceden eğitilmiş model ve LoRA adaptörünün birleştirilip tek bir model olarak dışa aktarılması gerekir. Bu birleştirilmiş model, normal bir Hugging Face model dosyası olarak kullanılabilir. LLaMA Factory, [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora) içinde örnek yapılandırmalar sağlar.
 
-Qwen3 ince ayarlanmış modelini dışa aktarmak için aşağıdaki komutu kullanın:
+Qwen3 fine-tuning yapılmış modelini dışa aktarmak için aşağıdaki komutu kullanın:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-İnce ayarlanmış modelin dışa aktarılma sonucu aşağıda gösterilmiştir.
+Fine-tuning yapılmış modeli dışa aktarmanın sonucu aşağıda gösterilmiştir.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -593,24 +595,24 @@ print("PASS: Exported merged model output looks correct")
 <!-- @test:end -->
 ## LLaMA Factory GUI Kullanımı
 
-`LLaMA-Factory`, tarayıcıdaki bir web arayüzü aracılığıyla LLM'lerin sıfır kodla ince ayarlanmasını da destekler.
+`LLaMA-Factory`, tarayıcıdaki bir web arayüzü aracılığıyla LLM'lerin sıfır kod yazarak ince ayarını yapmayı da destekler.
 
-Bunu açmak için şu komutu kullanın:
+Açmak için aşağıdaki komutu kullanın:
 
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI`, eğitim, değerlendirme, tahmin, sohbet ve modelleri dışa aktarma dahil olmak üzere makine öğrenimi iş akışlarını yönetmek için sadeleştirilmiş bir arayüz sunar. İşte her bir sekmeye kısa bir giriş:
+`LlamaFactory Web UI`, eğitim, değerlendirme, tahmin, sohbet ve modelleri dışa aktarma gibi makine öğrenimi iş akışlarını yönetmek için sadeleştirilmiş bir arayüz sunar. İşte her sekmeye kısa bir giriş:
 
 * **Train**: Bu sekme, bir model ve veri kümesi seçmenize, eğitim parametrelerini yapılandırmanıza ve eğitim sürecini başlatmanıza olanak tanır. Eğitim kurulumunu optimize etmek için zorunlu ve isteğe bağlı parametreleri anlamak önemlidir.
-* **Evaluate & Predict**: Eğitimden sonra bu sekmeyi kullanarak modelin performansını değerlendirebilir ve tahminlerde bulunabilirsiniz. Modelin doğruluğu ve yeni veriler üzerindeki etkinliği hakkında bilgiler sağlar.
-* **Chat**: Eğitim tamamlandıktan sonra, modeli Chat sekmesinde yükleyerek onunla etkileşime geçebilir ve çalışmanızın sonuçlarını görebilirsiniz. Bu özellik, eğitilmiş model ile gerçek zamanlı iletişim kurulmasını sağlar.
-* **Export**: Bu sekme, dağıtım veya başka amaçlarla kullanım için eğitilmiş modellerin dışa aktarılmasını kolaylaştırır. Modellerinizi farklı uygulamalara uygun çeşitli formatlarda kaydedebilirsiniz.
+* **Evaluate & Predict**: Eğitimden sonra, bu sekmeyi kullanarak modelin performansını değerlendirebilir ve tahminlerde bulunabilirsiniz. Modelin doğruluğu ve yeni veriler üzerindeki etkinliği hakkında bilgiler sunar.
+* **Chat**: Eğitim tamamlandığında, modelle etkileşime geçmek ve çalışmanızın sonuçlarını görmek için Chat sekmesinde modeli yükleyin. Bu özellik, eğitilmiş modelle gerçek zamanlı iletişim kurulmasını sağlar.
+* **Export**: Bu sekme, dağıtım veya başka kullanımlar için eğitilmiş modellerin dışa aktarılmasını kolaylaştırır. Modellerinizi farklı uygulamalara uygun çeşitli biçimlerde kaydedebilirsiniz.
 
-Ayrıntılı rehberlik için [LlamaFactory GitHub deposundaki](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) ve [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) üzerindeki resmi dokümantasyona başvurmanızı öneririz. Ayrıca, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) arayüz ve işlevleri hakkında değerli bilgiler sunar.
+Ayrıntılı rehberlik için [LlamaFactory GitHub deposundaki](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) ve [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) üzerindeki resmi belgelere başvurmanızı öneririz. Ayrıca, [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) arayüz ve işlevleri hakkında değerli bilgiler sunar.
 
 ## Sonraki Adımlar
-- `gpt-oss` gibi farklı modelleri ve diğer son teknoloji modelleri deneyin.
-- İnce ayarlanmış model üzerinde farklı arka uçları (backend) deneyin
+- `gpt-oss` ve diğer son teknoloji modeller gibi farklı modelleri deneyin.
+- İnce ayarı yapılmış model üzerinde farklı arka uçları deneyimleyin
 
-Daha fazla dokümantasyon için lütfen şu adresi ziyaret edin: https://llamafactory.readthedocs.io/en/latest/
+Daha fazla belge için lütfen şu adresi ziyaret edin: https://llamafactory.readthedocs.io/en/latest/

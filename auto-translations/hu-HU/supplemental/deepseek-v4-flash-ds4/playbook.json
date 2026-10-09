@@ -1,6 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
-  "title": "DeepSeek V4 Flash futtatása ds4 használatával",
-  "description": "A DeepSeek V4 Flash helyi telepítése a ds4 következtetési motor segítségével, valamint a modellek interaktív kezelése a ds4-cockpit használatával.",
+  "title": "Futtatás: DeepSeek V4 Flash a ds4-gyel",
+  "description": "Telepítse a DeepSeek V4 Flash modellt helyben a ds4 következtetési motor segítségével, és kezelje interaktívan a modelleket a ds4-cockpit eszközzel.",
   "auto_translated": true
 }

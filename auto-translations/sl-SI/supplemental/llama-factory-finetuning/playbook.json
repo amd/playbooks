@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Fino prilagajanje (fine-tuning) LLM-jev z orodjem LLaMA Factory",
-  "description": "Fino nastavite (fine-tune) velike jezikovne modele (LLM) z uporabo tehnik LLaMA-Factory in LoRA.",
+  "title": "Fino prilagajanje (fine-tuning) jezikovnih modelov LLM z LLaMA Factory",
+  "description": "Izpopolnite velike jezikovne modele (LLM) z uporabo LLaMA Factory in tehnik LoRA.",
   "auto_translated": true
 }

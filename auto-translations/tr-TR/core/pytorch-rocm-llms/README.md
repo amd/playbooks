@@ -18,15 +18,15 @@ SPDX-License-Identifier: MIT
 
 
 Güçlü yapay zeka dil modellerini kendi donanımınızda çalıştırmak mı istiyorsunuz? Bu kılavuz bunu nasıl yapacağınızı gösterir.
-Bu eğitim, belgeleri özetleyebilen, soruları yanıtlayabilen, metin üretebilen ve daha fazlasını yapabilen modelleri tamamen yerel olarak çalıştırmak için AMD ROCm™ yazılımı tarafından desteklenen PyTorch'u kullanır.
+Bu eğitim, belgeleri özetleyebilen, soruları yanıtlayabilen, metin oluşturabilen ve daha fazlasını yapabilen modelleri tamamen yerel olarak çalıştırmak için AMD ROCm™ yazılımıyla desteklenen PyTorch'u kullanır.
 
 ## Neler Öğreneceksiniz
 
-- PyTorch ve ROCm kullanarak gpt-oss-20b ve qwen3.5-4B gibi LLM'leri yerel olarak çalıştırın
-- LLM'leri kullanarak bir belge özetleme aracı oluşturun
+- PyTorch ve ROCm kullanarak gpt-oss-20b ve qwen3.5-4B gibi LLM'leri yerel olarak çalıştırma
+- LLM'ler kullanarak bir belge özetleme aracı oluşturma
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Bellek Yapılandırmasını Ayarlama
+## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -38,13 +38,13 @@ Bu eğitim, belgeleri özetleyebilen, soruları yanıtlayabilen, metin üretebil
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarını Yükleme
+## Yazılım Önkoşullarının Kurulumu
 
 ### Sanal Ortam Oluşturma
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux üzerinde, tercih ettiğiniz dizinde bir terminal açın ve ROCm+Pytorch önceden yüklenmiş bir venv oluşturmak için komutları izleyin.
+Linux'ta, istediğiniz dizinde bir terminal açın ve ROCm+PyTorch önceden yüklenmiş bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -63,7 +63,7 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linux üzerinde, tercih ettiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+Linux'ta, istediğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows üzerinde, tercih ettiğiniz dizinde bir terminal açın ve ROCm+Pytorch önceden yüklenmiş bir venv oluşturmak için komutları izleyin.
+Windows'ta, istediğiniz dizinde bir terminal açın ve ROCm+PyTorch önceden yüklenmiş bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windows üzerinde, tercih ettiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+Windows'ta, istediğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,18 +100,24 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **İpucu**: Windows kullanıcılarının bazı Powershell komutlarını çalıştırmadan önce PowerShell Execution Policy ayarlarını değiştirmeleri gerekebilir (örneğin,
+> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmeleri gerekebilir (örneğin,
 > RemoteSigned veya Unrestricted olarak ayarlamak).
 
 <!-- @os:end -->
 
-### Temel Bağımlılıkları Yükleme
+### Temel Bağımlılıkların Kurulumu
 <!-- @require:driver,pytorch -->
 
-### Ek Bağımlılıkları Yükleme
+### Ek Bağımlılıkların Kurulumu
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,7 +136,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Not:** Model yüklenemezse veya bellek yetersizliği oluşursa, modeli optimize edilmiş nicemleme ile yüklemek için `kernels` paketini yüklemeyi deneyin.
+> **Not:** Model yüklenemiyorsa veya bellek yetersiz kalırsa, modeli optimize edilmiş niceleme ile yüklemek için `kernels` paketini yüklemeyi deneyin.
 >
 > ```bash
 > # Use this version which is compatible with the Transformers version
@@ -156,14 +162,14 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Örnek Betiklerle Hızlı Başlangıç
+## Örnek Komut Dosyalarıyla Hızlı Başlangıç
 
-Bu kılavuz, kullanıma hazır betikler içerir. Bunları önizlemek ve oluşturduğunuz ortamla aynı dizine indirmek için üzerlerine tıklayın.
+Bu kılavuz, kullanıma hazır komut dosyaları içerir. Önizlemek ve oluşturduğunuz ortamla aynı dizine indirmek için bunlara tıklayın.
 
-| Betik | Açıklama | Kullanım |
+| Komut Dosyası | Açıklama | Kullanım |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | Temel LLM metin üretimi | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Harmony destekli belge özetleyici | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | Temel LLM metin oluşturma | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | Harmony desteğiyle belge özetleyici | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -188,17 +194,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 ```
 <!-- @test:end -->
 
-Her iki betik de şunları destekler:
-- `--model` bayrağı aracılığıyla model seçimi
-- Uygun model istemi için sohbet şablonu biçimlendirmesi, özellikle belge özetleme için faydalıdır
+Her iki komut dosyası da şunları destekler:
+- `--model` bayrağı ile model seçimi
+- Özellikle belge özetleme için yararlı olan, doğru model istem biçimlendirmesi için sohbet şablonu biçimlendirmesi
 
 ## İlk LLM'inizi Yükleme ve Çalıştırma
 
-Dahil edilen [run_llm.py](assets/run_llm.py) betiği, PyTorch ve AMD ROCm kullanarak LLM'lerle metin üretmenin nasıl yapılacağını gösterir.
+Dahil edilen [run_llm.py](assets/run_llm.py) komut dosyası, PyTorch ve AMD ROCm kullanarak LLM'lerle nasıl metin oluşturulacağını gösterir.
 
-> **Not:** Bir model yüklediğinizde, Hugging Face Transformers önce yerel önbelleğini kontrol eder (Linux'ta `~/.cache/huggingface/hub`, Windows'ta `C:\Users\<user>\.cache\huggingface\hub`). Model önbellekte yoksa, huggingface.co'dan otomatik olarak indirilir. İlk çalıştırma, model boyutuna ve ağ hızına bağlı olarak birkaç dakika sürebilir.
+> **Not:** Bir model yüklediğinizde, Hugging Face Transformers önce yerel önbelleğini kontrol eder (Linux'ta `~/.cache/huggingface/hub`, Windows'ta `C:\Users\<user>\.cache\huggingface\hub`). Model önbellekte değilse, otomatik olarak huggingface.co'dan indirilir. Model boyutuna ve ağ hızına bağlı olarak ilk çalıştırma birkaç dakika sürebilir.
 
-Aşağıdaki kod parçacığı, modelin nasıl kullanılacağını ve sorulan soruların nasıl özelleştirileceğini göstermektedir.
+Aşağıdaki kod parçası, modelin nasıl kullanılacağını ve sorulan soruların nasıl özelleştirileceğini gösterir.
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -265,7 +271,7 @@ messages = [
 ]
 ```
 
-İndirilen betiği deneyin:
+İndirilen komut dosyasını deneyin:
 
 <!-- @test:id=run-llm-simple timeout=600 setup=activate-venv -->
 ```bash
@@ -276,9 +282,9 @@ python run_llm.py --model ${hf_model}
 
 ## Bir Belge Özetleyici Oluşturma
 
-Yerel LLM çıktısı ürettiğinize göre, pratik bir belge özetleyicisi oluşturarak bunun üzerine inşa edebilirsiniz. Bu bölümde, bir .txt dosyası besleyip GPU'nuzda tamamen yerel olarak çalışarak otomatik olarak özlü bir özet üretmek için [summarizer.py](assets/summarizer.py) betiğini kullanacaksınız.
+Artık yerel bir LLM çıktısı oluşturduğunuza göre, pratik bir belge özetleyici yaparak bunun üzerine inşa edebilirsiniz. Bu bölümde, bir .txt dosyasını beslemek ve tamamen yerel olarak GPU'nuzda çalışarak otomatik olarak özlü bir özet oluşturmak için [summarizer.py](assets/summarizer.py) komut dosyasını kullanacaksınız.
 
-Betik, kutudan çıktığı gibi çalışacak şekilde tasarlanmıştır. Kodu keşfetmek, istemleri özelleştirmek ve uzunluk ile sıcaklık gibi parametreleri ayarlamak için betiği bir düzenleyicide açın.
+Komut dosyası, kutudan çıktığı gibi çalışacak şekilde tasarlanmıştır. Kodu incelemek, istemleri özelleştirmek ve uzunluk ile sıcaklık gibi parametreleri ayarlamak için komut dosyasını bir düzenleyicide açın.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -304,25 +310,25 @@ python summarizer.py --file document.txt --max-length 400
 
 ## Üretim Parametreleri Hakkında Bilgi Edinin
 
-| Parametre | Neyi Kontrol Eder | Tipik Değerler |
+| Parametre | Ne Kontrol Eder | Tipik Değerler |
 |-----------|------------------|----------------|
-| `max_new_tokens` | LLM'in çıktısının maksimum uzunluğu | Özetler için 50–500 token kullanın. (1 token yaklaşık 0,75 İngilizce kelimeye denk gelir) |
+| `max_new_tokens` | LLM'nin çıktısının maksimum uzunluğu | Özetler için 50-500 belirteç kullanın. (1 belirteç yaklaşık 0,75 İngilizce kelimeye karşılık gelir) |
 | `temperature` | Yaratıcılık. Düşük değerler odaklı yapar, yüksek değerler ise daha fazla öngörülemezlik getirir | - **0.1–0.3**: Odaklı, deterministik (özetler için iyi) <br> **0.5–0.7**: Dengeli (genel kullanım) <br> **0.8–1.0**: Yaratıcı, çeşitli (beyin fırtınası) |
 | `top_p` | Nucleus Sampling - Düşük değerler modeli daha dar çıktılarla sınırlar | **0.1-0.5**: Katı, öngörülebilir <br> **0.9-0.95**: (standart, doğal, sohbet tarzı) |
 
 
 ## Gerçek Dünya Uygulamaları
 
-- **Araştırma Makalesi Analizi**: Hızlı inceleme için karmaşık yayınlardan önemli bulguları çıkarın
+- **Araştırma Makalesi Analizi**: Hızlı inceleme için karmaşık yayınlardan temel bulguları çıkarın
 - **Haber Toplama**: Haber makalelerini kısa günlük özetlere veya öne çıkanlara dönüştürün
-- **Toplantı Notları**: Transkriptleri eyleme geçirilebilir maddelere ve özlü özetlere dönüştürün
+- **Toplantı Notları**: Dökümleri eyleme geçirilebilir maddelere ve özlü özetlere indirgeyin
 - **Hukuki Belge İncelemesi**: Uzun hukuki metinlerden ilgili maddeleri veya yükümlülükleri hızlıca çıkarın
-- **Kod Dokümantasyonu**: Özlü depo genel bakışları ve fonksiyon açıklamaları oluşturun
+- **Kod Belgelendirmesi**: Özlü depo genel bakışları ve fonksiyon açıklamaları oluşturun
 ## Sonraki Adımlar
 
 - **İnce Ayar (Fine-tuning)**: Modelleri kendi alanınıza veya jargonunuza uyarlayarak daha iyi doğruluk elde edin (bkz. Fine-tuning Playbooks)
-- **RAG Sistemleri**: Bağlama duyarlı yanıtlar ve arama için LLM'leri belge alma (retrieval) ile birleştirin
-- **Model Keşfi**: Daha iyi sonuçlar için Llama 3, Phi-3 veya Qwen gibi yeni modelleri deneyin
-- **Üretim Ortamına Dağıtım**: Kuruluşlarda ölçeklenebilir LLM sunumu için vLLM gibi araçları kullanın
+- **RAG Sistemleri**: Bağlama duyarlı yanıtlar ve arama için LLM'leri belge erişimiyle birleştirin
+- **Model Keşfi**: Daha iyi sonuçlar için Llama 3, Phi-3 veya Qwen gibi yeni modeller deneyin
+- **Üretim Dağıtımı**: Kuruluşlarda ölçeklenebilir LLM sunumu için vLLM gibi araçları kullanın
 
-Sisteminiz, gelişmiş dil modellerini yerel olarak çalıştırma gücünü size sunar. Uygulamalarınız için en iyi sonucu verecek yöntemi keşfetmek üzere farklı modelleri, komut istemlerini ve parametreleri deneyin.
+Sisteminiz, karmaşık dil modellerini yerel olarak çalıştırma gücünü size veriyor. Uygulamalarınız için en iyi sonucu neyin verdiğini keşfetmek üzere farklı modeller, istemler (prompt) ve parametrelerle deneyler yapın.

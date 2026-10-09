@@ -1,6 +1,6 @@
 {
   "id": "llama-factory-finetuning",
-  "title": "Reglaj fin al LLM-urilor cu LLaMA Factory",
-  "description": "Reglați fin modele de limbaj de mari dimensiuni (LLM) folosind tehnicile LLaMA Factory și LoRA.",
+  "title": "Reglarea fină a LLM-urilor cu LLaMA Factory",
+  "description": "Reglați fin modele de limbaj mari (LLM) folosind LLaMA Factory și tehnici LoRA.",
   "auto_translated": true
 }

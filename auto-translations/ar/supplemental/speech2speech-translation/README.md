@@ -16,24 +16,24 @@ SPDX-License-Identifier: MIT
 
 ## نظرة عامة
 
-يُنشئ برنامج AMD ROCm™ ومكدس PyTorch نظامًا بيئيًا موحدًا للذكاء الاصطناعي على الجهاز. يعمل هذا النظام على كل من Windows وLinux مع دعم رسمي لمجموعة واسعة من الأجهزة بما في ذلك وحدات معالجة Ryzen™ AI APUs ووحدات معالجة الرسومات Radeon™ GPUs.
+يُنشئ برنامج AMD ROCm™ وحزمة PyTorch نظامًا بيئيًا موحدًا للذكاء الاصطناعي على الجهاز مباشرةً. يعمل على كل من Windows وLinux مع دعم رسمي لمجموعة واسعة من الأجهزة بما في ذلك معالجات Ryzen™ AI APU ووحدات معالجة الرسومات Radeon™.
 
-سيعلمك هذا الدليل الإرشادي كيفية تشغيل ترجمة الكلام إلى كلام بزمن استجابة منخفض وتعبيرية وخاصة بالكامل على الحافة.
+سيعلّمك هذا الدليل كيفية تشغيل ترجمة كلام إلى كلام منخفضة الكمون وتعبيرية وخاصة بالكامل على الحافة (edge).
 
 ## ما ستتعلمه
 
-- كيفية إعداد بيئة الكلام إلى كلام
-- كيفية كتابة كود Python لتحميل واستخدام نماذج الكلام إلى كلام
-- كيفية تشغيل واجهة Gradio والتجربة معها
+- كيفية إعداد بيئة الكلام إلى الكلام
+- كيفية كتابة كود Python لتحميل نماذج الكلام إلى الكلام واستخدامها
+- كيفية تشغيل واجهة Gradio والتجربة بها
 
-## لماذا نستخدم ترجمة الكلام إلى كلام في الوقت الفعلي؟
+## لماذا نستخدم ترجمة الكلام إلى الكلام في الوقت الفعلي؟
 
 - يزيل الاحتكاك بين الترجمة وحواجز اللغة
-- ينقل النبرة والعاطفة والنية دون توقفات مربكة
-- يمكّن التعاون العالمي واتخاذ القرارات بشكل أسرع
+- ينقل النبرة والعاطفة والنية دون توقفات محرجة
+- يتيح التعاون العالمي واتخاذ القرارات بشكل أسرع
 
 <!-- @device:halo_box,halo,stx,krk -->
-## تعيين إعدادات الذاكرة
+## ضبط إعدادات الذاكرة
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -51,7 +51,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-على Linux، افتح طرفية (terminal) وقم بتشغيل الأمر التالي لإنشاء بيئة افتراضية (venv) مع تثبيت ROCm+Pytorch بالفعل:
+على نظام Linux، افتح طرفية (terminal) وشغّل الأمر التالي لإنشاء بيئة افتراضية (venv) مع تثبيت ROCm+Pytorch مسبقًا:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,13 +65,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**امنح مستخدمك حق الوصول إلى أجهزة GPU** (يجب تسجيل الخروج ثم تسجيل الدخول مرة أخرى لكي يصبح هذا التغيير ساري المفعول):
+**امنح مستخدمك إمكانية الوصول إلى أجهزة GPU** (سجّل الخروج ثم الدخول مرة أخرى لتفعيل ذلك):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-على Linux، افتح طرفية (terminal) وقم بتشغيل الأمر التالي لإنشاء بيئة افتراضية (venv):
+على نظام Linux، افتح طرفية وشغّل الأمر التالي لإنشاء بيئة افتراضية (venv):
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv) مع تثبيت ROCm+Pytorch بالفعل:
+على نظام Windows، افتح طرفية في المجلد الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv) مع تثبيت ROCm+Pytorch مسبقًا:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (مثل
-> ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell (Execution Policy)
+> (على سبيل المثال، تعيينها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-على Windows، افتح طرفية (terminal) في الدليل الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv):
+على نظام Windows، افتح طرفية في المجلد الذي تختاره واتبع الأوامر لإنشاء بيئة افتراضية (venv):
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell الخاصة بهم (مثل
-> ضبطها على RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
+> **نصيحة**: قد يحتاج مستخدمو Windows إلى تعديل سياسة تنفيذ PowerShell (Execution Policy)
+> (على سبيل المثال، تعيينها إلى RemoteSigned أو Unrestricted) قبل تشغيل بعض أوامر Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -126,13 +126,14 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### تبعيات إضافية
 
-قم بتثبيت تبعيات m4t باستخدام pip:
+ثبّت تبعيات m4t باستخدام pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,39 +203,39 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## إعداد عرض الكلام إلى كلام التوضيحي
+## إعداد عرض الكلام إلى الكلام التوضيحي
 
-#### تعرف على seamless-m4t-v2
+#### تعرّف على seamless-m4t-v2
 
-راجع [بطاقة النموذج](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) على Hugging Face لمزيد من المعلومات.
-هذه هي البنية التقنية لنماذج الكلام إلى كلام:
+اطّلع على [بطاقة النموذج](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) على Hugging Face لمزيد من المعلومات.
+هذه هي البنية التقنية لنماذج الكلام إلى الكلام:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### تنزيل النصوص البرمجية
+#### تنزيل السكربتات
 
-يتضمن هذا الدليل الإرشادي نصوصًا برمجية جاهزة للاستخدام. يُرجى تنزيلها جميعًا في نفس الدليل الخاص بالبيئة التي أنشأتها.
+يتضمن هذا الدليل سكربتات جاهزة للاستخدام. يُرجى تنزيلها جميعًا إلى نفس المجلد الخاص بالبيئة التي أنشأتها.
 
-| النص البرمجي | الوصف | الاستخدام |
+| السكربت | الوصف | الاستخدام |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | توليد نص أساسي بواسطة LLM | `python infer.py` |
-| [input1.wav](assets/input1.wav) | ملف صوتي كمثال | لا ينطبق |
-| [lang_list.py](assets/lang_list.py) | ملف دعم اللغات | لا ينطبق |
+| [infer.py](assets/infer.py) | توليد نص أساسي باستخدام LLM | `python infer.py` |
+| [input1.wav](assets/input1.wav) | ملف صوتي كمثال | غير متاح |
+| [lang_list.py](assets/lang_list.py) | ملف دعم اللغات | غير متاح |
 | [gradio_demo.py](assets/gradio_demo.py) | واجهة مستخدم بديهية لترجمة الكلام | `python gradio_demo.py --no-share` |
 
 
-### البدء مع infer.py
+### البدء باستخدام infer.py
 
-لتنفيذ النص البرمجي، قم بتشغيل 
+لتنفيذ السكربت، شغّل 
 ```bash
 python infer.py
 ```
-> **ملاحظة**: قد ترى بعض التحذيرات. هذا أمر متوقع.
+> **ملاحظة**: قد تظهر بعض التحذيرات. هذا أمر متوقع.
  
   
 #### شرح الكود
-**المقطع 1: استيراد التبعيات اللازمة**
+**المقتطف 1: استيراد التبعيات اللازمة**
 
 ```python 
 import os
@@ -261,7 +262,7 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**المقطع 2: تحميل النماذج من HuggingFace**
+**المقتطف 2: تحميل النماذج من HuggingFace**
 
 تأخذ هذه الدالة معرّف نموذج وتقوم بتنزيل النموذج إذا لم يكن قد تم تنزيله بالفعل. ثم تُرجع المعالج (processor) والنموذج لتستخدمهما الدالة التالية.
 ```python
@@ -282,9 +283,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**المقطع 3: إدخال مقطع صوتي بصيغة .wav ومعالجته مسبقًا**
+**المقتطف 3: إدخال مقطع صوتي بصيغة .wav ومعالجته مسبقًا**
 
-تقوم هذه الدالة بتحميل المقطع الصوتي وإعادة أخذ العينات بمعدل الهدف.
+تقوم هذه الدالة بتحميل المقطع الصوتي وإعادة أخذ عيناته (resample) إلى المعدل المستهدف.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,9 +305,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**المقطع 4: تشغيل الاستدلال**
+**المقتطف 4: تشغيل الاستدلال**
 
-تقوم هذه الدالة بتشغيل الاستدلال مع النموذج وإرجاع الناتج المُولّد.
+تقوم هذه الدالة بتشغيل الاستدلال باستخدام النموذج وإرجاع المخرجات المُولَّدة.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -334,7 +335,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**المقطع 5: حفظ الملف المترجم**
+**المقتطف 5: حفظ الملف المترجَم**
 
 تقوم هذه الدالة بحفظ مصفوفة الصوت في ملف .WAV. 
 ```python
@@ -401,14 +402,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### تشغيل عرض واجهة Gradio التوضيحي:
 
-الآن بعد أن قمت بتشغيل مثال نص برمجي أساسي، توفر التعليمات التالية واجهة مستخدم مفيدة تُبنى على الكود الذي كتبناه وتجعل ترجمة الكلام إلى كلام المباشرة سهلة.
+بعد أن قمت بتشغيل مثال سكربت أساسي، توفّر الإرشادات التالية واجهة مستخدم مفيدة تبني على الكود الذي كتبناه وتجعل ترجمة الكلام إلى الكلام المباشرة سهلة.
 
 #### تشغيل Gradio محليًا
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-بعد ذلك، افتح متصفح الويب الخاص بك على `http://127.0.0.1:7860` للوصول إلى واجهة المستخدم.
+ثم افتح متصفح الويب الخاص بك على `http://127.0.0.1:7860` للوصول إلى الواجهة.
 
 
 ### مثال على واجهة Gradio:
@@ -530,12 +531,12 @@ PY
 
 ## الخطوات التالية
 
-- امزج وطابق بين عشرات اللغات للترجمة السريعة. 
+- امزج وجرّب بين عشرات اللغات للترجمة السريعة. 
 - شارك عرضك التوضيحي مع الآخرين: أضف --share لإنشاء رابط عام يمكن لأي شخص الوصول إليه عن بُعد، أو انشره بشكل دائم باستخدام Hugging Face Spaces
 
 ## الموارد
 
-فيما يلي بعض الموارد الإضافية لمعرفة المزيد حول ترجمة الكلام إلى كلام:  
+فيما يلي بعض الموارد الإضافية لمعرفة المزيد عن ترجمة الكلام إلى الكلام:  
 * المستودع موجود هنا https://huggingface.co/facebook/seamless-m4t-v2-large 
-* الأبحاث الأكاديمية المتعلقة بـ "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* مشاركة ونشر Gradio: [دليل مشاركة تطبيقك](https://www.gradio.app/guides/sharing-your-app) و[النشر على Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* الأبحاث الأكاديمية ذات الصلة بـ "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* مشاركة Gradio ونشره: [دليل مشاركة تطبيقك](https://www.gradio.app/guides/sharing-your-app) و[النشر على Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 
 Želite da pokrenete moćne AI jezičke modele na sopstvenom hardveru? Ovaj vodič vam pokazuje kako.
-Ovaj tutorijal koristi PyTorch pokretan pomoću AMD ROCm™ softvera za pokretanje modela koji mogu da sumiraju dokumente, odgovaraju na pitanja, generišu tekst i još mnogo toga, sve dok se sve to izvršava lokalno.
+Ovaj tutorijal koristi PyTorch pokretan AMD ROCm™ softverom za pokretanje modela koji mogu da sumiraju dokumente, odgovaraju na pitanja, generišu tekst i još mnogo toga, a sve to lokalno.
 
 ## Šta ćete naučiti
 
@@ -32,8 +32,8 @@ Ovaj tutorijal koristi PyTorch pokretan pomoću AMD ROCm™ softvera za pokretan
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Proverite ažuriranja softvera
-> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center-a.
+## Proverite da li postoje ažuriranja softvera
+> **Napomena**: Ako VS Code nije instaliran, možete ga instalirati putem Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -44,7 +44,7 @@ Ovaj tutorijal koristi PyTorch pokretan pomoću AMD ROCm™ softvera za pokretan
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Na Linuxu, otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv sa već instaliranim ROCm+Pytorch.
+Na Linuxu otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv sa već instaliranim ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -63,7 +63,7 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Na Linuxu, otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv.
+Na Linuxu otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv.
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +79,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv sa već instaliranim ROCm+Pytorch.
+Na Windowsu otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv sa već instaliranim ROCm+Pytorch.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +90,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Na Windows-u, otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv.
+Na Windowsu otvorite terminal u direktorijumu po vašem izboru i pratite komande da kreirate venv.
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Savet**: Windows korisnicima može biti potrebno da izmene svoju PowerShell politiku izvršavanja (npr.
-> podešavanjem na RemoteSigned ili Unrestricted) pre pokretanja pojedinih Powershell komandi.
+> **Savet**: Korisnicima Windowsa možda će biti potrebno da izmene svoju PowerShell Execution Policy (npr.
+> postavljanjem na RemoteSigned ili Unrestricted) pre pokretanja nekih PowerShell komandi.
 
 <!-- @os:end -->
 
@@ -112,6 +112,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,7 +136,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Napomena:** Ako se model ne učita ili ponestane memorije, pokušajte da instalirate paket `kernels` kako biste učitali model uz optimizovanu kvantizaciju.
+> **Napomena:** Ako model ne uspe da se učita ili ponestane memorije, pokušajte da instalirate paket `kernels` da biste učitali model sa optimizovanom kvantizacijom.
 >
 > ```bash
 > # Use this version which is compatible with the Transformers version
@@ -158,12 +164,12 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 
 ## Brzi početak sa primerima skripti
 
-Ovaj priručnik sadrži skripte spremne za upotrebu. Kliknite na njih da biste ih pregledali i preuzeli u isti direktorijum kao okruženje koje ste kreirali.
+Ovaj priručnik uključuje spremne skripte za upotrebu. Kliknite na njih da biste ih pregledali i preuzeli u isti direktorijum kao i okruženje koje ste kreirali.
 
 | Skripta | Opis | Upotreba |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Osnovno generisanje teksta pomoću LLM-a | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Sumarizator dokumenata sa podrškom za Harmony | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Alat za sumiranje dokumenata sa podrškom za Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -190,13 +196,13 @@ for script in ['run_llm.py', 'summarizer.py']:
 
 Obe skripte podržavaju:
 - Izbor modela putem oznake `--model`
-- Formatiranje šablona ćaskanja radi ispravnog podešavanja upita ka modelu, što je posebno korisno za sumiranje dokumenata
+- Formatiranje chat šablona za pravilno prompt-ovanje modela, što je posebno korisno za sumiranje dokumenata
 
 ## Učitavanje i pokretanje vašeg prvog LLM-a
 
-Uključena skripta [run_llm.py](assets/run_llm.py) pokazuje kako da generišete tekst pomoću LLM-ova koristeći PyTorch i AMD ROCm.
+Priložena skripta [run_llm.py](assets/run_llm.py) pokazuje kako da generišete tekst pomoću LLM-ova koristeći PyTorch i AMD ROCm.
 
-> **Napomena:** Kada učitate model, Hugging Face Transformers prvo proverava svoj lokalni keš (`~/.cache/huggingface/hub` na Linuxu, `C:\Users\<user>\.cache\huggingface\hub` na Windows-u). Ako model nije keširan, automatski se preuzima sa huggingface.co. Prvo pokretanje može potrajati nekoliko minuta, u zavisnosti od veličine modela i brzine mreže.
+> **Napomena:** Kada učitate model, Hugging Face Transformers prvo proverava lokalni keš (`~/.cache/huggingface/hub` na Linuxu, `C:\Users\<user>\.cache\huggingface\hub` na Windowsu). Ako model nije keširan, automatski se preuzima sa huggingface.co. Prvo pokretanje može potrajati nekoliko minuta u zavisnosti od veličine modela i brzine mreže.
 
 Isečak ispod pokazuje kako da koristite model i prilagodite postavljena pitanja.
 
@@ -274,11 +280,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Izrada sumarizatora dokumenata
+## Izrada alata za sumiranje dokumenata
 
-Sada kada ste generisali izlaz lokalnog LLM-a, možete nadograditi to i napraviti praktičan sumarizator dokumenata. U ovom odeljku ćete koristiti skriptu [summarizer.py](assets/summarizer.py) da unesete .txt fajl i automatski generišete sažet rezime, sve dok se sve izvršava lokalno na vašem GPU-u.
+Sada kada ste generisali izlaz lokalnog LLM-a, možete to nadograditi kreiranjem praktičnog alata za sumiranje dokumenata. U ovom odeljku ćete koristiti skriptu [summarizer.py](assets/summarizer.py) da učitate .txt fajl i automatski generišete sažet rezime, a sve to pokretano lokalno na vašem GPU-u.
 
-Skripta je dizajnirana da radi odmah po instalaciji. Otvorite skriptu u editoru da biste istražili kod, prilagodili upite i podesili parametre poput dužine i temperature.
+Skripta je dizajnirana da radi odmah po pokretanju. Otvorite skriptu u editoru da biste istražili kod, prilagodili prompt-ove i podesili parametre poput dužine i temperature.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -302,27 +308,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Naučite o parametrima generisanja
+## Upoznajte parametre generisanja
 
 | Parametar | Šta kontroliše | Tipične vrednosti |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Maksimalna dužina izlaza LLM-a | Koristite 50–500 tokena za sažetke. (1 token je otprilike 0,75 engleskih reči) |
-| `temperature` | Kreativnost. Niske vrednosti čine izlaz fokusiranijim, dok visoke vrednosti donose više nepredvidivosti | - **0.1–0.3**: Fokusirano, deterministički (dobro za sažetke) <br> **0.5–0.7**: Uravnoteženo (opšta upotreba) <br> **0.8–1.0**: Kreativno, raznovrsno (brejnstorming) |
+| `max_new_tokens` | Maksimalna dužina izlaza LLM-a | Koristite 50–500 tokena za rezimee. (1 token je oko 0,75 engleskih reči) |
+| `temperature` | Kreativnost. Niske vrednosti čine izlaz fokusiranim, dok visoke vrednosti donose više nepredvidivosti | - **0.1–0.3**: Fokusirano, determinističko (dobro za rezimee) <br> **0.5–0.7**: Uravnoteženo (opšta upotreba) <br> **0.8–1.0**: Kreativno, raznovrsno (brejnstorming) |
 | `top_p` | Nucleus Sampling - Niske vrednosti ograničavaju model na uže izlaze | **0.1-0.5**: Strogo, predvidivo <br> **0.9-0.95**: (standardno, prirodno, konverzaciono) |
 
 
 ## Primene u stvarnom svetu
 
-- **Analiza istraživačkih radova**: Izdvajanje ključnih nalaza iz kompleksnih publikacija radi brzog pregleda
-- **Agregacija vesti**: Sumiranje vesti u kratke dnevne preglede ili istaknute teme
-- **Beleške sa sastanaka**: Sažimanje transkripata u konkretne stavke za akciju i sažete zaključke
-- **Pregled pravnih dokumenata**: Brzo izdvajanje relevantnih klauzula ili obaveza iz dugih pravnih tekstova
+- **Analiza naučnih radova**: Izvlačenje ključnih nalaza iz kompleksnih publikacija radi brzog pregleda
+- **Agregacija vesti**: Sumiranje vesti u kratke dnevne preglede ili izdvojene stavke
+- **Beleške sa sastanaka**: Sažimanje transkripata u konkretne zadatke i sažete rezimee
+- **Pregled pravnih dokumenata**: Brzo izvlačenje relevantnih klauzula ili obaveza iz dugih pravnih tekstova
 - **Dokumentacija koda**: Generisanje sažetih pregleda repozitorijuma i objašnjenja funkcija
 ## Sledeći koraci
 
-- **Fino podešavanje (Fine-tuning)**: Prilagodite modele svojoj specifičnoj oblasti ili terminologiji radi bolje preciznosti (pogledajte Fine-tuning Playbooks)
-- **RAG sistemi**: Kombinujte LLM-ove sa preuzimanjem dokumenata za odgovore i pretragu svesne konteksta
-- **Istraživanje modela**: Eksperimentišite sa novim modelima poput Llama 3, Phi-3 ili Qwen za bolje rezultate
-- **Produkciono postavljanje**: Koristite alate poput vLLM za skalabilno servisiranje LLM-ova u organizacijama
+- **Fino podešavanje**: Prilagodite modele svojoj specifičnoj oblasti ili terminologiji radi bolje preciznosti (pogledajte Vodiče za fino podešavanje)
+- **RAG sistemi**: Kombinujte LLM-ove sa pretragom dokumenata radi kontekstualno svesnih odgovora i pretraživanja
+- **Istraživanje modela**: Eksperimentišite sa novim modelima poput Llama 3, Phi-3 ili Qwen radi boljih rezultata
+- **Produkciono postavljanje**: Koristite alate poput vLLM za skalabilno posluživanje LLM-ova u organizacijama
 
-Vaš sistem vam daje mogućnost da lokalno pokrećete sofisticirane jezičke modele. Eksperimentišite sa različitim modelima, promptovima i parametrima da biste otkrili šta najbolje odgovara vašim aplikacijama.
+Vaš sistem vam daje moć da lokalno pokrećete sofisticirane jezičke modele. Eksperimentišite sa različitim modelima, upitima i parametrima kako biste otkrili šta najbolje odgovara vašim aplikacijama.

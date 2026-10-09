@@ -1,6 +1,6 @@
 {
   "id": "deepseek-v4-flash-ds4",
-  "title": "Poganjanje DeepSeek V4 Flash z ds4",
-  "description": "Namestite DeepSeek V4 Flash lokalno z uporabo mehanizma za sklepanje ds4 in interaktivno upravljajte modele z ds4-cockpit.",
+  "title": "Poganjanje modela DeepSeek V4 Flash z ds4",
+  "description": "Namestite DeepSeek V4 Flash lokalno z uporabo sklepalnika ds4 in upravljajte modele interaktivno z ds4-cockpit.",
   "auto_translated": true
 }

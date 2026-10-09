@@ -16,35 +16,34 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
+ご自身のハードウェアで強力なAI言語モデルを実行してみませんか？このガイドでは、その方法をご紹介します。
+このチュートリアルでは、AMD ROCm™ ソフトウェアを活用したPyTorchを使用して、文書の要約、質問への回答、テキスト生成などを行えるモデルをローカルで実行します。
 
-ご自身のハードウェアで強力なAI言語モデルを実行してみませんか?このガイドではその方法を説明します。
-このチュートリアルでは、AMD ROCm™ ソフトウェアによって動作するPyTorchを使用して、ドキュメントの要約、質問への回答、テキスト生成などが可能なモデルを、すべてローカルで実行します。
-
-## 学べること
+## このガイドで学べること
 
 - PyTorchとROCmを使用して、gpt-oss-20bやqwen3.5-4BなどのLLMをローカルで実行する
-- LLMを使ったドキュメント要約ツールを作成する
+- LLMを使用した文書要約ツールの作成
 
 <!-- @device:halo_box,halo,stx,krk -->
-## メモリ設定の構成
+## メモリ構成の設定
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## ソフトウェアアップデートの確認
-> **注記**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerでインストールできます。
+## ソフトウェアの更新を確認する
+> **注**: VS Codeがインストールされていない場合は、Ryzen AI Developer Centerからインストールできます。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## ソフトウェア前提条件のインストール
+## ソフトウェアの前提条件のインストール
 
 ### 仮想環境の作成
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従って、ROCm+Pytorchがすでにインストールされたvenvを作成します。
+Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってROCm+Pytorchが既にインストールされたvenvを作成してください。
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -57,13 +56,13 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ユーザーにGPUデバイスへのアクセス権を付与します**(有効にするにはログアウトして再ログインしてください):
+**GPUデバイスへのアクセス権をユーザーに付与します**（これを有効にするにはログアウトして再度ログインしてください）:
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
+Linuxでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成してください。
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
@@ -79,7 +78,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従って、ROCm+Pytorchがすでにインストールされたvenvを作成します。
+Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってROCm+Pytorchが既にインストールされたvenvを作成してください。
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -90,7 +89,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成します。
+Windowsでは、任意のディレクトリでターミナルを開き、以下のコマンドに従ってvenvを作成してください。
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
@@ -100,8 +99,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **ヒント**: Windowsユーザーは、一部のPowerShellコマンドを実行する前に、PowerShellの実行ポリシーを変更する必要がある場合があります(例:
-> RemoteSignedまたはUnrestrictedに設定する)。
+> **ヒント**: Windowsユーザーは、一部のPowershellコマンドを実行する前に、PowerShell実行ポリシーを変更する必要がある場合があります（例:
+> RemoteSignedまたはUnrestrictedに設定する）。
 
 <!-- @os:end -->
 
@@ -112,6 +111,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -130,10 +135,10 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **注記:** モデルの読み込みに失敗する、またはメモリ不足になる場合は、`kernels` パッケージをインストールして、最適化された量子化でモデルを読み込んでみてください。
+> **注:** モデルの読み込みに失敗したり、メモリ不足になったりする場合は、`kernels`パッケージをインストールして、最適化された量子化でモデルを読み込んでみてください。
 >
 > ```bash
-> # Transformersのバージョンと互換性のあるこのバージョンを使用してください
+> # Use this version which is compatible with the Transformers version
 > pip install "kernels==0.14.1" 
 > ```
 <!-- @device:end -->
@@ -156,14 +161,14 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:end -->
 <!-- @device:end -->
 
-## サンプルスクリプトによるクイックスタート
+## サンプルスクリプトでクイックスタート
 
 このプレイブックには、すぐに使えるスクリプトが含まれています。クリックしてプレビューし、作成した環境と同じディレクトリにダウンロードしてください。
 
 | スクリプト | 説明 | 使用方法 |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | 基本的なLLMテキスト生成 | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Harmonyをサポートするドキュメント要約ツール | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Harmonyサポート付き文書要約ツール | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -188,17 +193,17 @@ for script in ['run_llm.py', 'summarizer.py']:
 ```
 <!-- @test:end -->
 
-両方のスクリプトは以下をサポートします:
-- `--model` フラグによるモデル選択
-- 適切なモデルプロンプトのためのチャットテンプレート形式(特にドキュメント要約に有用)
+どちらのスクリプトも以下をサポートしています:
+- `--model`フラグによるモデル選択
+- 適切なモデルプロンプトのためのチャットテンプレート形式。特に文書要約で有用です
 
 ## 最初のLLMの読み込みと実行
 
-同梱の[run_llm.py](assets/run_llm.py)スクリプトは、PyTorchとAMD ROCmを使用してテキストを生成する方法を示しています。
+含まれている[run_llm.py](assets/run_llm.py)スクリプトは、PyTorchとAMD ROCmを使用してLLMでテキストを生成する方法を示しています。
 
-> **注記:** モデルを読み込むと、Hugging Face Transformersはまずローカルキャッシュ(Linuxでは`~/.cache/huggingface/hub`、Windowsでは`C:\Users\<user>\.cache\huggingface\hub`)を確認します。モデルがキャッシュされていない場合は、huggingface.coから自動的にダウンロードされます。初回実行時は、モデルサイズやネットワーク速度によっては数分かかることがあります。
+> **注:** モデルを読み込む際、Hugging Face Transformersはまずローカルキャッシュ（Linuxでは`~/.cache/huggingface/hub`、Windowsでは`C:\Users\<user>\.cache\huggingface\hub`）を確認します。モデルがキャッシュされていない場合は、huggingface.coから自動的にダウンロードされます。初回実行時は、モデルのサイズやネットワーク速度によっては数分かかることがあります。
 
-以下のスニペットは、モデルの使用方法と、質問のカスタマイズ方法を示しています。
+以下のスニペットは、モデルの使用方法と質問のカスタマイズ方法を示しています。
 
 <!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -274,11 +279,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## ドキュメント要約ツールの構築
+## 文書要約ツールの構築
 
-ローカルLLMの出力を生成できるようになったところで、それを応用して実用的なドキュメント要約ツールを作成してみましょう。このセクションでは、[summarizer.py](assets/summarizer.py)スクリプトを使用して.txtファイルを入力し、GPU上でローカルに動作させながら、簡潔な要約を自動生成します。
+ローカルLLMの出力を生成できたので、次は実用的な文書要約ツールを作成して応用してみましょう。このセクションでは、[summarizer.py](assets/summarizer.py)スクリプトを使用して.txtファイルを読み込み、GPU上ですべてローカルで実行しながら簡潔な要約を自動生成します。
 
-このスクリプトはそのまま動作するように設計されています。エディタでスクリプトを開いてコードを確認し、プロンプトをカスタマイズしたり、長さや温度などのパラメータを調整したりしてください。
+このスクリプトはそのまま動作するように設計されています。コードを確認したり、プロンプトをカスタマイズしたり、長さや温度などのパラメータを調整したりするには、エディタでスクリプトを開いてください。
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -306,23 +311,23 @@ python summarizer.py --file document.txt --max-length 400
 
 | パラメータ | 制御する内容 | 一般的な値 |
 |-----------|------------------|----------------|
-| `max_new_tokens` | LLMの出力の最大長 | 要約には50~500トークンを使用します。(1トークンは約0.75英単語) |
-| `temperature` | 創造性。値が低いほど焦点が絞られ、値が高いほど予測不可能性が高まります | - **0.1~0.3**: 焦点を絞った決定論的な出力(要約に適しています) <br> **0.5~0.7**: バランス型(一般的な用途) <br> **0.8~1.0**: 創造的で多様(ブレインストーミング向け) |
-| `top_p` | 核サンプリング(Nucleus Sampling)- 値が低いほどモデルの出力がより限定的になります | **0.1~0.5**: 厳密で予測可能 <br> **0.9~0.95**: (標準的、自然、会話的) |
+| `max_new_tokens` | LLMの出力の最大長 | 要約には50～500トークンを使用します（1トークンは約0.75英単語に相当） |
+| `temperature` | 創造性。低い値では焦点が絞られ、高い値では予測不可能性が増します | - **0.1～0.3**: 焦点が絞られた、決定論的な出力（要約に最適） <br> **0.5～0.7**: バランスの取れた（一般用途） <br> **0.8～1.0**: 創造的で多様な出力（ブレインストーミング） |
+| `top_p` | Nucleus Sampling - 低い値ではモデルの出力がより狭い範囲に制限されます | **0.1-0.5**: 厳密で予測可能 <br> **0.9-0.95**:（標準的、自然、会話的） |
 
 
-## 実際の応用例
+## 実用例
 
-- **研究論文の分析**: 複雑な論文から主要な発見をすばやく確認するために抽出する
-- **ニュースの集約**: ニュース記事を短い日次ダイジェストやハイライトに要約する
-- **会議の記録**: 議事録を実行可能な項目と簡潔な要約に凝縮する
-- **法的文書のレビュー**: 長い法的文書から関連する条項や義務をすばやく抽出する
-- **コードドキュメント**: 簡潔なリポジトリ概要や関数の説明を生成する
-##次のステップ
+- **研究論文の分析**: 複雑な論文から主要な知見を抽出し、迅速なレビューを可能にします
+- **ニュース集約**: ニュース記事を簡潔な日次ダイジェストやハイライトに要約します
+- **会議記録**: 書き起こしを実行可能な項目と簡潔な要約に凝縮します
+- **法的文書のレビュー**: 長い法的文書から関連する条項や義務を迅速に抽出します
+- **コードドキュメント**: 簡潔なリポジトリ概要と関数の説明を生成します
+## 次のステップ
 
-- **ファインチューニング**: 特定の分野や専門用語にモデルを適応させ、精度を高めます(Fine-tuning Playbooksを参照)
+- **ファインチューニング**: 特定の分野や専門用語に合わせてモデルを適応させ、精度を向上させます(Fine-tuning Playbooksを参照)
 - **RAGシステム**: LLMとドキュメント検索を組み合わせ、文脈を考慮した回答や検索を実現します
-- **モデルの探求**: Llama 3、Phi-3、Qwenなどの新しいモデルを試し、より良い結果を追求します
+- **モデルの検証**: Llama 3、Phi-3、Qwenなどの新しいモデルを試し、より良い結果を追求します
 - **本番環境への展開**: vLLMなどのツールを使用し、組織内でスケーラブルなLLMサービングを実現します
 
-あなたのシステムは、高度な言語モデルをローカルで実行する力を与えてくれます。さまざまなモデル、プロンプト、パラメーターを試し、ご自身のアプリケーションに最適な方法を見つけてください。
+このシステムにより、高度な言語モデルをローカルで実行する力が得られます。さまざまなモデル、プロンプト、パラメータを試し、ご自身のアプリケーションに最適な設定を見つけてください。

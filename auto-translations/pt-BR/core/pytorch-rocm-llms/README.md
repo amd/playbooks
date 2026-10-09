@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 
 Quer executar modelos de linguagem de IA poderosos no seu próprio hardware? Este guia mostra como fazer isso.
-Este tutorial usa PyTorch potencializado pelo software AMD ROCm™ para executar modelos que podem resumir documentos, responder perguntas, gerar texto e muito mais, tudo em execução local.
+Este tutorial usa o PyTorch com tecnologia AMD ROCm™ para executar modelos que podem resumir documentos, responder perguntas, gerar texto e muito mais, tudo rodando localmente.
 
 ## O Que Você Vai Aprender
 
@@ -26,7 +26,7 @@ Este tutorial usa PyTorch potencializado pelo software AMD ROCm™ para executar
 - Criar uma ferramenta de resumo de documentos usando LLMs
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Configurando a Configuração de Memória
+## Configurando a Memória
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -100,18 +100,24 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Dica**: Usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
-> definindo-a como RemoteSigned ou Unrestricted) antes de executar alguns comandos do PowerShell.
+> **Dica**: Os usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
+> definindo-a como RemoteSigned ou Unrestricted) antes de executar alguns comandos do Powershell.
 
 <!-- @os:end -->
 
-### Instalando Dependências Básicas
+### Instalando as Dependências Básicas
 <!-- @require:driver,pytorch -->
 
 ### Instalando Dependências Adicionais
 
 <!-- @var:id=hf_model device=halo,halo_box value="openai/gpt-oss-20b" -->
 <!-- @var:id=hf_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:hf-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:hf-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -158,7 +164,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 
 ## Início Rápido com Scripts de Exemplo
 
-Este playbook inclui scripts prontos para uso. Clique neles para visualizar e baixá-los para o mesmo diretório do ambiente que você criou.
+Este playbook inclui scripts prontos para uso. Clique neles para visualizá-los e baixá-los para o mesmo diretório do ambiente que você criou.
 
 | Script | Descrição | Uso |
 |--------|-------------|-------|
@@ -189,14 +195,14 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Ambos os scripts suportam:
-- Seleção de modelo por meio da flag `--model`
-- Formatação de template de chat para prompts adequados ao modelo, especialmente útil para resumo de documentos
+- Seleção de modelo via flag `--model`
+- Formatação de template de chat para a devida instrução do modelo, especialmente útil para o resumo de documentos
 
 ## Carregando e Executando Seu Primeiro LLM
 
 O script incluído [run_llm.py](assets/run_llm.py) mostra como gerar texto com LLMs usando PyTorch e AMD ROCm.
 
-> **Observação:** Ao carregar um modelo, o Hugging Face Transformers primeiro verifica seu cache local (`~/.cache/huggingface/hub` no Linux, `C:\Users\<user>\.cache\huggingface\hub` no Windows). Se o modelo não estiver em cache, ele é baixado automaticamente de huggingface.co. A primeira execução pode levar alguns minutos, dependendo do tamanho do modelo e da velocidade da rede.
+> **Observação:** Ao carregar um modelo, o Hugging Face Transformers primeiro verifica seu cache local (`~/.cache/huggingface/hub` no Linux, `C:\Users\<user>\.cache\huggingface\hub` no Windows). Se o modelo não estiver em cache, ele é baixado automaticamente do huggingface.co. A primeira execução pode levar alguns minutos, dependendo do tamanho do modelo e da velocidade da rede.
 
 O trecho abaixo mostra como usar o modelo e personalizar as perguntas feitas.
 
@@ -274,11 +280,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Criando um Resumidor de Documentos
+## Construindo um Resumidor de Documentos
 
-Agora que você já gerou uma saída de LLM local, você pode expandir isso criando um resumidor de documentos prático. Nesta seção, você usará o script [summarizer.py](assets/summarizer.py) para fornecer um arquivo .txt e gerar automaticamente um resumo conciso, tudo executando localmente na sua GPU.
+Agora que você já gerou uma saída de LLM local, pode avançar criando um resumidor de documentos prático. Nesta seção, você usará o script [summarizer.py](assets/summarizer.py) para inserir um arquivo .txt e gerar automaticamente um resumo conciso, tudo rodando localmente na sua GPU.
 
-O script foi projetado para funcionar imediatamente. Abra o script em um editor para explorar o código, personalizar prompts e ajustar parâmetros como comprimento e temperatura.
+O script foi projetado para funcionar imediatamente. Abra o script em um editor para explorar o código, personalizar os prompts e ajustar parâmetros como comprimento e temperatura.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -302,27 +308,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## Aprenda sobre Parâmetros de Geração
+## Aprenda Sobre os Parâmetros de Geração
 
-| Parâmetro | O Que Controla | Valores Típicos |
+| Parâmetro | O Que Ele Controla | Valores Típicos |
 |-----------|------------------|----------------|
 | `max_new_tokens` | O comprimento máximo da saída do LLM | Use de 50 a 500 tokens para resumos. (1 token equivale a cerca de 0,75 palavras em inglês) |
-| `temperature` | Criatividade. Valores baixos deixam o resultado mais focado, enquanto valores altos trazem mais imprevisibilidade | - **0.1–0.3**: Focado, determinístico (bom para resumos) <br> **0.5–0.7**: Equilibrado (uso geral) <br> **0.8–1.0**: Criativo, variado (brainstorming) |
-| `top_p` | Amostragem por Núcleo (Nucleus Sampling) - Valores baixos limitam o modelo a saídas mais restritas | **0.1-0.5**: Rigoroso, previsível <br> **0.9-0.95**: (padrão, natural, conversacional) |
+| `temperature` | Criatividade. Valores baixos deixam o resultado mais focado, enquanto valores altos trazem mais imprevisibilidade | - **0,1–0,3**: Focado, determinístico (bom para resumos) <br> **0,5–0,7**: Equilibrado (uso geral) <br> **0,8–1,0**: Criativo, variado (brainstorming) |
+| `top_p` | Nucleus Sampling - Valores baixos limitam o modelo a saídas mais restritas | **0,1-0,5**: Rigoroso, previsível <br> **0,9-0,95**: (padrão, natural, conversacional) |
 
 
 ## Aplicações no Mundo Real
 
-- **Análise de Artigos de Pesquisa**: Extraia descobertas importantes de publicações complexas para revisão rápida
+- **Análise de Artigos de Pesquisa**: Extraia principais descobertas de publicações complexas para revisão rápida
 - **Agregação de Notícias**: Resuma artigos de notícias em breves resumos diários ou destaques
 - **Notas de Reunião**: Condense transcrições em itens de ação e resumos concisos
 - **Revisão de Documentos Jurídicos**: Extraia cláusulas ou obrigações relevantes de textos jurídicos longos rapidamente
 - **Documentação de Código**: Gere visões gerais concisas de repositórios e explicações de funções
 ## Próximos Passos
 
-- **Fine-tuning**: Adapte os modelos ao seu campo ou jargão específico para melhor precisão (veja Fine-tuning Playbooks)
-- **Sistemas RAG**: Combine LLMs com recuperação de documentos para respostas e buscas com reconhecimento de contexto
+- **Fine-tuning**: Adapte modelos à sua área ou jargão específico para melhor precisão (consulte Fine-tuning Playbooks)
+- **Sistemas RAG**: Combine LLMs com recuperação de documentos para respostas e buscas sensíveis ao contexto
 - **Exploração de Modelos**: Experimente novos modelos como Llama 3, Phi-3 ou Qwen para obter melhores resultados
-- **Implantação em Produção**: Use ferramentas como vLLM para serviço escalável de LLM em organizações
+- **Implantação em Produção**: Use ferramentas como vLLM para fornecer LLMs de forma escalável em organizações
 
-Seu sistema oferece o poder de executar modelos de linguagem sofisticados localmente. Experimente diferentes modelos, prompts e parâmetros para descobrir o que funciona melhor para suas aplicações.
+Seu sistema oferece a você o poder de executar modelos de linguagem sofisticados localmente. Experimente diferentes modelos, prompts e parâmetros para descobrir o que funciona melhor para suas aplicações.
