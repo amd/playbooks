@@ -61,7 +61,7 @@ By the end of this playbook you will be able to:
 <!-- @prereq:nodejs -->
 <!-- @os:end -->
 <!-- On Windows OpenClaw runs in WSL, so its Node.js is covered by the openclaw prereq. -->
-<!-- @prereq:docker,openclaw,lemonade-models-qwen3-6-35b-a3b -->
+<!-- @prereq:docker,openclaw,lemonade-models-qwen3-6-35b-a3b,lemonade -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 

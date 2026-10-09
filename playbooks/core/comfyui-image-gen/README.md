@@ -356,6 +356,7 @@ Before generating images, you need to load the Z-Image Turbo template. Here's ho
 ## Downloading Models
 
 <!-- @require:comfyui-models -->
+<!-- @prereq:comfyui-models -->
 
 ## Understanding the Interface
 
