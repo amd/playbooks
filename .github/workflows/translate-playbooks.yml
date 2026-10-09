@@ -58,6 +58,7 @@ jobs:
     outputs:
       changed: ${{ steps.push.outputs.changed }}
       branch: ${{ steps.push.outputs.branch }}
+      summary: ${{ steps.push.outputs.summary }}
     env:
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
@@ -180,6 +181,40 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
+          # Build a human-readable summary for the PR body: a "why" trigger line
+          # (from the detect step) plus a "what changed" breakdown (from the diff
+          # we just committed). This replaces the old bland one-line PR body.
+          EVENT="${{ github.event_name }}"
+          DISPATCH_ID="${{ github.event.inputs.playbook_id }}"
+          CHANGED_IDS="${{ steps.detect.outputs.playbooks }}"
+          DEPS="${{ steps.detect.outputs.deps }}"
+          if [ "$EVENT" = "workflow_dispatch" ] && [ -z "$DISPATCH_ID" ]; then
+            TRIGGER="Manual full backfill of all playbooks."
+          elif [ "$EVENT" = "workflow_dispatch" ]; then
+            TRIGGER="Manual backfill of: \`$DISPATCH_ID\`."
+          else
+            IDS_CSV=$(echo "$CHANGED_IDS" | tr -s ' ' ',' | sed 's/^,//; s/,$//')
+            if [ -n "$IDS_CSV" ]; then
+              TRIGGER="Triggered by changes to the English source of: \`$IDS_CSV\`."
+            else
+              TRIGGER="Triggered by a push to main."
+            fi
+            if [ "$DEPS" = "true" ]; then
+              TRIGGER="$TRIGGER Shared dependency files also changed."
+            fi
+          fi
+          WHAT=$(git diff --name-only HEAD~1 HEAD -- auto-translations \
+            | python .github/scripts/summarize_translation_diff.py)
+          {
+            echo "summary<<SUMMARY_EOF"
+            echo "### Trigger"
+            echo ""
+            echo "$TRIGGER"
+            echo ""
+            echo "$WHAT"
+            echo "SUMMARY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
   # PR/issue creation runs on a GitHub-hosted runner: `gh` is preinstalled and
   # api.github.com is reachable. The self-hosted `translation` runner has neither
   # guaranteed, so keeping any `gh` call there is what broke the previous run.
@@ -202,16 +237,35 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ needs.translate.outputs.branch }}
+          # Multiline what/which/why summary built by the translate job. Passed via
+          # env (not inline) so its markdown can't break the shell quoting.
+          SUMMARY: ${{ needs.translate.outputs.summary }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
         run: |
-          # Open a PR for manual review. The @-mention notifies the maintainer.
+          # Assemble the PR body: @-mention + the run's what/which/why summary.
+          # Use a body file so the multiline markdown is passed verbatim.
+          {
+            echo "@bconsolvo automated translation update from the Translate Playbooks workflow ([run ${RUN_ID}](${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}))."
+            echo ""
+            echo "$SUMMARY"
+            echo ""
+            echo "Touches \`auto-translations/\` only — please review and merge."
+          } > pr_body.md
+          # Open the PR WITHOUT --label first: `gh pr create --label X` fails
+          # atomically if label X doesn't exist, which would abort PR creation
+          # entirely (this is what happened when the repo had no 'translation'
+          # label). The @-mention in the body is what actually notifies the
+          # maintainer, so the PR must open regardless of label/reviewer state.
           PR_URL=$(gh pr create --repo "${{ github.repository }}" \
             --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
-            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
-            --label "translation")
+            --body-file pr_body.md)
           echo "Opened $PR_URL for manual review."
-          # Request review so it surfaces in the maintainer's review queue,
-          # not just as an @-mention. Best-effort — never fail the run over it.
+          # Label + reviewer are both best-effort: never fail the run over them.
+          gh pr edit "$PR_URL" --add-label "translation" \
+            || echo "::warning::Could not add 'translation' label (does it exist?); PR $PR_URL is still open."
           gh pr edit "$PR_URL" --add-reviewer bconsolvo \
             || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 
