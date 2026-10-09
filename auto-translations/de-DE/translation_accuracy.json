@@ -482,12 +482,12 @@
       "quality_issues": "Excellent translation; code/URLs/numbers intact, fluent, terminology consistent. Minor: 2,3B comma localization acceptable."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
-      "source_sha256": "606fd50baf712296dcb61bcd481471fd4f05a48809890d72ebff15a0e099d7ec",
+      "source_sha256": "6fb3b1d711584b0d32f53e540c7ab6be272f4c0b67e65babd684a239c6529927",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Slightly awkward 'Sprache-zu-Sprache'; 'Erstellen' is acceptable but 'Entwickeln' fits 'build' better."
+      "quality_score": 86,
+      "quality_issues": "Inconsistent compound forms (Sprache-zu-Sprache vs Sprach-zu-Sprach); otherwise accurate and fluent."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "fc3d6e51b607ba3be6e2ea1d8102db4a2034600ffd52d4ab07d4632aadb31257",
@@ -538,12 +538,12 @@
       "quality_issues": "Minor inconsistency: 'Walkthrough' vs 'Übung' mixed; 'Walkthrough 1' left untranslated in one spot. Otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
-      "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",
+      "source_sha256": "9849ad462523bb0e7de5810020a3d6f9b4ef37c46d34eb1da2049279720fff0c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Minor: 'Reibungsverluste zwischen Übersetzungs- und Sprachbarrieren' slightly awkward. Code, URLs, brands intact. Fluent, accurate."
+      "quality_score": 92,
+      "quality_issues": "Accurate, fluent, code/URLs intact. 'Sprache-zu-Sprache' slightly literal vs 'Sprachübersetzung'; minor awkwardness but acceptable."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",

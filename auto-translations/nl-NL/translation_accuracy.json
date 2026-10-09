@@ -482,12 +482,12 @@
       "quality_issues": "Accurate, fluent translation; code blocks, brands, numbers intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
-      "source_sha256": "606fd50baf712296dcb61bcd481471fd4f05a48809890d72ebff15a0e099d7ec",
+      "source_sha256": "6fb3b1d711584b0d32f53e540c7ab6be272f4c0b67e65babd684a239c6529927",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'spraak-naar-spraakvertaling' is slightly awkward compound but acceptable."
+      "quality_score": 82,
+      "quality_issues": "Inconsistent hyphenation/compounding: 'realtime' vs 'real-time', 'spraakvertaling' vs 'spraak-naar-spraak-vertaling'."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "fc3d6e51b607ba3be6e2ea1d8102db4a2034600ffd52d4ab07d4632aadb31257",
@@ -530,12 +530,12 @@
       "quality_issues": "Untranslated technical terms 'inference/serving' acceptable but could localize; 'gecontaineriseerde' slightly awkward. Otherwise accurate and fluent."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
-      "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",
+      "source_sha256": "9849ad462523bb0e7de5810020a3d6f9b4ef37c46d34eb1da2049279720fff0c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Fluent, accurate, code/URLs intact. Minor: 'infer.py' description says 'LLM text generation' faithfully kept; all fine."
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: untranslated IMPORTANT block (intentional per tag), slight 'frictie tussen' phrasing awkwardness."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "521f29360e9bba4b8a19cf40efb40f83eecdb87412a0d3ca176e5317203998a4",

@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Przegląd
 
-Oprogramowanie AMD ROCm™ oraz stos PyTorch tworzą zunifikowany ekosystem dla sztucznej inteligencji działającej lokalnie na urządzeniu. Działa zarówno w systemie Windows, jak i Linux, z oficjalnym wsparciem dla szerokiej gamy urządzeń, w tym APU Ryzen™ AI oraz GPU Radeon™.
+Oprogramowanie AMD ROCm™ wraz ze stosem PyTorch tworzą zunifikowany ekosystem dla sztucznej inteligencji działającej lokalnie na urządzeniu. Działa zarówno w systemie Windows, jak i Linux, z oficjalnym wsparciem dla szerokiej gamy urządzeń, w tym układów Ryzen™ AI APU oraz kart graficznych Radeon™ GPU.
 
-Ten przewodnik nauczy Cię, jak uruchomić tłumaczenie mowy na mowę o niskim opóźnieniu, ekspresyjne i prywatne, w całości na urządzeniu brzegowym.
+Ten przewodnik nauczy Cię, jak uruchomić niskolatencyjne, ekspresyjne i prywatne tłumaczenie mowy na mowę całkowicie na urządzeniu brzegowym.
 
 ## Czego się nauczysz
 
 - Jak skonfigurować środowisko do tłumaczenia mowy na mowę
-- Jak napisać kod w Pythonie do ładowania i używania modeli mowy na mowę
+- Jak napisać kod w Pythonie, aby wczytać i korzystać z modeli mowa-mowa
 - Jak uruchomić i eksperymentować z interfejsem Gradio UI
 
 ## Dlaczego warto korzystać z tłumaczenia mowy na mowę w czasie rzeczywistym?
 
-- Eliminuje tarcia między tłumaczeniem a barierami językowymi
+- Usuwa tarcia między tłumaczeniem a barierami językowymi
 - Przekazuje ton, emocje i intencje bez niezręcznych przerw
 - Umożliwia globalną współpracę i szybsze podejmowanie decyzji
 
@@ -39,8 +39,8 @@ Ten przewodnik nauczy Cię, jak uruchomić tłumaczenie mowy na mowę o niskim o
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Sprawdzanie aktualizacji oprogramowania
-> **Uwaga**: Jeśli VS Code nie jest zainstalowany, możesz zainstalować go za pomocą Ryzen AI Developer Center.
+## Sprawdzenie aktualizacji oprogramowania
+> **Uwaga**: Jeśli VS Code nie jest zainstalowany, możesz go zainstalować za pomocą Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -51,7 +51,7 @@ Ten przewodnik nauczy Cię, jak uruchomić tłumaczenie mowy na mowę o niskim o
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-W systemie Linux otwórz terminal i uruchom poniższe polecenie, aby utworzyć środowisko venv z już zainstalowanym ROCm+Pytorch:
+W systemie Linux otwórz terminal i wykonaj poniższe polecenie, aby utworzyć venv z już zainstalowanym ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,13 +65,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Przyznaj swojemu użytkownikowi dostęp do urządzeń GPU** (aby zmiana zaczęła obowiązywać, wyloguj się i zaloguj ponownie):
+**Przyznaj swojemu użytkownikowi dostęp do urządzeń GPU** (wyloguj się i zaloguj ponownie, aby zmiana zaczęła obowiązywać):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-W systemie Linux otwórz terminal i uruchom poniższe polecenie, aby utworzyć środowisko venv:
+W systemie Linux otwórz terminal i wykonaj poniższe polecenie, aby utworzyć venv:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv z już zainstalowanym ROCm+Pytorch:
+W systemie Windows otwórz terminal w wybranym przez siebie katalogu i wykonaj poniższe polecenia, aby utworzyć venv z już zainstalowanym ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować zasady wykonywania PowerShell (np.
-> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń Powershell.
+> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować swoją politykę wykonywania PowerShell (np.
+> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv:
+W systemie Windows otwórz terminal w wybranym przez siebie katalogu i wykonaj poniższe polecenia, aby utworzyć venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować zasady wykonywania PowerShell (np.
-> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń Powershell.
+> **Wskazówka**: Użytkownicy systemu Windows mogą potrzebować zmodyfikować swoją politykę wykonywania PowerShell (np.
+> ustawiając ją na RemoteSigned lub Unrestricted) przed uruchomieniem niektórych poleceń PowerShell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -132,7 +132,7 @@ s2st-env\Scripts\activate
 Zainstaluj zależności m4t za pomocą pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,31 +202,31 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Konfiguracja demo mowy na mowę
+## Konfiguracja demo mowa-mowa
 
 #### Dowiedz się więcej o seamless-m4t-v2
 
-Sprawdź [kartę modelu](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face, aby uzyskać więcej informacji.
-Oto architektura techniczna modeli mowy na mowę:
+Zapoznaj się z [kartą modelu](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face, aby uzyskać więcej informacji.
+Oto architektura techniczna modeli mowa-mowa:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Pobierz skrypty
 
-Ten przewodnik zawiera gotowe do użycia skrypty. Pobierz je wszystkie do tego samego katalogu co środowisko, które utworzyłeś.
+Ten przewodnik zawiera gotowe do użycia skrypty. Pobierz je wszystkie do tego samego katalogu, co środowisko, które utworzyłeś/aś.
 
 | Skrypt | Opis | Użycie |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Podstawowa generacja tekstu LLM | `python infer.py` |
+| [infer.py](assets/infer.py) | Podstawowe generowanie tekstu LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Przykładowy plik audio | N/A |
-| [lang_list.py](assets/lang_list.py) | Plik obsługi języków | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuicyjny interfejs UI do tłumaczenia mowy | `python gradio_demo.py --no-share` |
+| [lang_list.py](assets/lang_list.py) | Plik wsparcia językowego | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuicyjny interfejs do tłumaczenia mowy | `python gradio_demo.py --no-share` |
 
 
-### Rozpoczynanie pracy z infer.py
+### Rozpoczęcie z infer.py
 
-Aby wykonać skrypt, uruchom 
+Aby uruchomić skrypt, wykonaj 
 ```bash
 python infer.py
 ```
@@ -234,7 +234,7 @@ python infer.py
  
   
 #### Wyjaśnienie kodu
-**Fragment 1: Import niezbędnych zależności**
+**Fragment 1: Importowanie niezbędnych zależności**
 
 ```python 
 import os
@@ -261,7 +261,7 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Fragment 2: Ładowanie modeli z HuggingFace**
+**Fragment 2: Wczytywanie modeli z HuggingFace**
 
 Ta funkcja przyjmuje identyfikator modelu i pobiera model, jeśli nie został jeszcze pobrany. Następnie zwraca procesor i model do wykorzystania przez kolejną funkcję.
 ```python
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Fragment 3: Wczytanie pliku audio .wav i jego wstępne przetworzenie**
+**Fragment 3: Wczytanie pliku klipu audio .wav i jego wstępne przetworzenie**
 
-Ta funkcja wczytuje klip audio i zmienia jego częstotliwość próbkowania na docelową.
+Ta funkcja wczytuje klip audio i poddaje go resamplingowi do docelowej częstotliwości próbkowania.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -399,16 +399,16 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Uruchamianie demo interfejsu Gradio:
+### Uruchamianie demo z interfejsem Gradio UI:
 
-Teraz, gdy uruchomiłeś już podstawowy przykładowy skrypt, poniższe instrukcje zapewnią pomocny interfejs UI, który rozbudowuje napisany przez nas kod i ułatwia tłumaczenie mowy na mowę na żywo.
+Teraz, gdy uruchomiłeś/aś podstawowy przykładowy skrypt, poniższe instrukcje przedstawiają przydatny interfejs użytkownika, który bazuje na napisanym przez nas kodzie i ułatwia tłumaczenie mowy na mowę na żywo.
 
-#### Uruchamianie Gradio lokalnie
+#### Uruchom Gradio lokalnie
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Następnie otwórz przeglądarkę internetową pod adresem `http://127.0.0.1:7860`, aby uzyskać dostęp do interfejsu UI.
+Następnie otwórz przeglądarkę internetową pod adresem `http://127.0.0.1:7860`, aby uzyskać dostęp do interfejsu.
 
 
 ### Przykład interfejsu Gradio UI:
@@ -530,12 +530,12 @@ PY
 
 ## Kolejne kroki
 
-- Miksuj i łącz dziesiątki języków, aby szybko dokonywać tłumaczeń. 
-- Udostępnij swoje demo innym: Dodaj --share, aby utworzyć publiczny link, do którego każdy będzie miał dostęp zdalnie, lub wdróż je na stałe za pomocą Hugging Face Spaces
+- Mieszaj i dopasowuj dziesiątki języków w celu szybkiego tłumaczenia.
+- Udostępnij swoje demo innym: dodaj --share, aby utworzyć publiczny link, do którego każdy będzie mógł uzyskać dostęp zdalnie, lub wdróż je na stałe za pomocą Hugging Face Spaces
 
 ## Zasoby
 
 Poniżej znajdują się dodatkowe zasoby, aby dowiedzieć się więcej o tłumaczeniu mowy na mowę:  
 * Repozytorium znajduje się tutaj https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Badania naukowe związane z „Seamless: Multilingual Expressive and Streaming Speech Translation”
-* Udostępnianie i wdrażanie Gradio: [Przewodnik po udostępnianiu aplikacji](https://www.gradio.app/guides/sharing-your-app) oraz [Wdrażanie do Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Udostępnianie i wdrażanie Gradio: [Przewodnik udostępniania aplikacji](https://www.gradio.app/guides/sharing-your-app) oraz [Wdrażanie w Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

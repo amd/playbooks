@@ -8,7 +8,7 @@
     },
     "cs-CZ": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -26,7 +26,7 @@
     },
     "el-GR": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -56,7 +56,7 @@
     },
     "he": {
       "files_scored": 80,
-      "mean": 92.2,
+      "mean": 92.1,
       "min": 60,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -68,7 +68,7 @@
     },
     "it-IT": {
       "files_scored": 80,
-      "mean": 93.9,
+      "mean": 94.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -80,7 +80,7 @@
     },
     "ko-KR": {
       "files_scored": 80,
-      "mean": 93.5,
+      "mean": 93.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -92,7 +92,7 @@
     },
     "nl-NL": {
       "files_scored": 80,
-      "mean": 92.6,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -110,31 +110,31 @@
     },
     "pt-PT": {
       "files_scored": 80,
-      "mean": 92.9,
+      "mean": 93.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
       "files_scored": 80,
-      "mean": 92.5,
+      "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
       "files_scored": 80,
-      "mean": 92.9,
+      "mean": 92.8,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
       "files_scored": 80,
-      "mean": 91.6,
+      "mean": 91.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
       "files_scored": 80,
-      "mean": 90.5,
+      "mean": 90.4,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -146,31 +146,31 @@
     },
     "sv-SE": {
       "files_scored": 80,
-      "mean": 93.0,
-      "min": 88,
+      "mean": 92.9,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
       "files_scored": 80,
-      "mean": 92.7,
+      "mean": 92.8,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
       "files_scored": 80,
-      "mean": 92.4,
+      "mean": 92.5,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
       "files_scored": 80,
-      "mean": 92.6,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
       "files_scored": 80,
-      "mean": 93.5,
+      "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -211,6 +211,12 @@
       "file": "playbooks/supplemental/cvml/playbook.json",
       "score": 70,
       "issues": "Left 'Local Computer Vision' and 'perception' untranslated; inconsistent localization reduces fluency."
+    },
+    {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 72,
+      "issues": "Omits 'speech-to-speech' nuance; 'parole à parole' lost. Otherwise fluent, correct terminology."
     },
     {
       "locale": "fr-CA",
@@ -291,12 +297,6 @@
       "issues": "Inconsistent: title translates 'AMD Sync' as 'synchronisation AMD' but body keeps 'AMD Sync'; 'métriques' anglicism (préfère 'mesures')."
     },
     {
-      "locale": "fr-CA",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 78,
-      "issues": "Title drops speech-to-speech nuance; 'voix-à-voix' awkward calque, 'traduction vocale directe' preferred."
-    },
-    {
       "locale": "fr-FR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
@@ -355,6 +355,12 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
       "issues": "Title mistranslates 'AMD Sync' brand as 'sinhronizacijo AMD'; body correctly keeps 'AMD Sync'. Inconsistency."
+    },
+    {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 78,
+      "issues": "Title redundant: 'Sprotno...v realnem času' repeats real-time; awkward 'govorno-govorni'. Body fluent and accurate."
     },
     {
       "locale": "sl-SI",
@@ -427,6 +433,12 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent terminology: 'jader' vs 'kernely' for kernels; otherwise accurate, fluent, brands intact."
+    },
+    {
+      "locale": "cs-CZ",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Redundant 'v reálném čase' repeated twice; slightly verbose but accurate and fluent."
     },
     {
       "locale": "cs-CZ",
@@ -537,22 +549,10 @@
       "issues": "Title mistranslates 'first agent with GAIA' as 'GAIA's first agent'; otherwise accurate and fluent."
     },
     {
-      "locale": "it-IT",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Title omits 'speech-to-speech' nuance; 'voce-voce' awkward, 'da voce a voce' preferred."
-    },
-    {
       "locale": "ja-JP",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
-      "issues": "Awkward '音声対音声'; more natural rendering like '音声から音声への' preferred; otherwise accurate."
-    },
-    {
-      "locale": "ko-KR",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent term (음성 대 음성 vs 음성-음성); 'speech-to-speech' better as 음성 간; otherwise accurate and fluent."
+      "issues": "\"音声対音声\" is literal; \"音声間翻訳\" or \"スピーチ翻訳\" more natural. Otherwise accurate."
     },
     {
       "locale": "ko-KR",
@@ -585,6 +585,12 @@
       "issues": "Added 'AMD' not in source; 'Clustering' left untranslated; 'Halo-er' awkward pluralization."
     },
     {
+      "locale": "nl-NL",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent hyphenation/compounding: 'realtime' vs 'real-time', 'spraakvertaling' vs 'spraak-naar-spraak-vertaling'."
+    },
+    {
       "locale": "pt-BR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
@@ -595,12 +601,6 @@
       "file": "playbooks/supplemental/hermes-lemonade-server/playbook.json",
       "score": 82,
       "issues": "Gerund 'Executando' is Brazilian; pt-PT prefers 'A executar'. 'Agente Hermes'/'Hermes Agent' inconsistent."
-    },
-    {
-      "locale": "pt-PT",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Terminology inconsistency: title uses 'Fala para Fala' but body uses 'voz-a-voz'; minor fluency."
     },
     {
       "locale": "ro-RO",
@@ -633,6 +633,12 @@
       "issues": "Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate."
     },
     {
+      "locale": "sk-SK",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "'reálny' should be 'v reálnom čase'; minor accuracy drop in second sentence."
+    },
+    {
       "locale": "sl-SI",
       "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
@@ -663,16 +669,16 @@
       "issues": "\"rasporedite\" awkward for deploy; \"inferentni\" unusual; otherwise accurate, brands intact"
     },
     {
+      "locale": "sv-SE",
+      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
+      "score": 82,
+      "issues": "Title 'Taltolkning i realtid' loses speech-to-speech specificity; otherwise accurate and fluent."
+    },
+    {
       "locale": "th-TH",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 82,
       "issues": "Title leaves 'Clustering' untranslated, slightly awkward; otherwise accurate and fluent."
-    },
-    {
-      "locale": "th-TH",
-      "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
-      "score": 82,
-      "issues": "Title omits speech-to-speech nuance (just 'speech translation'); otherwise accurate and fluent."
     },
     {
       "locale": "th-TH",

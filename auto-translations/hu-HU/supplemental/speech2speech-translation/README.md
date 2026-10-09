@@ -16,20 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Az AMD ROCm™ szoftver és a PyTorch stack egységes ökoszisztémát hoz létre az eszközön futó AI-hoz. Windows és Linux rendszereken egyaránt működik, hivatalos támogatással az eszközök széles körére, beleértve a Ryzen™ AI APU-kat és a Radeon™ GPU-kat is.
+Az AMD ROCm™ szoftver és a PyTorch együtt egységes ökoszisztémát alkotnak az eszközön futó (on-device) AI-hoz. Windows és Linux rendszeren egyaránt működik, hivatalos támogatással az eszközök széles köréhez, beleértve a Ryzen™ AI APU-kat és a Radeon™ GPU-kat is.
 
-Ez a útmutató megtanítja, hogyan futtass alacsony késleltetésű, kifejező és privát beszéd-beszéd fordítást teljes egészében a peremen (edge).
+Ez a playbook megtanítja, hogyan futtathatsz alacsony késleltetésű, kifejező és privát beszéd-beszéd fordítást teljes egészében az eszközön (edge).
 
-## Amit meg fogsz tanulni
+## Amit megtanulsz
 
-- Hogyan állítsd be a beszéd-beszéd környezetet
+- Hogyan állítsd be a beszéd-beszéd (speech-to-speech) környezetet
 - Hogyan írj Python kódot a beszéd-beszéd modellek betöltéséhez és használatához
 - Hogyan futtasd és kísérletezz a Gradio felhasználói felülettel
 
 ## Miért érdemes valós idejű beszéd-beszéd fordítást használni?
 
-- Megszünteti a súrlódást a fordítás és a nyelvi akadályok között
-- Közvetíti a hangnemet, az érzelmeket és a szándékot kínos szünetek nélkül
+- Megszünteti a fordítási és nyelvi akadályok okozta súrlódást
+- Hangsúlyt, érzelmet és szándékot közvetít kínos szünetek nélkül
 - Lehetővé teszi a globális együttműködést és a gyorsabb döntéshozatalt
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -45,13 +45,13 @@ Ez a útmutató megtanítja, hogyan futtass alacsony késleltetésű, kifejező 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftveres előfeltételek telepítése
+## A szoftver-előfeltételek telepítése
 
 ### Virtuális környezet létrehozása
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linuxon nyiss meg egy terminált, és futtasd a következő parancsot egy olyan venv létrehozásához, amelyben már telepítve van a ROCm+PyTorch:
+Linuxon nyiss meg egy terminált, és futtasd a következő parancsot egy olyan venv létrehozásához, amelyben már telepítve van a ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adj hozzáférést a felhasználódnak a GPU-eszközökhöz** (jelentkezz ki és be ismét, hogy ez érvénybe lépjen):
+**Add meg a felhasználódnak a hozzáférést a GPU-eszközökhöz** (jelentkezz ki, majd vissza, hogy ez érvénybe lépjen):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows rendszeren nyiss meg egy terminált a kívánt könyvtárban, és kövesd a parancsokat egy olyan venv létrehozásához, amelyben már telepítve van a ROCm+PyTorch:
+Windowson nyiss meg egy terminált a kiválasztott könyvtárban, és kövesd a parancsokat egy olyan venv létrehozásához, amelyben már telepítve van a ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási házirendjét (pl.
-> RemoteSigned vagy Unrestricted beállítása) egyes PowerShell-parancsok futtatása előtt.
+> **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási szabályzatát (Execution Policy) (pl.
+> RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell-parancs futtatása előtt.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Windows rendszeren nyiss meg egy terminált a kívánt könyvtárban, és kövesd a parancsokat egy venv létrehozásához:
+Windowson nyiss meg egy terminált a kiválasztott könyvtárban, és kövesd a parancsokat egy venv létrehozásához:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási házirendjét (pl.
-> RemoteSigned vagy Unrestricted beállítása) egyes PowerShell-parancsok futtatása előtt.
+> **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási szabályzatát (Execution Policy) (pl.
+> RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell-parancs futtatása előtt.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -129,10 +129,10 @@ s2st-env\Scripts\activate
 
 ### További függőségek
 
-Telepítsd az m4t függőségeket pip használatával:
+Telepítsd az m4t függőségeket pip segítségével:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -204,9 +204,9 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 ## A beszéd-beszéd demó beállítása
 
-#### Ismerd meg a seamless-m4t-v2-t
+#### Ismerkedés a seamless-m4t-v2-vel
 
-Nézd meg a [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) oldalt a Hugging Face-en további információkért.
+Nézd meg a [modellkártyát](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) a Hugging Face-en további információkért.
 Ez a beszéd-beszéd modellek technikai architektúrája:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -214,23 +214,23 @@ Ez a beszéd-beszéd modellek technikai architektúrája:
 
 #### Szkriptek letöltése
 
-Ez az útmutató használatra kész szkripteket tartalmaz. Kérjük, töltsd le mindegyiket ugyanabba a könyvtárba, ahol a létrehozott környezet található.
+Ez a playbook azonnal használható szkripteket tartalmaz. Kérjük, töltsd le mindegyiket ugyanabba a könyvtárba, mint ahol a létrehozott környezeted található.
 
 | Szkript | Leírás | Használat |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Alapvető LLM szöveggenerálás | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Példa hangfájl | N/A |
 | [lang_list.py](assets/lang_list.py) | Nyelvi támogatási fájl | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitív felhasználói felület a beszédfordításhoz | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitív felhasználói felület beszédfordításhoz | `python gradio_demo.py --no-share` |
 
 
 ### Kezdés az infer.py-vel
 
-A szkript futtatásához add ki a következő parancsot: 
+A szkript futtatásához add ki a 
 ```bash
 python infer.py
 ```
-> **Megjegyzés**: Előfordulhat, hogy néhány figyelmeztetést látsz. Ez normális.
+> **Megjegyzés**: Néhány figyelmeztetést láthatsz. Ez normális jelenség.
  
   
 #### A kód magyarázata
@@ -263,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **2. részlet: A modellek betöltése a HuggingFace-ről**
 
-Ez a függvény egy modell-azonosítót vesz be, és letölti a modellt, ha még nincs letöltve. Ezután visszaadja a processzort és a modellt a következő függvény számára.
+Ez a funkció egy modellazonosítót fogad el, és letölti a modellt, ha az még nincs letöltve. Ezután visszaadja a processzort és a modellt a következő funkció számára.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**3. részlet: Bemeneti hangfájl (.wav) betöltése és előfeldolgozása**
+**3. részlet: A bemeneti hangklip .wav fájl betöltése és előfeldolgozása**
 
-Ez a függvény betölti a hangfájlt, és újramintavételezi a célfrekvenciára.
+Ez a funkció betölti a hangklipet, és újramintavételezi azt a célfrekvenciára.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,9 +304,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**4. részlet: Következtetés (inference) futtatása**
+**4. részlet: Következtetés futtatása**
 
-Ez a függvény futtatja a modellt, és visszaadja a generált kimenetet.
+Ez a funkció következtetést (inference) futtat a modellel, és visszaadja a generált kimenetet.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -336,7 +336,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **5. részlet: A lefordított fájl mentése**
 
-Ez a függvény elmenti a hangtömböt egy .WAV fájlba. 
+Ez a funkció elmenti a hangtömböt egy .WAV fájlba. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -401,14 +401,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### A Gradio felhasználói felület demó futtatása:
 
-Most, hogy futtattál egy alap szkriptpéldát, a következő útmutatás egy hasznos felhasználói felületet mutat be, amely az eddig megírt kódra épül, és megkönnyíti az élő beszéd-beszéd fordítást.
+Most, hogy lefuttattál egy alapvető szkriptpéldát, a következő utasítások egy hasznos felhasználói felületet biztosítanak, amely az eddig megírt kódra épül, és megkönnyíti az élő beszéd-beszéd fordítást.
 
-#### A Gradio helyi futtatása
+#### Gradio helyi futtatása
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Ezután nyisd meg a webböngésződben a `http://127.0.0.1:7860` címet a felhasználói felület eléréséhez.
+Ezután nyisd meg a webböngésződet a `http://127.0.0.1:7860` címen a felhasználói felület eléréséhez.
 
 
 ### Gradio felhasználói felület példa:
@@ -530,12 +530,12 @@ PY
 
 ## Következő lépések
 
-- Keverd és párosítsd a nyelvek tucatjait a gyors fordításhoz. 
-- Oszd meg a demódat másokkal: Add hozzá a --share kapcsolót, hogy nyilvános linket hozz létre, amelyet bárki elérhet távolról, vagy telepítsd tartósan a Hugging Face Spaces segítségével
+- Keverj és párosíts tucatnyi nyelv között a gyors fordításhoz. 
+- Oszd meg a demódat másokkal: add hozzá a --share kapcsolót, hogy nyilvános linket hozz létre, amelyet bárki elérhet távolról, vagy telepítsd véglegesen a Hugging Face Spaces segítségével
 
 ## Erőforrások
 
-Az alábbiakban további erőforrásokat találsz a beszéd-beszéd fordításról:  
-* A repó itt található: https://huggingface.co/facebook/seamless-m4t-v2-large 
-* A "Seamless: Multilingual Expressive and Streaming Speech Translation" témájú tudományos kutatás
-* Gradio megosztás és telepítés: [Alkalmazásod megosztása útmutató](https://www.gradio.app/guides/sharing-your-app) és [Telepítés a Hugging Face Spaces-re](https://shafiqulai.github.io/blogs/blog_5.html)
+Az alábbiakban néhány további erőforrást találsz, amelyekből többet megtudhatsz a beszéd-beszéd fordításról:  
+* A tárhely itt található: https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Kutatási szakirodalom a „Seamless: Multilingual Expressive and Streaming Speech Translation” témában
+* Gradio megosztás és telepítés: [Útmutató az alkalmazásod megosztásához](https://www.gradio.app/guides/sharing-your-app) és [Telepítés a Hugging Face Spaces-re](https://shafiqulai.github.io/blogs/blog_5.html)

@@ -466,12 +466,12 @@
       "quality_issues": "Accurate, fluent, code/numbers/brands intact; only minor stylistic nits."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
-      "source_sha256": "606fd50baf712296dcb61bcd481471fd4f05a48809890d72ebff15a0e099d7ec",
+      "source_sha256": "6fb3b1d711584b0d32f53e540c7ab6be272f4c0b67e65babd684a239c6529927",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 82,
-      "quality_issues": "Inconsistent term (음성 대 음성 vs 음성-음성); 'speech-to-speech' better as 음성 간; otherwise accurate and fluent."
+      "quality_score": 88,
+      "quality_issues": "Title uses '대' while body uses '간', minor inconsistency in rendering speech-to-speech."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "fc3d6e51b607ba3be6e2ea1d8102db4a2034600ffd52d4ab07d4632aadb31257",
@@ -538,12 +538,12 @@
       "quality_issues": "Excellent translation; code, URLs, brands intact. Minor awkward line break near 'flm run/lemonade run' bridging phrase."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
-      "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",
+      "source_sha256": "9849ad462523bb0e7de5810020a3d6f9b4ef37c46d34eb1da2049279720fff0c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Accurate, fluent, code/URLs intact; 'speech-to-speech' rendered as 음성-음성, acceptable but slightly literal."
+      "quality_issues": "Accurate, fluent; code/URLs intact. Minor: 'speech-speech' rendered as 음성-음성, slightly literal but acceptable."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
       "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",

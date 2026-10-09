@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Огляд
 
-Програмний стек AMD ROCm™ і PyTorch створюють єдину екосистему для ШІ на пристрої. Він працює як у Windows, так і в Linux з офіційною підтримкою широкого спектра пристроїв, включно з APU Ryzen™ AI та GPU Radeon™.
+Програмний стек AMD ROCm™ та PyTorch створюють єдину екосистему для ШІ на пристрої. Він працює як для Windows, так і для Linux з офіційною підтримкою широкого спектру пристроїв, включаючи Ryzen™ AI APU та Radeon™ GPU.
 
-Цей посібник навчить вас, як запускати низьколатентний, виразний і приватний переклад мовлення в мовлення повністю на периферійному пристрої.
+Цей посібник навчить вас, як запускати маловитратний за затримкою, виразний і приватний переклад мовлення в мовлення повністю на пристрої.
 
-## Що ви дізнаєтесь
+## Чого ви навчитеся
 
 - Як налаштувати середовище для перекладу мовлення в мовлення
-- Як писати код Python для завантаження та використання моделей мовлення в мовлення
-- Як запускати та експериментувати з інтерфейсом користувача Gradio
+- Як писати код на Python для завантаження та використання моделей мовлення в мовлення
+- Як запускати та експериментувати з Gradio UI
 
 ## Навіщо використовувати переклад мовлення в мовлення в реальному часі?
 
-- Усуває тертя між перекладом і мовними бар'єрами
+- Усуває тертя між перекладом та мовними бар'єрами
 - Передає тон, емоції та наміри без незручних пауз
 - Уможливлює глобальну співпрацю та швидше прийняття рішень
 
@@ -51,7 +51,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-У Linux відкрийте термінал і виконайте наступну команду, щоб створити venv з уже встановленими ROCm+Pytorch:
+У Linux відкрийте термінал та виконайте наступну команду, щоб створити venv з уже встановленими ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,13 +65,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Надайте вашому користувачеві доступ до пристроїв GPU** (вийдіть із системи та увійдіть знову, щоб зміни набули чинності):
+**Надайте вашому користувачу доступ до пристроїв GPU** (вийдіть з системи та увійдіть знову, щоб це набуло чинності):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-У Linux відкрийте термінал і виконайте наступну команду, щоб створити venv:
+У Linux відкрийте термінал та виконайте наступну команду, щоб створити venv:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-У Windows відкрийте термінал у потрібному каталозі та виконайте наступні команди, щоб створити venv з уже встановленими ROCm+Pytorch:
+У Windows відкрийте термінал у обраному вами каталозі та виконайте команди, щоб створити venv з уже встановленими ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Порада**: Користувачам Windows може знадобитися змінити свою політику виконання PowerShell (наприклад,
-> встановити RemoteSigned або Unrestricted) перед виконанням деяких команд PowerShell.
+> **Порада**: Користувачам Windows може знадобитися змінити політику виконання PowerShell (наприклад,
+> встановити її на RemoteSigned або Unrestricted) перед запуском деяких команд PowerShell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-У Windows відкрийте термінал у потрібному каталозі та виконайте наступні команди, щоб створити venv:
+У Windows відкрийте термінал у обраному вами каталозі та виконайте команди, щоб створити venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Порада**: Користувачам Windows може знадобитися змінити свою політику виконання PowerShell (наприклад,
-> встановити RemoteSigned або Unrestricted) перед виконанням деяких команд PowerShell.
+> **Порада**: Користувачам Windows може знадобитися змінити політику виконання PowerShell (наприклад,
+> встановити її на RemoteSigned або Unrestricted) перед запуском деяких команд PowerShell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -132,7 +132,7 @@ s2st-env\Scripts\activate
 Встановіть залежності m4t за допомогою pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -204,7 +204,7 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 ## Налаштування демонстрації перекладу мовлення в мовлення
 
-#### Дізнайтеся більше про seamless-m4t-v2
+#### Дізнайтеся про seamless-m4t-v2
 
 Перегляньте [картку моделі](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) на Hugging Face для отримання додаткової інформації.
 Це технічна архітектура моделей мовлення в мовлення:
@@ -212,15 +212,15 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Завантажте скрипти
+#### Завантаження скриптів
 
-Цей посібник містить готові до використання скрипти. Будь ласка, завантажте їх усі в той самий каталог, що й створене вами середовище.
+Цей посібник включає готові до використання скрипти. Будь ласка, завантажте їх усі до того ж каталогу, що й середовище, яке ви створили.
 
 | Скрипт | Опис | Використання |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Базова генерація тексту LLM | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Приклад аудіофайлу | Н/З |
-| [lang_list.py](assets/lang_list.py) | Файл підтримки мов | Н/З |
+| [input1.wav](assets/input1.wav) | Приклад аудіофайлу | N/A |
+| [lang_list.py](assets/lang_list.py) | Файл підтримки мов | N/A |
 | [gradio_demo.py](assets/gradio_demo.py) | Інтуїтивний інтерфейс для перекладу мовлення | `python gradio_demo.py --no-share` |
 
 
@@ -263,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Фрагмент 2: Завантаження моделей з HuggingFace**
 
-Ця функція приймає ідентифікатор моделі та завантажує модель, якщо вона ще не завантажена. Потім вона повертає процесор і модель для використання наступною функцією.
+Ця функція приймає ідентифікатор моделі та завантажує модель, якщо вона ще не завантажена. Потім вона повертає процесор та модель для використання наступною функцією.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Фрагмент 3: Введення аудіокліпу у файлі .wav та його попередня обробка**
+**Фрагмент 3: Введення аудіокліпу .wav файлу та його попередня обробка**
 
-Ця функція завантажує аудіокліп і повторно дискретизує його до цільової частоти.
+Ця функція завантажує аудіокліп та здійснює ресемплінг до цільової частоти.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,9 +304,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Фрагмент 4: Виконання інференсу**
+**Фрагмент 4: Виконання висновування**
 
-Ця функція виконує інференс за допомогою моделі та повертає згенерований результат.
+Ця функція виконує висновування за допомогою моделі та повертає згенерований результат.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -336,7 +336,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Фрагмент 5: Збереження перекладеного файлу**
 
-Ця функція зберігає аудіомасив у файл .WAV. 
+Ця функція зберігає масив аудіо у файл .WAV. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -399,7 +399,7 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Запуск демонстрації інтерфейсу Gradio:
+### Запуск демонстрації Gradio UI:
 
 Тепер, коли ви запустили базовий приклад скрипту, наступні інструкції надають зручний інтерфейс, який спирається на написаний нами код і спрощує переклад мовлення в мовлення в реальному часі.
 
@@ -408,10 +408,10 @@ echo "PASS: infer.py created out1.wav successfully"
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Потім відкрийте свій веб-браузер за адресою `http://127.0.0.1:7860`, щоб отримати доступ до інтерфейсу.
+Потім відкрийте веб-браузер за адресою `http://127.0.0.1:7860`, щоб отримати доступ до інтерфейсу.
 
 
-### Приклад інтерфейсу Gradio:
+### Приклад Gradio UI:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -530,12 +530,12 @@ PY
 
 ## Наступні кроки
 
-- Змішуйте та поєднуйте десятки мов для швидкого перекладу. 
-- Поділіться своєю демонстрацією з іншими: додайте --share, щоб створити публічне посилання, доступне будь-кому віддалено, або розгорніть демонстрацію на постійній основі за допомогою Hugging Face Spaces
+- Змішуйте та комбінуйте десятки мов для швидкого перекладу. 
+- Поділіться своєю демонстрацією з іншими: Додайте --share, щоб створити публічне посилання, доступне будь-кому віддалено, або розгорніть її постійно за допомогою Hugging Face Spaces
 
 ## Ресурси
 
-Нижче наведено додаткові ресурси, щоб дізнатися більше про переклад мовлення в мовлення:  
-* Репозиторій знаходиться тут https://huggingface.co/facebook/seamless-m4t-v2-large 
+Нижче наведено додаткові ресурси для отримання додаткової інформації про переклад мовлення в мовлення:  
+* Репозиторій тут https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Наукові дослідження, пов'язані з "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Спільний доступ та розгортання Gradio: [Посібник зі спільного доступу до вашого застосунку](https://www.gradio.app/guides/sharing-your-app) та [Розгортання на Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Спільний доступ та розгортання Gradio: [Посібник зі спільного доступу до вашого додатка](https://www.gradio.app/guides/sharing-your-app) та [Розгортання на Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

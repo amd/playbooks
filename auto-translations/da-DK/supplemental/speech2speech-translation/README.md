@@ -16,24 +16,24 @@ SPDX-License-Identifier: MIT
 
 ## Oversigt
 
-AMD ROCm™-softwaren og PyTorch-stakken skaber et samlet økosystem til AI på enheden. Det fungerer til både Windows og Linux med officiel understøttelse af en bred vifte af enheder, herunder Ryzen™ AI-APU'er og Radeon™-GPU'er.
+AMD ROCm™-softwaren og PyTorch-stakken danner et samlet økosystem til on-device AI. Det fungerer på både Windows og Linux med officiel understøttelse af en bred vifte af enheder, herunder Ryzen™ AI APU'er og Radeon™ GPU'er.
 
-Denne playbook lærer dig, hvordan du kører lav-latens, udtryksfuld og privat tale-til-tale-oversættelse udelukkende på edge-enheden.
+Denne playbook lærer dig, hvordan du kører lav-latens, udtryksfuld og privat tale-til-tale-oversættelse fuldstændigt på kanten (edge).
 
 ## Hvad du vil lære
 
-- Hvordan man opsætter et speech-to-speech-miljø
-- Hvordan man skriver Python-kode til at indlæse og bruge speech-speech-modeller
-- Hvordan man kører og eksperimenterer med Gradio UI
+- Hvordan du opsætter et tale-til-tale-miljø
+- Hvordan du skriver Python-kode til at indlæse og bruge tale-til-tale-modeller
+- Hvordan du kører og eksperimenterer med Gradio UI'en
 
 ## Hvorfor bruge tale-til-tale-oversættelse i realtid?
 
-- Fjerner friktion mellem oversættelses- og sprogbarrierer
-- Formidler tone, følelser og hensigt uden akavede pauser
+- Fjerner friktion mellem oversættelse og sprogbarrierer
+- Formidler tone, følelse og intention uden akavede pauser
 - Muliggør globalt samarbejde og hurtigere beslutningstagning
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Indstilling af hukommelseskonfigurationen
+## Konfiguration af hukommelsesindstilling
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -45,7 +45,7 @@ Denne playbook lærer dig, hvordan du kører lav-latens, udtryksfuld og privat t
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installation af softwareforudsætninger
+## Installation af nødvendig software
 
 ### Opret et virtuelt miljø
 
@@ -98,7 +98,7 @@ s2st-env\Scripts\activate
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
 > **Tip**: Windows-brugere kan være nødt til at ændre deres PowerShell Execution Policy (f.eks.
-> ved at sætte den til RemoteSigned eller Unrestricted), før de kører nogle Powershell-kommandoer.
+> ved at sætte den til RemoteSigned eller Unrestricted), før de kører visse PowerShell-kommandoer.
 
 <!-- @device:end -->
 
@@ -114,7 +114,7 @@ s2st-env\Scripts\activate
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
 > **Tip**: Windows-brugere kan være nødt til at ændre deres PowerShell Execution Policy (f.eks.
-> ved at sætte den til RemoteSigned eller Unrestricted), før de kører nogle Powershell-kommandoer.
+> ved at sætte den til RemoteSigned eller Unrestricted), før de kører visse PowerShell-kommandoer.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -132,7 +132,7 @@ s2st-env\Scripts\activate
 Installer m4t-afhængigheder ved hjælp af pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,35 +202,35 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Opsætning af speech-to-speech-demoen
+## Opsætning af tale-til-tale-demoen
 
 #### Lær om seamless-m4t-v2
 
-Se [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) på Hugging Face for mere information.
-Dette er den tekniske arkitektur for speech-speech-modellerne:
+Se [modelkortet](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) på Hugging Face for mere information.
+Dette er den tekniske arkitektur for tale-til-tale-modellerne:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
 #### Download af scripts
 
-Denne playbook indeholder klar-til-brug scripts. Download venligst alle sammen til den samme mappe som det miljø, du oprettede.
+Denne playbook indeholder klar-til-brug scripts. Download venligst alle disse til den samme mappe som det miljø, du oprettede.
 
-| Script | Beskrivelse | Anvendelse |
+| Script | Beskrivelse | Brug |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Grundlæggende LLM-tekstgenerering | `python infer.py` |
-| [input1.wav](assets/input1.wav) | Eksempel-lydfil | N/A |
-| [lang_list.py](assets/lang_list.py) | Sprogunderstøttelsesfil | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitiv brugerflade til taleoversættelse | `python gradio_demo.py --no-share` |
+| [input1.wav](assets/input1.wav) | Eksempel på lydfil | N/A |
+| [lang_list.py](assets/lang_list.py) | Fil med understøttede sprog | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitiv brugergrænseflade til taleoversættelse | `python gradio_demo.py --no-share` |
 
 
 ### Kom i gang med infer.py
 
-For at eksekvere scriptet, kør 
+For at køre scriptet skal du køre 
 ```bash
 python infer.py
 ```
-> **Bemærk**: Du kan muligvis se nogle advarsler. Dette er forventet.
+> **Bemærk**: Du kan se nogle advarsler. Dette er forventet.
  
   
 #### Forklaring af koden
@@ -263,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Uddrag 2: Indlæsning af modellerne fra HuggingFace**
 
-Denne funktion tager et model-ID som input og downloader modellen, hvis den ikke allerede er downloadet. Den returnerer derefter processoren og modellen, som den næste funktion kan bruge.
+Denne funktion tager et model-ID som input og downloader modellen, hvis den ikke allerede er downloadet. Den returnerer derefter processoren og modellen, så den næste funktion kan bruge dem.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Uddrag 3: Indlæs lydklip .wav-fil og forbehandl den**
+**Uddrag 3: Indlæsning af en lydklip .wav-fil og forbehandling af den**
 
-Denne funktion indlæser lydklippet og resampler det til den ønskede samplingfrekvens.
+Denne funktion indlæser lydklippet og resampler det til den ønskede samplingsrate.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -336,7 +336,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Uddrag 5: Gem den oversatte fil**
 
-Denne funktion gemmer lydarrayet som en .WAV-fil. 
+Denne funktion gemmer lyd-arrayet som en .WAV-fil. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -401,14 +401,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### Kørsel af Gradio UI-demoen:
 
-Nu hvor du har kørt et grundlæggende script-eksempel, giver følgende instruktioner en nyttig brugerflade, der bygger videre på den kode, vi har skrevet, og gør live speech-speech-oversættelse nem.
+Nu hvor du har kørt et grundlæggende script-eksempel, giver følgende instruktioner en nyttig brugergrænseflade, der bygger videre på den kode, vi har skrevet, og gør tale-til-tale-oversættelse i realtid let.
 
 #### Kør Gradio lokalt
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Åbn derefter din webbrowser på `http://127.0.0.1:7860` for at få adgang til brugerfladen.
+Åbn derefter din webbrowser på `http://127.0.0.1:7860` for at få adgang til brugergrænsefladen.
 
 
 ### Eksempel på Gradio UI:
@@ -531,11 +531,11 @@ PY
 ## Næste skridt
 
 - Bland og match mellem snesevis af sprog for hurtig oversættelse. 
-- Del din demo med andre: Tilføj --share for at oprette et offentligt link, som alle kan tilgå eksternt, eller udgiv permanent ved hjælp af Hugging Face Spaces
+- Del din demo med andre: Tilføj --share for at oprette et offentligt link, som alle kan tilgå eksternt, eller udrul permanent ved hjælp af Hugging Face Spaces
 
 ## Ressourcer
 
-Nedenfor er nogle yderligere ressourcer, hvor du kan lære mere om tale-til-tale-oversættelse:  
+Nedenfor er nogle yderligere ressourcer til at lære mere om tale-til-tale-oversættelse:  
 * Repoet findes her https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Forskningsartikler relateret til "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Gradio-deling og -udgivelse: [Guide til deling af din app](https://www.gradio.app/guides/sharing-your-app) og [Udgiv på Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Forskning relateret til "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Gradio-deling og -udrulning: [Guide til deling af din app](https://www.gradio.app/guides/sharing-your-app) og [Udrulning til Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

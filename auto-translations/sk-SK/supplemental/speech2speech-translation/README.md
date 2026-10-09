@@ -16,20 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Prehľad
 
-Softvér AMD ROCm™ a stack PyTorch vytvárajú jednotný ekosystém pre AI priamo na zariadení. Funguje na Windows aj Linux s oficiálnou podporou širokej škály zariadení vrátane Ryzen™ AI APU a Radeon™ GPU.
+Softvér AMD ROCm™ a stack PyTorch vytvárajú jednotný ekosystém pre AI na zariadení. Funguje na Windows aj Linuxe s oficiálnou podporou pre širokú škálu zariadení vrátane Ryzen™ AI APU a Radeon™ GPU.
 
-Táto príručka vás naučí, ako spustiť rýchly, expresívny a súkromný preklad reči na reč (speech-to-speech) úplne na edge zariadení.
+Táto príručka vás naučí, ako spustiť nízkolatenčný, expresívny a súkromný preklad reči na reč (speech-to-speech) úplne na okraji siete (edge).
 
 ## Čo sa naučíte
 
 - Ako nastaviť prostredie pre preklad reči na reč
-- Ako napísať Python kód na načítanie a použitie modelov reč-reč
-- Ako spustiť a experimentovať s používateľským rozhraním Gradio
+- Ako napísať Python kód na načítanie a používanie modelov reč-na-reč
+- Ako spustiť a experimentovať s Gradio UI
 
-## Prečo používať real-time preklad reči na reč?
+## Prečo používať preklad reči na reč v reálnom čase?
 
 - Odstraňuje trenie medzi prekladom a jazykovými bariérami
-- Prenáša tón, emócie a zámer bez nepríjemných pauz
+- Sprostredkúva tón, emócie a zámer bez trápnych pauz
 - Umožňuje globálnu spoluprácu a rýchlejšie rozhodovanie
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -40,7 +40,7 @@ Táto príručka vás naučí, ako spustiť rýchly, expresívny a súkromný pr
 
 <!-- @device:halo_box -->
 ## Skontrolujte aktualizácie softvéru
-> **Poznámka**: Ak nie je nainštalovaný VS Code, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
+> **Poznámka**: Ak VS Code nie je nainštalovaný, môžete ho nainštalovať pomocou Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udeľte svojmu používateľovi prístup k GPU zariadeniam** (aby sa to prejavilo, odhláste sa a znova prihláste):
+**Udeľte svojmu používateľovi prístup k GPU zariadeniam** (pre uplatnenie sa odhláste a znova prihláste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Vo Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch:
+Na Windows otvorte terminál v adresári podľa vášho výberu a postupujte podľa príkazov na vytvorenie venv s už nainštalovaným ROCm+Pytorch:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Používatelia Windows možno budú musieť upraviť svoju zásadu vykonávania PowerShell (Execution Policy) (napr.
-> nastaviť ju na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
+> **Tip**: Používatelia Windows možno budú musieť upraviť svoj PowerShell Execution Policy (napr.
+> nastaviť ho na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Vo Windows otvorte terminál v adresári podľa vlastného výberu a postupujte podľa príkazov na vytvorenie venv:
+Na Windows otvorte terminál v adresári podľa vášho výberu a postupujte podľa príkazov na vytvorenie venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Používatelia Windows možno budú musieť upraviť svoju zásadu vykonávania PowerShell (Execution Policy) (napr.
-> nastaviť ju na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov PowerShell.
+> **Tip**: Používatelia Windows možno budú musieť upraviť svoj PowerShell Execution Policy (napr.
+> nastaviť ho na RemoteSigned alebo Unrestricted) pred spustením niektorých príkazov Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -127,12 +127,12 @@ s2st-env\Scripts\activate
 
 <!-- @require:pytorch -->
 
-### Dodatočné závislosti
+### Ďalšie závislosti
 
 Nainštalujte závislosti m4t pomocou pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,23 +202,23 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Nastavenie demo verzie reči na reč
+## Nastavenie demo preklad reči na reč
 
-#### Zoznámte sa so seamless-m4t-v2
+#### Informácie o seamless-m4t-v2
 
-Pre viac informácií si pozrite [kartu modelu](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face.
+Pozrite si [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face pre viac informácií.
 Toto je technická architektúra modelov reč-reč:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Sťahovanie skriptov
+#### Stiahnutie skriptov
 
-Táto príručka obsahuje pripravené skripty na priame použitie. Stiahnite si ich všetky do rovnakého adresára ako prostredie, ktoré ste vytvorili.
+Táto príručka obsahuje pripravené skripty na okamžité použitie. Stiahnite si ich všetky do rovnakého adresára ako prostredie, ktoré ste vytvorili.
 
 | Skript | Popis | Použitie |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Základná generácia textu pomocou LLM | `python infer.py` |
+| [infer.py](assets/infer.py) | Základná generácia textu LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Príklad zvukového súboru | N/A |
 | [lang_list.py](assets/lang_list.py) | Súbor s podporou jazykov | N/A |
 | [gradio_demo.py](assets/gradio_demo.py) | Intuitívne UI pre preklad reči | `python gradio_demo.py --no-share` |
@@ -234,7 +234,7 @@ python infer.py
  
   
 #### Vysvetlenie kódu
-**Úryvok 1: Import potrebných závislostí**
+**Útržok 1: Importovanie potrebných závislostí**
 
 ```python 
 import os
@@ -261,9 +261,9 @@ MODEL_ID = "facebook/seamless-m4t-v2-large"
 TARGET_SAMPLE_RATE = 16_000
 ```
 
-**Úryvok 2: Načítanie modelov z HuggingFace**
+**Útržok 2: Načítanie modelov z HuggingFace**
 
-Táto funkcia prijíma ID modelu a stiahne model, ak ešte nebol stiahnutý. Následne vráti procesor a model na použitie v ďalšej funkcii.
+Táto funkcia prijíma ID modelu a stiahne model, ak ešte nie je stiahnutý. Následne vráti processor a model pre použitie v ďalšej funkcii.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Úryvok 3: Vstupný zvukový klip .wav a jeho predspracovanie**
+**Útržok 3: Vstupný zvukový klip vo formáte .wav a jeho predspracovanie**
 
-Táto funkcia načíta zvukový klip a znovu ho vzorkuje na cieľovú frekvenciu.
+Táto funkcia načíta zvukový klip a prevzorkuje ho na cieľovú frekvenciu.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,7 +304,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Úryvok 4: Spustenie inferencie**
+**Útržok 4: Spustenie inferencie**
 
 Táto funkcia spúšťa inferenciu s modelom a vracia vygenerovaný výstup.
 ```python
@@ -334,7 +334,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
     return audio_array, elapsed
 ```
 
-**Úryvok 5: Uloženie preloženého súboru**
+**Útržok 5: Uloženie preloženého súboru**
 
 Táto funkcia ukladá zvukové pole do súboru .WAV. 
 ```python
@@ -399,16 +399,16 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Spustenie ukážky Gradio UI:
+### Spustenie Gradio UI demo:
 
-Teraz, keď ste spustili základný príklad skriptu, nasledujúce inštrukcie poskytujú užitočné UI, ktoré stavia na kóde, ktorý sme napísali, a uľahčuje živý preklad reči na reč.
+Teraz, keď ste spustili základný príklad skriptu, nasledujúce pokyny poskytujú užitočné UI, ktoré stavia na kóde, ktorý sme napísali, a zjednodušuje preklad reči na reč v reálnom čase.
 
 #### Spustenie Gradio lokálne
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Potom otvorte webový prehliadač na adrese `http://127.0.0.1:7860` na prístup k UI.
+Potom otvorte váš webový prehliadač na adrese `http://127.0.0.1:7860` pre prístup k UI.
 
 
 ### Príklad Gradio UI:
@@ -530,12 +530,12 @@ PY
 
 ## Ďalšie kroky
 
-- Kombinujte desiatky jazykov pre rýchly preklad. 
-- Zdieľajte svoje demo s ostatnými: Pridajte --share na vytvorenie verejného odkazu, ku ktorému má prístup ktokoľvek na diaľku, alebo nasaďte trvalo pomocou Hugging Face Spaces
+- Kombinujte a miešajte medzi desiatkami jazykov pre rýchly preklad.
+- Zdieľajte svoje demo s ostatnými: Pridajte --share na vytvorenie verejného odkazu, ku ktorému môže vzdialene pristupovať ktokoľvek, alebo nasaďte trvalo pomocou Hugging Face Spaces
 
 ## Zdroje
 
-Nižšie nájdete niekoľko ďalších zdrojov na hlbšie oboznámenie sa s prekladom reči na reč:  
-* Repozitár nájdete tu https://huggingface.co/facebook/seamless-m4t-v2-large 
+Nižšie nájdete niekoľko ďalších zdrojov na získanie viac informácií o preklade reči na reč:
+* Repozitár je tu https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Akademický výskum súvisiaci s "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Zdieľanie a nasadenie Gradio: [Sprievodca zdieľaním vašej aplikácie](https://www.gradio.app/guides/sharing-your-app) a [Nasadenie na Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Zdieľanie a nasadenie Gradio: [Sharing Your App Guide](https://www.gradio.app/guides/sharing-your-app) a [Deploy to Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

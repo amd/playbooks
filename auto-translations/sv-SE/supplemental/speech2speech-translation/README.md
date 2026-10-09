@@ -16,42 +16,42 @@ SPDX-License-Identifier: MIT
 
 ## Översikt
 
-AMD ROCm™-mjukvaran och PyTorch-stacken skapar ett enhetligt ekosystem för AI på enheten. Det fungerar för både Windows och Linux med officiellt stöd för ett brett utbud av enheter, inklusive Ryzen™ AI APU:er och Radeon™-GPU:er.
+AMD ROCm™-programvaran och PyTorch-stacken skapar ett enhetligt ekosystem för AI på enheten. Den fungerar för både Windows och Linux med officiellt stöd för ett brett utbud av enheter, inklusive Ryzen™ AI APU:er och Radeon™ GPU:er.
 
-Denna handbok lär dig hur du kör lågfördröjd, uttrycksfull och privat tal-till-tal-översättning helt vid kanten (edge).
+Den här spelboken lär dig hur du kör lågfördröjd, uttrycksfull och privat tal-till-tal-översättning helt och hållet på edge.
 
 ## Vad du kommer att lära dig
 
-- Hur du konfigurerar en tal-till-tal-miljö
+- Hur du konfigurerar en miljö för tal-till-tal
 - Hur du skriver Python-kod för att ladda och använda tal-till-tal-modeller
 - Hur du kör och experimenterar med Gradio-gränssnittet
 
-## Varför använda tal-till-tal-översättning i realtid?
+## Varför använda realtidsöversättning från tal till tal?
 
-- Tar bort friktion mellan översättning och språkbarriärer
+- Minskar friktionen mellan översättning och språkbarriärer
 - Förmedlar ton, känsla och avsikt utan besvärande pauser
 - Möjliggör globalt samarbete och snabbare beslutsfattande
 
 <!-- @device:halo_box,halo,stx,krk -->
-## Konfigurera minnesinställningar
+## Konfigurera minnesinställningen
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrollera om det finns mjukvaruuppdateringar
-> **Obs**: Om VS Code inte är installerat kan du installera det med Ryzen AI Developer Center.
+## Kontrollera om det finns programuppdateringar
+> **Obs!**: Om VS Code inte är installerat kan du installera det med Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Installera nödvändig mjukvara
+## Installera nödvändig programvara
 
 ### Skapa en virtuell miljö
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-På Linux, öppna en terminal och kör följande kommando för att skapa en venv med ROCm+Pytorch redan installerat:
+På Linux öppnar du en terminal och kör följande kommando för att skapa en venv med ROCm+Pytorch redan installerat:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,13 +65,13 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Ge din användare åtkomst till GPU-enheter** (logga ut och in igen för att detta ska träda i kraft):
+**Ge din användare åtkomst till GPU-enheter** (logga ut och in igen för att det ska börja gälla):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-På Linux, öppna en terminal och kör följande kommando för att skapa en venv:
+På Linux öppnar du en terminal och kör följande kommando för att skapa en venv:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-På Windows, öppna en terminal i katalogen du önskar och följ kommandona för att skapa en venv med ROCm+Pytorch redan installerat:
+På Windows öppnar du en terminal i önskad katalog och följer kommandona för att skapa en venv med ROCm+Pytorch redan installerat:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,13 +97,13 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tips**: Windows-användare kan behöva ändra sin PowerShell Execution Policy (t.ex.
-> sätta den till RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
+> **Tips**: Windows-användare kan behöva ändra sin PowerShell-körningspolicy (Execution Policy) (t.ex.
+> ställa in den på RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-På Windows, öppna en terminal i katalogen du önskar och följ kommandona för att skapa en venv:
+På Windows öppnar du en terminal i önskad katalog och följer kommandona för att skapa en venv:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -113,8 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tips**: Windows-användare kan behöva ändra sin PowerShell Execution Policy (t.ex.
-> sätta den till RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
+> **Tips**: Windows-användare kan behöva ändra sin PowerShell-körningspolicy (Execution Policy) (t.ex.
+> ställa in den på RemoteSigned eller Unrestricted) innan de kör vissa PowerShell-kommandon.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -132,7 +132,7 @@ s2st-env\Scripts\activate
 Installera m4t-beroenden med pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,9 +202,9 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Konfigurera tal-till-tal-demot
+## Konfigurera tal-till-tal-demon
 
-#### Lär dig om seamless-m4t-v2
+#### Lär dig mer om seamless-m4t-v2
 
 Kolla in [modellkortet](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) på Hugging Face för mer information.
 Detta är den tekniska arkitekturen för tal-till-tal-modellerna:
@@ -214,23 +214,23 @@ Detta är den tekniska arkitekturen för tal-till-tal-modellerna:
 
 #### Ladda ner skript
 
-Denna handbok innehåller färdiga skript. Vänligen ladda ner alla till samma katalog som miljön du skapade.
+Den här spelboken innehåller färdiga skript. Ladda ner alla till samma katalog som miljön du skapade.
 
 | Skript | Beskrivning | Användning |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Grundläggande LLM-textgenerering | `python infer.py` |
+| [infer.py](assets/infer.py) | Grundläggande textgenerering med LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Exempel på ljudfil | N/A |
 | [lang_list.py](assets/lang_list.py) | Fil med språkstöd | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitivt gränssnitt för taltal-översättning | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitivt användargränssnitt för taliversättning | `python gradio_demo.py --no-share` |
 
 
-### Börja med infer.py
+### Kom igång med infer.py
 
-För att köra skriptet, kör 
+Kör skriptet genom att köra 
 ```bash
 python infer.py
 ```
-> **Obs**: Du kan se vissa varningar. Detta är förväntat.
+> **Obs!**: Du kan se vissa varningar. Det är förväntat.
  
   
 #### Förklaring av koden
@@ -263,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Utdrag 2: Ladda modellerna från HuggingFace**
 
-Denna funktion tar emot ett model-ID och laddar ner modellen om den inte redan har laddats ner. Den returnerar sedan processorn och modellen för nästa funktion att använda.
+Den här funktionen tar emot ett modell-ID och laddar ner modellen om den inte redan har laddats ner. Den returnerar sedan processorn och modellen som nästa funktion ska använda.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Utdrag 3: Mata in en ljudfil (.wav) och förbehandla den**
+**Utdrag 3: Mata in en ljudklipps .wav-fil och förbehandla den**
 
-Denna funktion laddar ljudklippet och samplar om det till målfrekvensen.
+Den här funktionen laddar ljudklippet och samplar om det till målfrekvensen.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -306,7 +306,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Utdrag 4: Kör inferens**
 
-Denna funktion kör inferens med modellen och returnerar det genererade resultatet.
+Den här funktionen kör inferens med modellen och returnerar den genererade utdatan.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -336,7 +336,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Utdrag 5: Spara den översatta filen**
 
-Denna funktion sparar ljuduppsättningen till en .WAV-fil. 
+Den här funktionen sparar ljudmatrisen till en .WAV-fil. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -399,9 +399,9 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Köra Gradio-gränssnittsdemot:
+### Köra demon med Gradio-gränssnittet:
 
-Nu när du har kört ett grundläggande skriptexempel ger följande instruktioner ett användbart gränssnitt som bygger vidare på koden vi har skrivit och gör tal-till-tal-översättning i realtid enkel.
+Nu när du har kört ett grundläggande exempelskript ger följande instruktioner ett användbart gränssnitt som bygger vidare på koden vi har skrivit och gör tal-till-tal-översättning i realtid enkel.
 
 #### Kör Gradio lokalt
 
@@ -530,12 +530,12 @@ PY
 
 ## Nästa steg
 
-- Blanda och matcha mellan dussintals språk för snabb översättning. 
+- Blanda och matcha mellan ett dussintal språk för snabb översättning. 
 - Dela din demo med andra: Lägg till --share för att skapa en offentlig länk som vem som helst kan komma åt på distans, eller distribuera permanent med Hugging Face Spaces
 
 ## Resurser
 
-Nedan finns några ytterligare resurser för att lära dig mer om tal-till-tal-översättning:  
+Nedan följer några ytterligare resurser för att lära dig mer om tal-till-tal-översättning:  
 * Repot finns här https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Akademisk forskning relaterad till "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Gradio-delning och distribution: [Guide för att dela din app](https://www.gradio.app/guides/sharing-your-app) och [Distribuera till Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Forskning inom akademin relaterad till "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Delning och distribution med Gradio: [Guide för att dela din app](https://www.gradio.app/guides/sharing-your-app) och [Distribuera till Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

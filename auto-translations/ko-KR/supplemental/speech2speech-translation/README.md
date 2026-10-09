@@ -16,14 +16,14 @@ SPDX-License-Identifier: MIT
 
 ## 개요
 
-AMD ROCm™ 소프트웨어와 PyTorch 스택은 온디바이스 AI를 위한 통합 생태계를 구성합니다. 이는 Windows와 Linux 모두에서 작동하며 Ryzen™ AI APU 및 Radeon™ GPU를 포함한 다양한 디바이스를 공식적으로 지원합니다.
+AMD ROCm™ 소프트웨어와 PyTorch 스택은 온디바이스 AI를 위한 통합 생태계를 구축합니다. 이는 Windows와 Linux 모두에서 작동하며, Ryzen™ AI APU와 Radeon™ GPU를 포함한 다양한 장치를 공식적으로 지원합니다.
 
-이 플레이북에서는 저지연, 표현력이 풍부하고 프라이빗한 음성-음성 번역을 완전히 엣지에서 실행하는 방법을 알려드립니다.
+이 플레이북에서는 지연 시간이 짧고 표현력이 풍부하며 프라이버시가 보장되는 음성-음성 번역을 완전히 엣지에서 실행하는 방법을 배웁니다.
 
-## 배우게 될 내용
+## 학습 내용
 
 - 음성-음성 환경을 설정하는 방법
-- 음성-음성 모델을 로드하고 사용하기 위한 Python 코드 작성 방법
+- 음성-음성 모델을 로드하고 사용하는 Python 코드를 작성하는 방법
 - Gradio UI를 실행하고 실험하는 방법
 
 ## 실시간 음성-음성 번역을 사용하는 이유
@@ -40,18 +40,18 @@ AMD ROCm™ 소프트웨어와 PyTorch 스택은 온디바이스 AI를 위한 �
 
 <!-- @device:halo_box -->
 ## 소프트웨어 업데이트 확인
-> **참고**: VS Code가 설치되어 있지 않은 경우, Ryzen AI Developer Center를 통해 설치할 수 있습니다.
+> **참고**: VS Code가 설치되어 있지 않다면 Ryzen AI Developer Center를 통해 설치할 수 있습니다.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## 소프트웨어 사전 요구 사항 설치
 
-### 가상 환경 생성
+### 가상 환경 만들기
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux에서는 터미널을 열고 다음 프롬프트를 실행하여 ROCm+PyTorch가 이미 설치된 venv를 생성합니다:
+Linux에서는 터미널을 열고 다음 프롬프트를 실행하여 ROCm+Pytorch가 이미 설치된 venv를 생성합니다:
 
 <!-- @test:id=create-venv timeout=300 -->
 ```bash
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**사용자에게 GPU 디바이스 접근 권한을 부여합니다** (적용하려면 로그아웃 후 다시 로그인해야 합니다):
+**사용자에게 GPU 장치 접근 권한을 부여합니다** (적용하려면 로그아웃 후 다시 로그인해야 합니다):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -87,7 +87,7 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Windows에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 ROCm+PyTorch가 이미 설치된 venv를 생성합니다:
+Windows에서는 원하는 디렉터리에서 터미널을 열고 다음 명령을 따라 ROCm+Pytorch가 이미 설치된 venv를 생성합니다:
 
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
@@ -97,7 +97,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **팁**: Windows 사용자는 일부 PowerShell 명령을 실행하기 전에 PowerShell 실행 정책을 수정해야 할 수 있습니다(예: RemoteSigned 또는 Unrestricted로 설정).
+> **팁**: Windows 사용자는 일부 PowerShell 명령을 실행하기 전에 PowerShell 실행 정책(예:
+> RemoteSigned 또는 Unrestricted로 설정)을 수정해야 할 수 있습니다.
 
 <!-- @device:end -->
 
@@ -112,7 +113,8 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **팁**: Windows 사용자는 일부 PowerShell 명령을 실행하기 전에 PowerShell 실행 정책을 수정해야 할 수 있습니다(예: RemoteSigned 또는 Unrestricted로 설정).
+> **팁**: Windows 사용자는 일부 PowerShell 명령을 실행하기 전에 PowerShell 실행 정책(예:
+> RemoteSigned 또는 Unrestricted로 설정)을 수정해야 할 수 있습니다.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -130,7 +132,7 @@ s2st-env\Scripts\activate
 pip를 사용하여 m4t 종속성을 설치합니다:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -200,11 +202,11 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## 음성-음성 데모 설정
+## 음성-음성 데모 설정하기
 
 #### seamless-m4t-v2 알아보기
 
-자세한 내용은 Hugging Face의 [모델 카드](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)를 참조하세요.
+자세한 내용은 Hugging Face의 [모델 카드](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main)를 확인하세요.
 다음은 음성-음성 모델의 기술 아키텍처입니다:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -212,19 +214,19 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 #### 스크립트 다운로드
 
-이 플레이북에는 바로 사용할 수 있는 스크립트가 포함되어 있습니다. 모두 생성한 환경과 동일한 디렉터리에 다운로드하세요.
+이 플레이북에는 바로 사용할 수 있는 스크립트가 포함되어 있습니다. 생성한 환경과 동일한 디렉터리에 모두 다운로드하세요.
 
 | 스크립트 | 설명 | 사용법 |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | 기본 LLM 텍스트 생성 | `python infer.py` |
-| [input1.wav](assets/input1.wav) | 예제 오디오 파일 | 해당 없음 |
-| [lang_list.py](assets/lang_list.py) | 언어 지원 파일 | 해당 없음 |
-| [gradio_demo.py](assets/gradio_demo.py) | 직관적인 음성 번역 UI | `python gradio_demo.py --no-share` |
+| [input1.wav](assets/input1.wav) | 예시 오디오 파일 | N/A |
+| [lang_list.py](assets/lang_list.py) | 언어 지원 파일 | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | 음성 번역을 위한 직관적인 UI | `python gradio_demo.py --no-share` |
 
 
 ### infer.py로 시작하기
 
-스크립트를 실행하려면 다음을 실행하세요 
+스크립트를 실행하려면 
 ```bash
 python infer.py
 ```
@@ -280,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**스니펫 3: 입력 오디오 클립 .wav 파일을 전처리하기**
+**스니펫 3: 입력 오디오 클립 .wav 파일 전처리**
 
-이 함수는 오디오 클립을 로드하고 목표 샘플레이트로 리샘플링합니다.
+이 함수는 오디오 클립을 로드하고 목표 속도로 리샘플링합니다.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -399,7 +401,7 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### Gradio UI 데모 실행하기:
 
-이제 기본 스크립트 예제를 실행해 보았으니, 다음 지침은 지금까지 작성한 코드를 기반으로 실시간 음성-음성 번역을 쉽게 만들어주는 유용한 UI를 제공합니다.
+기본 스크립트 예제를 실행해 보았으니, 이제 작성한 코드를 기반으로 실시간 음성-음성 번역을 쉽게 만들어 주는 유용한 UI에 대한 지침을 안내합니다.
 
 #### Gradio를 로컬에서 실행하기
 
@@ -528,12 +530,12 @@ PY
 
 ## 다음 단계
 
-- 빠른 번역을 위해 수십 개 언어를 자유롭게 조합해 보세요. 
-- 데모를 다른 사람과 공유하세요: --share를 추가하여 누구나 원격으로 접근할 수 있는 공개 링크를 생성하거나, Hugging Face Spaces를 사용하여 영구적으로 배포하세요
+- 수십 개의 언어를 조합하여 빠르게 번역해 보세요. 
+- 데모를 다른 사람과 공유하세요: --share를 추가하여 누구나 원격으로 접근할 수 있는 공개 링크를 만들거나, Hugging Face Spaces를 사용해 영구적으로 배포하세요
 
 ## 리소스
 
-음성-음성 번역에 대해 더 자세히 알아보려면 아래의 추가 리소스를 참조하세요:  
+음성-음성 번역에 대해 더 알아볼 수 있는 추가 리소스는 다음과 같습니다:  
 * 저장소는 여기에 있습니다 https://huggingface.co/facebook/seamless-m4t-v2-large 
 * "Seamless: Multilingual Expressive and Streaming Speech Translation" 관련 학술 연구
 * Gradio 공유 및 배포: [앱 공유 가이드](https://www.gradio.app/guides/sharing-your-app) 및 [Hugging Face Spaces에 배포하기](https://shafiqulai.github.io/blogs/blog_5.html)

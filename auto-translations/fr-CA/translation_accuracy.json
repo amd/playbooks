@@ -546,12 +546,12 @@
       "quality_issues": "\"Noyaux\" for GPU kernels acceptable but \"kernels\" often kept; otherwise accurate, fluent, terms intact."
     },
     "playbooks/supplemental/speech2speech-translation/README.md": {
-      "source_sha256": "30451d6a37e2c41dfe741c16d8e2ee3ff5ad1100f306755dffb3ec10b08e0653",
+      "source_sha256": "9849ad462523bb0e7de5810020a3d6f9b4ef37c46d34eb1da2049279720fff0c",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent, code/URLs intact. 'voix-à-voix' unusual vs standard 'voix-à-voix/parole-à-parole'; minor. OQLF conventions well applied."
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent, OQLF-compliant; code/URLs intact. 'processeur' for processor slightly ambiguous; minor stylistic nits only."
     },
     "playbooks/supplemental/speech2speech-translation/platform.md": {
       "source_sha256": "594590b98fc8e24d4fc481dea81504dbf8ae3c6ab995e88070d68c50a84839d0",
@@ -562,12 +562,12 @@
       "quality_issues": "Minor: French typography requires space before semicolon; '2,3 G' slightly ambiguous vs '2.3B'. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/speech2speech-translation/playbook.json": {
-      "source_sha256": "606fd50baf712296dcb61bcd481471fd4f05a48809890d72ebff15a0e099d7ec",
+      "source_sha256": "6fb3b1d711584b0d32f53e540c7ab6be272f4c0b67e65babd684a239c6529927",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 78,
-      "quality_issues": "Title drops speech-to-speech nuance; 'voix-à-voix' awkward calque, 'traduction vocale directe' preferred."
+      "quality_score": 72,
+      "quality_issues": "Omits 'speech-to-speech' nuance; 'parole à parole' lost. Otherwise fluent, correct terminology."
     },
     "playbooks/supplemental/unsloth-llms-finetuning/README.md": {
       "source_sha256": "fc3d6e51b607ba3be6e2ea1d8102db4a2034600ffd52d4ab07d4632aadb31257",

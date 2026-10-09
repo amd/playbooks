@@ -16,20 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Přehled
 
-Software AMD ROCm™ a PyTorch stack vytvářejí jednotný ekosystém pro AI přímo na zařízení. Funguje jak ve Windows, tak v Linuxu s oficiální podporou širokého spektra zařízení, včetně Ryzen™ AI APU a Radeon™ GPU.
+Software AMD ROCm™ a PyTorch spolu vytvářejí jednotný ekosystém pro AI přímo na zařízení. Funguje jak pro Windows, tak pro Linux s oficiální podporou široké škály zařízení, včetně APU Ryzen™ AI a GPU Radeon™.
 
-Tento průvodce vás naučí, jak spouštět nízkolatenční, expresivní a soukromý překlad řeč-do-řeči zcela na okraji sítě (on-device).
+Tato příručka vás naučí, jak spouštět nízkolatenční, expresivní a soukromý překlad řeči na řeč zcela na okraji sítě (edge).
 
 ## Co se naučíte
 
-- Jak nastavit prostředí pro překlad řeč-do-řeči
-- Jak napsat Python kód pro načtení a použití modelů řeč-do-řeči
+- Jak nastavit prostředí pro překlad řeči na řeč
+- Jak napsat kód v Pythonu pro načtení a použití modelů řeč-řeč
 - Jak spustit a experimentovat s uživatelským rozhraním Gradio
 
-## Proč používat překlad řeč-do-řeči v reálném čase?
+## Proč používat překlad řeči na řeč v reálném čase?
 
 - Odstraňuje tření mezi překladem a jazykovými bariérami
-- Přenáší tón, emoce a záměr bez trapných pauz
+- Předává tón, emoce a záměr bez trapných pauz
 - Umožňuje globální spolupráci a rychlejší rozhodování
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -65,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udělte svému uživateli přístup k zařízením GPU** (odhlaste se a znovu přihlaste, aby se změna projevila):
+**Udělte svému uživateli přístup k zařízením GPU** (aby se to projevilo, odhlaste se a znovu přihlaste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -97,7 +97,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Uživatelé Windows mohou potřebovat upravit svou zásadu spouštění PowerShellu (Execution Policy) (např.
+> **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění PowerShellu (Execution Policy) (např.
 > nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
 
 <!-- @device:end -->
@@ -113,7 +113,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Tip**: Uživatelé Windows mohou potřebovat upravit svou zásadu spouštění PowerShellu (Execution Policy) (např.
+> **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění PowerShellu (Execution Policy) (např.
 > nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
 
 <!-- @device:end -->
@@ -132,7 +132,7 @@ s2st-env\Scripts\activate
 Nainstalujte závislosti m4t pomocí pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 
@@ -202,11 +202,11 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 <!-- @test:end -->
 
 
-## Nastavení dema pro překlad řeč-do-řeči
+## Nastavení ukázky překladu řeči na řeč
 
 #### Seznamte se s modelem seamless-m4t-v2
 
-Podívejte se na [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face pro více informací.
+Více informací naleznete v [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) na Hugging Face.
 Toto je technická architektura modelů řeč-řeč:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -214,23 +214,23 @@ Toto je technická architektura modelů řeč-řeč:
 
 #### Stažení skriptů
 
-Tento průvodce obsahuje připravené skripty. Stáhněte je prosím všechny do stejného adresáře jako prostředí, které jste vytvořili.
+Tato příručka obsahuje připravené skripty k okamžitému použití. Stáhněte si je prosím všechny do stejného adresáře jako prostředí, které jste vytvořili.
 
 | Skript | Popis | Použití |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Základní generování textu LLM | `python infer.py` |
+| [infer.py](assets/infer.py) | Základní generování textu pomocí LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Ukázkový zvukový soubor | N/A |
-| [lang_list.py](assets/lang_list.py) | Soubor podpory jazyků | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitivní UI pro překlad řeči | `python gradio_demo.py --no-share` |
+| [lang_list.py](assets/lang_list.py) | Soubor s podporou jazyků | N/A |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitivní uživatelské rozhraní pro překlad řeči | `python gradio_demo.py --no-share` |
 
 
-### Začínáme se souborem infer.py
+### Začínáme se skriptem infer.py
 
-Skript spustíte příkazem 
+Pro spuštění skriptu spusťte 
 ```bash
 python infer.py
 ```
-> **Poznámka**: Můžete vidět některá varování. To je očekávané.
+> **Poznámka**: Mohou se zobrazit některá upozornění. To je očekávané chování.
  
   
 #### Vysvětlení kódu
@@ -263,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Úryvek 2: Načtení modelů z HuggingFace**
 
-Tato funkce přijímá ID modelu a stáhne model, pokud ještě není stažený. Poté vrátí processor a model pro použití v další funkci.
+Tato funkce přijímá ID modelu a stáhne model, pokud ještě není stažen. Poté vrátí procesor a model, které použije následující funkce.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Úryvek 3: Vstupní zvukový klip .wav a jeho předzpracování**
+**Úryvek 3: Vstupní zvukový klip ve formátu .wav a jeho předzpracování**
 
-Tato funkce načte zvukový klip a přesampluje jej na cílovou vzorkovací frekvenci.
+Tato funkce načte zvukový klip a převzorkuje ho na cílovou vzorkovací frekvenci.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -306,7 +306,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Úryvek 4: Spuštění inference**
 
-Tato funkce spouští inferenci s modelem a vrací vygenerovaný výstup.
+Tato funkce spustí inferenci s modelem a vrátí vygenerovaný výstup.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -399,9 +399,9 @@ echo "PASS: infer.py created out1.wav successfully"
 <!-- @test:end --> 
 <!-- @os:end -->
 
-### Spuštění dema uživatelského rozhraní Gradio:
+### Spuštění ukázkového rozhraní Gradio:
 
-Nyní, když jste spustili základní příklad skriptu, následující pokyny poskytují užitečné uživatelské rozhraní, které staví na napsaném kódu a usnadňuje živý překlad řeč-do-řeči.
+Nyní, když jste si vyzkoušeli základní ukázkový skript, následující pokyny vám poskytnou užitečné uživatelské rozhraní, které staví na napsaném kódu a usnadňuje živý překlad řeči na řeč.
 
 #### Spuštění Gradio lokálně
 
@@ -411,7 +411,7 @@ python ./gradio_demo.py --no-share
 Poté otevřete webový prohlížeč na adrese `http://127.0.0.1:7860` pro přístup k uživatelskému rozhraní.
 
 
-### Příklad uživatelského rozhraní Gradio:
+### Ukázka uživatelského rozhraní Gradio:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -530,12 +530,12 @@ PY
 
 ## Další kroky
 
-- Kombinujte a experimentujte s desítkami jazyků pro rychlý překlad. 
-- Sdílejte své demo s ostatními: Přidejte --share pro vytvoření veřejného odkazu, ke kterému může kdokoliv přistupovat vzdáleně, nebo nasaďte trvale pomocí Hugging Face Spaces
+- Kombinujte desítky jazyků pro rychlý překlad. 
+- Sdílejte svou ukázku s ostatními: Přidejte --share pro vytvoření veřejného odkazu, ke kterému může kdokoli vzdáleně přistupovat, nebo ji trvale nasaďte pomocí Hugging Face Spaces
 
 ## Zdroje
 
-Níže naleznete několik dalších zdrojů pro hlubší pochopení překladu řeč-do-řeči:  
+Níže naleznete další zdroje, kde se dozvíte více o překladu řeči na řeč:  
 * Repozitář najdete zde https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Akademický výzkum týkající se tématu "Seamless: Multilingual Expressive and Streaming Speech Translation"
+* Akademický výzkum týkající se „Seamless: Multilingual Expressive and Streaming Speech Translation“
 * Sdílení a nasazení Gradio: [Sharing Your App Guide](https://www.gradio.app/guides/sharing-your-app) a [Deploy to Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
