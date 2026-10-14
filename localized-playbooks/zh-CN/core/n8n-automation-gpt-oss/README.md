@@ -52,6 +52,7 @@ n8n 包含一个**原生 Lemonade 节点**（`Lemonade Chat Model`），可提�
 
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -59,10 +60,12 @@ n8n 包含一个**原生 Lemonade 节点**（`Lemonade Chat Model`），可提�
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-qwen3-5-35b-a3b -->
 <!-- @var:id=lemonade_model value="Qwen3.5-35B-A3B-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-qwen3-5-9b -->
 <!-- @var:id=lemonade_model value="Qwen3.5-9B-GGUF" -->
 <!-- @device:end -->
 

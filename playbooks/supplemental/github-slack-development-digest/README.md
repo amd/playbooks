@@ -69,14 +69,14 @@ It uses GitHub to inspect recent repository activity, Slack to post the digest, 
 
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
-<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-35b-a3b,lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
 <!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
-     Node.js, uv and agent-canvas), so only the Lemonade model is needed here. -->
-<!-- @prereq:lemonade-models-qwen3-35b-a3b -->
+     Node.js, uv and agent-canvas); host npm is only used by CI to resolve the MCP packages. -->
+<!-- @prereq:docker,nodejs,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
 You need:

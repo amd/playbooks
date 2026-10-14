@@ -99,6 +99,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade -->
 <!-- @device:end -->
+<!-- @prereq:hf-models-all-minilm-l6-v2 -->
 ---
 <!-- @os:end -->
 
@@ -116,7 +117,7 @@ This playbook needs Lemonade running as the backend and, on Linux, a container e
 <!-- @os:end -->
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
-<!-- @prereq:lemonade-models-qwen3-4b,lemonade-models-sdxl-turbo -->
+<!-- @prereq:lemonade-models-qwen3-5-4b,lemonade-models-sdxl-turbo -->
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
@@ -137,6 +138,7 @@ Before installing Open WebUI, make sure the models you want to use are downloade
 
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk -->
+<!-- @prereq:lemonade-models-qwen3-4b-hybrid -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
