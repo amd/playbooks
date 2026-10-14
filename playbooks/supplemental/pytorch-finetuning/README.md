@@ -71,6 +71,11 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 
 ## Installing Software Prerequisites
 
+<!-- @prereq:hf-models-gemma-3-4b-it,hf-datasets-databricks-dolly-15k -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
+
 #### Create a Virtual Environment
 
 <!-- @os:linux -->

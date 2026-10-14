@@ -17,7 +17,7 @@ sys.path.insert(0, str(GITHUB / "scripts"))
 import orchestrai_trigger as trigger
 
 DRIVER = {"script": "InstallationScripts/gfx/windows.ps1", "reboot_after": True}
-HIPINFO = {"script": "InstallationScripts/gfx/windows-therock-hipinfo.ps1", "reboot_after": False}
+THEROCK = {"script": "InstallationScripts/gfx/windows-therock-tarball.ps1", "reboot_after": False}
 SCOPED = ["llama-factory-finetuning", "pytorch-finetuning",
           "pytorch-rocm-llms", "unsloth-llms-finetuning"]
 
@@ -29,9 +29,12 @@ class WindowsTheRockProvisioning(unittest.TestCase):
         self.cfg["provisioning"]["therock_url"] = "https://example.invalid/linux.tar.gz"
         self.cfg["provisioning"]["windows_therock_url"] = "https://example.invalid/windows.tar.gz"
 
-    def builds(self, platform="windows", arch="rx7900xt", playbooks=SCOPED[:1]):
+    def make(self, platform="windows", arch="rx7900xt", playbooks=SCOPED[:1]):
         batch = {"platform": platform, "arch": arch, "playbooks": list(playbooks)}
-        builds, missing = trigger.make_builds(batch, self.cfg)
+        return trigger.make_builds(batch, self.cfg)
+
+    def builds(self, **batch):
+        builds, missing = self.make(**batch)
         self.assertEqual(missing, [])
         return builds
 
@@ -40,15 +43,20 @@ class WindowsTheRockProvisioning(unittest.TestCase):
             for playbook in SCOPED:
                 with self.subTest(device=device, playbook=playbook):
                     builds = self.builds(arch=device, playbooks=[playbook])
-                    self.assertEqual(builds["install_scripts"], [DRIVER, HIPINFO])
+                    self.assertEqual(builds["install_scripts"], [DRIVER, THEROCK])
                     self.assertEqual(builds["vars"]["THEROCK_URL"],
                                      "https://example.invalid/windows.tar.gz")
+                    self.assertEqual(builds["vars"]["THEROCK_PUBLISH_ENV"], "0")
 
-    def test_unset_url_sends_no_source_so_the_script_is_a_no_op(self):
+    def test_unset_url_is_reported_before_acquiring_hardware(self):
         self.cfg["provisioning"]["windows_therock_url"] = ""
-        builds = self.builds()
-        self.assertEqual(builds["install_scripts"], [DRIVER, HIPINFO])
-        self.assertEqual(builds["vars"], {"driver_source": "driver", "driver_copy": "direct"})
+        _, missing = self.make()
+        self.assertEqual(missing, ["ORCHESTRAI_WINDOWS_THEROCK_URL"])
+
+    def test_unset_url_is_not_required_where_therock_is_not_scheduled(self):
+        self.cfg["provisioning"]["windows_therock_url"] = ""
+        self.builds(arch="stx")
+        self.builds(playbooks=["ollama-getting-started"])
 
     def test_apus_and_other_playbooks_do_not_install_therock(self):
         for device, playbook in (("halo", "unsloth-llms-finetuning"),
@@ -57,15 +65,17 @@ class WindowsTheRockProvisioning(unittest.TestCase):
                                  ("rx7900xt", "ollama-getting-started")):
             with self.subTest(device=device, playbook=playbook):
                 builds = self.builds(arch=device, playbooks=[playbook])
-                self.assertNotIn(HIPINFO, builds["install_scripts"])
+                self.assertNotIn(THEROCK, builds["install_scripts"])
+                self.assertNotIn("THEROCK_URL", builds["vars"])
+                self.assertNotIn("THEROCK_PUBLISH_ENV", builds["vars"])
 
     def test_mixed_batch_installs_therock_once(self):
         builds = self.builds(playbooks=SCOPED + ["ollama-getting-started"])
-        self.assertEqual(builds["install_scripts"].count(HIPINFO), 1)
+        self.assertEqual(builds["install_scripts"].count(THEROCK), 1)
 
     def test_linux_keeps_its_own_tarball(self):
         builds = self.builds(platform="linux", arch="stx", playbooks=SCOPED)
-        self.assertNotIn(HIPINFO, builds["install_scripts"])
+        self.assertNotIn(THEROCK, builds["install_scripts"])
         self.assertEqual(builds["vars"]["THEROCK_URL"], "https://example.invalid/linux.tar.gz")
 
     def test_repository_variable_sets_the_windows_url_only(self):
