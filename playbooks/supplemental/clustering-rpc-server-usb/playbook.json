@@ -1,0 +1,123 @@
+{
+  "id": "clustering-rpc-server-usb",
+  "title": "Clustering Two Ryzen™ AI Halos with RPC over USB4",
+  "description": "Set up distributed inference using RPC server across two Ryzen™ AI Halo devices connected directly with a USB4/Thunderbolt cable to run 350B+ models with llama.cpp",
+  "time": 90,
+  "unsupported_platforms": {
+    "halo_box": [
+      {
+        "platform": "windows",
+        "reason": "This playbook's USB4/Thunderbolt networking setup is only supported on Linux"
+      }
+    ],
+    "halo": [
+      {
+        "platform": "windows",
+        "reason": "This playbook's USB4/Thunderbolt networking setup is only supported on Linux"
+      }
+    ],
+    "stx": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "krk": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx7900xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "rx9070xt": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
+    ],
+    "r9700": [
+      {
+        "platform": "windows",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      },
+      {
+        "platform": "linux",
+        "reason": "This clustering playbook requires 2+ Strix Halo systems with large memory capacity"
+      }
+    ]
+  },
+  "supported_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "clustering",
+    "rpc",
+    "distributed",
+    "llm",
+    "inference",
+    "rocm",
+    "usb4",
+    "thunderbolt"
+  ],
+  "recommendedSystemMemory": 128,
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "llama.cpp": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "llama.cpp": "Latest"
+      }
+    }
+  },
+  "primaryModel": "GLM-4.7",
+  "authors": [
+    {
+      "name": "Abdullah Malik",
+      "github": "abdmalik-amd",
+      "github_url": "https://github.com/abdmalik-amd",
+      "type": "amd"
+    }
+  ]
+}
