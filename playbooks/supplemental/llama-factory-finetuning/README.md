@@ -57,6 +57,8 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 
 ## Installing Software Prerequisites
 
+<!-- @prereq:hf-models-qwen3-4b-instruct-2507 -->
+
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
 ```bash

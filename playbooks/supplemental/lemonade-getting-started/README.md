@@ -115,7 +115,7 @@ Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-update-linux timeout=120 hidden=True -->
+<!-- @test:id=lemonade-update-linux timeout=300 hidden=True -->
 ```bash
 sudo apt update
 sudo apt install --only-upgrade lemonade-server
