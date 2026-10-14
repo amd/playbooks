@@ -69,11 +69,16 @@ SPDX-License-Identifier: MIT
 
 ## 安装软件先决条件
 
+<!-- @prereq:modelscope-models-gemma-3-4b-it -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
+
 #### 创建虚拟环境
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -91,7 +96,7 @@ source finetune-venv/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -220,6 +225,7 @@ import sys
 
 os.environ["QUICK_TRAIN"] = "1"
 os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
+os.environ["HF_HUB_OFFLINE"] = "0"  # some runners set HF offline mode; MsDataset needs it off and only contacts ModelScope
 r = subprocess.run([sys.executable, "train_lora.py"], timeout=600)
 sys.exit(r.returncode)
 ```
@@ -249,6 +255,7 @@ import sys
 
 os.environ["QUICK_TRAIN"] = "1"
 os.environ["QUICK_TRAIN_MODEL"] = "LLM-Research/gemma-3-4b-it"
+os.environ["HF_HUB_OFFLINE"] = "0"  # some runners set HF offline mode; MsDataset needs it off and only contacts ModelScope
 r = subprocess.run([sys.executable, "train_full_finetuning.py"], timeout=600)
 sys.exit(r.returncode)
 ```
