@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-LoRA Fine-tuning Gemma 3 4B on AMD Strix Halo (GFX1151)
+LoRA Fine-tuning Gemma 3 4B on AMD GPUs
 
 This script uses LoRA (Low-Rank Adaptation) to efficiently fine-tune by training
 small adapter matrices while freezing the base model.
