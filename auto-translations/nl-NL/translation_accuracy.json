@@ -442,20 +442,20 @@
       "quality_issues": "Accurate, fluent, terminology and brand names intact; minor style preference only"
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "ba19d38dd97b959013b5f80b2434c0ddd1cdf6acd8607879b3fb6df0fe44ff7e",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Fluent, accurate, tags/code intact. Minor: 'deze playbook' gender inconsistency, slight quantisation terminology variation (kwantisatie/kwantisering)."
+      "quality_score": 95,
+      "quality_issues": "Minor terminology inconsistency: kwantisatie vs kwantisering used interchangeably. Otherwise accurate, fluent, code/tags intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'Fine-tuning'/'Fine-tune' kept in English, acceptable but slight inconsistency in casing."
+      "quality_score": 90,
+      "quality_issues": "Anglicism 'Fine-Tuning/Fine-tune' acceptable but could use Dutch equivalent; otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",

@@ -442,20 +442,20 @@
       "quality_issues": "Accurate, fluent; brand terms intact. Minor infinitive vs imperative style choice."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "ba19d38dd97b959013b5f80b2434c0ddd1cdf6acd8607879b3fb6df0fe44ff7e",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor inconsistency: 'guia' vs 'playbook'; leaves untranslated English link anchor (acceptable)."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent, terminology consistent; code/URLs/tags intact. Minor inconsistency: 'Observação' vs 'Nota' for Note."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate, fluent; 'modelos de linguagem grandes' slightly awkward vs 'grandes modelos de linguagem'."
+      "quality_score": 88,
+      "quality_issues": "Awkward word order 'AMD ROCm™ Software'; 'modelos de linguagem grandes' slightly less idiomatic than 'grandes modelos'."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "521f29360e9bba4b8a19cf40efb40f83eecdb87412a0d3ca176e5317203998a4",

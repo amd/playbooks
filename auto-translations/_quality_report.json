@@ -2,20 +2,20 @@
   "per_locale": {
     "ar": {
       "files_scored": 80,
-      "mean": 93.0,
+      "mean": 92.9,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
       "files_scored": 80,
-      "mean": 92.5,
-      "min": 78,
+      "mean": 92.6,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
@@ -26,7 +26,7 @@
     },
     "el-GR": {
       "files_scored": 80,
-      "mean": 92.3,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -62,13 +62,13 @@
     },
     "hu-HU": {
       "files_scored": 80,
-      "mean": 92.1,
+      "mean": 92.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
       "files_scored": 80,
-      "mean": 93.9,
+      "mean": 93.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -80,7 +80,7 @@
     },
     "ko-KR": {
       "files_scored": 80,
-      "mean": 93.5,
+      "mean": 93.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -104,7 +104,7 @@
     },
     "pt-BR": {
       "files_scored": 80,
-      "mean": 93.7,
+      "mean": 93.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -128,20 +128,20 @@
     },
     "sk-SK": {
       "files_scored": 80,
-      "mean": 91.6,
+      "mean": 91.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
       "files_scored": 80,
-      "mean": 90.5,
+      "mean": 90.6,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
       "files_scored": 80,
-      "mean": 91.1,
-      "min": 78,
+      "mean": 90.9,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
@@ -152,7 +152,7 @@
     },
     "th-TH": {
       "files_scored": 80,
-      "mean": 92.7,
+      "mean": 92.6,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -176,7 +176,7 @@
     },
     "zh-TW": {
       "files_scored": 80,
-      "mean": 93.2,
+      "mean": 93.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -232,33 +232,21 @@
     },
     {
       "locale": "sl-SI",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 72,
-      "issues": "Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'."
-    },
-    {
-      "locale": "sl-SI",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 72,
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
+    },
+    {
+      "locale": "sr-Latn",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 72,
+      "issues": "Untranslated 'Fine-tune' in body; should be 'Fino podešavanje'. Otherwise accurate, brands intact."
     },
     {
       "locale": "cs-CZ",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate."
-    },
-    {
-      "locale": "da-DK",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'."
-    },
-    {
-      "locale": "de-DE",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb."
     },
     {
       "locale": "de-DE",
@@ -271,12 +259,6 @@
       "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
       "score": 78,
       "issues": "\"LLM Coding\" left partly untranslated; \"Coding\" awkward in Greek title, slightly unnatural phrasing."
-    },
-    {
-      "locale": "el-GR",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact."
     },
     {
       "locale": "es-LA",
@@ -424,6 +406,12 @@
     },
     {
       "locale": "cs-CZ",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent 'jemné doladění' vs 'doladění'; 'Software' untranslated/awkward in title; otherwise accurate."
+    },
+    {
+      "locale": "cs-CZ",
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent terminology: 'jader' vs 'kernely' for kernels; otherwise accurate, fluent, brands intact."
@@ -454,6 +442,12 @@
     },
     {
       "locale": "de-DE",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent terminology: 'Feinabstimmung' vs 'Feintunen'; anglicism 'Feintunen' slightly informal but acceptable."
+    },
+    {
+      "locale": "de-DE",
       "file": "playbooks/supplemental/github-slack-development-digest/playbook.json",
       "score": 82,
       "issues": "Inconsistent register (Erstelle vs Konfigurieren Sie); 'ein Digest' gender debatable, minor fluency issues"
@@ -463,6 +457,12 @@
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
       "issues": "Inconsistent fine-tune rendering (Βελτιστοποίηση vs Συντονίστε); minor terminology awkwardness but adequate, brands/acronyms intact."
+    },
+    {
+      "locale": "el-GR",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent translation of 'fine-tuning'; 'Λογισμικό' unnecessarily capitalized; otherwise accurate and fluent."
     },
     {
       "locale": "el-GR",
@@ -639,6 +639,12 @@
       "issues": "Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency."
     },
     {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent LLM pluralization; 'Fino prilagajanje' slightly awkward for fine-tuning; otherwise accurate, intact terms."
+    },
+    {
       "locale": "sr-Latn",
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 82,
@@ -670,6 +676,12 @@
     },
     {
       "locale": "th-TH",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Title left 'Fine-Tuning' in English; otherwise accurate, terms and brands intact."
+    },
+    {
+      "locale": "th-TH",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
       "issues": "Title omits speech-to-speech nuance (just 'speech translation'); otherwise accurate and fluent."
@@ -691,6 +703,12 @@
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
       "issues": "Minor grammar: 'ince ayar yapın' should be 'ince ayar yapın modelleri' or 'ince ayarlayın'; slightly awkward phrasing."
+    },
+    {
+      "locale": "tr-TR",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Second sentence has grammatical issue: 'modellerini ince ayar yapın' should be 'modellerine ince ayar yapın'."
     },
     {
       "locale": "tr-TR",

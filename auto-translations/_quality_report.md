@@ -4,38 +4,38 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 
 | Locale | Files | Mean | Min | Judge |
 |--------|-------|------|-----|-------|
-| ar | 80 | 93.0 | 82 | Claude-Opus-4.8 |
-| cs-CZ | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| da-DK | 80 | 92.5 | 78 | Claude-Opus-4.8 |
+| ar | 80 | 92.9 | 82 | Claude-Opus-4.8 |
+| cs-CZ | 80 | 92.2 | 78 | Claude-Opus-4.8 |
+| da-DK | 80 | 92.6 | 82 | Claude-Opus-4.8 |
 | de-DE | 80 | 93.1 | 78 | Claude-Opus-4.8 |
-| el-GR | 80 | 92.3 | 78 | Claude-Opus-4.8 |
+| el-GR | 80 | 92.4 | 78 | Claude-Opus-4.8 |
 | es-LA | 80 | 92.8 | 78 | Claude-Opus-4.8 |
 | fi-FI | 80 | 91.9 | 82 | Claude-Opus-4.8 |
 | fr-CA | 80 | 90.7 | 72 | Claude-Opus-4.8 |
 | fr-FR | 80 | 93.2 | 78 | Claude-Opus-4.8 |
 | he | 80 | 92.2 | 60 | Claude-Opus-4.8 |
-| hu-HU | 80 | 92.1 | 78 | Claude-Opus-4.8 |
-| it-IT | 80 | 93.9 | 78 | Claude-Opus-4.8 |
+| hu-HU | 80 | 92.0 | 78 | Claude-Opus-4.8 |
+| it-IT | 80 | 93.8 | 78 | Claude-Opus-4.8 |
 | ja-JP | 80 | 92.4 | 20 | Claude-Opus-4.8 |
-| ko-KR | 80 | 93.5 | 82 | Claude-Opus-4.8 |
+| ko-KR | 80 | 93.6 | 82 | Claude-Opus-4.8 |
 | nb-NO | 80 | 91.9 | 82 | Claude-Opus-4.8 |
 | nl-NL | 80 | 92.6 | 78 | Claude-Opus-4.8 |
 | pl-PL | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| pt-BR | 80 | 93.7 | 82 | Claude-Opus-4.8 |
+| pt-BR | 80 | 93.6 | 82 | Claude-Opus-4.8 |
 | pt-PT | 80 | 92.9 | 82 | Claude-Opus-4.8 |
 | ro-RO | 80 | 92.5 | 78 | Claude-Opus-4.8 |
 | ru-RU | 80 | 92.9 | 88 | Claude-Opus-4.8 |
-| sk-SK | 80 | 91.6 | 82 | Claude-Opus-4.8 |
-| sl-SI | 80 | 90.5 | 68 | Claude-Opus-4.8 |
-| sr-Latn | 80 | 91.1 | 78 | Claude-Opus-4.8 |
+| sk-SK | 80 | 91.7 | 82 | Claude-Opus-4.8 |
+| sl-SI | 80 | 90.6 | 68 | Claude-Opus-4.8 |
+| sr-Latn | 80 | 90.9 | 72 | Claude-Opus-4.8 |
 | sv-SE | 80 | 93.0 | 88 | Claude-Opus-4.8 |
-| th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
+| th-TH | 80 | 92.6 | 70 | Claude-Opus-4.8 |
 | tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
 | uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
 | zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
-| zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
+| zh-TW | 80 | 93.3 | 78 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (95)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -47,14 +47,11 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | fr-CA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 72 | Trademark symbol misplaced (belongs to Unsloth, not LLM); 'affinés' vs 'réglage fin' terminology inconsistency; awkward phrasing. |
 | he | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 72 | Title 'AiCluster' is mistranslation/garbled; 'Clustering' not properly rendered. Rest accurate and fluent. |
 | ja-JP | playbooks/supplemental/vllm-inference/playbook.json | 72 | Added 'Ryzen AI Max+' not in source; 'integrated GPU' loosely rendered as iGPU. |
-| sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 72 | Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'. |
 | sl-SI | playbooks/supplemental/pytorch-kernels/playbook.json | 72 | Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order. |
+| sr-Latn | playbooks/supplemental/pytorch-finetuning/playbook.json | 72 | Untranslated 'Fine-tune' in body; should be 'Fino podešavanje'. Otherwise accurate, brands intact. |
 | cs-CZ | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate. |
-| da-DK | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'. |
-| de-DE | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb. |
 | de-DE | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth, not LLMs); minor stylistic awkwardness in 'feinabgestimmte'. |
 | el-GR | playbooks/core/vscode-qwen3-coder/playbook.json | 78 | "LLM Coding" left partly untranslated; "Coding" awkward in Greek title, slightly unnatural phrasing. |
-| el-GR | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact. |
 | es-LA | playbooks/supplemental/github-slack-development-digest/playbook.json | 78 | Inconsistent formality (Cree vs Configura); 'digest' left untranslated in title while translated later as 'resumen'. |
 | fr-CA | playbooks/supplemental/amd-sync/playbook.json | 78 | Inconsistent: title translates 'AMD Sync' as 'synchronisation AMD' but body keeps 'AMD Sync'; 'métriques' anglicism (préfère 'mesures'). |
 | fr-CA | playbooks/supplemental/speech2speech-translation/playbook.json | 78 | Title drops speech-to-speech nuance; 'voix-à-voix' awkward calque, 'traduction vocale directe' preferred. |
@@ -79,13 +76,16 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | ar | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Title omits 'Fine' nuance; inconsistent LLaMA Factory vs LLaMA-Factory hyphenation; otherwise accurate and fluent. |
 | cs-CZ | playbooks/supplemental/amd-sync/playbook.json | 82 | Title translates 'AMD Sync' as 'synchronizací AMD' inconsistently; body keeps brand correctly. Minor terminology inconsistency. |
 | cs-CZ | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Anglicism 'Clustrování' awkward; 'Halos' plural left untranslated in title; otherwise accurate and fluent. |
+| cs-CZ | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Inconsistent 'jemné doladění' vs 'doladění'; 'Software' untranslated/awkward in title; otherwise accurate. |
 | cs-CZ | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent terminology: 'jader' vs 'kernely' for kernels; otherwise accurate, fluent, brands intact. |
 | cs-CZ | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 82 | Added 'AMD' not in source; 'Clustrování' is awkward anglicism; otherwise accurate, terms/code intact. |
 | da-DK | playbooks/supplemental/cvml/playbook.json | 82 | Grammatical gender error: 'Lokal' should be 'Lokalt' for neuter 'computersyn'. Otherwise accurate, terms/brands intact. |
 | da-DK | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Gender agreement error: 'et...udviklingsoversigt' should be 'en'; 'udgiver' slightly off for 'posts'. |
 | de-DE | playbooks/supplemental/lemonade-getting-started/playbook.json | 82 | Omitted 'Gen AI' (Gen KI); translated as generic 'KI-Modelle', losing generative AI specificity. |
+| de-DE | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Inconsistent terminology: 'Feinabstimmung' vs 'Feintunen'; anglicism 'Feintunen' slightly informal but acceptable. |
 | de-DE | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Inconsistent register (Erstelle vs Konfigurieren Sie); 'ein Digest' gender debatable, minor fluency issues |
 | el-GR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Inconsistent fine-tune rendering (Βελτιστοποίηση vs Συντονίστε); minor terminology awkwardness but adequate, brands/acronyms intact. |
+| el-GR | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Inconsistent translation of 'fine-tuning'; 'Λογισμικό' unnecessarily capitalized; otherwise accurate and fluent. |
 | el-GR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark ™ likely belongs to Unsloth, not LLM; slightly awkward phrasing. Terminology otherwise accurate. |
 | el-GR | playbooks/supplemental/openhands-getting-started/playbook.json | 82 | "πράκτορα κωδικοποίησης" awkward; "coding agent" better as "προγραμματισμού". Otherwise accurate, brands intact. |
 | es-LA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; 'LLMs™' brand term altered; slightly verbose but adequate and fluent. |
@@ -115,15 +115,18 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | ro-RO | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 82 | "Clustering" left untranslated (anglicism); "unități" odd for "Halos"; otherwise accurate, terms/code intact. |
 | sk-SK | playbooks/supplemental/amd-sync/playbook.json | 82 | Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate. |
 | sl-SI | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency. |
+| sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Inconsistent LLM pluralization; 'Fino prilagajanje' slightly awkward for fine-tuning; otherwise accurate, intact terms. |
 | sr-Latn | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent terminology: 'posluživanje' vs 'servisiranje' for 'serving'; minor fluency issues. |
 | sr-Latn | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement). |
 | sr-Latn | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent 'kernela' vs 'jezgra' terminology; otherwise accurate, brands intact. |
 | sr-Latn | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 82 | "rasporedite" awkward for deploy; "inferentni" unusual; otherwise accurate, brands intact |
 | th-TH | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Title leaves 'Clustering' untranslated, slightly awkward; otherwise accurate and fluent. |
+| th-TH | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Title left 'Fine-Tuning' in English; otherwise accurate, terms and brands intact. |
 | th-TH | playbooks/supplemental/speech2speech-translation/playbook.json | 82 | Title omits speech-to-speech nuance (just 'speech translation'); otherwise accurate and fluent. |
 | th-TH | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; 'fine-tuned' rendering slightly awkward but meaning preserved and terms intact. |
 | tr-TR | playbooks/supplemental/clustering-rpc-server/playbook.json | 82 | "RPC server" untranslated; "çıkarım ayarı yapın" awkward for 'set up inference'; slightly stiff phrasing. |
 | tr-TR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Minor grammar: 'ince ayar yapın' should be 'ince ayar yapın modelleri' or 'ince ayarlayın'; slightly awkward phrasing. |
+| tr-TR | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Second sentence has grammatical issue: 'modellerini ince ayar yapın' should be 'modellerine ince ayar yapın'. |
 | tr-TR | playbooks/supplemental/vllm-inference/playbook.json | 82 | Added 'AMD' not in source; otherwise accurate and fluent. |
 | uk-UA | playbooks/supplemental/amd-sync/playbook.json | 82 | Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent. |
 | zh-CN | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method. |
