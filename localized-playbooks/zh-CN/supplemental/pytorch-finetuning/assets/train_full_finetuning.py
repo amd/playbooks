@@ -50,7 +50,7 @@ def cleanup_gpu_memory():
 # -----------------------
 # Model Configuration
 # -----------------------
-MODEL = "google/gemma-3-4b-it" 
+MODEL = "LLM-Research/gemma-3-4b-it"
 model_name = MODEL.split("/")[-1]
 
 # -----------------------
@@ -97,16 +97,17 @@ print(f"Total selected samples: {n_samples}")
 # Load Model and Tokenizer
 # -----------------------
 print(f"\nLoading {MODEL}...")
-print("Note: Model is stored as MXFP4 on Hugging Face but will be loaded as BF16 for training")
+print("Note: Model is stored as MXFP4 but will be loaded as BF16 for training")
 print("(This is expected - the warning about MXFP4 is informational)\n")
 
 # Download the model from ModelScope
 model_dir = snapshot_download(MODEL)
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 model = AutoModelForCausalLM.from_pretrained(
     model_dir,
     dtype=torch.bfloat16,             # Use BF16 for better stability and ROCm support (dtype not torch_dtype)
-    device_map="auto",                # Automatically distribute across available GPUs
+    device_map=device,
     trust_remote_code=True,
     low_cpu_mem_usage=True,            # Reduce CPU memory during loading
     local_files_only=True
@@ -178,7 +179,6 @@ args = SFTConfig(
     logging_steps=5,
     save_strategy="epoch",
     eval_strategy="epoch",
-    save_safetensors=True,
     save_total_limit=1,                # Keep only last checkpoint to save disk space
     
     # Other

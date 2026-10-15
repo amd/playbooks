@@ -1,0 +1,160 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: OrchestrAI Test Matrix
+
+on:
+  workflow_call:
+    inputs:
+      matrix_json:
+        description: Matrix entries for one independently bounded GitHub job matrix
+        required: true
+        type: string
+      build_urls:
+        description: OrchestrAI batch IDs mapped to their pipeline build URLs
+        required: true
+        type: string
+    secrets:
+      ORCHESTRAI_PIPELINE_USER:
+        required: true
+      ORCHESTRAI_PIPELINE_TOKEN:
+        required: true
+
+jobs:
+  test-playbooks:
+    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
+    continue-on-error: ${{ !matrix.required }}
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        include: ${{ fromJson(inputs.matrix_json) }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Wait for OrchestrAI pipeline build
+        id: wait
+        env:
+          BUILD_URLS_JSON: ${{ inputs.build_urls }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
+          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+        run: |
+          BUILD_URL=$(python3 -c "import json,os;print(json.loads(os.environ.get('BUILD_URLS_JSON','{}') or '{}').get(os.environ['BATCH_ID'],''))")
+          if [ -z "$BUILD_URL" ]; then
+            echo "::error::No OrchestrAI pipeline build URL for batch ${BATCH_ID}"; exit 1
+          fi
+          echo "build_url=${BUILD_URL}" >> "$GITHUB_OUTPUT"
+          echo "Waiting for OrchestrAI pipeline build ..."
+          # SECURITY: pass credentials via a 0600 netrc file, never as `curl -u
+          # user:token` — argv is world-readable (/proc/<pid>/cmdline, ps) for the
+          # life of each curl, which would leak the pipeline token to any other
+          # process on a shared/persistent self-hosted runner. mktemp creates the
+          # file 0600; printf is a shell builtin, so the token never hits argv.
+          NETRC="$(mktemp)"
+          trap 'rm -f "$NETRC"' EXIT
+          NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
+          printf 'machine %s login %s password %s\n' \
+            "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
+          # Bounded poll: ~4.5h cap (1080 * 15s) — covers max_duration (240m) plus
+          # provisioning/queue, but never hangs to the GitHub job timeout.
+          MAX=1080          # ~4.5h cap (1080 * 15s) — covers max_duration + queue
+          FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
+          i=0; fails=0
+          while [ "$i" -lt "$MAX" ]; do
+            if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
+              fails=0
+              building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
+              result=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('result') or '')" 2>/dev/null || echo "")
+              # The batch result reflects ALL its playbooks; this job's verdict is
+              # resolved per-playbook in the next step from summary.json.
+              if [ "$building" = "False" ] && [ -n "$result" ]; then
+                echo "Batch build finished: $result (per-playbook verdict resolved next)"; break
+              fi
+            else
+              fails=$((fails + 1))
+              if [ "$fails" -ge "$FAIL_MAX" ]; then
+                echo "::error::OrchestrAI pipeline unreachable ($FAIL_MAX consecutive failures)"; exit 1
+              fi
+            fi
+            i=$((i + 1))
+            sleep 15
+          done
+          if [ "$i" -ge "$MAX" ]; then
+            echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1
+          fi
+
+      - name: Resolve per-playbook verdict
+        if: always()
+        id: results
+        env:
+          BUILD_URL: ${{ steps.wait.outputs.build_url }}
+          PLAYBOOK_ID: ${{ matrix.playbook }}
+          PLATFORM: ${{ matrix.platform }}
+          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
+          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
+        # ("Resolve per-playbook verdict"), which is where the user-facing !orc
+        # sticky comment comes from. Deliberately duplicated rather than
+        # factored into .github/actions/ — see the rationale on that copy.
+        #
+        # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
+        # INTERRUPTED (the batch never produced results for this playbook).
+        # GitHub has no neutral step result, so 2 still fails the job — but it is
+        # annotated as infrastructure and the artifact records outcome=NOT_RUN,
+        # so the aggregated PR report counts it separately from test failures.
+        run: |
+          rc=0
+          python3 .github/scripts/orchestrai_verdict.py || rc=$?
+          echo "verdict_rc=${rc}" >> "$GITHUB_OUTPUT"
+          if [ "$rc" = "2" ]; then
+            echo "::warning::${PLAYBOOK_ID} (${PLATFORM}) did not run — OrchestrAI infrastructure issue, not a test failure"
+          fi
+          exit "$rc"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: test-results/
+          if-no-files-found: ignore
+
+      - name: Test summary
+        if: always()
+        env:
+          RP_URL: ${{ steps.results.outputs.rp_url }}
+        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
+        # ("Test summary"). See the sync note on the verdict step above.
+        run: |
+          # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
+          # the job summary instead of letting it read as a failed playbook.
+          INFRA_NOTE=$(python3 - <<'PY'
+          import json
+          try:
+              d = json.load(open("test-results/summary.json"))
+          except Exception:
+              d = {}
+          outcome = (d.get("outcome") or "").upper()
+          if outcome in ("NOT_RUN", "INTERRUPTED"):
+              reason = d.get("infrastructure_reason") or "reason not reported by the pipeline"
+              print(f"> ⚠️ **{outcome}** — this playbook produced no test results. "
+                    f"Infrastructure: {reason}")
+          PY
+          )
+          {
+            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
+            echo ""
+            if [ -n "${INFRA_NOTE}" ]; then
+              echo "${INFRA_NOTE}"
+              echo ""
+            fi
+            # Link to ReportPortal (test results) only. The pipeline build URL is
+            # intentionally not shown here.
+            if [ -n "${RP_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| ReportPortal | [View Results](${RP_URL}) |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

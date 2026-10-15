@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Η έκδοση Node.js 22.22.1 LTS είναι η προτεινόμενη έκδοση για αυτήν την πλατφόρμα.
-
 <!-- @os:windows -->
 
-1. Κατεβάστε το Windows 64-bit Installer από το [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Κατεβάστε το Windows 64-bit Installer από το [nodejs.org](https://nodejs.org/en/download/)
 2. Εκτελέστε το πρόγραμμα εγκατάστασης και ακολουθήστε τις οδηγίες
 3. Επαληθεύστε την εγκατάσταση:
 ```cmd
@@ -38,4 +36,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Σημείωση**: Δείτε το [Node.js Downloads](https://nodejs.org/en/download/) για επιπλέον επιλογές εγκατάστασης και πλατφόρμες.
+> **Σημείωση**: Δείτε το [Node.js Downloads](https://nodejs.org/en/download/) για πρόσθετες επιλογές εγκατάστασης και πλατφόρμες.

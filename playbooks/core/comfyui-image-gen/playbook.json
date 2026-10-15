@@ -127,5 +127,15 @@
         "ComfyUI": "Latest from Ryzen AI Developer Center"
       }
     }
-  }
+  },
+  "authors": [
+    {
+      "name": "Daniel Holanda",
+      "github": "danielholanda",
+      "github_url": "https://github.com/danielholanda",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2025-12-30",
+  "updated_date": "2026-10-01"
 }

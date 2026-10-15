@@ -16,34 +16,36 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Az LM Studio egy erőteljes, GUI-alapú wrapper a [llama.cpp](https://github.com/ggml-org/llama.cpp) számára, és emellett [OpenAI-kompatibilis végpontot](https://lmstudio.ai/docs/developer/openai-compat) is biztosít a helyi modellkiszolgáláshoz. Az LM Studio egyszerű, mégis nagy teljesítményű felületet nyújt a modellek egyszerű letöltéséhez és üzembe helyezéséhez. Az LM Studio mind Vulkan, mind AMD ROCm™ szoftveres backendet (úgynevezett runtime-ot) kínál AMD felhasználók számára.
+Az LM Studio egy hatékony, GUI-alapú wrapper a [llama.cpp](https://github.com/ggml-org/llama.cpp) köré, és emellett egy [OpenAI-kompatibilis végpontot](https://lmstudio.ai/docs/developer/openai-compat) is biztosít a helyi modellek kiszolgálásához. Az LM Studio egyszerű, mégis hatékony felületet kínál a modellek egyszerű letöltéséhez és üzembe helyezéséhez. Az LM Studio mind Vulkan, mind AMD ROCm™ szoftveres háttérrendszereket (úgynevezett futtatókörnyezeteket) kínál az AMD felhasználók számára.
 
 
-## Amit tanulni fog
-- Hogyan konfigurálja és használja az LM Studiót a helyi hardver kihasználásához
-- LLM-ek tesztelése és kezelése teljesen offline környezetben
-- Modellek kiszolgálása OpenAI-kompatibilis API-n keresztül egyedi munkafolyamatok és alkalmazások meghajtásához
+## Amit meg fogsz tanulni
+- Hogyan konfiguráld és használd az LM Studio-t a helyi hardvered kihasználásához
+- Hogyan teszteld és kezeld az LLM-eket teljesen offline környezetben
+- Hogyan szolgálj ki modelleket OpenAI-kompatibilis API-n keresztül, hogy egyedi munkafolyamatokat és alkalmazásokat hajtsanak meg
 
 
-## A memóriakonfiguráció beállítása
+<!-- @device:halo_box,halo,stx,krk -->
+## A memória konfigurálása
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
 
 <!-- @os:linux -->
-> **Megjegyzés**: A VS Code-ot telepítheti az AMD Ryzen™ AI Developer Centeren keresztül. Az LM Studio esetében kövesse az alábbi telepítési utasításokat.
+> **Megjegyzés**: A VS Code-ot az AMD Ryzen™ AI Developer Centeren keresztül telepítheted. Az LM Studio esetében kövesd az alábbi telepítési útmutatót.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés**: Ha a VS Code vagy az LM Studio nincs telepítve, telepítheti azokat az AMD Ryzen™ AI Developer Centerről. 
+> **Megjegyzés**: Ha a VS Code vagy az LM Studio nincs telepítve, telepítheted őket az AMD Ryzen™ AI Developer Centerből. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftverelőfeltételek telepítése
+## A szoftveres előfeltételek telepítése
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -67,16 +69,16 @@ Az LM Studio egy erőteljes, GUI-alapú wrapper a [llama.cpp](https://github.com
 <!-- @device:end -->
 
 ## Csevegés egy LLM-mel
-Ismerje meg, hogyan kezdhet el csevegni egy ChatGPT-szintű LLM-mel teljesen helyi módon.  
+Tanuld meg, hogyan kezdhetsz csevegni egy ChatGPT-szintű LLM-mel teljesen helyben.  
 
-1. Nyissa meg az LMStudio-t. 
-2. Nyomja meg a `Ctrl + L` billentyűkombinációt a Model Loader megnyitásához, válassza a `Manually choose model load parameters` opciót, majd kattintson a(z) `${model_name}` elemre
-3. Győződjön meg róla, hogy a „show advanced settings” be van jelölve.  
-4. Módosítsa a `Context Length` értékét igény szerint. A nagyobb kontextushossz több modellmemóriát jelent, de több rendszermemóriát is felhasznál. Ehhez a playbookhoz a 4096 érték ajánlott.
-5. Győződjön meg róla, hogy a `GPU Offload` a maximumra van állítva, és a `Flash Attention` be van kapcsolva (a Cache Quantizations maradhat kikapcsolva)
-6. Jelölje be a `Remember settings` opciót, majd kattintson a `Load Model` gombra.
-7. Ha nem a csevegőablakban van, nyomja meg a `Ctrl + 1` billentyűkombinációt, vagy kattintson a 👾 gombra a képernyő bal felső sarkában.
-8. Küldjön egy üzenetet, és kezdjen el interakcióba lépni a modellel!
+1. Nyisd meg az LMStudio-t. 
+2. Nyomd meg a `Ctrl + L` billentyűkombinációt a Modellbetöltő megnyitásához, válaszd a `Manually choose model load parameters` opciót, majd kattints a `${model_name}` elemre
+3. Győződj meg róla, hogy a „show advanced settings” be van jelölve.  
+4. Módosítsd a `Context Length` értéket igény szerint. A magasabb kontextushossz nagyobb modellmemóriát jelent, de több rendszermemóriát is használ. Ehhez a útmutatóhoz a 4096 érték ajánlott.
+5. Győződj meg róla, hogy a `GPU Offload` a maximumra van állítva, és a `Flash Attention` be van kapcsolva (a Cache Quantizations maradhat kikapcsolva).
+6. Jelöld be a `Remember settings` opciót, majd kattints a `Load Model` gombra.
+7. Ha nem a csevegőablakban vagy, nyomd meg a `Ctrl + 1` billentyűkombinációt, vagy kattints a 👾 gombra a képernyő bal felső sarkában.
+8. Küldj el egy üzenetet, és kezdj el interakcióba lépni a modellel!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Tipp**: A kontextushossz a modell memóriájára utal. A flash attention javítja a feldolgozási sebességet, miközben csökkenti a memóriahasználatot. A GPU Offload a számítást a videokártyára helyezi át a gyorsabb válaszok érdekében.
+> **Tipp**: A kontextushossz a modell memóriájára utal. A Flash Attention javítja a feldolgozási sebességet, miközben csökkenti a memóriahasználatot. A GPU Offload a számítást a videokártyára helyezi át a gyorsabb válaszok érdekében.
 
 ## LLM-ek kiszolgálása OpenAI-kompatibilis végponton keresztül
 
-Az LM Studio emellett OpenAI-kompatibilis végpontot is kínál az LM Studio Server formájában. Ezt már bemutattuk egy ügynökalapú kódolási munkafolyamatban a Cline-nal [itt](../playbooks/vscode-qwen3-coder). Egy másik gyakori felhasználási eset az LM Studio Server csatlakoztatása bármely webalkalmazáshoz (React, Node.js, Python) szabványos HTTP-kérések küldésével a következtetési végpontra.
+Az LM Studio egy OpenAI-kompatibilis végpontot is kínál az LM Studio Server formájában. Ezt már bemutattuk egy agentikus kódolási munkafolyamatban a Cline-nal [itt](../playbooks/vscode-qwen3-coder). Egy másik gyakori felhasználási eset az LM Studio Server összekapcsolása bármely webalkalmazással (React, Node.js, Python) standard HTTP-kérések küldésével a következtetési végpontra.
 
-Az LM Studio Server beállításához kövesse az alábbi utasításokat:
+Az LM Studio Server beállításához kövesd az alábbi utasításokat:
 
-1. A bal oldalon kattintson a `Developer` fülre (parancssor ikon) vagy nyomja meg a `Ctrl + 2` billentyűkombinációt, majd kattintson a `Server Settings` elemre.  
-2. (Opcionális): Ha a modellt a LAN hálózaton keresztül szeretné kiszolgálni, jelölje be a `Serve on Local Network` opciót. Ha egy weboldallal vagy kiterjedt hívásokkal szeretné használni a VS Code-on belül, jelölje be az `Enable CORS` opciót. 
-3. A bal felső sarokban győződjön meg róla, hogy a szerver fut, a `Status` előtti kapcsológombra kattintva.
-4. Ezzel egy OpenAI-kompatibilis végpont fog futni. A cím jellemzően a http://127.0.0.1:1234 címen érhető el  
-5. Ha még nincs betöltve modell, betöltheti a `Load Model` gombra kattintva, és a korábban ismertetett lépéseket követve. 
+1. A bal oldalon kattints a `Developer` fülre (parancssor ikon), vagy nyomd meg a `Ctrl + 2` billentyűkombinációt, majd kattints a `Server Settings` opcióra.  
+2. (Opcionális): Ha a modellt a helyi hálózatodon szeretnéd kiszolgálni, jelöld be a `Serve on Local Network` opciót. Ha egy weboldallal vagy kiterjedt hívásokkal szeretnéd használni a VS Code-on belül, jelöld be az `Enable CORS` opciót. 
+3. A bal felső sarokban győződj meg róla, hogy a szerver fut, a `Status` előtti kapcsoló gombra kattintva.
+4. Ekkor egy OpenAI-kompatibilis végpont fog futni. A cím jellemzően a http://127.0.0.1:1234 
+5. Ha még nincs betöltve modell, betöltheted a `Load Model` gombra kattintva, és a korábban ismertetett lépéseket követve. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -186,23 +188,23 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Ez a modell mostantól elérhető lesz az LM Studio Server végponton keresztül, és támogatni fogja az OpenAI végpontokat, beleértve az alábbiakat:
+Ez a modell mostantól elérhető lesz az LM Studio Server végponton keresztül, és támogatni fogja az OpenAI végpontokat, beleértve:
 
-| Endpoint | Method | Docs |
+| Végpont | Metódus | Dokumentáció |
 |------------|----------|----------|
-| /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
-| /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
-| /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
-| /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
-| /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Példa: Az Endpoint pingelése
-Miután létrehoztuk az OpenAI-kompatibilis végpontot, nézzük meg, hogyan integrálhatjuk ezt egy Python fejlesztői környezetbe (mint például a VSCode), és hogyan használhatjuk a rendszerünket helyi API-szolgáltatóként.
+| /v1/models | GET | [Modellek](https://lmstudio.ai/docs/developer/openai-compat/models) |
+| /v1/responses | POST | [Válaszok](https://lmstudio.ai/docs/developer/openai-compat/responses) |
+| /v1/chat/completions | POST |	[Csevegés-kiegészítések](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
+| /v1/embeddings | POST | [Beágyazások](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
+| /v1/completions | POST | [Kiegészítések](https://lmstudio.ai/docs/developer/openai-compat/completions) |
+#### Példa: Az végpont pingelése
+Miután létrehoztuk az OpenAI-kompatibilis végpontot, nézzük meg, hogyan integrálhatjuk ezt egy Python fejlesztői környezetbe (például a VSCode-ba), és hogyan használhatjuk a rendszert helyi API-szolgáltatóként.
 
 1. Hozzon létre egy Python virtuális környezetet:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Linuxon nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat a venv létrehozásához.
+    Linux rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -212,13 +214,13 @@ Miután létrehoztuk az OpenAI-kompatibilis végpontot, nézzük meg, hogyan int
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (a változtatás érvénybe lépéséhez jelentkezzen ki, majd vissza):
+**Adjon hozzáférést a felhasználójának a GPU eszközökhöz** (a változás érvénybe lépéséhez jelentkezzen ki, majd vissza):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Linuxon nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat a venv létrehozásához.
+    Linux rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -230,26 +232,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat a venv létrehozásához.
+    Windows rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási szabályzatát (Execution Policy) (pl.
-    > RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell-parancs futtatása előtt.
+    > **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási házirendjét (Execution Policy) (pl.
+    > RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell parancs futtatása előtt.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, és kövesse az alábbi parancsokat a venv létrehozásához.
+    Windows rendszeren nyisson meg egy terminált a választott könyvtárban, és kövesse az alábbi parancsokat egy venv létrehozásához.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási szabályzatát (Execution Policy) (pl.
-    > RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell-parancs futtatása előtt.
+    > **Tipp**: A Windows-felhasználóknak esetleg módosítaniuk kell a PowerShell végrehajtási házirendjét (Execution Policy) (pl.
+    > RemoteSigned vagy Unrestricted értékre állítva) néhány PowerShell parancs futtatása előtt.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -259,7 +261,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Futtassa a következő szkriptet az imént létrehozott végpont pingeléséhez.
+3. Futtassa az alábbi szkriptet az imént létrehozott végpont pingeléséhez.
     ```python
     from openai import OpenAI
 
@@ -362,15 +364,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Opcionális): Váltás a futtatókörnyezetek (Runtimes) között
+#### (Opcionális): Váltás a futásidejű környezetek (Runtime) között
 
-1. Nyomja meg a `Ctrl + Shift + R` billentyűkombinációt a billentyűzeten. Alternatív megoldásként kattintson a bal oldalon található `Discover` (Felfedezés) fülre (nagyítóüveg ikon), majd a felugró ablakban kattintson a `Runtime` opcióra.
-2. Ezután meg kell jelennie a `Runtime Selections` (Futtatókörnyezet-választás) résznek, ahol a legördülő menü segítségével módosíthatja a futtatókörnyezetet.
+1. Nyomja meg a `Ctrl + Shift + R` billentyűkombinációt a billentyűzetén. Alternatívaként kattintson a `Discover` fülre (nagyítóüveg ikon) a bal oldalon, majd a felugró ablakban kattintson a `Runtime` elemre.
+2. Ekkor megjelenik a `Runtime Selections`, ahol a legördülő menü segítségével módosíthatja a futásidejű környezetet.
 
 
 ## Következő lépések
 
 - **Egyéni alkalmazásintegráció**: Integrálja saját Python szkriptjeit vagy alkalmazásait a helyi, OpenAI-kompatibilis API használatával.
-- **Fejlett felhasználói felületek**: Csatlakoztasson erőteljes felületeket, mint például az Open WebUI-t, a szerveréhez a csevegési előzmények és a persona-kezelés érdekében.
+- **Fejlett felhasználói felületek**: Csatlakoztasson erőteljes felületeket, például az Open WebUI-t a szerveréhez a csevegési előzmények és a személyiségprofilok kezeléséhez.
 
 További dokumentációért látogasson el ide: https://lmstudio.ai/docs/developer

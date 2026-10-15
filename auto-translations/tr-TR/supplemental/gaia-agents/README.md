@@ -16,21 +16,23 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-GAIA ajanları, tanımladığınız araçları çağırmak ve akıl yürütmek için yerel bir LLM kullanan yapay zeka asistanlarıdır — eylem gerçekleştirebilen sohbet botları gibi düşünebilirsiniz. Bulut API'leri olmadan, hiçbir veri makinenizden dışarı çıkmadan ve API anahtarı gerekmeden **%100 yerel olarak** çalışırlar.
+GAIA aracıları, akıl yürütmek ve tanımladığınız araçları çağırmak için yerel bir LLM kullanan yapay zeka asistanlarıdır — eylem gerçekleştirebilen sohbet botları gibidirler. Bulut API'leri olmadan, hiçbir veri makinenizden dışarı çıkmadan ve API anahtarı gerektirmeden **%100 yerel** olarak çalışırlar.
 
-Bu kitapçıkta, sisteminizin RAM'ini, GPU'sunu ve NPU'sunu tespit eden, yerel model kataloğunu sorgulayan ve makinenizin hangi LLM'leri çalıştırabileceğini öneren bir Donanım Danışmanı Ajanı (Hardware Advisor Agent) oluşturacaksınız. Bu, hemen kullanışlı bir sonuç üreten GAIA Agent SDK'sına pratik bir giriş niteliğindedir.
+Bu playbook'ta, sisteminizin RAM, GPU ve NPU'sunu algılayan, yerel model kataloğunu sorgulayan ve makinenizin hangi LLM'leri çalıştırabileceğini öneren bir Donanım Danışmanı Aracısı (Hardware Advisor Agent) oluşturacaksınız. Bu, hemen kullanışlı bir şey üreten GAIA Agent SDK'ya pratik bir giriştir.
 
 ## Neler Öğreneceksiniz
 
-- Özel araçlarla bir GAIA ajanı nasıl oluşturulur
-- Sistem bilgilerini ve model kataloglarını sorgulamak için LemonadeClient SDK'sının kullanımı
-- Platforma özgü GPU/NPU tespiti (Windows PowerShell ve Linux lspci)
-- %70 kuralı kullanılarak bellek tabanlı model boyutlandırması
+- Özel araçlara sahip bir GAIA aracısı nasıl oluşturulur
+- Sistem bilgisi ve model kataloglarını sorgulamak için LemonadeClient SDK'nın kullanımı
+- Platforma özgü GPU/NPU algılama (Windows PowerShell ve Linux lspci)
+- 70% kuralı kullanılarak bellek tabanlı model boyutlandırma
 - Doğal dil donanım sorguları için etkileşimli bir CLI oluşturma
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Bellek Yapılandırmasını Ayarlama
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Yazılım Güncellemelerini Kontrol Edin
@@ -39,7 +41,7 @@ Bu kitapçıkta, sisteminizin RAM'ini, GPU'sunu ve NPU'sunu tespit eden, yerel m
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Yazılım Ön Koşullarının Kurulumu
+## Yazılım Ön Koşullarını Yükleme
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -69,11 +71,11 @@ which python3
 
 ## Başlarken
 
-Neyi oluşturduğunuzu görebilmek için önce tamamlanmış ajanı çalıştırın. Ardından, kodu adım adım inceleyeceğiz.
+Neyi inşa ettiğinizi görebilmek için önce tamamlanmış aracıyı çalışır hale getirin. Ardından kodu adım adım inceleyeceğiz.
 
-### Önceden Oluşturulmuş Örneği Çalıştırın
+### Önceden Oluşturulmuş Örneği Çalıştırma
 
-Bu kitapçık, eksiksiz [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) dosyasını içerir. Bunu seçtiğiniz bir dizine indirin ve tamamlanmış ajanı çalışırken görmek için çalıştırın:
+Bu playbook, tam [hardware_advisor_agent.py](assets/hardware_advisor_agent.py) dosyasını içerir. Bunu seçtiğiniz bir dizine indirin ve tamamlanmış aracıyı çalışırken görmek için çalıştırın:
 
 ```bash
 python hardware_advisor_agent.py
@@ -101,7 +103,7 @@ print("PASS: hardware_advisor_agent.py has valid syntax")
 ```
 <!-- @test:end --> 
 
-**Şunu sormayı deneyin:** "What size LLM can I run?"
+**Şunu sormayı deneyin:** "Ne boyutta bir LLM çalıştırabilirim?"
 
 **Beklenen çıktı:**
 
@@ -122,9 +124,9 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 - NPU acceleration available for smaller models
 ```
 
-**Tebrikler** - bir ajan oluşturdunuz!
+**Tebrikler** - bir aracı oluşturdunuz! 
 
-Kitapçığın geri kalanında, betiğin her bir bölümünün nasıl çalıştığı açıklanacak, böylece bunu temelden anlayabilirsiniz.
+Playbook'un geri kalanında, betiğin her bir parçasının nasıl çalıştığını açıklayacağız, böylece bunu en baştan anlayabilirsiniz.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -266,17 +268,17 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 ## Mimariyi Anlama
 
-Donanım Danışmanı Ajanı üç bileşeni bir araya getirir:
+Donanım Danışmanı Aracısı üç bileşeni bir araya getirir:
 
 - **LemonadeClient SDK** — Sistem bilgisi ve model kataloğu API'leri
-- **Platforma özgü tespit** — GPU bilgisi için Windows PowerShell / Linux lspci
-- **Bellek hesaplamaları** — Güvenli model boyutlandırması için %70 kuralı
+- **Platforma özgü algılama** — GPU bilgisi için Windows PowerShell / Linux lspci
+- **Bellek hesaplamaları** — Güvenli model boyutlandırma için 70% kuralı
 
-Veri şu sırayla akar: kullanıcı sorgusu → ajan bir araç seçer → araç LemonadeClient ve işletim sistemi tespitini çağırır → ajan sonuçları bir öneriye dönüştürür.
+Veri bu bileşenler arasında şu sırayla akar: kullanıcı sorgusu → aracı bir araç seçer → araç LemonadeClient + işletim sistemi algılamayı çağırır → aracı sonuçları bir öneriye dönüştürür.
 
 ### LemonadeClient SDK
 
-LemonadeClient, sistem tespiti, NPU/GPU kullanılabilirliği ve model kataloğu sorguları için birleşik bir API sağlar.
+LemonadeClient, sistem algılama, NPU/GPU kullanılabilirliği ve model kataloğu sorguları için birleşik bir API sağlar.
 
 **İçe aktarma ve başlatma:**
 
@@ -360,13 +362,13 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 }
 ```
 
-### Platforma Özgü GPU Tespiti
+### Platforma Özgü GPU Algılama
 
-Ajan, GPU tespiti için PyTorch yerine işletim sistemine özgü komutlar kullanır. Bu yaklaşım GPU sürücüleri yüklü olmadan çalışır, yalnızca CUDA destekli olanlar değil tüm GPU'ları tespit eder ve ağır kütüphane içe aktarmalarından kaçınır.
+Aracı, GPU algılama için PyTorch yerine işletim sistemine özgü komutlar kullanır. Bu, GPU sürücüleri yüklü olmadan çalışır, tüm GPU'ları (yalnızca CUDA destekli olanları değil) algılar ve ağır kütüphane içe aktarmalarından kaçınır.
 
 <!-- @os:windows -->
 
-Windows'ta ajan, WMI'yi sorgulamak için PowerShell kullanır:
+Windows'ta, aracı WMI'yi sorgulamak için PowerShell kullanır:
 
 ```python
 ps_command = (
@@ -385,7 +387,7 @@ result = subprocess.run(
 
 <!-- @os:linux -->
 
-Linux'ta ajan lspci kullanır:
+Linux'ta, aracı lspci kullanır:
 
 ```python
 result = subprocess.run(
@@ -399,7 +401,7 @@ result = subprocess.run(
 
 ### %70 Bellek Kuralı
 
-> **Kural:** Çıkarım işlemleri için (KV önbelleği, toplu işleme tamponları, çalışma zamanı bellek artışları) %30'luk bir marj bırakmak amacıyla model boyutu, kullanılabilir RAM'in %70'inden az olmalıdır.
+> **Kural:** Çıkarım işlemleri (KV önbelleği, toplu işleme tamponları, çalışma zamanı bellek sıçramaları) için %30 ek yük bırakmak amacıyla model boyutu, kullanılabilir RAM'in %70'inden az olmalıdır.
 
 ```
 System: 32 GB RAM
@@ -408,13 +410,13 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 70B model (~42 GB):   Too large
 ```
 
-## Ajanı Adım Adım Kodlama (İsteğe Bağlı)
+## Aracıyı Adım Adım Kodlama (İsteğe Bağlı)
 
-`hardware_advisor_agent.py` adında **tek bir dosya** oluşturacak ve giderek özellikler ekleyeceksiniz. Her adım bir öncekinin üzerine inşa edilir.
+`hardware_advisor_agent.py` adlı **tek bir dosya** oluşturacak ve özellikleri kademeli olarak ekleyeceksiniz. Her adım bir öncekinin üzerine inşa edilir.
 
-### Adım 1: Ajan İskeleti
+### Adım 1: Aracı İskeleti
 
-Minimal bir ajan yapısıyla başlayın — sadece sınıf ve temel bir sistem istemi (system prompt). Ajanın henüz aracı yok.
+Minimal bir aracı yapısıyla başlayın — yalnızca sınıf ve temel bir sistem istemi. Aracının henüz hiçbir aracı yok.
 
 ```python
 from gaia import Agent
@@ -455,9 +457,9 @@ Agent created successfully!
 
 ---
 
-### Adım 2: GPU ve Donanım Tespiti
+### Adım 2: GPU ve Donanım Algılama
 
-`_get_gpu_info()` yardımcı yöntemini ve `get_hardware_info()` aracını ekleyin. Bu, ajanı etkileşimli hale getirir — artık sistem özellikleri hakkında sorgu yapabilirsiniz.
+`_get_gpu_info()` yardımcı yöntemini ve `get_hardware_info()` aracını ekleyin. Bu, aracıyı etkileşimli hale getirir — artık ona sistem özellikleri hakkında sorgu gönderebilirsiniz.
 
 Dosyanın en üstündeki **içe aktarmaları güncelleyin**:
 
@@ -631,7 +633,7 @@ if __name__ == "__main__":
             break
 ```
 
-Çalıştırın ve "Show me my system specs" sormayı deneyin:
+Çalıştırın ve "Sistem özelliklerimi göster" sorusunu sormayı deneyin:
 
 ```bash
 python hardware_advisor_agent.py
@@ -652,7 +654,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### Adım 3: Model Kataloğu
 
-`get_hardware_info` fonksiyonundan sonra, `_register_tools()` içine `list_available_models()` aracını ekleyin. Artık ajan hangi modellerin kullanılabilir olduğunu size söyleyebilir.
+`get_hardware_info` fonksiyonundan sonra, `_register_tools()` içine `list_available_models()` aracını ekleyin. Artık aracı size hangi modellerin mevcut olduğunu söyleyebilir.
 
 ```python
     @tool(atomic=True)
@@ -694,7 +696,7 @@ Agent: Your system has excellent specs for running LLMs locally!
             }
 ```
 
-Çalıştırın ve "What models are available?" sormayı deneyin:
+Çalıştırın ve "Hangi modeller mevcut?" sorusunu sormayı deneyin:
 
 ```bash
 python hardware_advisor_agent.py
@@ -715,7 +717,7 @@ Agent: I found 15 models in the catalog:
 
 ### Adım 4: Akıllı Öneriler
 
-`list_available_models`'dan sonra, `_register_tools()` içine `recommend_models()` aracını ekleyin. Ajan artık %70 kuralını kullanarak sisteminizin belleğine hangi modellerin sığacağını hesaplayabilir.
+`list_available_models`'dan sonra, `_register_tools()` içine `recommend_models()` aracını ekleyin. Aracı artık %70 kuralını kullanarak sisteminizin belleğine hangi modellerin sığdığını hesaplayabilir.
 
 ```python
     @tool(atomic=True)
@@ -774,7 +776,7 @@ Agent: I found 15 models in the catalog:
             }
 ```
 
-Çalıştırın ve "What size LLM can I run?" sormayı deneyin:
+Çalıştırın ve "Ne boyutta bir LLM çalıştırabilirim?" sorusunu sormayı deneyin:
 
 ```bash
 python hardware_advisor_agent.py
@@ -794,11 +796,11 @@ Top recommendations:
 
 ---
 
-### Adım 5: Üretim CLI'sı
+### Adım 5: Üretim CLI
 
-Basit `__main__` bloğunu, gelişmiş bir etkileşimli CLI ile değiştirin. Bu, bir başlık banner'ı, çıkış komutları ve daha iyi hata işleme ekler.
+Basit `__main__` bloğunu, gelişmiş bir etkileşimli CLI ile değiştirin. Bu, bir başlık, çıkış komutları ve daha iyi hata işleme ekler.
 
-**`if __name__ == "__main__":` bloğunun tamamını** şununla **değiştirin**:
+**Tüm `if __name__ == "__main__":` bloğunu** şununla **değiştirin**:
 
 ```python
 def main():
@@ -850,20 +852,20 @@ if __name__ == "__main__":
 ---
 ### Son Doğrulama
 
-`hardware_advisor_agent.py` dosyanız artık şu bileşenlerin hepsine sahip olmalıdır:
+`hardware_advisor_agent.py` dosyanız artık şu bileşenlerin tümüne sahip olmalıdır:
 
 - [x] İçe aktarmalar: `from typing import Any, Dict` ve `from gaia import Agent, tool`
-- [x] `__init__` ve sistem istemine sahip `HardwareAdvisorAgent` sınıfı
-- [x] `_get_gpu_info()` yardımcı fonksiyonu (Windows PowerShell + Linux lspci)
+- [x] Sistem istemine sahip `__init__` ile `HardwareAdvisorAgent` sınıfı
+- [x] `_get_gpu_info()` yardımcı işlevi (Windows PowerShell + Linux lspci)
 - [x] GPU, NPU ve OS alanlarına sahip `get_hardware_info()` aracı
 - [x] Etiketler ve boyut zenginleştirmesine sahip `list_available_models()` aracı
 - [x] %70 kuralı, fits_in_ram ve fits_in_gpu ile `recommend_models()` aracı
-- [x] Etkileşimli CLI ile `main()` fonksiyonu
+- [x] Etkileşimli CLI'ye sahip `main()` işlevi
 
 **Her şeyin çalıştığını doğrulamak için şu sorguları test edin:**
 
 - "Ne boyutta bir LLM çalıştırabilirim?"
-- "Sistem özelliklerimi göster"
+- "Bana sistem özelliklerimi göster"
 - "Hangi modeller mevcut?"
 - "30B bir model çalıştırabilir miyim?"
 
@@ -871,8 +873,8 @@ if __name__ == "__main__":
 
 ## Sonraki Adımlar
 
-- **LemonadeClient API'lerini keşfedin** — [LemonadeClient SDK belgelerinde](https://amd-gaia.ai/sdk/lemonade-client) daha fazla sistem ve model yönetimi yeteneği keşfedin
-- **Sesli etkileşim ekleyin** — Kullanıcıların konuşarak donanım soruları sormasına izin vermek için Whisper ASR ve Kokoro TTS'i entegre edin. [Talk kılavuzuna](https://amd-gaia.ai/guides/talk) bakın
+- **LemonadeClient API'lerini keşfedin** — [LemonadeClient SDK belgelerinde](https://amd-gaia.ai/sdk/lemonade-client) daha fazla sistem ve model yönetimi özelliğini keşfedin
+- **Sesli etkileşim ekleyin** — Kullanıcıların donanım sorularını konuşarak sorabilmesi için Whisper ASR ve Kokoro TTS'i entegre edin. [Talk kılavuzuna](https://amd-gaia.ai/guides/talk) bakın
 - **MCP desteği ekleyin** — Diğer araçların sorgulayabilmesi için donanım danışmanını bir MCP sunucusu olarak sunun. [MCP kılavuzuna](https://amd-gaia.ai/sdk/infrastructure/mcp) bakın
-- **Öneri motorunu genişletin** — Katmanları boşaltmak için GPU VRAM'ini hesaba katın veya saniye başına token sayısını tahmin etmek için kıyaslama ekleyin
-- **Çoklu ajan sistemi oluşturun** — [Routing Agent'ı](https://amd-gaia.ai/guides/routing) kullanarak donanım danışmanını bir kod ajanı veya sohbet ajanıyla birleştirin
+- **Öneri motorunu genişletin** — Katmanları boşaltmak için GPU VRAM'ini hesaba katın veya saniye başına token tahmini için kıyaslama (benchmarking) ekleyin
+- **Çoklu ajan sistemi oluşturun** — Donanım danışmanını [Routing Agent](https://amd-gaia.ai/guides/routing) kullanarak bir kod ajanı veya sohbet ajanıyla birleştirin

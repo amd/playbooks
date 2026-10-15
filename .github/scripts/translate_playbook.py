@@ -49,6 +49,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -642,9 +643,8 @@ def find_playbook_dir(playbook_id):
     return None, None
 
 
-def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt_version):
+def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt_version, manifest, lock):
     print(f"\n=== {playbook_id} -> {locale} ===", flush=True)
-    manifest = load_manifest(locale)
     changed = 0
     failures = []
 
@@ -670,7 +670,8 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
             # existing translation (no re-translation needed).
             score, issues = judge_translation(src_text, DISCLAIMER_BLOCK_RE.sub("", out_path.read_text(encoding="utf-8")), locale, cfg)
             entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
-            manifest["files"][rel] = entry
+            with lock:
+                manifest["files"][rel] = entry
             changed += 1
             print(f"  [rescore] {rel}  (score {score}, judge {judge_id})", flush=True)
             continue
@@ -686,14 +687,15 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
         # Prepend the machine-translation disclaimer (after scoring, so it never
         # affects the quality score). Not applied to shared dependency files.
         out_path.write_text(ensure_disclaimer(translated, locale), encoding="utf-8")
-        manifest["files"][rel] = {
-            "source_sha256": src_hash,
-            "prompt_version": prompt_version,
-            "model": cfg["model"],
-            "judge_model": cfg.get("judge_model") or cfg["model"],
-            "quality_score": score,
-            "quality_issues": issues,
-        }
+        with lock:
+            manifest["files"][rel] = {
+                "source_sha256": src_hash,
+                "prompt_version": prompt_version,
+                "model": cfg["model"],
+                "judge_model": cfg.get("judge_model") or cfg["model"],
+                "quality_score": score,
+                "quality_issues": issues,
+            }
         changed += 1
         print(f"  [ok]   {rel}  (score {score})", flush=True)
 
@@ -719,7 +721,8 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
                 tgt_join = "\n".join(str(meta_out.get(f, "")) for f in ("title", "description"))
                 score, issues = judge_translation(src_join, tgt_join, locale, cfg)
                 entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
-                manifest["files"][rel] = entry
+                with lock:
+                    manifest["files"][rel] = entry
                 changed += 1
                 print(f"  [rescore] {rel} (title/description)  (score {score}, judge {judge_id})", flush=True)
             except (RuntimeError, ValueError, json.JSONDecodeError) as e:
@@ -735,29 +738,28 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
                 src_join = "\n".join(str(meta_src.get(f, "")) for f in ("title", "description"))
                 tgt_join = "\n".join(str(meta_out.get(f, "")) for f in ("title", "description"))
                 score, issues = judge_translation(src_join, tgt_join, locale, cfg)
-                manifest["files"][rel] = {
-                    "source_sha256": src_hash,
-                    "prompt_version": prompt_version,
-                    "model": cfg["model"],
-                    "judge_model": cfg.get("judge_model") or cfg["model"],
-                    "quality_score": score,
-                    "quality_issues": issues,
-                }
+                with lock:
+                    manifest["files"][rel] = {
+                        "source_sha256": src_hash,
+                        "prompt_version": prompt_version,
+                        "model": cfg["model"],
+                        "judge_model": cfg.get("judge_model") or cfg["model"],
+                        "quality_score": score,
+                        "quality_issues": issues,
+                    }
                 changed += 1
                 print(f"  [ok]   {rel} (title/description)  (score {score})", flush=True)
             except (RuntimeError,) as e:
                 print(f"  [FAIL] {rel} metadata: {e}", flush=True)
                 failures.append((rel, str(e)))
 
-    save_manifest(locale, manifest)
     return changed, failures
 
 
-def process_dependencies(locale, cfg, glossary_terms, prompt_version):
+def process_dependencies(locale, cfg, glossary_terms, prompt_version, manifest, lock):
     """Translate the shared dependency markdown files (playbooks/dependencies/*.md)
     used by @require/@setup dropdowns, into translations/<locale>/playbooks/dependencies/."""
     print(f"\n=== dependencies -> {locale} ===", flush=True)
-    manifest = load_manifest(locale)
     changed = 0
     failures = []
 
@@ -776,7 +778,8 @@ def process_dependencies(locale, cfg, glossary_terms, prompt_version):
             # Translation still valid but the judge model changed: re-score only.
             score, issues = judge_translation(src_text, DISCLAIMER_BLOCK_RE.sub("", out_path.read_text(encoding="utf-8")), locale, cfg)
             entry.update(quality_score=score, quality_issues=issues, judge_model=judge_id)
-            manifest["files"][rel] = entry
+            with lock:
+                manifest["files"][rel] = entry
             changed += 1
             print(f"  [rescore] {rel}  (score {score}, judge {judge_id})", flush=True)
             continue
@@ -790,18 +793,18 @@ def process_dependencies(locale, cfg, glossary_terms, prompt_version):
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(translated, encoding="utf-8")
-        manifest["files"][rel] = {
-            "source_sha256": src_hash,
-            "prompt_version": prompt_version,
-            "model": cfg["model"],
-            "judge_model": cfg.get("judge_model") or cfg["model"],
-            "quality_score": score,
-            "quality_issues": issues,
-        }
+        with lock:
+            manifest["files"][rel] = {
+                "source_sha256": src_hash,
+                "prompt_version": prompt_version,
+                "model": cfg["model"],
+                "judge_model": cfg.get("judge_model") or cfg["model"],
+                "quality_score": score,
+                "quality_issues": issues,
+            }
         changed += 1
         print(f"  [ok]   {rel}  (score {score})", flush=True)
 
-    save_manifest(locale, manifest)
     return changed, failures
 
 
@@ -1001,6 +1004,7 @@ def remediate(locales, cfg, glossary_terms, min_score):
 def main():
     ap = argparse.ArgumentParser(description="Translate a playbook (and/or shared dependencies) into target locales.")
     ap.add_argument("--playbook", help="Playbook id (folder name)")
+    ap.add_argument("--playbooks", help="Comma-separated playbook ids, e.g. comfyui-image-gen,n8n-automation-gpt-oss")
     ap.add_argument("--all-playbooks", action="store_true", help="Translate every core + supplemental playbook")
     ap.add_argument("--dependencies", action="store_true", help="Translate the shared playbooks/dependencies/*.md files")
     ap.add_argument("--remediate", action="store_true", help="Re-score judge errors and re-translate sub-threshold files, then exit")
@@ -1008,14 +1012,14 @@ def main():
     ap.add_argument("--sync-github-only", action="store_true", help="Restore the verbatim English @github-only block (which the website strips and never shows) in existing translations, without re-translating. Idempotent. Defaults to all present locales when --locales is omitted.")
     ap.add_argument("--min-score", type=int, default=None, help="Remediation threshold (default: LLM_QUALITY_THRESHOLD or 85)")
     ap.add_argument("--locales", help="Comma-separated locale codes, e.g. zh-CN,es-LA,fr-FR (required except for --apply-disclaimers)")
-    ap.add_argument("--jobs", type=int, default=1, help="Parallel workers across locales (each locale owns its own manifest, so this is race-free)")
+    ap.add_argument("--jobs", type=int, default=1, help="Total concurrent (playbook x locale) translation tasks. Each locale's manifest is shared in-memory under a lock, so tasks for different playbooks in the same locale are race-free.")
     ap.add_argument("--retries", type=int, default=2, help="After the main pass, automatically re-attempt files that failed the structural gate this many times (failures are usually stochastic). Set 0 to disable.")
     ap.add_argument("--force", action="store_true", help="Retranslate even if up to date")
     ap.add_argument("--dry-run", action="store_true", help="Mask/round-trip only; do not call the model")
     args = ap.parse_args()
 
-    if not args.playbook and not args.all_playbooks and not args.dependencies and not args.remediate and not args.apply_disclaimers and not args.sync_github_only:
-        print("ERROR: specify --playbook <id>, --all-playbooks, --dependencies, --remediate, --apply-disclaimers, and/or --sync-github-only.", file=sys.stderr)
+    if not args.playbook and not args.playbooks and not args.all_playbooks and not args.dependencies and not args.remediate and not args.apply_disclaimers and not args.sync_github_only:
+        print("ERROR: specify --playbook <id>, --playbooks <id,id>, --all-playbooks, --dependencies, --remediate, --apply-disclaimers, and/or --sync-github-only.", file=sys.stderr)
         sys.exit(2)
 
     # These backfills need no model/secrets - handle them up front and exit.
@@ -1031,13 +1035,6 @@ def main():
         if args.sync_github_only:
             sync_github_only(apply_locales)
         return
-
-    cat, pb_dir = (None, None)
-    if args.playbook:
-        cat, pb_dir = find_playbook_dir(args.playbook)
-        if not pb_dir:
-            print(f"ERROR: playbook '{args.playbook}' not found under playbooks/{{core,supplemental}}/", file=sys.stderr)
-            sys.exit(2)
 
     extra_headers = {}
     raw_headers = os.environ.get("LLM_EXTRA_HEADERS", "")
@@ -1086,43 +1083,74 @@ def main():
                 for d in sorted(cdir.iterdir()):
                     if d.is_dir():
                         targets.append((d.name, c, d))
-    elif args.playbook:
-        targets.append((args.playbook, cat, pb_dir))
+    else:
+        ids = []
+        if args.playbook:
+            ids.append(args.playbook)
+        if args.playbooks:
+            ids.extend(x.strip() for x in args.playbooks.split(",") if x.strip())
+        for pid in ids:
+            pcat, pdir = find_playbook_dir(pid)
+            if not pdir:
+                print(f"ERROR: playbook '{pid}' not found under playbooks/{{core,supplemental}}/", file=sys.stderr)
+                sys.exit(2)
+            targets.append((pid, pcat, pdir))
 
-    def work(locale):
-        """Translate all requested content for ONE locale. A locale owns its own
-        translation_accuracy.json, so running locales concurrently is race-free."""
-        changed = 0
-        failures = []
-        if args.dependencies:
-            c, f = process_dependencies(locale, cfg, glossary_terms, prompt_version)
-            changed += c
-            failures.extend((locale, rel, err) for rel, err in f)
-        for (pid, pcat, pdir) in targets:
-            c, f = process_locale(pid, pcat, pdir, locale, cfg, glossary_terms, prompt_version)
-            changed += c
-            failures.extend((locale, rel, err) for rel, err in f)
-        return changed, failures
+    # One manifest dict per locale, shared across all tasks for that locale and
+    # guarded by a per-locale lock. Loading once (instead of per task) is what
+    # lets us fan out over (playbook x locale) without tasks clobbering each
+    # other's manifest: each task only writes keys under its own playbook prefix,
+    # and the lock serializes just the in-memory dict update (never the API call).
+    manifests = {loc: load_manifest(loc) for loc in locales}
+    locks = {loc: threading.Lock() for loc in locales}
+
+    # Flatten to independent (playbook x locale) tasks - plus one dependencies
+    # task per locale when requested. This is the unit of parallelism: the whole
+    # run finishes in ~the time of the single slowest file, not the sum over
+    # playbooks. Each task is a thunk returning (changed, [(locale, rel, err), ...]).
+    def make_playbook_task(pid, pcat, pdir, locale):
+        def task():
+            c, f = process_locale(pid, pcat, pdir, locale, cfg, glossary_terms,
+                                   prompt_version, manifests[locale], locks[locale])
+            return c, [(locale, rel, err) for rel, err in f]
+        return task
+
+    def make_deps_task(locale):
+        def task():
+            c, f = process_dependencies(locale, cfg, glossary_terms, prompt_version,
+                                        manifests[locale], locks[locale])
+            return c, [(locale, rel, err) for rel, err in f]
+        return task
+
+    def build_tasks(locs):
+        tasks = []
+        for loc in locs:
+            if args.dependencies:
+                tasks.append(make_deps_task(loc))
+            for (pid, pcat, pdir) in targets:
+                tasks.append(make_playbook_task(pid, pcat, pdir, loc))
+        return tasks
 
     jobs = max(1, args.jobs)
 
-    def run_round(locs):
-        """Run work() for the given locales, in parallel when possible."""
-        if jobs > 1 and len(locs) > 1:
+    def run_tasks(tasks):
+        """Run task thunks, in parallel when possible."""
+        if jobs > 1 and len(tasks) > 1:
             from concurrent.futures import ThreadPoolExecutor
             with ThreadPoolExecutor(max_workers=jobs) as ex:
-                return list(ex.map(work, locs))
-        return [work(loc) for loc in locs]
+                return list(ex.map(lambda t: t(), tasks))
+        return [t() for t in tasks]
 
-    print(f"Running {len(locales)} locales with {jobs} parallel worker(s)...", flush=True)
-    results = run_round(locales)
+    print(f"Running {len(targets)} playbook(s) x {len(locales)} locale(s) "
+          f"with up to {jobs} concurrent task(s)...", flush=True)
+    results = run_tasks(build_tasks(locales))
     total_changed = sum(r[0] for r in results)
     all_failures = [x for r in results for x in r[1]]
 
     # Structural-gate failures (placeholder mismatch / span-count) are usually
     # stochastic - a fresh attempt on the same file almost always succeeds. Retry
-    # only the locales that still have failures; already-written files are "up to
-    # date" and skip, so each round re-attempts just the failures (no wasted work).
+    # only the (playbook, locale) tasks that still have failures; already-written
+    # files are "up to date" and skip, so each round re-attempts just the failures.
     retries = max(0, args.retries)
     attempt = 0
     while all_failures and attempt < retries:
@@ -1133,9 +1161,14 @@ def main():
             f"file(s) across {len(failed_locales)} locale(s)...",
             flush=True,
         )
-        round_results = run_round(failed_locales)
+        round_results = run_tasks(build_tasks(failed_locales))
         total_changed += sum(r[0] for r in round_results)
         all_failures = [x for r in round_results for x in r[1]]
+
+    # Persist each locale's shared manifest exactly once, after all tasks (and
+    # retries) have finished mutating it in memory.
+    for loc in locales:
+        save_manifest(loc, manifests[loc])
 
     print(f"\nDone. {total_changed} file(s) written.", flush=True)
     write_quality_report()

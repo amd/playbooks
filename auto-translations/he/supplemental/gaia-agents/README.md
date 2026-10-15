@@ -16,21 +16,23 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-סוכני GAIA הם עוזרים מבוססי בינה מלאכותית המשתמשים במודל שפה מקומי (LLM) כדי להסיק מסקנות ולהפעיל כלים שאתם מגדירים — כמו צ'אטבוטים שיכולים לבצע פעולות. הם פועלים **100% מקומית** ללא צורך בממשקי API בענן, ללא נתונים שיוצאים מהמחשב שלכם וללא צורך במפתחות API.
+סוכני GAIA הם עוזרים מבוססי בינה מלאכותית המשתמשים במודל שפה מקומי כדי לחשוב ולהפעיל כלים שאתם מגדירים — כמו צ'אטבוטים שיכולים לבצע פעולות. הם פועלים **100% מקומית** ללא API בענן, ללא נתונים היוצאים מהמחשב שלכם, וללא צורך במפתחות API.
 
-במדריך זה, תבנו סוכן ייעוץ חומרה (Hardware Advisor Agent) שמזהה את זיכרון ה-RAM, ה-GPU וה-NPU של המערכת שלכם, שולח שאילתות לקטלוג המודלים המקומי, וממליץ אילו מודלי LLM המחשב שלכם מסוגל להריץ. זוהי הצגה מעשית של ה-GAIA Agent SDK שמייצרת תוצאה שימושית באופן מיידי.
+במדריך זה, תבנו סוכן Hardware Advisor שמזהה את זיכרון ה-RAM, ה-GPU וה-NPU של המערכת שלכם, שולח שאילתות לקטלוג המודלים המקומי, וממליץ אילו מודלי שפה (LLM) המחשב שלכם יכול להריץ. זהו מבוא מעשי ל-GAIA Agent SDK שמייצר משהו שימושי באופן מיידי.
 
 ## מה תלמדו
 
 - כיצד ליצור סוכן GAIA עם כלים מותאמים אישית
-- שימוש ב-SDK של LemonadeClient לשליחת שאילתות למידע על המערכת ולקטלוגי מודלים
+- שימוש ב-LemonadeClient SDK לשליחת שאילתות למידע מערכת וקטלוגי מודלים
 - זיהוי GPU/NPU ספציפי לפלטפורמה (Windows PowerShell ו-Linux lspci)
-- קביעת גודל מודל מבוססת זיכרון תוך שימוש בכלל ה-70%
+- קביעת גודל מודל מבוססת זיכרון באמצעות כלל ה-70%
 - בניית ממשק שורת פקודה (CLI) אינטראקטיבי לשאילתות חומרה בשפה טבעית
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
@@ -39,7 +41,7 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## התקנת דרישות מוקדמות של התוכנה
+## התקנת דרישות תוכנה מקדימות
 
 <!-- @os:windows -->
 <!-- @test:id=python-env-check-windows timeout=30 hidden=True -->
@@ -69,11 +71,11 @@ which python3
 
 ## תחילת העבודה
 
-הריצו תחילה את הסוכן המוגמר כדי לראות מה אתם בונים. לאחר מכן, נעבור על הקוד שלב אחר שלב.
+תחילה הריצו את הדוגמה המוגמרת של הסוכן כדי לראות מה אתם בונים. לאחר מכן, נעבור על הקוד שלב אחר שלב.
 
-### הרצת הדוגמה המוכנה מראש
+### הרצת הדוגמה המוגמרת מראש
 
-מדריך זה כולל את הקובץ המלא [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). הורידו אותו לתיקייה לבחירתכם והריצו אותו כדי לראות את הסוכן המוגמר בפעולה:
+מדריך זה כולל את הקובץ המלא [hardware_advisor_agent.py](assets/hardware_advisor_agent.py). הורידו אותו לספרייה לבחירתכם והריצו אותו כדי לראות את הסוכן המוגמר בפעולה:
 
 ```bash
 python hardware_advisor_agent.py
@@ -124,7 +126,7 @@ Agent: Great news! With 32 GB RAM and a 24 GB GPU, you can run:
 
 **מזל טוב** - בניתם סוכן! 
 
-שאר המדריך יסביר כיצד כל חלק בסקריפט פועל, כדי שתוכלו להבין אותו מהיסודות.
+יתר המדריך יסביר כיצד כל חלק בסקריפט עובד, כדי שתוכלו להבין אותו מהיסודות.
 <!-- @os:windows -->
 <!-- @test:id=gaia-lemonadeclient-smoke-windows timeout=300 hidden=True setup=activate-venv -->
 ```powershell
@@ -266,17 +268,17 @@ echo "OK: hardware_advisor_agent.py started successfully"
 
 ## הבנת הארכיטקטורה
 
-סוכן ייעוץ החומרה משלב שלושה רכיבים:
+סוכן Hardware Advisor משלב שלושה רכיבים:
 
-- **SDK של LemonadeClient** — ממשקי API למידע על המערכת וקטלוג מודלים
-- **זיהוי ספציפי לפלטפורמה** — Windows PowerShell / Linux lspci לקבלת מידע על GPU
+- **LemonadeClient SDK** — ממשקי API למידע מערכת וקטלוג מודלים
+- **זיהוי ספציפי לפלטפורמה** — Windows PowerShell / Linux lspci לקבלת מידע על ה-GPU
 - **חישובי זיכרון** — כלל ה-70% לקביעת גודל מודל בטוחה
 
-הנתונים זורמים דרך הרכיבים הללו ברצף: שאילתת משתמש ← הסוכן בוחר כלי ← הכלי קורא ל-LemonadeClient + זיהוי מערכת הפעלה ← הסוכן מסנתז את התוצאות להמלצה.
+הנתונים זורמים דרך רכיבים אלה ברצף: שאילתת משתמש ← הסוכן בוחר כלי ← הכלי קורא ל-LemonadeClient + זיהוי מערכת הפעלה ← הסוכן מגבש את התוצאות להמלצה.
 
-### SDK של LemonadeClient
+### LemonadeClient SDK
 
-LemonadeClient מספק ממשק API אחיד לזיהוי מערכת, זמינות NPU/GPU ושאילתות לקטלוג מודלים.
+LemonadeClient מספק ממשק API אחיד לזיהוי מערכת, זמינות NPU/GPU, ושאילתות לקטלוג מודלים.
 
 **ייבוא ואתחול:**
 
@@ -286,7 +288,7 @@ from gaia.llm.lemonade_client import LemonadeClient
 client = LemonadeClient(keep_alive=True)
 ```
 
-**`get_system_info()`** — מחזיר מערכת הפעלה, CPU, RAM וזמינות מכשירים:
+**`get_system_info()`** — מחזיר מערכת הפעלה, CPU, RAM, וזמינות התקנים:
 
 ```python
 info = client.get_system_info()
@@ -362,11 +364,11 @@ model_info = client.get_model_info("Qwen3-Coder-30B-A3B-Instruct-GGUF")
 
 ### זיהוי GPU ספציפי לפלטפורמה
 
-הסוכן משתמש בפקודות מובנות של מערכת ההפעלה במקום ב-PyTorch לזיהוי GPU. גישה זו פועלת גם ללא התקנת מנהלי התקן GPU, מזהה את כל כרטיסי ה-GPU (לא רק כאלה התומכים ב-CUDA), ונמנעת מייבוא ספריות כבדות.
+הסוכן משתמש בפקודות מובנות של מערכת ההפעלה במקום ב-PyTorch לזיהוי GPU. פתרון זה עובד ללא צורך בהתקנת מנהלי התקן GPU, מזהה את כל כרטיסי המסך (לא רק כאלה התומכים ב-CUDA), ונמנע מייבוא ספריות כבדות.
 
 <!-- @os:windows -->
 
-ב-Windows, הסוכן משתמש ב-PowerShell לשליחת שאילתה ל-WMI:
+ב-Windows, הסוכן משתמש ב-PowerShell כדי לשלוח שאילתה ל-WMI:
 
 ```python
 ps_command = (
@@ -397,9 +399,9 @@ result = subprocess.run(
 
 <!-- @os:end -->
 
-### כלל ה-70% של הזיכרון
+### כלל הזיכרון של 70%
 
-> **כלל:** גודל המודל צריך להיות פחות מ-70% מהזיכרון הפנוי כדי להשאיר 30% מרווח לפעולות היסק (מטמון KV, מאגרי עיבוד באצווה, קפיצות זיכרון בזמן ריצה).
+> **כלל:** גודל המודל צריך להיות פחות מ-70% מהזיכרון הזמין, כדי להשאיר 30% תקורה עבור פעולות ההסקה (KV cache, מאגרי עיבוד באצווה, קפיצות זיכרון בזמן ריצה).
 
 ```
 System: 32 GB RAM
@@ -410,11 +412,11 @@ Max safe model size: 32 x 0.7 = 22.4 GB
 
 ## כתיבת קוד הסוכן שלב אחר שלב (אופציונלי)
 
-תיצרו **קובץ אחד** בשם `hardware_advisor_agent.py` ותוסיפו לו תכונות בהדרגה. כל שלב נבנה על בסיס הקודם.
+תיצרו **קובץ אחד** בשם `hardware_advisor_agent.py` ותוסיפו הדרגתית תכונות. כל שלב נבנה על הקודם.
 
 ### שלב 1: שלד הסוכן
 
-התחילו במבנה סוכן מינימלי — רק המחלקה ופרומפט מערכת בסיסי. לסוכן עדיין אין כלים.
+התחילו עם מבנה סוכן מינימלי — רק המחלקה והנחיית מערכת בסיסית. לסוכן עדיין אין כלים.
 
 ```python
 from gaia import Agent
@@ -457,9 +459,9 @@ Agent created successfully!
 
 ### שלב 2: זיהוי GPU וחומרה
 
-הוסיפו את שיטת העזר `_get_gpu_info()` ואת הכלי `get_hardware_info()`. זה הופך את הסוכן לאינטראקטיבי — כעת ניתן לשאול אותו על מפרטי המערכת.
+הוסיפו את שיטת העזר `_get_gpu_info()` ואת הכלי `get_hardware_info()`. פעולה זו הופכת את הסוכן לאינטראקטיבי — כעת תוכלו לשאול אותו על מפרט המערכת.
 
-**עדכנו את הייבואים** בראש הקובץ:
+**עדכנו את הייבוא (imports)** בראש הקובץ:
 
 ```python
 from typing import Any, Dict
@@ -555,7 +557,7 @@ def _get_gpu_info(self) -> Dict[str, Any]:
     return {"name": "Not detected", "memory_mb": 0}
 ```
 
-**החליפו את השיטה `_register_tools()`** בכלי `get_hardware_info`:
+**החליפו את השיטה `_register_tools()`** עם הכלי `get_hardware_info`:
 
 ```python
 def _register_tools(self):
@@ -612,7 +614,7 @@ def _register_tools(self):
             }
 ```
 
-**עדכנו את הבלוק `__main__`** כדי לאפשר בדיקה אינטראקטיבית:
+**עדכנו את בלוק `__main__`** כדי לאפשר בדיקה אינטראקטיבית:
 
 ```python
 if __name__ == "__main__":
@@ -637,7 +639,7 @@ if __name__ == "__main__":
 python hardware_advisor_agent.py
 ```
 
-**פלט לדוגמה:**
+**דוגמת פלט:**
 
 ```
 You: Show me my system specs
@@ -652,7 +654,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 
 ### שלב 3: קטלוג מודלים
 
-הוסיפו את הכלי `list_available_models()` בתוך `_register_tools()`, אחרי הפונקציה `get_hardware_info`. כעת הסוכן יכול לספר לכם אילו מודלים זמינים.
+הוסיפו את הכלי `list_available_models()` בתוך `_register_tools()`, אחרי הפונקציה `get_hardware_info`. כעת הסוכן יכול לומר לכם אילו מודלים זמינים.
 
 ```python
     @tool(atomic=True)
@@ -700,7 +702,7 @@ Agent: Your system has excellent specs for running LLMs locally!
 python hardware_advisor_agent.py
 ```
 
-**פלט לדוגמה:**
+**דוגמת פלט:**
 
 ```
 You: What models are available?
@@ -715,7 +717,7 @@ Agent: I found 15 models in the catalog:
 
 ### שלב 4: המלצות חכמות
 
-הוסיפו את הכלי `recommend_models()` בתוך `_register_tools()`, אחרי `list_available_models`. כעת הסוכן יכול לחשב אילו מודלים מתאימים לזיכרון המערכת שלכם באמצעות כלל ה-70%.
+הוסיפו את הכלי `recommend_models()` בתוך `_register_tools()`, אחרי `list_available_models`. הסוכן יכול כעת לחשב אילו מודלים מתאימים לזיכרון המערכת שלכם באמצעות כלל ה-70%.
 
 ```python
     @tool(atomic=True)
@@ -780,7 +782,7 @@ Agent: I found 15 models in the catalog:
 python hardware_advisor_agent.py
 ```
 
-**פלט לדוגמה:**
+**דוגמת פלט:**
 
 ```
 You: What size LLM can I run?
@@ -794,11 +796,11 @@ Top recommendations:
 
 ---
 
-### שלב 5: CLI לסביבת ייצור
+### שלב 5: CLI מוכן לייצור
 
-החליפו את בלוק ה-`__main__` הפשוט בממשק שורת פקודה אינטראקטיבי ומלוטש. זה מוסיף באנר, פקודות יציאה וטיפול שגיאות טוב יותר.
+החליפו את בלוק `__main__` הפשוט בממשק שורת פקודה (CLI) אינטראקטיבי משופר. זה מוסיף כותרת (banner), פקודות יציאה, וטיפול שגיאות משופר.
 
-**החליפו את כל הבלוק `if __name__ == "__main__":`** ב:
+**החליפו את כל בלוק `if __name__ == "__main__":`** ב-:
 
 ```python
 def main():
@@ -850,15 +852,15 @@ if __name__ == "__main__":
 ---
 ### אימות סופי
 
-כעת אמור להיות ב-`hardware_advisor_agent.py` שלכם את כל הרכיבים הבאים:
+לקובץ `hardware_advisor_agent.py` שלכם צריכים כעת להיות כל הרכיבים הבאים:
 
-- [x] ייבואים: `from typing import Any, Dict` וגם `from gaia import Agent, tool`
+- [x] ייבואים: `from typing import Any, Dict` וכן `from gaia import Agent, tool`
 - [x] מחלקת `HardwareAdvisorAgent` עם `__init__` ו-system prompt
 - [x] פונקציית עזר `_get_gpu_info()` (Windows PowerShell + Linux lspci)
-- [x] הכלי `get_hardware_info()` עם שדות GPU, NPU ו-OS
-- [x] הכלי `list_available_models()` עם תוויות והעשרת גודל
-- [x] הכלי `recommend_models()` עם כלל ה-70%, `fits_in_ram`, `fits_in_gpu`
-- [x] פונקציית `main()` עם ממשק שורת פקודה אינטראקטיבי
+- [x] כלי `get_hardware_info()` עם שדות GPU, NPU ו-OS
+- [x] כלי `list_available_models()` עם תוויות והעשרת גודל
+- [x] כלי `recommend_models()` עם כלל ה-70%, ‏`fits_in_ram`, ‏`fits_in_gpu`
+- [x] פונקציית `main()` עם CLI אינטראקטיבי
 
 **בדקו את השאילתות הבאות כדי לוודא שהכול עובד:**
 
@@ -867,12 +869,12 @@ if __name__ == "__main__":
 - "What models are available?"
 - "Can I run a 30B model?"
 
-> **טיפ**: היישום המלא זמין בקובץ [hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
+> **טיפ**: המימוש המלא זמין ב-[hardware_advisor_agent.py](assets/hardware_advisor_agent.py).
 
 ## הצעדים הבאים
 
-- **חקרו את ה-APIs של LemonadeClient** — גלו יכולות נוספות לניהול מערכת ומודלים במסמכי [ה-SDK של LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
-- **הוסיפו אינטראקציה קולית** — שלבו את Whisper ASR ו-Kokoro TTS כדי לאפשר למשתמשים לשאול שאלות חומרה בדיבור. ראו את [מדריך ה-Talk](https://amd-gaia.ai/guides/talk)
-- **הוסיפו תמיכת MCP** — חשפו את יועץ החומרה כשרת MCP כדי שכלים אחרים יוכלו לשאול אותו. ראו את [מדריך ה-MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
-- **הרחיבו את מנוע ההמלצות** — שלבו התחשבות ב-VRAM של ה-GPU להעברת שכבות (offloading), או הוסיפו בנצ'מרקינג כדי להעריך אסימונים לשנייה (tokens-per-second)
-- **בנו מערכת רב-סוכנים** — שלבו את יועץ החומרה עם סוכן קוד או סוכן צ'אט באמצעות [ה-Routing Agent](https://amd-gaia.ai/guides/routing)
+- **חקרו את ה-APIs של LemonadeClient** — גלו יכולות נוספות לניהול מערכת ומודלים במסמכי [תיעוד ה-SDK של LemonadeClient](https://amd-gaia.ai/sdk/lemonade-client)
+- **הוסיפו אינטראקציה קולית** — שלבו את Whisper ASR ו-Kokoro TTS כדי לאפשר למשתמשים לשאול שאלות חומרה בדיבור. עיינו ב[מדריך Talk](https://amd-gaia.ai/guides/talk)
+- **הוסיפו תמיכה ב-MCP** — חשפו את יועץ החומרה כשרת MCP כך שכלים אחרים יוכלו לתשאל אותו. עיינו ב[מדריך MCP](https://amd-gaia.ai/sdk/infrastructure/mcp)
+- **הרחיבו את מנוע ההמלצות** — קחו בחשבון VRAM של ה-GPU להעברת שכבות (offloading), או הוסיפו בנצ'מרקינג להערכת קצב טוקנים לשנייה
+- **בנו מערכת מרובת סוכנים** — שלבו את יועץ החומרה עם סוכן קוד או סוכן צ'אט באמצעות [סוכן הניתוב](https://amd-gaia.ai/guides/routing)

@@ -16,19 +16,19 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) je različica družine DeepSeek V4, osredotočena na učinkovitost — model mešanice strokovnjakov (Mixture of Experts) s 284 milijardami parametrov, od katerih je 13 milijard aktivnih. Glede na [tehnično poročilo podjetja DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) doseže 79 % pri SWE-bench Verified in 91,6 % pri LiveCodeBench.
+[DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) je različica družine DeepSeek V4, osredotočena na učinkovitost — model Mixture of Experts s 284 milijardami parametrov, od tega 13 milijard aktivnih parametrov. Po [tehničnem poročilu DeepSeek](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) doseže 79 % na SWE-bench Verified in 91,6 % na LiveCodeBench.
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) je namenski sklepalni pogon (inference engine), zgrajen posebej za to arhitekturo modela. Namesto splošno namenskega izvajalnega okolja je ds4 usmerjen neposredno na družino DeepSeek V4, z optimizacijami jeder, specifičnimi za arhitekturo, za programsko opremo AMD ROCm™. Trenutno je ena najbolje delujočih implementacij DeepSeek V4 Flash na Strix Halo.
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) je namenski sklepalni pogon, zgrajen posebej za to arhitekturo modela. Namesto splošno namenskega izvajalnega okolja je ds4 usmerjen neposredno v družino DeepSeek V4, z jedrnimi optimizacijami, specifičnimi za arhitekturo, za programsko opremo AMD ROCm™. Trenutno velja za eno najbolje delujočih implementacij DeepSeek V4 Flash na platformi Strix Halo.
 
-Ta vadnica prikazuje, kako z orodjem `ds4-cockpit`, terminalskim uporabniškim vmesnikom, namestiti ds4, prenesti uteži modela in lokalno zagnati strežbo DeepSeek V4 Flash na platformi AMD Ryzen™ AI Halo Developer Platform.
+Ta vodnik prikazuje, kako z orodjem `ai-toolbox-cockpit`, terminalskim uporabniškim vmesnikom, nastavite ds4, prenesete uteži modela in zaženete strežbo modela DeepSeek V4 Flash lokalno na razvojni platformi AMD Ryzen™ AI Halo.
 
 ## Kaj se boste naučili
 
-- Kako namestiti in zagnati terminalski uporabniški vmesnik `ds4-cockpit`
-- Kako ustvariti vsebnik orodne zbirke (toolbox) ds4 ROCm
+- Kako namestiti in zagnati terminalski uporabniški vmesnik `ai-toolbox-cockpit`
+- Kako ustvariti vsebnik toolbox ds4 ROCm
 - Prenos priporočene kvantizacije za posamezno vozlišče Halo
-- Zagon strežnika za sklepanje ds4 in izpostavitev API-jevske končne točke, združljive z OpenAI
-- Povezovanje spletnega vmesnika ali agenta za kodiranje z lokalnim strežnikom
+- Zagon sklepalnega strežnika ds4 in izpostavitev končne točke, združljive z OpenAI
+- Povezovanje spletnega uporabniškega vmesnika ali kodirnega agenta z lokalnim strežnikom
 
 ## Nastavitev konfiguracije pomnilnika
 
@@ -36,14 +36,14 @@ Ta vadnica prikazuje, kako z orodjem `ds4-cockpit`, terminalskim uporabniškim v
 
 ## Namestitev programskih predpogojev
 
-> **Sistemske zahteve za to konfiguracijo (posamezno vozlišče, IQ2_XXS pri kontekstu 126k):**
-> - Sistem Strix Halo z **vsaj 128 GB enotnega pomnilnika**.
-> - **Namenski VRAM v BIOS-u (UMA medpomnilnik) naj bo nastavljen na najnižjo vrednost**, tako da je skupni pomnilniški bazen lahko čim večji.
-> - **Skupni pomnilniški bazen GPE naj bo nastavljen na vsaj 110 GB**: zaženite `amd-ttm --set 110` (glejte zgornji korak konfiguracije pomnilnika) in znova zaženite sistem. Nižje vrednosti lahko povzročijo napako zaradi pomanjkanja pomnilnika ob nalaganju modela pri kontekstu 126k. Če ima vaš sistem na voljo manj pomnilnika, namesto tega znižajte vrednost **Context** v načinu Server Mode.
+> **Sistemske zahteve za to konfiguracijo (enovozliščni IQ2_XXS pri kontekstu 126k):**
+> - Sistem Strix Halo z **vsaj 128 GB skupnega (unified) pomnilnika**.
+> - **VRAM, namenjen v BIOS-u (medpomnilnik okvirjev UMA), nastavljen na najmanjšo vrednost**, da je lahko skupni pomnilniški sklad čim večji.
+> - Skupni pomnilniški sklad GPE nastavljen na **vsaj 110 GB**: zaženite `amd-ttm --set 110` (glejte zgornji korak nastavitve pomnilnika) in znova zaženite sistem. Nižje vrednosti lahko povzročijo napake zaradi pomanjkanja pomnilnika pri nalaganju modela s kontekstom 126k. Če ima vaš sistem na voljo manj pomnilnika, namesto tega znižajte vrednost **Context** v načinu Server Mode.
 >
-> **Opomba:** Kot izhodišče poskusite nastaviti **skupni pomnilniški bazen GPE** na **110 GB**. Če naletite na napake zaradi pomanjkanja pomnilnika, povečajte skupni pomnilniški bazen ali zmanjšajte velikost konteksta.
+> **Opomba:** Kot izhodišče poskusite nastaviti **skupni pomnilniški sklad GPE** na **110 GB**. Če naletite na napake zaradi pomanjkanja pomnilnika, povečajte skupni pomnilniški sklad ali zmanjšajte velikost konteksta.
 
-ds4-cockpit za zagon pogona ds4 uporablja vsebniške orodne zbirke (toolboxes). Namestite `podman`, `distrobox` in `pipx`:
+ai-toolbox-cockpit za zagon pogona ds4 uporablja vsebniške toolboxe. Namestite `podman`, `distrobox` in `pipx`:
 
 ```bash
 sudo apt update
@@ -63,28 +63,30 @@ echo "OK: podman, distrobox, and pipx are installed"
 
 ## Razpoložljive kvantizacije
 
-Avtor ds4 zagotavlja več kvantiziranih različic DeepSeek V4 Flash v obliki GGUF. Vsi spodnji modeli uporabljajo kalibracijo matrike pomembnosti (imatrix), ki ohranja višjo natančnost za tiste dele modela, ki so najpomembnejši za naloge kodiranja in sklepanja.
+Avtor ds4 zagotavlja več kvantiziranih različic modela DeepSeek V4 Flash v obliki zapisa GGUF. Vsi spodnji modeli uporabljajo kalibracijo z matriko pomembnosti (imatrix), ki ohranja višjo natančnost v tistih delih modela, ki so najpomembnejši za opravila kodiranja in sklepanja.
 
 | Kvantizacija | Velikost | Opis |
 |-------------|------|-------------|
 | [IQ2_XXS imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~80,8 GB | Priporočeno za posamezno vozlišče s 128 GB |
-| [Hibridni Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Ohranja plasti 37–42 pri natančnosti Q4 za boljšo točnost. Ustreza v 128 GB, vendar pusti manj prostora za kontekst |
-| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Višja kakovost. Zahteva dve vozlišči Halo prek gručenja z več vozlišči (multi-node clustering) |
-| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Neobvezen dodatek za špekulativno dekodiranje za izboljšanje hitrosti generiranja |
+| [Hibridni Q2/Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~97 GB | Ohranja plasti 37–42 pri natančnosti Q4 za boljšo natančnost. Prilega se v 128 GB, a pusti manj prostora za kontekst |
+| [Q4 imatrix](https://huggingface.co/antirez/deepseek-v4-gguf) | ~153 GB | Višja kakovost. Zahteva dve vozlišči Halo prek grozdenja z več vozlišči |
+| [MTP Speculative Decoding](https://huggingface.co/antirez/deepseek-v4-gguf) | ~3,6 GB | Neobvezen dodatek za spekulativno dekodiranje za izboljšanje hitrosti generiranja |
 
-Model **IQ2_XXS imatrix** je dobro izhodišče. Udobno se prilega na posamezno vozlišče in pusti dovolj pomnilnika za razumno velik kontekstni okvir.
+Model **IQ2_XXS imatrix** je dobro izhodišče. Udobno se prilega na eno vozlišče in pusti dovolj pomnilnika za razumno okno konteksta.
 
-## Nameščanje ds4-cockpit
+## Namestitev ai-toolbox-cockpit
 
-[ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox) je lahek terminalski uporabniški vmesnik, ki olajša zagon in delovanje ds4 na Strix Halo. Poskrbi za ustvarjanje vsebnikov orodnih zbirk, prenos uteži modela in zagon strežnikov. Namestite ga s `pipx`:
+[ai-toolbox-cockpit](https://github.com/kyuz0/ai-toolbox-cockpit) je lahek terminalski uporabniški vmesnik, ki poenostavi namestitev različnih zalednih sistemov AI. Uporabili ga bomo za ustvarjanje vsebnika ds4, prenos uteži modela in zagon strežnikov. Namestite ga s pomočjo `pipx`:
 
+<!-- @test:id=ds4-cockpit-install-linux timeout=300 -->
 ```bash
-pipx install "git+https://github.com/kyuz0/strix-halo-ds4-toolbox.git#subdirectory=ds4-strix-halo-cockpit"
+pipx install git+https://github.com/kyuz0/ai-toolbox-cockpit.git
 ```
+<!-- @test:end -->
 
-Zaženite kabino (cockpit):
+Zaženite cockpit:
 ```bash
-ds4-cockpit
+ai-toolbox-cockpit
 ```
 
 <!-- @test:id=ds4-cockpit-linux timeout=60 hidden=True -->
@@ -92,18 +94,18 @@ ds4-cockpit
 set -euo pipefail
 export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 # Verify the pipx-installed cockpit entry point is on PATH (do NOT launch the TUI).
-command -v ds4-cockpit
-echo "OK: ds4-cockpit is installed and on PATH"
+command -v ai-toolbox-cockpit
+echo "OK: ai-toolbox-cockpit is installed and on PATH"
 ```
 <!-- @test:end -->
 
-## Ustvarjanje orodne zbirke
+## Korak 1: Ustvarjanje vsebnika toolbox
 
-V zavihku **Interactive Toolboxes** izberite najnovejšo razpoložljivo/stabilno orodno zbirko (npr. `ds4-rocm-7.2.4`) in kliknite **Create/Update**. To povleče sliko vsebnika in ustvari okolje orodne zbirke.
+V zavihku **Interactive Toolboxes** izberite najnovejši razpoložljiv/stabilen toolbox za ds4 (npr. `ds4-rocm-10.0`) in kliknite **Create/Update**. S tem se povleče slika vsebnika in ustvari okolje toolboxa.
 
 
 <p align="center">
-  <img src="assets/ds4-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ds4-cockpit" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-toolboxes.png" alt="Selecting the ds4 toolbox in ai-toolbox-cockpit" width="800"/>
 </p>
 
 <!-- @test:id=ds4-toolbox-image-linux timeout=120 hidden=True -->
@@ -113,37 +115,37 @@ export PATH="$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
 
 # The toolbox version changes over time, so match the image family, not a fixed tag.
 if ! podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit (Interactive Toolboxes tab) first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit (Interactive Toolboxes tab) first."
   exit 1
 fi
 echo "OK: ds4 toolbox container image is present"
 ```
 <!-- @test:end -->
 
-## Prenos modela
+## Korak 2: Prenos modela
 
-Odprite zavihek **Model Manager**. V spustnem meniju izberite **IQ2_XXS imatrix (~80,8 GB)** in kliknite **Download**. Datoteke modela bodo privzeto shranjene v `~/ds4` (pot za shranjevanje lahko spremenite).
+Odprite zavihek **Models**. Najprej izberite zaledje (ds4). Nato izberite **IQ2_XXS imatrix (~80,8 GB)** v spustnem meniju in kliknite **Download**. Datoteke modela bodo privzeto shranjene v `~/ds4` (pot shranjevanja lahko spremenite).
 
-> **Opomba:** Model IQ2_XXS je velik približno 80 GB, zato lahko prenos glede na vašo povezavo traja dlje časa. Ko se prenos konča, lahko nadaljujete.
+> **Opomba:** Model IQ2_XXS je velik približno 80 GB, zato lahko prenos glede na vašo povezavo traja nekaj časa. Ko se prenos konča, lahko nadaljujete.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-model-manager.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-models.png" alt="Selecting and downloading the IQ2_XXS model" width="800"/>
 </p>
 
 <!-- @test:id=ds4-model-downloaded-linux timeout=60 hidden=True -->
 ```bash
 set -euo pipefail
 
-# ds4-cockpit saves model weights to ~/ds4 by default
+# ai-toolbox-cockpit saves model weights to ~/ds4 by default
 model_dir="$HOME/ds4"
 
 if [ ! -d "$model_dir" ]; then
-  echo "Model directory $model_dir does not exist. Download the model in ds4-cockpit (Model Manager tab) first."
+  echo "Model directory $model_dir does not exist. Download the model in ai-toolbox-cockpit (Model Manager tab) first."
   exit 1
 fi
 
 if ! find "$model_dir" -maxdepth 2 -iname '*.gguf' | grep -q .; then
-  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ds4-cockpit first."
+  echo "No .gguf model files found under $model_dir. Download the IQ2_XXS imatrix model in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -156,21 +158,21 @@ fi
 ```
 <!-- @test:end -->
 
-## Zagon strežnika
+## Korak 3: Zagon strežnika
 
-Odprite zavihek **Server Mode**. Izberite prenesen model in orodno zbirko, nato konfigurirajte velikost konteksta, gostitelja in vrata. Ko ste pripravljeni, kliknite **Start ds4-server**.
+Odprite zavihek **Server Mode**. Izberite preneseni model in toolbox, nato nastavite velikost konteksta, gostitelja in vrata. Ko ste pripravljeni, kliknite **Start ds4-server**.
 
-> **Nasvet** Velikost konteksta `126000` je razumna začetna vrednost, ki bi morala ustrezati na posameznem vozlišču — nastavite jo lahko višje, če imate na voljo dodaten pomnilnik, ali nižje, če naletite na napake zaradi pomanjkanja pomnilnika. Vrata (`8000` v tem vodniku) so poljubna; izberite katera koli prosta vrata.
+> **Nasvet** Velikost konteksta `126000` je razumna izhodiščna vrednost, ki naj bi se prilegala na posamezno vozlišče — nastavite jo lahko višje, če imate na voljo dodaten pomnilnik, ali nižje, če naletite na napake zaradi pomanjkanja pomnilnika. Vrata (`8000` v tem vodniku) so poljubna; izberite katera koli prosta vrata.
 
-> **Predpomnilnik KV na disku (neobvezno).** Vklop **KV Disk Cache** prenese predpomnilnik KV na disk (v **Host Cache Dir**, privzeto `~/.cache/ds4-kv`), tako da se ponavljajoči se sistemski pozivi obnovijo z SSD-ja namesto da bi se znova izračunavali. Gre za optimizacijo zmogljivosti za delovne tokove agentov za kodiranje z dolgimi, ponavljajočimi se pozivi in **ni potrebna** za zagon strežnika.
+> **Predpomnilnik KV na disku (neobvezno).** Vklop možnosti **KV Disk Cache** razbremeni predpomnilnik KV na disk (v mapi **Host Cache Dir**, privzeto `~/.cache/ds4-kv`), tako da se ponovljeni sistemski pozivi obnovijo z diska SSD namesto ponovnega izračunavanja. Gre za optimizacijo zmogljivosti za delovne tokove kodirnih agentov z dolgimi, ponovljenimi pozivi in **ni obvezna** za zagon strežnika.
 
 <p align="center">
-  <img src="assets/ds4-cockpit-server-mode.png" alt="Configuring and starting the ds4 server" width="800"/>
+  <img src="assets/ai-toolbox-cockpit-server.png" alt="Configuring and starting the ds4 server" width="800"/>
 </p>
 
-Strežnik se bo zagnal in poslušal na vratih 8000, ter izpostavil API-jevsko končno točko, združljivo z OpenAI, na naslovu `http://localhost:8000/v1`.
+Strežnik se bo zagnal in poslušal na vratih 8000, ter izpostavil končno točko API, združljivo z OpenAI, na naslovu `http://localhost:8000/v1`.
 
-**Hiter test:**
+**Hitri preizkus:**
 ```bash
 curl http://127.0.0.1:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
@@ -199,7 +201,7 @@ if [ -z "$model_file" ]; then
   model_file="$(find "$MODEL_DIR" -maxdepth 2 -iname '*.gguf' 2>/dev/null | head -1)"
 fi
 if [ -z "$model_file" ]; then
-  echo "No .gguf model found under $MODEL_DIR. Download it in ds4-cockpit first."
+  echo "No .gguf model found under $MODEL_DIR. Download it in ai-toolbox-cockpit first."
   exit 1
 fi
 model_name="$(basename "$model_file")"
@@ -207,7 +209,7 @@ model_name="$(basename "$model_file")"
 # Pick the toolbox image (version-agnostic).
 image="$(podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox' | head -1)"
 if [ -z "$image" ]; then
-  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ds4-cockpit first."
+  echo "No strix-halo-ds4-toolbox image found. Create the toolbox in ai-toolbox-cockpit first."
   exit 1
 fi
 
@@ -218,7 +220,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Remove any stale instance, then start ds4-server detached (same flags ds4-cockpit uses, with -d instead of -it).
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
+# Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
   --device /dev/dri --device /dev/kfd \
@@ -227,7 +236,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \
@@ -297,24 +306,28 @@ PY
 echo "OK: ds4 server test complete; server stopped and GPU memory released"
 ```
 <!-- @test:end -->
+## Povezovanje spletnega vmesnika
 
-## Povezovanje spletnega uporabniškega vmesnika
-
-Povežete lahko kateri koli klepetalni vmesnik, ki podpira obliko API-ja OpenAI. Za uporabo HuggingFace ChatUI na primer:
+Povežete lahko kateri koli klepetalni vmesnik, ki podpira obliko OpenAI API. Če želite na primer uporabiti HuggingFace ChatUI:
 
 ```bash
-docker run -p 3000:3000 \
-  --add-host=host.docker.internal:host-gateway \
-  -e OPENAI_BASE_URL=http://host.docker.internal:8000/v1 \
+docker run --network=host \
+  -e PORT=3000 \
+  -e OPENAI_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=dummy \
   -v chat-ui-data:/data \
   ghcr.io/huggingface/chat-ui-db
 ```
 
-Odprite `http://localhost:3000` v brskalniku, da začnete klepetati.
-## Povezovanje kodirnega agenta
+V brskalniku odprite `http://localhost:3000`, da začnete klepetati.
 
-Strežnik ds4 izpostavlja tako z OpenAI kot z Anthropic združljive končne točke, zato se lahko večina kodirnih agentov poveže z njim neposredno. Če ga na primer želite dodati h kodirnemu agentu `pi`, dodajte naslednji blok v `~/.pi/agent/models.json`:
+> **Opomba:** `--network=host` postavi spletni vmesnik v omrežje gostitelja, tako da lahko strežnik ds4 doseže neposredno na `localhost`. To ohrani strežnik ds4 vezan na povratno zanko (ni ga treba izpostaviti na drugih vmesnikih).
+
+> **Nasvet:** Vrata spletnega vmesnika (tukaj `3000`, nastavljena prek `PORT`) so poljubna — izberite katera koli prosta vrata, če so `3000` že v uporabi, in v brskalniku odprite ta vrata namesto tega. Prepričajte se, da se vrata v `OPENAI_BASE_URL` ujemajo z vrati, na katerih teče vaš strežnik ds4.
+
+## Povezovanje agenta za kodiranje
+
+Strežnik ds4 izpostavlja tako končne točke, združljive z OpenAI, kot tudi z Anthropic, zato se lahko večina agentov za kodiranje poveže nanj neposredno. Če ga na primer želite dodati agentu za kodiranje `pi`, dodajte naslednji blok v `~/.pi/agent/models.json`:
 
 ```json
 "ds4": {
@@ -354,15 +367,15 @@ Strežnik ds4 izpostavlja tako z OpenAI kot z Anthropic združljive končne toč
 }
 ```
 
-> **Namig**: Če vaš kodirni agent ali spletni vmesnik teče na drugi napravi kot platforma Halo, morate vrata 8000 posredovati (angl. forward) prek SSH:
+> **Nasvet**: Če agent za kodiranje ali spletni vmesnik teče na drugi napravi kot platforma Halo, boste morali posredovati vrata strežnika (tukaj `8000`) prek SSH:
 > ```bash
-> ssh -L 0.0.0.0:8000:localhost:8000 <halo-host-ip>
+> ssh -L 8000:localhost:8000 <halo-host-ip>
 > ```
 
 ## Naslednji koraki
 
-- **Gručenje več vozlišč (multi-node clustering)**: Če imate dve napravi Halo, ds4 podpira porazdelitev modela Q4 (~153 GB) med obema napravama s cevovodno paralelizacijo (angl. pipeline parallelism). Navodila za nastavitev si oglejte v [dokumentaciji ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
-- **Špekulativno dekodiranje (MTP)**: Prenesite uteži MTP (~3,6 GB) in strežniku posredujte `--mtp` za hitrejšo generacijo.
-- **Razbremenitev predpomnilnika KV na disk**: Za delovne tokove kodirnega agenta omogočite `--kv-disk-dir`, da se ponovljeni sistemski pozivi obnovijo s SSD-ja namesto ponovnega izračuna vsakič znova.
+- **Gruča z več vozlišči**: Če imate dve napravi Halo, ds4 podpira porazdeljevanje modela Q4 (~153 GB) med obema napravama prek vzporednosti cevovoda. Navodila za nastavitev najdete v [dokumentaciji ds4-toolbox](https://github.com/kyuz0/strix-halo-ds4-toolbox#distributed-inference-pipeline-parallelism).
+- **Spekulativno dekodiranje (MTP)**: Prenesite uteži MTP (~3,6 GB) in strežniku podajte `--mtp` za hitrejšo hitrost generiranja.
+- **Razbremenitev predpomnilnika KV na disk**: Za poteke dela agentov za kodiranje omogočite `--kv-disk-dir`, tako da se ponavljajoči se sistemski pozivi obnovijo s pomnilnika SSD namesto ponovnega izračunavanja vsakič.
 
-Za več informacij si oglejte [repozitorij ds4](https://github.com/antirez/ds4) in [orodje ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).
+Za več informacij glejte [repozitorij ds4](https://github.com/antirez/ds4) in [orodje ds4-cockpit](https://github.com/kyuz0/strix-halo-ds4-toolbox).

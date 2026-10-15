@@ -155,5 +155,15 @@
       }
     }
   },
-  "primaryModel": "Qwen3.6-35B-A3B"
+  "primaryModel": "Qwen3.6-35B-A3B",
+  "authors": [
+    {
+      "name": "Eddie Richter",
+      "github": "eddierichter-amd",
+      "github_url": "https://github.com/eddierichter-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-07-16",
+  "updated_date": "2026-10-01"
 }

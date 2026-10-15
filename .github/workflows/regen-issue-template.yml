@@ -1,0 +1,60 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Regenerate Issue Template
+
+# Keeps the bug-report issue template's playbook dropdown in sync with the
+# playbooks on disk. A playbook PR no longer has to hand-regenerate the
+# template (the validate-playbooks check for it is advisory only). Runs after
+# a push to main that touches playbooks/, then commits any change back with
+# [skip ci].
+#
+# Pure git + Python on ubuntu-latest — no self-hosted runner, so it can't be
+# wedged by an offline device runner.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'playbooks/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regen-issue-template-${{ github.ref }}
+  # Newest-wins: a fresh push supersedes an older still-running regen instead of
+  # queuing behind it, so one slow run can't backlog the pipeline.
+  cancel-in-progress: true
+
+jobs:
+  regen:
+    name: Regenerate issue template
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Regenerate bug-report playbook list
+        run: python .github/scripts/gen_issue_template_playbooks.py
+
+      - name: Commit and push if changed
+        shell: bash
+        run: |
+          if [ -z "$(git status --porcelain .github/ISSUE_TEMPLATE/bug_report.yml)" ]; then
+            echo "Issue template already up to date."
+            exit 0
+          fi
+          git config user.name "amd-playbooks-bot"
+          git config user.email "amd-playbooks-bot@users.noreply.github.com"
+          git add .github/ISSUE_TEMPLATE/bug_report.yml
+          git commit -m "chore: regenerate issue-template playbook list [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}

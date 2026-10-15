@@ -18,77 +18,132 @@ SPDX-License-Identifier: MIT
 
 ## نظرة عامة
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) هو وكيل برمجي مدعوم
-بالذكاء الاصطناعي يمكنه كتابة الشيفرة البرمجية وتشغيل الأوامر وتصفح الويب
-وتحرير الملفات في بيئة عمل حقيقية. بدلاً من نسخ الاقتراحات من نافذة محادثة،
-توجّه الوكيل إلى مجلد مشروع وتتركه ينجز العمل: تنفيذ ميزة، أو إصلاح خطأ، أو
-كتابة اختبارات، أو شرح قاعدة شيفرة برمجية.
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) هو عامل برمجي مدعوم بالذكاء الاصطناعي
+قادر على كتابة الشيفرة البرمجية، وتشغيل الأوامر، وتصفح الويب، وتحرير الملفات في مساحة عمل
+حقيقية. بدلاً من نسخ الاقتراحات من نافذة محادثة، توجّه العامل إلى مجلد مشروع
+وتتركه ينجز العمل: تنفيذ ميزة، إصلاح خلل، كتابة اختبارات، أو شرح قاعدة شيفرة.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) هو واجهة المستخدم
-عبر المتصفح الموصى بها لتشغيل OpenHands. يقوم أمر واحد وهو `agent-canvas` ببدء
-تشغيل خادم الوكيل، والخلفية البرمجية للأتمتة، والواجهة الأمامية للويب معًا،
-مما يتيح لك إجراء محادثة مع الوكيل من متصفحك.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) هو واجهة المتصفح
+الموصى بها لتشغيل OpenHands. يقوم أمر واحد وهو `agent-canvas` بتشغيل خادم
+العامل، والواجهة الخلفية للأتمتة، والواجهة الأمامية للويب معًا، بحيث يمكنك
+إجراء محادثة مع العامل من متصفحك.
 
-للحفاظ على كل شيء على نظام AMD الخاص بك، يتواصل الوكيل مع نموذج محلي يقدمه
-Lemonade Server. يعرض Lemonade هذا النموذج من خلال واجهة برمجة تطبيقات متوافقة
-مع OpenAI، بحيث يمكن لـ Agent Canvas تكوينه مثل أي نقطة نهاية أخرى بأسلوب
-OpenAI، بينما يبقى النموذج وشيفرتك البرمجية وسياق المحادثة كلها على جهازك.
+للحفاظ على كل شيء على نظام AMD الخاص بك، يتحدث العامل إلى نموذج محلي يُقدَّم
+عبر Lemonade Server. يعرض Lemonade هذا النموذج من خلال واجهة برمجة تطبيقات
+متوافقة مع OpenAI، لذا يمكن لـ Agent Canvas تهيئته مثل أي نقطة نهاية أخرى
+بأسلوب OpenAI بينما يبقى النموذج وشيفرتك وسياق المحادثة كلها على جهازك.
 
-في هذا الدليل التعليمي، ستقوم ببدء تشغيل نموذج محلي، وتشغيل Agent Canvas،
-وتوجيهه إلى ذلك النموذج، وتنفيذ أول مهمة برمجية لك على مجلد مشروع حقيقي.
+في هذا الدليل التطبيقي، ستبدأ نموذجًا محليًا، وتُطلق Agent Canvas، وتوجّهه
+نحو ذلك النموذج، وتُشغّل أول مهمة برمجة لك على مجلد مشروع حقيقي.
 
 ## ما ستتعلمه
 
-- كيفية بدء تشغيل Lemonade Server والتأكد من أن نموذجًا محليًا يستجيب لطلبات
-  المحادثة
-- كيفية تثبيت وتشغيل Agent Canvas من حزمة npm
-- كيفية تكوين Agent Canvas لاستخدام نموذج Lemonade محلي كنموذج اللغة الكبير
-  (LLM)
-- كيفية بدء محادثة OpenHands ومراقبة الوكيل وهو يحرر الملفات وينفذ الأوامر في
-  بيئة عمل
-- كيفية مراجعة ما قام الوكيل بتغييره وتوجيهه برسائل متابعة
+- كيفية بدء تشغيل Lemonade Server والتأكد من أن نموذجًا محليًا يستجيب لطلبات المحادثة
+- كيفية تثبيت وإطلاق Agent Canvas من حزمة npm
+- كيفية تهيئة Agent Canvas لاستخدام نموذج Lemonade محلي كنموذج اللغة الكبير (LLM)
+- كيفية بدء محادثة OpenHands ومشاهدة العامل يُحرر الملفات ويُشغّل
+  الأوامر في مساحة عمل
+- كيفية مراجعة ما غيّره العامل وتوجيهه برسائل متابعة
 
 ## المفاهيم الأساسية
 
-| المفهوم | ما هو | مكانه في هذا الدليل التعليمي |
+| المفهوم | ما هو | مكانه في هذا الدليل التطبيقي |
 | --- | --- | --- |
-| Lemonade Server | منصة محلية لتقديم نماذج اللغة الكبيرة مصممة لأجهزة AMD وتعرض واجهة برمجة تطبيقات متوافقة مع OpenAI. لا تغادر بياناتك جهازك أبدًا. | يشغّل النموذج الذي يشغّل الوكيل. |
-| OpenHands | وكيل برمجي مدعوم بالذكاء الاصطناعي يقرأ الملفات ويحررها، وينفذ أوامر الصدفة، ويتصفح الويب داخل بيئة عمل. | الوكيل الذي توجّهه من المحادثة. |
-| Agent Canvas | واجهة المستخدم عبر المتصفح والخلفية البرمجية التي تشغّل محادثات OpenHands وتعرض استدعاءات الأدوات وتغييرات الملفات. | يشغّل المكدس ويستضيف محادثتك. |
-| بيئة العمل | مجلد المشروع الذي يُسمح للوكيل بقراءته وتعديله. | هدف تحريرات الوكيل وأوامره. |
+| Lemonade Server | منصة محلية لتقديم نماذج اللغة الكبيرة مصممة لأجهزة AMD تعرض واجهة برمجة تطبيقات متوافقة مع OpenAI. بياناتك لا تغادر جهازك أبدًا. | يُشغّل النموذج الذي يُشغّل العامل. |
+| OpenHands | عامل برمجي مدعوم بالذكاء الاصطناعي يقرأ الملفات ويحررها، ويشغّل أوامر الصدفة، ويتصفح الويب داخل مساحة عمل. | العامل الذي تُوجّهه من المحادثة. |
+| Agent Canvas | واجهة المتصفح والواجهة الخلفية التي تُشغّل محادثات OpenHands وتُظهر استدعاءات الأدوات وتغييرات الملفات. | تُطلق المجموعة الكاملة وتستضيف محادثتك. |
+| مساحة العمل | مجلد المشروع الذي يُسمح للعامل بقراءته وتعديله. | هدف تعديلات العامل وأوامره. |
 
-<!-- @device:stx,krk -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> تستفيد سير عمل الوكلاء البرمجيين من نموذج أكبر ونافذة سياق أكبر. استخدم
-> 32 جيجابايت على الأقل من ذاكرة النظام، ويُفضّل 64 جيجابايت أو أكثر لنماذج
-> GGUF الأكبر حجمًا.
+> تستفيد سير عمل عامل البرمجة من نموذج أكبر ونافذة سياق أوسع. استخدم
+> ذاكرة نظام لا تقل عن 32 غيغابايت، ويُفضّل 64 غيغابايت أو أكثر لنماذج GGUF الأكبر.
+<!-- @device:end -->
+
+## ضبط تهيئة الذاكرة
+
+<!-- @require:memory-config -->
+
+<!-- @device:halo_box -->
+## التحقق من تحديثات البرمجيات
+
+<!-- @require:software-update -->
 <!-- @device:end -->
 
 ## المتطلبات الأساسية
+
 
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @require:lemonade,nodejs -->
+<!-- @require:lemonade -->
 <!-- @os:end -->
 
-تحتاج إلى:
+ستحتاج إلى:
 
-- تثبيت Lemonade Server والقدرة على تقديم النموذج أدناه.
-- Node.js الإصدار 22.12 أو أحدث وأداة `npm` (تُستخدم بواسطة واجهة سطر الأوامر
-  الخاصة بـ `agent-canvas`).
-- `uv`، مدير حزم Python الذي يستخدمه Agent Canvas لإدارة بيئة خادم الوكيل. إذا
-  لم يكن نظامك يحتوي عليه بالفعل، فقم بتثبيته من
+- تثبيت Lemonade Server وقدرته على تقديم النموذج أدناه.
+
+<!-- @os:linux -->
+- Node.js الإصدار 22.12 أو أحدث و`npm` (يستخدمهما أداة سطر الأوامر `agent-canvas`).
+- `uv`، وهو مدير حزم Python الذي يستخدمه Agent Canvas لإدارة بيئة
+  خادم العامل. إذا لم يكن نظامك يحتوي عليه بالفعل، فقم بتثبيته من
   [دليل تثبيت uv](https://docs.astral.sh/uv/getting-started/installation/)
-  قبل تشغيل Agent Canvas.
-- مجلد مشروع للعمل فيه. يمكن أن يكون هذا أي مستودع git محلي أو دليل شيفرة
-  برمجية تريد أن يعمل الوكيل عليه.
+  قبل إطلاق Agent Canvas.
+<!-- @os:end -->
 
-<!-- @device:halo,halo_box,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)،
+  مثبتًا وقيد التشغيل. على Windows، تعمل مجموعة Agent Canvas من
+  صورة Docker المنشورة، والتي تحزّم Node.js و`uv` وحزمة
+  `@openhands/agent-canvas`، لذا لست بحاجة لتثبيت هذه العناصر على الجهاز المضيف.
+<!-- @os:end -->
+
+- مجلد مشروع للعمل فيه. يمكن أن يكون هذا أي مستودع git محلي أو دليل شيفرة
+  تريد أن يعمل عليه العامل.
+
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
-<!-- @device:end -->
+
+<!-- @os:linux -->
+<!-- @test:id=prereq-clis-linux timeout=120 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+lemonade --version
+node -v
+npm -v
+
+# uv is a required prerequisite (agent-canvas uses it to build its Python env).
+# Install it only if the runner doesn't already have it.
+# TODO: remove this self-provisioning once the runners ship uv by default.
+if ! command -v uv >/dev/null 2>&1; then
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+export PATH="$HOME/.local/bin:$PATH"
+uv --version
+
+echo "OK: lemonade, node, npm, and uv are all available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=prereq-clis-windows timeout=120 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+# On Windows the Agent Canvas stack runs from the published Docker image, so the
+# only host prerequisites are Lemonade and a running Docker engine. Node.js, uv,
+# and agent-canvas are bundled inside the container.
+lemonade --version
+docker version --format "{{.Server.Version}}"
+
+Write-Host "OK: lemonade and docker are available"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## 1. بدء تشغيل Lemonade Server
 
@@ -100,17 +155,19 @@ lemonade config set ctx_size=65536
 lemonade run "Qwen3.6-35B-A3B-GGUF"
 ```
 
-يعرض Lemonade واجهة برمجة تطبيقات متوافقة مع OpenAI على:
+> **اختر نموذجًا يناسب جهازك.** يُعد `Qwen3.6-35B-A3B-GGUF` (~20 غيغابايت) نموذج ترميز قويًا لكنه يحتاج إلى مجموعة ذاكرة كبيرة. إذا كان جهازك يمتلك ذاكرة محدودة أو ذاكرة GPU VRAM محدودة، فاختر بدلاً منه نموذج GGUF أصغر من مكتبة نماذج Lemonade واستخدم معرّف ذلك النموذج طوال هذا الدليل التطبيقي.
+
+> **ملاحظة:** يقوم أمر `lemonade run` الأول بتنزيل النموذج إذا لم يكن موجودًا بالفعل، وهو ما قد يستغرق بعض الوقت حسب حجم النموذج وسرعة اتصالك.
+
+يعرض Lemonade واجهة برمجة تطبيقات متوافقة مع OpenAI على العنوان:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-
-
 ## 2. التحقق من النموذج المحلي
 
-تأكد من أن Lemonade يمكنه تقديم النموذج المحدد:
+تأكد من أن Lemonade قادر على تقديم النموذج المُختار:
 
 ```bash
 curl -s "http://127.0.0.1:13305/api/v1/models" | python3 -m json.tool
@@ -131,79 +188,361 @@ curl -sS "http://127.0.0.1:13305/api/v1/chat/completions" \
   }' | python3 -m json.tool
 ```
 
-إذا أعاد ذلك مصفوفة `choices`، فإن Lemonade جاهز لـ Agent Canvas.
+إذا أعاد هذا مصفوفة `choices`، فإن Lemonade جاهز لـ Agent Canvas.
 
-## 3. تثبيت Agent Canvas وتشغيله
+<!-- @os:linux -->
+<!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
 
-قم بتثبيت حزمة Agent Canvas المنشورة بشكل عام (global):
+models_json=""
+for i in $(seq 1 120); do
+  models_json="$(curl -s --max-time 2 http://127.0.0.1:13305/api/v1/models || true)"
+  if [ -n "$models_json" ]; then
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$models_json" ]; then
+  echo "Lemonade server not ready on http://127.0.0.1:13305"
+  exit 1
+fi
+echo "OK: Lemonade server is responding"
+
+export MODELS_JSON="$models_json"
+
+python3 - <<'PY'
+import json
+import os
+import sys
+
+data = json.loads(os.environ["MODELS_JSON"])
+model_id = "${lemonade_model}"
+
+entry = None
+for item in data.get("data", []):
+    if item.get("id") == model_id:
+        entry = item
+        break
+
+if entry is None:
+    print(f"Model {model_id} is not present in Lemonade /api/v1/models.")
+    sys.exit(1)
+
+if not entry.get("downloaded", False):
+    print(f"Model {model_id} is present but not downloaded in Lemonade. Please download it before running CI.")
+    sys.exit(1)
+
+print(f"OK: {model_id} model is downloaded in Lemonade")
+PY
+
+body='{
+  "model": "${lemonade_model}",
+  "messages": [{"role": "user", "content": "Reply with exactly: OK"}],
+  "temperature": 0,
+  "max_tokens": 32
+}'
+
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d "$body")"
+
+if [ -z "$out" ]; then
+  echo "Empty response from Lemonade chat/completions"
+  exit 1
+fi
+
+echo "OK: Lemonade chat/completions returned a response"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-chat-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$modelsJson = $null
+for ($i = 0; $i -lt 120; $i++) {
+  $modelsJson = curl.exe -s --max-time 2 http://127.0.0.1:13305/api/v1/models
+  if ($modelsJson) { break }
+  Start-Sleep -Seconds 1
+}
+
+if (-not $modelsJson) {throw "Lemonade server not ready on http://127.0.0.1:13305"}
+Write-Host "OK: Lemonade server is responding"
+
+$parsed = $modelsJson | ConvertFrom-Json
+$entry = $parsed.data | Where-Object { $_.id -eq "${lemonade_model}" } | Select-Object -First 1
+
+if (-not $entry) {throw "Model ${lemonade_model} is not present in Lemonade /api/v1/models."}
+if (-not $entry.downloaded) {throw "Model ${lemonade_model} is present but not downloaded in Lemonade. Please download it before running CI."}
+Write-Host "OK: ${lemonade_model} model is downloaded in Lemonade"
+
+$body = @{
+  model = "${lemonade_model}"
+  messages = @(
+    @{
+      role = "user"
+      content = "Reply with exactly: OK"
+    }
+  )
+  temperature = 0
+  max_tokens = 32
+} | ConvertTo-Json -Depth 5
+
+$tmpBody = Join-Path $env:TEMP "openhands-lemonade-chat-body.json"
+[System.IO.File]::WriteAllText($tmpBody, $body, [System.Text.UTF8Encoding]::new($false))
+
+try {
+  $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
+    -H "Content-Type: application/json" `
+    --data-binary "@$tmpBody"
+  if (-not $out) {throw "Empty response from Lemonade chat/completions"}
+  Write-Host "OK: Lemonade chat/completions returned a response"
+}
+finally {
+  Remove-Item $tmpBody -Force -ErrorAction SilentlyContinue
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+## 3. تثبيت وتشغيل Agent Canvas
+
+<!-- @os:linux -->
+ثبّت حزمة Agent Canvas المنشورة بشكل عام:
 
 ```bash
 npm install -g @openhands/agent-canvas
 ```
 
-ثم ابدأ تشغيل المكدس الكامل من طرفية:
+<!-- @test:id=agent-canvas-version-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+
+# agent-canvas is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than installing it here.
+if ! command -v agent-canvas >/dev/null 2>&1; then
+  echo "agent-canvas is not on PATH; the runner must provision it before CI runs"
+  exit 1
+fi
+
+# Prefer --version; fall back to --help if this build has no --version flag.
+agent-canvas --version || agent-canvas --help
+
+echo "OK: agent-canvas CLI is on PATH"
+```
+<!-- @test:end -->
+
+ثم ابدأ تشغيل المجموعة الكاملة من طرفية:
 
 ```bash
 agent-canvas
 ```
 
-افتراضيًا، يبدأ Agent Canvas على `http://localhost:8000`. افتح ذلك العنوان
-في متصفحك. إذا كان المنفذ 8000 مستخدمًا بالفعل، مرّر `--port` (أو `-p`) عند
-تشغيل Agent Canvas:
+بشكل افتراضي، يبدأ Agent Canvas على `http://localhost:8000`. افتح هذا الرابط في
+متصفحك. المنفذ ليس مميزًا — إذا كان المنفذ 8000 مستخدمًا بالفعل، مرر أي
+منفذ متاح باستخدام `--port` (أو `-p`) عند تشغيل Agent Canvas:
 
 ```bash
 agent-canvas --port 3000
 ```
 
-يعمل نفس الأمر في PowerShell على Windows. ثم افتح `http://localhost:3000`
-بدلاً من ذلك. يجب أن تظهر الخلفية البرمجية المحلية الافتراضية بحالة سليمة
-(healthy) في الشاشة الرئيسية.
+ثم افتح `http://localhost:3000` بدلاً من ذلك. يجب أن تظهر الواجهة الخلفية المحلية الافتراضية
+بحالة سليمة على الشاشة الرئيسية.
 
-يبدأ أمر `agent-canvas` تشغيل خادم الوكيل، والخلفية البرمجية للأتمتة، والواجهة
-الأمامية للويب معًا. تحتاج فقط إلى هذا الأمر الواحد لتشغيل OpenHands محليًا.
+يبدأ الأمر `agent-canvas` خادم الوكيل، والواجهة الخلفية للأتمتة، وواجهة
+الويب الأمامية معًا. تحتاج فقط إلى هذا الأمر الواحد لتشغيل OpenHands
+محليًا.
 
-## 4. تكوين نموذج اللغة الكبير المحلي
+<!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
+```bash
+set -euo pipefail
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 
-عند التشغيل الأول، يفتح Agent Canvas سير عمل تعريفي (onboarding). في ذلك
-السير:
+log="/tmp/agent-canvas-ci.log"
+p=""
+cleanup() {
+  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
+    kill "$p" 2>/dev/null || true
+    sleep 2
+    kill -9 "$p" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
 
-1. أبقِ **OpenHands** محددًا كوكيل وانقر على **Next**.
+rm -f "$log"
+
+# First launch builds the agent server's uv-managed Python env, so allow a generous startup window.
+agent-canvas >"$log" 2>&1 &
+p=$!
+
+# Probe the agent-server backend health (18000/server_info), NOT just the 8000
+# ingress root: the ingress serves the static frontend and returns 200 for /
+# even when the agent-server is down.
+ok=false
+for i in $(seq 1 300); do
+  code="$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:18000/server_info || true)"
+  if [ "$code" = "200" ]; then
+    ok=true
+    break
+  fi
+  if ! kill -0 "$p" 2>/dev/null; then
+    echo "agent-canvas process exited before it finished starting"
+    break
+  fi
+  sleep 1
+done
+
+if [ "$ok" != "true" ]; then
+  echo "agent-server not ready on http://127.0.0.1:18000/server_info"
+  echo "---- agent-canvas log ----"
+  cat "$log" || true
+  exit 1
+fi
+
+echo "OK: agent-canvas agent-server is responding"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+على نظام Windows، شغّل صورة حاوية Agent Canvas المنشورة باستخدام Docker Desktop.
+تحتوي الصورة على Agent Server، والواجهة الخلفية للأتمتة، وواجهة الويب الأمامية، لذا
+لست بحاجة إلى تثبيت Node.js أو `uv` أو الواجهة النصية على الجهاز المضيف.
+
+أولاً، أنشئ مجلدي التهيئة ومساحة العمل التي ستقوم الحاوية بربطهما (mount):
+
+```powershell
+$env:PROJECTS_PATH = Join-Path $HOME "projects"
+New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
+```
+
+اسحب الصورة المنشورة (وهي عامة، لذا لا حاجة لتسجيل الدخول):
+
+```powershell
+docker pull ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+ثم ابدأ تشغيل المجموعة:
+
+```powershell
+docker run -it --rm `
+  -p 8000:8000 `
+  -v "$($env:USERPROFILE)\.openhands:/home/openhands/.openhands" `
+  -v "$($env:PROJECTS_PATH):/projects" `
+  ghcr.io/openhands/agent-canvas:1.14.0
+```
+
+افتح `http://localhost:8000/canvas` في متصفحك. إذا كان المنفذ 8000 مستخدمًا
+بالفعل، اربط منفذ مضيف مختلف، على سبيل المثال `-p 8080:8000`، وافتح
+`http://localhost:8080/canvas` بدلاً من ذلك.
+
+> **ملاحظة:** يقوم أول تشغيل بتهيئة Agent Server داخل الحاوية،
+> لذا قد يستغرق الأمر دقيقة أو دقيقتين قبل أن تُبلغ الواجهة الخلفية عن حالتها السليمة.
+
+يحافظ الربط `.openhands` على ملف تعريف LLM الخاص بك وإعداداته عبر عمليات إعادة تشغيل
+الحاوية. يقوم بقية هذا الدليل بتهيئة كل شيء من خلال واجهة مستخدم
+Agent Canvas في متصفحك.
+
+<!-- @test:id=agent-canvas-docker-windows timeout=1200 hidden=True -->
+```powershell
+$ErrorActionPreference = "Stop"
+
+$image    = "ghcr.io/openhands/agent-canvas:1.14.0"
+$name     = "openhands-agent-canvas-ci"
+$hostPort = 18080
+
+# The image is expected to be provisioned on the runner. Fail loudly if it
+# isn't, rather than pulling it here.
+$imgId = docker images -q $image
+if (-not $imgId) {
+  throw "Image $image is not present; the runner must provision it before CI runs"
+}
+Write-Host "OK: $image is present"
+
+if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+
+try {
+  docker run -d --name $name -p "${hostPort}:8000" $image | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw "docker run failed for $image" }
+
+  # Probe the agent-server backend health through the container proxy
+  # (/server_info -> agent-server on 18000 inside the container), not just the
+  # /canvas static UI, which can return 200 while the backend is still down.
+  $ok = $false
+  for ($i = 0; $i -lt 300; $i++) {
+    $canvas = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/canvas").StatusCode } catch { 0 }
+    $info   = try { (Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 "http://localhost:${hostPort}/server_info").StatusCode } catch { 0 }
+    if ($canvas -eq 200 -and $info -eq 200) { $ok = $true; break }
+    $state = docker inspect -f "{{.State.Status}}" $name 2>$null
+    if ($state -ne "running") { throw "Container $name exited before it finished starting" }
+    Start-Sleep -Seconds 2
+  }
+
+  if (-not $ok) {
+    docker logs --tail 40 $name
+    throw "agent-canvas backend not healthy on http://localhost:${hostPort}/server_info"
+  }
+  Write-Host "OK: agent-canvas Docker stack is healthy (/canvas and /server_info return 200)"
+}
+finally {
+  if (docker ps -aq -f "name=$name") { docker rm -f $name | Out-Null }
+}
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+## 4. تهيئة نموذج اللغة الكبير المحلي
+
+عند التشغيل الأول، يفتح Agent Canvas تدفق إعداد أولي. في هذا التدفق:
+
+1. أبقِ **OpenHands** محددًا كالوكيل وانقر على **Next**.
 2. في **Set up your LLM**، اختر **Advanced**.
 3. أبقِ **Authentication** مضبوطًا على **API key**.
 4. اضبط **Custom Model** على `openai/Qwen3.6-35B-A3B-GGUF`.
 5. اضبط **Base URL** على `http://127.0.0.1:13305/api/v1`.
-6. في **API Key**، أدخل أي قيمة نائبة غير فارغة مثل `lemonade-local`. لا
-   يتطلب Lemonade مفتاحًا حقيقيًا، لكن عميل OpenHands يحتاج إلى قيمة لإرسالها.
+   <!-- @os:windows -->
+   > على نظام Windows، تعمل المجموعة داخل حاوية، والتي لا يمكنها الوصول إلى المضيف عبر
+   > `127.0.0.1`. استخدم `http://host.docker.internal:13305/api/v1` بدلاً من ذلك حتى يتمكن
+   > الوكيل الموجود داخل الحاوية من الوصول إلى Lemonade الذي يعمل على مضيف Windows.
+   <!-- @os:end -->
+6. في حقل **API Key**، أدخل أي نص بديل غير فارغ مثل `lemonade-local`.
+   لا يتطلب Lemonade مفتاحًا حقيقيًا، لكن عميل OpenHands يحتاج إلى قيمة
+   لإرسالها.
 7. انقر على **Next**.
 
-يجب أن تبدو إعدادات Advanced المكتملة كما يلي. حقل مفتاح واجهة برمجة التطبيقات
-مقنّع بواسطة الواجهة.
+يجب أن تبدو إعدادات Advanced المكتملة كما يلي. حقل مفتاح API
+مخفٍ بواسطة الواجهة.
 
-![إعدادات Advanced لنموذج اللغة الكبير عند أول استخدام لـ Agent Canvas مع نموذج Lemonade وعنوان URL الأساسي المحلي](assets/01-llm-advanced-settings.png)
+![إعدادات Agent Canvas المتقدمة لنموذج اللغة الكبير عند أول استخدام مع نموذج Lemonade والرابط الأساسي المحلي](assets/01-llm-advanced-settings.png)
 
-يحفظ Agent Canvas هذه القيم كملف تعريف لنموذج اللغة الكبير (LLM profile). إذا
-طلب إصدارك تسمية ذلك الملف الشخصي، استخدم اسمًا بدون مسافات مثل
-`lemonade-local`. إذا غيّرت النماذج لاحقًا، افتح **Settings > LLM** وحدّث نفس
-حقول Advanced. يمكنك التبديل بين الملفات الشخصية المحفوظة من إدخال المحادثة
-باستخدام الأمر `/model`.
+يحفظ Agent Canvas هذه القيم كملف تعريف LLM. إذا طلب إصدارك منك
+تسمية ملف التعريف هذا، استخدم اسمًا بدون مسافات مثل `lemonade-local`. إذا غيّرت
+النماذج لاحقًا، افتح **Settings > LLM** وحدّث نفس حقول Advanced. يمكنك
+التبديل بين ملفات التعريف المحفوظة من مدخل الدردشة باستخدام الأمر `/model`.
 
-## 5. فتح بيئة عمل
+## 5. فتح مساحة عمل
 
-يمكن للوكيل فقط قراءة الملفات وتعديلها داخل بيئة العمل التي تختارها. قبل بدء
-مهمة، وجّه Agent Canvas إلى مجلد مشروعك:
+يمكن للوكيل قراءة وتعديل الملفات فقط داخل مساحة عمل تختارها. قبل
+بدء مهمة، وجّه Agent Canvas إلى مجلد مشروعك:
 
 1. من الشاشة الرئيسية، اختر **Open Workspace**.
-2. حدد المجلد الذي يحتوي على مشروعك (على سبيل المثال، مستودع git تريد أن
-   يعمل الوكيل عليه).
-3. ابدأ محادثة جديدة في بيئة العمل تلك.
+2. حدد المجلد الذي يحتوي على مشروعك (على سبيل المثال، مستودع git
+   تريد أن يعمل عليه الوكيل).
+3. ابدأ محادثة جديدة في مساحة العمل هذه.
 
-كل ما يفعله الوكيل - قراءة الملفات، وتنفيذ الأوامر، وتحرير الشيفرة البرمجية -
-مقتصر على تلك بيئة العمل.
+كل ما يقوم به الوكيل - قراءة الملفات، وتشغيل الأوامر، وتحرير الكود - يكون
+محصورًا في تلك مساحة العمل.
 
-![الشاشة الرئيسية لـ Agent Canvas بعد التعريف الأولي](assets/02-agent-canvas-home.png)
-## 6. نفّذ أول مهمة برمجية
+![الشاشة الرئيسية لـ Agent Canvas بعد الإعداد الأولي](assets/02-agent-canvas-home.png)
 
-بعد فتح مساحة العمل واختيار نموذج اللغة الكبير المحلي، اكتب مهمة محددة في المحادثة. من المهام الجيدة للبداية أن تكون صغيرة وقابلة للتحقق، مثل:
+## 6. تشغيل أول مهمة برمجية
+
+مع فتح مساحة العمل واختيار نموذج اللغة الكبير المحلي، اكتب مهمة محددة في
+الدردشة. المهمة الأولى الجيدة تكون صغيرة وقابلة للتحقق، على سبيل المثال:
 
 ```text
 Create a new file called hello.py that defines a function greet(name) that
@@ -211,40 +550,47 @@ returns "Hello, {name}!", and add a small test that prints greet("World")
 when run as a script.
 ```
 
-راقب سلسلة زمنية للمحادثة. سيقوم OpenHands بما يلي:
+راقب الجدول الزمني للمحادثة. سيقوم OpenHands بما يلي:
 
-- قراءة مساحة العمل لفهم البنية.
+- قراءة مساحة العمل لفهم التخطيط.
 - إنشاء `hello.py` مع الدالة المطلوبة وكتلة الاختبار.
 - تشغيل `python3 hello.py` اختياريًا للتحقق من الناتج.
-- الإبلاغ عمّا قام به وأي ناتج للأوامر في المحادثة.
+- الإبلاغ عما فعله وأي ناتج للأوامر في الدردشة.
 
-يجب أن ترى الملف الجديد يظهر في مساحة العمل، وأن تصف رسالة العميل الأخيرة التغيير الذي أجراه. هذه هي اللحظة الفارقة: كتب العميل وشغّل كودًا حقيقيًا في مجلد مشروعك.
+يجب أن ترى الملف الجديد يظهر في مساحة العمل، ويجب أن تصف رسالة الوكيل
+النهائية التغيير الذي أجراه. هذه هي لحظة الإنجاز: كتب
+الوكيل وشغّل كودًا حقيقيًا في مجلد مشروعك.
 
-## 7. راجع عمل العميل ووجّهه
+## 7. مراجعة الوكيل وتوجيهه
 
-بعد أن ينتهي العميل من خطوة ما، راجع عمله قبل قبول الخطوة التالية:
+بعد أن ينتهي الوكيل من خطوة ما، راجع عمله قبل قبول الخطوة التالية:
 
-- **تغييرات الملفات**: استخدم متصفح ملفات مساحة العمل أو عرض الفروقات (diff) الخاص بالعميل لترى بالضبط ما تمت إضافته أو تغييره أو حذفه.
-- **ناتج الأوامر**: وسّع أي أمر نفّذه العميل لترى المخرجات القياسية (stdout) والأخطاء القياسية (stderr) ورمز الخروج.
-- **المتابعات**: إذا لم تكن النتيجة كما تريد، أجب في نفس المحادثة بتصحيح. يحتفظ العميل بالسياق السابق ويكرر العمل على نفس الملفات.
+- **تغييرات الملفات**: استخدم متصفح ملفات مساحة العمل أو عرض الفروقات
+  (diff) الخاص بالوكيل لرؤية ما تمت إضافته أو تغييره أو حذفه بالضبط.
+- **ناتج الأوامر**: وسّع أي أمر شغّله الوكيل لرؤية stdout و stderr
+  ورمز الخروج.
+- **المتابعات**: إذا لم تكن النتيجة كما تريد، رد في نفس
+  المحادثة بتصحيح. يحتفظ الوكيل بالسياق السابق ويكرر
+  العمل على نفس الملفات.
 
-على سبيل المثال، إذا لم يطبع الاختبار التحية المتوقعة، أجب بـ:
+على سبيل المثال، إذا لم يطبع الاختبار التحية المتوقعة، رد:
 
 ```text
 The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-سيعيد العميل قراءة الملف، وتشغيل الأمر، وتشخيص المشكلة، ثم يعدّل الملف مرة أخرى—كل ذلك في نفس المحادثة.
-
+سيعيد الوكيل قراءة الملف، وتشغيل الأمر، وتشخيص المشكلة، وتعديل
+الملف مرة أخرى - كل ذلك ضمن نفس المحادثة.
 ## استكشاف الأخطاء وإصلاحها
 
+<!-- @os:linux -->
 - **`agent-canvas` غير موجود في PATH:** أعد التثبيت باستخدام
-  `npm install -g @openhands/agent-canvas` وتأكد من أن دليل الملفات الثنائية العام لـ npm موجود في PATH لديك. على نظام Windows، شغّل `npm config get prefix`؛ يجب أن يكون الدليل المُعاد، غالبًا `%APPDATA%\npm` أو `%USERPROFILE%\.npm-global`،
-  موجودًا في PATH الخاص بمستخدمك قبل أن يمكن تشغيل `agent-canvas` من طرفية جديدة.
-- **يفشل `npm install -g` بخطأ في الأذونات:** قم بتهيئة دليل npm عام مملوك للمستخدم، ثم أعد فتح الطرفية وثبّت Agent Canvas مرة أخرى.
+  `npm install -g @openhands/agent-canvas` وتأكد من أن دليل الملفات الثنائية العام لـ npm
+  موجود ضمن PATH قبل أن يتمكّن `agent-canvas` من التشغيل من طرفية جديدة.
+- **يفشل `npm install -g` بخطأ في الأذونات:** قم بتهيئة دليل npm عام مملوك للمستخدم،
+  ثم أعد فتح الطرفية وقم بتثبيت Agent Canvas مرة أخرى.
 
-  <!-- @os:linux -->
   ```bash
   mkdir -p ~/.npm-global
   npm config set prefix ~/.npm-global
@@ -252,48 +598,70 @@ greet("World") test prints to stdout.
   . ~/.profile
   npm install -g @openhands/agent-canvas
   ```
-  <!-- @os:end -->
-
-  <!-- @os:windows -->
-  ```powershell
-  New-Item -ItemType Directory -Force "$env:USERPROFILE\.npm-global"
-  npm config set prefix "$env:USERPROFILE\.npm-global"
-  $env:Path = "$env:USERPROFILE\.npm-global;$env:Path"
-  npm install -g @openhands/agent-canvas
-  ```
-
-  لجعل تغيير PATH في Windows دائمًا، أضف `%USERPROFILE%\.npm-global` إلى
-  PATH الخاص بمستخدمك من **الإعدادات > النظام > حول > إعدادات النظام المتقدمة >
-  متغيرات البيئة**، ثم افتح طرفية جديدة.
-  <!-- @os:end -->
-- **تُحمَّل الواجهة لكن الخلفية تظهر غير سليمة:** انتظر بضع ثوانٍ حتى ينتهي خادم العميل من بدء التشغيل، ثم قم بالتحديث. إذا بقيت غير سليمة، أعد تشغيل
-  `agent-canvas` وتحقق من ناتج الطرفية بحثًا عن الأخطاء.
-- **تفشل طلبات محادثة Lemonade بخطأ في الاتصال:** تأكد من نجاح
-  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` وأن
-  Lemonade لا يزال يقدّم النموذج باستخدام `lemonade status`.
-- **يظهر خطأ لدى العميل يتعلق بطول السياق أو حد الرموز:** أعد تشغيل
-  Lemonade بقيمة أكبر لـ `ctx_size` (على سبيل المثال `ctx_size=65536`)، وابدأ
-  محادثة جديدة حتى لا يحمل العميل سجلاً ضخمًا للغاية.
-- **ينتج العميل تعديلات منخفضة الجودة أو غير مكتملة:** انتقل إلى نموذج أكبر في Lemonade، أو أعطِ العميل مهمة أصغر وأكثر تحديدًا ودعه ينهيها قبل طلب التغيير التالي.
-- **`uv` غير موجود:** ثبّته من
+- **`uv` مفقود:** قم بتثبيته من
   [دليل تثبيت uv](https://docs.astral.sh/uv/getting-started/installation/).
-  يستخدم Agent Canvas أداة `uv` لإدارة بيئة Python الخاصة بخادم العميل.
+  يستخدم Agent Canvas أداة `uv` لإدارة بيئة Python الخاصة بخادم العميل (agent server).
+<!-- @os:end -->
+
+<!-- @os:windows -->
+- **يفشل الاتصال عند تنفيذ `docker pull` أو `docker run`:** تأكد من أن Docker Desktop
+  قيد التشغيل (أيقونة الحوت الخاصة به موجودة في شريط النظام) وأن المحرك قد
+  انتهى من بدء التشغيل. يجب أن يعرض الأمر `docker version` كلا القسمين، Client وServer.
+- **يبدأ الحاوية لكن الخلفية (backend) لا تصبح سليمة أبدًا:** يقوم أول تشغيل بتهيئة Agent Server
+  داخل الحاوية؛ انتظر دقيقة أو دقيقتين، ثم تحقق من `docker logs <container>` بحثًا عن أخطاء.
+- **لا يمكن للحاوية الوصول إلى Lemonade:** تصل الحاوية إلى المضيف عبر
+  `host.docker.internal`. تأكد من أن Lemonade يعمل على مضيف Windows باستخدام
+  `lemonade status`، واستخدم `http://host.docker.internal:13305/api/v1` كعنوان URL الأساسي
+  عند تهيئة LLM.
+<!-- @os:end -->
+
+- **تُحمَّل واجهة المستخدم لكن الخلفية تظهر غير سليمة:** انتظر دقيقة أو دقيقتين حتى
+  ينتهي خادم العميل من بدء التشغيل، ثم قم بالتحديث. إذا استمرت في الظهور بحالة غير سليمة، أعد تشغيل
+  المكدس (stack) وتحقق من السجلات بحثًا عن أخطاء.
+- **تفشل طلبات محادثة Lemonade بخطأ في الاتصال:** تأكد من أن
+  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` ينجح وأن
+  Lemonade لا يزال يخدم النموذج باستخدام `lemonade status`.
+- **يظهر العميل خطأً متعلقًا بطول السياق أو حد الرموز (tokens):** ابدأ محادثة
+  جديدة حتى لا يحمل العميل سجلًا كبيرًا بشكل مفرط. إذا استمر حدوث ذلك، أعد تشغيل
+  Lemonade بقيمة `ctx_size` أكبر من الافتراضية 65536 (على سبيل المثال `ctx_size=131072`)، إذا سمحت الذاكرة بذلك.
+- **يقدّم العميل تعديلات منخفضة الجودة أو غير مكتملة:** انتقل إلى نموذج أكبر
+  في Lemonade، أو أعطِ العميل مهمة أصغر وأكثر تحديدًا ودعه ينهيها قبل طلب
+  التغيير التالي.
 
 ## الخطوات التالية
 
 - جرّب مهمة أكبر في نفس مساحة العمل، مثل إضافة ملف اختبار وحدة أو
-  إصلاح خطأ معروف، وراجع الفروقات (diff) الخاصة بالعميل قبل الإبقاء على التغيير.
+  إصلاح خطأ معروف، وراجع الفرق (diff) الناتج عن العميل قبل قبول التغيير.
 - اربط خادم MCP مثل GitHub أو Slack ضمن **Customize** حتى
   يتمكن العميل من قراءة المشكلات (issues) أو نشر التحديثات أثناء عمله.
-- احفظ عدة ملفات تعريف لنماذج اللغة الكبيرة (نموذج صغير سريع ونموذج كبير أقوى) وقم
+- احفظ عدة ملفات تعريف LLM (نموذج صغير وسريع ونموذج كبير وأقوى) وقم
   بالتبديل بينها باستخدام `/model` أثناء المحادثة.
 - انتقل إلى [أتمتة OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) لتحويل
-  دورات التطوير المتكررة إلى تشغيلات مجدولة أو مُفعَّلة بالأحداث للعميل.
+  حلقات التطوير المتكررة إلى تشغيلات مجدولة أو مُشغَّلة بالأحداث للعميل.
 
 ## الموارد
 
 - [توثيق OpenHands](https://docs.openhands.dev/)
 - [نظرة عامة على Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/overview)
 - [إعداد Agent Canvas](https://docs.openhands.dev/openhands/usage/agent-canvas/setup)
-- [ملفات تعريف نماذج اللغة الكبيرة وتهيئة النموذج](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
+- [ملفات تعريف LLM وتهيئة النموذج](https://docs.openhands.dev/openhands/usage/agent-canvas/llm-profiles)
 - [توثيق Lemonade Server](https://lemonade-server.ai/docs)
+
+<!-- @os:linux -->
+<!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
+```bash
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload || true
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=lemonade-unload-windows timeout=60 hidden=True -->
+```powershell
+# CI cleanup: unload the model so the GPU pool is free
+lemonade unload
+exit 0
+```
+<!-- @test:end -->
+<!-- @os:end -->

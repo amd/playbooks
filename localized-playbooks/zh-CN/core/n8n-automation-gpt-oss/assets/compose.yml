@@ -1,0 +1,15 @@
+# Copyright Advanced Micro Devices, Inc.
+# 
+# SPDX-License-Identifier: MIT
+
+services:
+  n8n:
+    image: docker.io/n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

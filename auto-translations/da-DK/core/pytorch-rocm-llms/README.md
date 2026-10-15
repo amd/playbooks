@@ -16,17 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Oversigt
 
+
 Vil du køre kraftfulde AI-sprogmodeller på din egen hardware? Denne guide viser dig hvordan.
-Denne tutorial bruger PyTorch drevet af AMD ROCm™-software til at køre modeller, der kan opsummere dokumenter, besvare spørgsmål, generere tekst og meget mere – alt sammen lokalt.
+Denne vejledning bruger PyTorch drevet af AMD ROCm™-software til at køre modeller, der kan opsummere dokumenter, besvare spørgsmål, generere tekst og meget mere, alt sammen kørende lokalt.
 
 ## Hvad du vil lære
 
 - Kør LLM'er som gpt-oss-20b og qwen3.5-4B lokalt ved hjælp af PyTorch og ROCm
 - Opret et værktøj til dokumentopsummering ved hjælp af LLM'er
 
-## Konfiguration af hukommelse
+<!-- @device:halo_box,halo,stx,krk -->
+## Indstilling af hukommelseskonfigurationen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tjek for softwareopdateringer
@@ -41,8 +44,8 @@ Denne tutorial bruger PyTorch drevet af AMD ROCm™-software til at køre modell
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-På Linux skal du åbne en terminal i den mappe, du foretrækker, og følge kommandoerne for at oprette et venv med ROCm+Pytorch allerede installeret.
-<!-- @test:id=create-venv timeout=120 -->
+På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv med ROCm+Pytorch allerede installeret.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -60,8 +63,8 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-På Linux skal du åbne en terminal i den mappe, du foretrækker, og følge kommandoerne for at oprette et venv.
-<!-- @test:id=create-venv timeout=120 -->
+På Linux skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -76,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-På Windows skal du åbne en terminal i den mappe, du foretrækker, og følge kommandoerne for at oprette et venv med ROCm+Pytorch allerede installeret.
-<!-- @test:id=create-venv timeout=60 -->
+På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv med ROCm+Pytorch allerede installeret.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -87,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-På Windows skal du åbne en terminal i den mappe, du foretrækker, og følge kommandoerne for at oprette et venv.
-<!-- @test:id=create-venv timeout=60 -->
+På Windows skal du åbne en terminal i den mappe, du ønsker, og følge kommandoerne for at oprette et venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -97,8 +100,8 @@ pytorch-env\Scripts\activate
 <!-- @setup:id=activate-venv command="pytorch-env\Scripts\activate" -->
 <!-- @device:end -->
 
-> **Tip**: Windows-brugere skal muligvis ændre deres PowerShell-eksekveringspolitik (f.eks.
-> ved at indstille den til RemoteSigned eller Unrestricted), før nogle PowerShell-kommandoer kan køres.
+> **Tip**: Windows-brugere skal muligvis ændre deres PowerShell Execution Policy (f.eks.
+> indstille den til RemoteSigned eller Unrestricted), før de kører nogle PowerShell-kommandoer.
 
 <!-- @os:end -->
 
@@ -114,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -122,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **Bemærk:** Hvis modellen ikke kan indlæses eller løber tør for hukommelse, kan du prøve at installere `kernels`-pakken for at indlæse modellen med optimeret kvantisering.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -140,20 +150,20 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 <!-- @device:end -->
 
-## Kom hurtigt i gang med eksempelscripts
+## Hurtig start med eksempelscripts
 
-Denne playbook indeholder brugsklare scripts. Klik på dem for at forhåndsvise og downloade dem til den samme mappe som det miljø, du har oprettet.
+Denne playbook indeholder klar-til-brug scripts. Klik på dem for at forhåndsvise og downloade dem til den samme mappe som det miljø, du oprettede.
 
-| Script | Beskrivelse | Anvendelse |
+| Script | Beskrivelse | Brug |
 |--------|-------------|-------|
 | [run_llm.py](assets/run_llm.py) | Grundlæggende LLM-tekstgenerering | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | Dokumentopsummering med Harmony-understøttelse | `python summarizer.py --file document.txt` |
+| [summarizer.py](assets/summarizer.py) | Dokumentopsummerer med Harmony-understøttelse | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -179,8 +189,8 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 Begge scripts understøtter:
-- Modeludvælgelse via `--model`-flaget
-- Formatering af chatskabelon for korrekt modelprompting, især nyttigt til dokumentopsummering
+- Modelvalg via `--model`-flaget
+- Chat-skabelonformatering for korrekt modelprompting, især nyttigt til dokumentopsummering
 
 ## Indlæsning og kørsel af din første LLM
 
@@ -188,9 +198,9 @@ Det medfølgende [run_llm.py](assets/run_llm.py)-script viser, hvordan man gener
 
 > **Bemærk:** Når du indlæser en model, tjekker Hugging Face Transformers først dens lokale cache (`~/.cache/huggingface/hub` på Linux, `C:\Users\<user>\.cache\huggingface\hub` på Windows). Hvis modellen ikke er cachet, downloades den automatisk fra huggingface.co. Den første kørsel kan tage et par minutter afhængigt af modelstørrelse og netværkshastighed.
 
-Nedenstående uddrag viser, hvordan du bruger modellen og tilpasser de stillede spørgsmål.
+Uddraget nedenfor viser, hvordan man bruger modellen og tilpasser de spørgsmål, der stilles.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -212,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -263,11 +274,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## Byg en dokumentopsummering
+## Opbygning af en dokumentopsummerer
 
-Nu hvor du har genereret lokalt LLM-output, kan du bygge videre på det ved at lave en praktisk dokumentopsummering. I dette afsnit vil du bruge [summarizer.py](assets/summarizer.py)-scriptet til at indlæse en .txt-fil og automatisk generere et kortfattet resumé, alt sammen kørende lokalt på din GPU.
+Nu hvor du har genereret lokal LLM-output, kan du bygge videre på dette ved at lave en praktisk dokumentopsummerer. I dette afsnit vil du bruge [summarizer.py](assets/summarizer.py)-scriptet til at indlæse en .txt-fil og automatisk generere en kortfattet opsummering, alt sammen kørende lokalt på din GPU.
 
-Scriptet er designet til at fungere ud af boksen. Åbn scriptet i en editor for at udforske koden, tilpasse prompts og justere parametre som længde og temperature.
+Scriptet er designet til at fungere ud af boksen. Åbn scriptet i en editor for at udforske koden, tilpasse prompts og finjustere parametre som længde og temperature.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -275,7 +286,7 @@ python summarizer.py --model ${hf_model}
 ```
 <!-- @test:end -->
 
-### Anvendelseseksempler
+### Brugseksempler
 
 ```bash
 # Summarize the built-in example text (defaults to openai/gpt-oss-20b)
@@ -295,24 +306,23 @@ python summarizer.py --file document.txt --max-length 400
 
 | Parameter | Hvad den styrer | Typiske værdier |
 |-----------|------------------|----------------|
-| `max_new_tokens` | Den maksimale længde af LLM'ens output | Brug 50–500 tokens til resuméer. (1 token svarer til cirka 0,75 engelske ord) |
-| `temperature` | Kreativitet. Lave værdier gør den fokuseret, mens høje værdier medfører mere uforudsigelighed | - **0,1–0,3**: Fokuseret, deterministisk (god til resuméer) <br> **0,5–0,7**: Afbalanceret (generel brug) <br> **0,8–1,0**: Kreativ, varieret (idéudvikling) |
-| `top_p` | Nucleus Sampling – lave værdier begrænser modellen til mere snævre output | **0,1-0,5**: Strengt, forudsigeligt <br> **0,9-0,95**: (standard, naturligt, samtalepræget) |
+| `max_new_tokens` | Den maksimale længde af LLM'ens output | Brug 50–500 tokens til opsummeringer. (1 token er cirka 0,75 engelske ord) |
+| `temperature` | Kreativitet. Lave værdier gør den fokuseret, mens høje værdier medfører mere uforudsigelighed | - **0,1–0,3**: Fokuseret, deterministisk (godt til opsummeringer) <br> **0,5–0,7**: Afbalanceret (generel brug) <br> **0,8–1,0**: Kreativ, varieret (idégenerering) |
+| `top_p` | Nucleus Sampling - Lave værdier begrænser modellen til smallere output | **0,1-0,5**: Strengt, forudsigeligt <br> **0,9-0,95**: (standard, naturligt, samtalepræget) |
 
 
 ## Anvendelser i den virkelige verden
 
 - **Analyse af forskningsartikler**: Uddrag centrale resultater fra komplekse publikationer til hurtig gennemgang
-- **Nyhedsaggregering**: Opsummer nyhedsartikler til korte daglige resuméer eller highlights
-- **Mødenotater**: Kondenser transskriptioner til handlingspunkter og kortfattede resuméer
+- **Nyhedsaggregering**: Opsummer nyhedsartikler til korte daglige digests eller highlights
+- **Mødenotater**: Kondenser transskriptioner til handlingspunkter og kortfattede opsummeringer
 - **Gennemgang af juridiske dokumenter**: Uddrag relevante klausuler eller forpligtelser fra lange juridiske tekster hurtigt
-- **Kodedokumentation**: Generer kortfattede oversigter over repositories og forklaringer af funktioner
-
+- **Kodedokumentation**: Generer kortfattede repository-oversigter og funktionsforklaringer
 ## Næste skridt
 
-- **Finjustering**: Tilpas modeller til dit specifikke fagområde eller fagsprog for bedre nøjagtighed (se Fine-tuning Playbooks)
-- **RAG-systemer**: Kombiner LLM'er med dokumenthentning for kontekstbevidste svar og søgning
+- **Finjustering**: Tilpas modeller til dit specifikke felt eller jargon for bedre nøjagtighed (se Fine-tuning Playbooks)
+- **RAG-systemer**: Kombinér LLM'er med dokumenthentning for kontekstbevidste svar og søgning
 - **Modeludforskning**: Eksperimenter med nye modeller som Llama 3, Phi-3 eller Qwen for bedre resultater
 - **Produktionsimplementering**: Brug værktøjer som vLLM til skalerbar LLM-servering i organisationer
 
-Dit system giver dig mulighed for at køre avancerede sprogmodeller lokalt. Eksperimenter med forskellige modeller, prompts og parametre for at finde ud af, hvad der fungerer bedst til dine anvendelser.
+Dit system giver dig mulighed for at køre avancerede sprogmodeller lokalt. Eksperimenter med forskellige modeller, prompts og parametre for at finde ud af, hvad der fungerer bedst til dine applikationer.

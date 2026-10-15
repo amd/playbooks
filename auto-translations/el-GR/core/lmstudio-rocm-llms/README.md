@@ -16,18 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Επισκόπηση
 
-Το LM Studio είναι ένα ισχυρό wrapper με γραφικό περιβάλλον (GUI) για το [llama.cpp](https://github.com/ggml-org/llama.cpp) και παρέχει επίσης ένα [συμβατό με OpenAI endpoint](https://lmstudio.ai/docs/developer/openai-compat) για τοπική εξυπηρέτηση μοντέλων. Το LM Studio προσφέρει μια απλή αλλά ισχυρή διεπαφή για εύκολη λήψη και ανάπτυξη μοντέλων. Το LM Studio προσφέρει τόσο backends (που ονομάζονται runtimes) Vulkan όσο και AMD ROCm™ software για χρήστες AMD.
+Το LM Studio είναι ένα ισχυρό wrapper βασισμένο σε GUI για το [llama.cpp](https://github.com/ggml-org/llama.cpp) και παρέχει επίσης ένα [συμβατό OpenAI endpoint](https://lmstudio.ai/docs/developer/openai-compat) για τοπική εξυπηρέτηση μοντέλων. Το LM Studio προσφέρει μια απλή αλλά ισχυρή διεπαφή για την εύκολη λήψη και ανάπτυξη μοντέλων. Το LM Studio προσφέρει τόσο backend Vulkan όσο και AMD ROCm™ software (που ονομάζονται runtimes) για χρήστες AMD.
 
 
 ## Τι θα μάθετε
 - Πώς να ρυθμίσετε και να χρησιμοποιήσετε το LM Studio για να αξιοποιήσετε το τοπικό σας υλικό
-- Πώς να δοκιμάσετε και να διαχειριστείτε LLMs σε ένα εντελώς offline περιβάλλον
-- Πώς να εξυπηρετήσετε μοντέλα μέσω OpenAI Compatible API για την υποστήριξη προσαρμοσμένων ροών εργασίας και εφαρμογών
+- Δοκιμή και διαχείριση LLM σε ένα εντελώς offline περιβάλλον
+- Εξυπηρέτηση μοντέλων μέσω OpenAI Compatible API για την υποστήριξη προσαρμοσμένων ροών εργασίας και εφαρμογών
 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Ρύθμιση Διαμόρφωσης Μνήμης
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Έλεγχος για Ενημερώσεις Λογισμικού
@@ -37,13 +39,13 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Σημείωση**: Εάν το VS Code ή το LM Studio δεν είναι εγκατεστημένα, μπορείτε να τα εγκαταστήσετε από το AMD Ryzen™ AI Developer Center.
+> **Σημείωση**: Αν το VS Code ή το LM Studio δεν είναι εγκατεστημένα, μπορείτε να τα εγκαταστήσετε από το AMD Ryzen™ AI Developer Center. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Εγκατάσταση Προαπαιτούμενου Λογισμικού
+## Εγκατάσταση Προαπαιτούμενων Λογισμικού
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -67,16 +69,16 @@ SPDX-License-Identifier: MIT
 <!-- @device:end -->
 
 ## Συνομιλία με ένα LLM
-Μάθετε πώς να ξεκινήσετε να συνομιλείτε με ένα LLM επιπέδου ChatGPT εντελώς τοπικά.
+Μάθετε πώς να ξεκινήσετε να συνομιλείτε με ένα LLM επιπέδου ChatGPT εντελώς τοπικά.  
 
-1. Ανοίξτε το LMStudio.
-2. Πατήστε `Ctrl + L` για να ανοίξετε τον Model Loader, επιλέξτε `Manually choose model load parameters`, και κάντε κλικ στο `${model_name}`
-3. Βεβαιωθείτε ότι το "show advanced settings" είναι επιλεγμένο.
-4. Αλλάξτε το `Context Length` όπως επιθυμείτε. Μεγαλύτερο μήκος περιεχομένου σημαίνει περισσότερη μνήμη μοντέλου, αλλά μεγαλύτερη χρήση μνήμης συστήματος. Συνιστάται για αυτό το playbook η τιμή 4096.
-5. Βεβαιωθείτε ότι το `GPU Offload` είναι ρυθμισμένο στο μέγιστο και ότι το `Flash Attention` είναι ενεργοποιημένο (τα Cache Quantizations μπορούν να παραμείνουν απενεργοποιημένα)
+1. Ανοίξτε το LMStudio. 
+2. Πατήστε `Ctrl + L` για να ανοίξετε το Model Loader, επιλέξτε `Manually choose model load parameters`, και κάντε κλικ στο `${model_name}`
+3. Βεβαιωθείτε ότι το "show advanced settings" είναι επιλεγμένο.  
+4. Αλλάξτε το `Context Length` όπως επιθυμείτε. Μεγαλύτερο context length σημαίνει περισσότερη μνήμη μοντέλου, αλλά και περισσότερη χρήση μνήμης συστήματος. Προτείνεται για αυτό το playbook η τιμή 4096.
+5. Βεβαιωθείτε ότι το `GPU Offload` είναι ρυθμισμένο στο μέγιστο και το `Flash Attention` είναι On (τα Cache Quantizations μπορούν να παραμείνουν off)
 6. Επιλέξτε το `Remember settings` και κάντε κλικ στο `Load Model`.
-7. Εάν δεν βρίσκεστε στο παράθυρο συνομιλίας, πατήστε `Ctrl + 1` ή κάντε κλικ στο κουμπί 👾 στο επάνω αριστερό μέρος της οθόνης.
-8. Στείλτε ένα μήνυμα και ξεκινήστε να αλληλεπιδράτε με το μοντέλο!
+7. Αν δεν βρίσκεστε στο παράθυρο συνομιλίας, πατήστε `Ctrl + 1` ή κάντε κλικ στο κουμπί 👾 πάνω αριστερά στην οθόνη.
+8. Στείλτε ένα μήνυμα και ξεκινήστε την αλληλεπίδραση με το μοντέλο!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Συμβουλή**: Το μήκος περιεχομένου (context length) αναφέρεται στη μνήμη του μοντέλου. Το Flash attention βελτιώνει την ταχύτητα επεξεργασίας μειώνοντας παράλληλα τη χρήση μνήμης. Το GPU Offload μεταφέρει τους υπολογισμούς στην κάρτα γραφικών για ταχύτερες αποκρίσεις.
+> **Συμβουλή**: Το context length αναφέρεται στη μνήμη του μοντέλου. Το flash attention βελτιώνει την ταχύτητα επεξεργασίας μειώνοντας παράλληλα τη χρήση μνήμης. Το GPU Offload μεταφέρει τους υπολογισμούς στην κάρτα γραφικών για ταχύτερες αποκρίσεις.
 
-## Εξυπηρέτηση LLMs μέσω ενός συμβατού με OpenAI endpoint
+## Εξυπηρέτηση LLM μέσω ενός συμβατού OpenAI endpoint
 
-Το LM Studio προσφέρει επίσης ένα συμβατό με OpenAI endpoint με τη μορφή του LM Studio Server. Αυτό έχει ήδη παρουσιαστεί σε μια ροή εργασίας agentic coding με το Cline [εδώ](../playbooks/vscode-qwen3-coder). Μια άλλη κοινή περίπτωση χρήσης είναι η σύνδεση του LM Studio Server με οποιαδήποτε web εφαρμογή (React, Node.js, Python) στέλνοντας τυπικά HTTP requests στο endpoint συμπερασμού (inference endpoint).
+Το LM Studio προσφέρει επίσης ένα συμβατό OpenAI endpoint με τη μορφή του LM Studio Server. Αυτό έχει ήδη παρουσιαστεί σε μια ροή εργασίας agentic coding με το Cline [εδώ](../playbooks/vscode-qwen3-coder). Μια άλλη κοινή περίπτωση χρήσης είναι η σύνδεση του LM Studio Server με οποιαδήποτε web εφαρμογή (React, Node.js, Python) στέλνοντας τυπικά αιτήματα HTTP στο inference endpoint.
 
 Για να ρυθμίσετε το LM Studio Server, ακολουθήστε τις παρακάτω οδηγίες:
 
-1. Στην αριστερή πλευρά, κάντε κλικ στην καρτέλα `Developer` (εικονίδιο γραμμής εντολών) ή πατήστε `Ctrl + 2` και στη συνέχεια κάντε κλικ στο `Server Settings`.
-2. (Προαιρετικό): Εάν θέλετε να εξυπηρετήσετε το μοντέλο μέσω του τοπικού σας δικτύου (LAN), επιλέξτε το `Serve on Local Network`. Εάν θέλετε να το χρησιμοποιήσετε με έναν ιστότοπο ή με εκτεταμένες κλήσεις μέσα στο VS Code, επιλέξτε το `Enable CORS`.
-3. Στην επάνω αριστερή γωνία, βεβαιωθείτε ότι ο διακομιστής εκτελείται κάνοντας κλικ στο κουμπί εναλλαγής μπροστά από το `Status`.
-4. Ένα συμβατό με OpenAI endpoint θα εκτελείται πλέον. Η διεύθυνση είναι συνήθως στο http://127.0.0.1:1234
-5. Εάν δεν είναι ήδη φορτωμένο κάποιο μοντέλο, μπορείτε να το φορτώσετε κάνοντας κλικ στο `Load Model` και ακολουθώντας τα βήματα που αναφέρθηκαν προηγουμένως.
+1. Στην αριστερή πλευρά, κάντε κλικ στην καρτέλα `Developer` (εικονίδιο γραμμής εντολών) ή `Ctrl + 2` και έπειτα κάντε κλικ στο `Server Settings`.  
+2. (Προαιρετικό): Αν θέλετε να εξυπηρετήσετε το μοντέλο μέσω του τοπικού σας δικτύου (LAN), επιλέξτε `Serve on Local Network`. Αν θέλετε να το χρησιμοποιήσετε με έναν ιστότοπο ή με εκτεταμένες κλήσεις μέσα από το VS Code, επιλέξτε `Enable CORS`. 
+3. Στην πάνω αριστερή γωνία, βεβαιωθείτε ότι ο server εκτελείται κάνοντας κλικ στο κουμπί εναλλαγής μπροστά από το `Status`.
+4. Ένα συμβατό OpenAI endpoint θα εκτελείται πλέον. Η διεύθυνση βρίσκεται συνήθως στο http://127.0.0.1:1234  
+5. Αν δεν έχει ήδη φορτωθεί κάποιο μοντέλο, μπορείτε να το φορτώσετε κάνοντας κλικ στο `Load Model` και ακολουθώντας τα προαναφερθέντα βήματα. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -173,7 +175,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -182,11 +184,11 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end -->
+<!-- @test:end --> 
 <!-- @os:end -->
 
 
-Αυτό το μοντέλο θα είναι πλέον προσβάσιμο μέσω του endpoint του LM Studio Server και θα υποστηρίζει endpoints συμβατά με OpenAI, όπως:
+Αυτό το μοντέλο θα είναι πλέον προσβάσιμο μέσω του endpoint του LM Studio Server και θα υποστηρίζει OpenAI endpoints, συμπεριλαμβανομένων των:
 
 | Endpoint | Method | Docs |
 |------------|----------|----------|
@@ -195,10 +197,10 @@ curl -s http://127.0.0.1:1234/v1/models
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Παράδειγμα: Ping στο Endpoint σας
-Αφού μόλις δημιουργήσατε το OpenAI Compatible endpoint, ας δούμε πώς να το ενσωματώσετε σε ένα περιβάλλον ανάπτυξης Python (όπως το VSCode) και να χρησιμοποιήσετε το σύστημά σας ως τοπικό API Provider.
+#### Παράδειγμα: Έλεγχος σύνδεσης (Ping) στο Endpoint σας
+Αφού μόλις δημιουργήσαμε το OpenAI Compatible endpoint, ας δούμε πώς μπορούμε να το ενσωματώσουμε σε ένα περιβάλλον ανάπτυξης Python (όπως το VSCode) και να χρησιμοποιήσουμε το σύστημά σας ως τοπικό API Provider.
 
-1. Δημιουργήστε ένα εικονικό περιβάλλον Python:
+1. Δημιουργήστε ένα εικονικό περιβάλλον Python (virtual environment):
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -212,7 +214,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Παραχωρήστε στον χρήστη σας πρόσβαση σε συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να ισχύσει αυτό):
+**Παραχωρήστε στον χρήστη σας πρόσβαση σε συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να ενεργοποιηθεί αυτό):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -236,7 +238,7 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την PowerShell Execution Policy τους (π.χ.
+    > **Συμβουλή**: Οι χρήστες Windows μπορεί να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell (π.χ.
     > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
@@ -248,7 +250,7 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την PowerShell Execution Policy τους (π.χ.
+    > **Συμβουλή**: Οι χρήστες Windows μπορεί να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell (π.χ.
     > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
@@ -259,7 +261,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Εκτελέστε το παρακάτω script για να κάνετε ping στο endpoint που μόλις δημιουργήσαμε.
+3. Εκτελέστε το παρακάτω script για να ελέγξετε τη σύνδεση με το endpoint που μόλις δημιουργήσαμε.
     ```python
     from openai import OpenAI
 
@@ -364,13 +366,13 @@ lms server stop
 
 #### (Προαιρετικό): Εναλλαγή μεταξύ Runtimes
 
-1. Πατήστε `Ctrl + Shift + R` στο πληκτρολόγιό σας. Εναλλακτικά, κάντε κλικ στην καρτέλα `Discover` (Μεγεθυντικός φακός) στην αριστερή πλευρά και μετά κάντε κλικ στο `Runtime` στο αναδυόμενο παράθυρο.
-2. Στη συνέχεια θα δείτε τα `Runtime Selections`, όπου το αναπτυσσόμενο μενού μπορεί να χρησιμοποιηθεί για να αλλάξετε το runtime.
+1. Πατήστε `Ctrl + Shift + R` στο πληκτρολόγιό σας. Εναλλακτικά, κάντε κλικ στην καρτέλα `Discover` (Μεγεθυντικός Φακός) στην αριστερή πλευρά και, στη συνέχεια, κάντε κλικ στο `Runtime` στο αναδυόμενο παράθυρο.
+2. Θα πρέπει τότε να δείτε το `Runtime Selections`, όπου μπορεί να χρησιμοποιηθεί το αναπτυσσόμενο μενού για να αλλάξετε το runtime.
 
 
 ## Επόμενα Βήματα
 
-- **Προσαρμοσμένη Ενσωμάτωση Εφαρμογής**: Ενσωματώστε τα δικά σας scripts ή εφαρμογές Python χρησιμοποιώντας το τοπικό OpenAI-compatible API.
-- **Προηγμένα Frontends**: Συνδέστε ισχυρά περιβάλλοντα όπως το Open WebUI στον server σας για ιστορικό συνομιλιών και διαχείριση προσώπων (persona).
+- **Προσαρμοσμένη Ενσωμάτωση Εφαρμογών**: Ενσωματώστε τα δικά σας scripts ή εφαρμογές Python χρησιμοποιώντας το τοπικό API συμβατό με OpenAI.
+- **Προηγμένα Frontends**: Συνδέστε ισχυρά περιβάλλοντα όπως το Open WebUI στον server σας για ιστορικό συνομιλιών και διαχείριση personas.
 
 Για περισσότερη τεκμηρίωση, επισκεφθείτε: https://lmstudio.ai/docs/developer

@@ -31,6 +31,9 @@ This tutorial shows how to use `ai-toolbox-cockpit`, a terminal UI, to set up ds
 
 ## Installing Software Prerequisites
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:podman,distrobox,ds4-cockpit,ds4-toolbox-image -->
+
 > **System requirements for this configuration (single-node IQ2_XXS at 126k context):**
 > - A Strix Halo system with **at least 128 GB of unified memory**.
 > - **BIOS dedicated VRAM (UMA frame buffer) set to the minimum**, so the shared memory pool can be as large as possible.
@@ -215,6 +218,13 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# keep-id maps the calling user into the container. Root does not need it, and as root it cannot
+# be combined with --ipc=host (crun fails to mount /dev/mqueue), so root keeps the host user namespace.
+userns=keep-id
+if [ "$(id -u)" -eq 0 ]; then
+  userns=host
+fi
+
 # Remove any stale instance, then start ds4-server detached (same flags ai-toolbox-cockpit uses, with -d instead of -it).
 podman rm -f "$CONTAINER" >/dev/null 2>&1 || true
 podman run -d --name "$CONTAINER" \
@@ -224,7 +234,7 @@ podman run -d --name "$CONTAINER" \
   --ipc=host \
   --cap-add=SYS_PTRACE \
   --security-opt label=disable \
-  --userns=keep-id \
+  --userns="$userns" \
   -p 127.0.0.1:8000:8000 \
   -v "$MODEL_DIR":/models:ro \
   "$image" \

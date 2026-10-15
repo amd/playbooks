@@ -14,13 +14,13 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Crearea unui cluster din două sisteme Ryzen™ AI Halo cu RPC
+# Clustering a două sisteme Ryzen™ AI Halo cu RPC
 
 ## Prezentare generală
 
-Sistemul dumneavoastră Ryzen™ AI Halo este deja capabil să ruleze modele de limbaj mari la nivel local. Crearea unui cluster duce acest lucru mai departe, combinând memoria GPU a mai multor sisteme printr-o rețea locală, oferindu-vă acces la modele și mai mari, cu raționament mai puternic, generare de cod mai bună și o înțelegere multilingvă mai profundă, totul complet pe propriul dumneavoastră hardware.
+Sistemul dumneavoastră Ryzen™ AI Halo este deja capabil să ruleze modele lingvistice de mari dimensiuni la nivel local. Clustering-ul duce acest lucru mai departe, combinând memoria GPU a mai multor sisteme printr-o rețea locală, oferindu-vă acces la modele și mai mari, cu raționament mai puternic, generare de cod mai bună și o înțelegere multilingvă mai profundă, totul complet pe propriul hardware.
 
-Acest playbook vă învață cum să creați un cluster din două sisteme Ryzen AI Halo folosind motorul RPC al llama.cpp și cum să rulați GLM 4.7, un model cu 358 de miliarde de parametri, pe ambele mașini cu accelerare AMD ROCm™.
+Acest ghid vă învață cum să grupați două sisteme Ryzen AI Halo folosind motorul RPC al llama.cpp și să rulați GLM 4.7, un model cu 358 de miliarde de parametri, pe ambele mașini cu accelerare AMD ROCm™.
 
 ## Ce veți învăța
 
@@ -45,18 +45,18 @@ Acest lucru se poate face deschizând panoul de control AMD Software: Adrenalin 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Pe Linux, ROCm utilizează un pool de memorie de sistem partajată, iar acest pool este configurat implicit la jumătate din memoria sistemului.
+Pe Linux, ROCm utilizează un pool de memorie de sistem partajat, iar acest pool este configurat implicit la jumătate din memoria sistemului.
 
-Această cantitate poate fi mărită modificând setarea paginii Translation Table Manager (TTM) a kernelului, urmând instrucțiunile de mai jos. AMD recomandă setarea memoriei VRAM dedicate minime în BIOS (0,5 GB).
+Această valoare poate fi mărită modificând setarea de pagini a Translation Table Manager (TTM) din kernel, urmând instrucțiunile de mai jos. AMD recomandă setarea VRAM dedicată minimă în BIOS (0,5 GB).
 
-* Instalați utilitarul pipx și adăugați calea pentru pachetele wheel instalate prin pipx în calea de căutare a sistemului.
+* Instalați utilitarul pipx și adăugați calea pentru wheel-urile instalate de pipx în calea de căutare a sistemului.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Instalați pachetul wheel amd-debug-tools din PyPI.
+* Instalați pachetul wheel amd-debug-tools de pe PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
@@ -66,7 +66,7 @@ Această cantitate poate fi mărită modificând setarea paginii Translation Tab
   amd-ttm
   ```
 
-* Reconfigurați setările memoriei partajate la **120 GB**:
+* Reconfigurați setările de memorie partajată la **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
@@ -76,7 +76,7 @@ Această cantitate poate fi mărită modificând setarea paginii Translation Tab
 
 <!-- @os:end -->
 <!-- @device:halo_box -->
-## Verificați actualizările de software
+## Verificarea actualizărilor de software
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -84,15 +84,15 @@ Această cantitate poate fi mărită modificând setarea paginii Translation Tab
 
 ### Hardware
 
-Acest playbook necesită două unități Ryzen AI Halo și un switch Ethernet, conectate într-o topologie stea, fiecare unitate fiind conectată direct la switch.
+Acest ghid necesită două unități Ryzen AI Halo și un switch Ethernet, conectate într-o topologie stea, fiecare unitate fiind conectată direct la switch.
 
 | Componentă | Cantitate | Descriere |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Nodurile de calcul care formează clusterul |
-| Switch Ethernet 10Gbps | 1 | Switch central care permite comunicarea între mai multe noduri Ryzen AI Halo (cel puțin 2 porturi) |
+| Ryzen AI Halo | 2 | Noduri de calcul care formează clusterul |
+| Switch Ethernet 10Gbps | 1 | Switch central care permite comunicarea multi-nod între unitățile Ryzen AI Halo (cel puțin 2 porturi) |
 | Cablu Ethernet | 2 | Conectează fiecare unitate Halo la switch (se recomandă Cat 7 sau superior) |
 
-> **Notă**: Sunt necesare două porturi de switch Ethernet pentru a conecta cele două unități Ryzen AI Halo. Este necesar un al treilea port dacă accesați modelul de pe o mașină client separată, în loc de pe una dintre unitățile Halo.
+> **Notă**: Sunt necesare două porturi de switch Ethernet pentru a conecta cele două unități Ryzen AI Halo. Este necesar un al treilea port dacă accesați modelul de pe o mașină client separată, în loc să o faceți de pe una dintre unitățile Halo.
 
 ### Software
 <!-- @os:windows -->
@@ -102,7 +102,7 @@ Acest playbook necesită două unități Ryzen AI Halo și un switch Ethernet, c
 Vă rugăm să instalați:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
-- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) cu componenta **Desktop Development with C++**
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) cu sarcina de lucru **Desktop Development with C++**
 - [AMD HIP SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html)
 <!-- @os:end -->
 
@@ -116,11 +116,11 @@ sudo apt install git cmake python3 python3-pip
 
 > **Notă**: Finalizați acest pas atât pe Mașina 1, cât și pe Mașina 2.
 
-Conectați fiecare unitate Ryzen AI Halo la switch-ul Ethernet folosind un cablu Cat 7 (sau superior). Aceasta stabilește legătura de 10Gbps folosită pentru comunicarea de mare viteză între noduri.
+Conectați fiecare unitate Ryzen AI Halo la switch-ul Ethernet folosind un cablu Cat 7 (sau superior). Astfel se stabilește legătura de 10Gbps folosită pentru comunicarea de mare viteză între noduri.
 <!-- @os:linux -->
 ### 1. Determinarea interfețelor de rețea
 
-Pe fiecare mașină, aflați numele interfeței sale de rețea și notați-l (va fi denumit mai jos `IFNAME`). Rulați:
+Pe fiecare mașină, aflați numele interfeței de rețea și notați-l (va fi denumit mai jos `IFNAME`). Rulați:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -134,7 +134,7 @@ enp191s0
 
 ### 2. Verificarea vitezelor legăturii de rețea
 
-Confirmați că legătura este activă și rulează la viteză maximă, verificând viteza interfeței dumneavoastră:
+Confirmați că legătura este activă și rulează la viteză maximă verificând viteza interfeței dumneavoastră:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
@@ -148,7 +148,7 @@ Ar trebui să vedeți o viteză de `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Notă**: Dacă viteza este mai mică decât `10000Mb/s` sau legătura nu se activează, verificați conexiunea cablului și confirmați că portul switch-ului este setat la 10Gbps. Unele switch-uri necesită dezactivarea auto-negocierii și setarea manuală a vitezei legăturii; consultați documentația switch-ului dumneavoastră.
+> **Notă**: Dacă viteza este mai mică de `10000Mb/s` sau legătura nu se stabilește, verificați conexiunea cablului și confirmați că portul switch-ului este setat la 10Gbps. Unele switch-uri necesită dezactivarea auto-negocierii și setarea manuală a vitezei legăturii; consultați documentația switch-ului dumneavoastră.
 
 <!-- @os:end -->
 
@@ -169,7 +169,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Notă**: Dacă viteza este mai mică decât `10 Gbps` sau legătura nu se activează, verificați conexiunea cablului și confirmați că portul switch-ului este setat la 10Gbps. Unele switch-uri necesită dezactivarea auto-negocierii și setarea manuală a vitezei legăturii; consultați documentația switch-ului dumneavoastră.
+> **Notă**: Dacă viteza este mai mică de `10 Gbps` sau legătura nu se stabilește, verificați conexiunea cablului și confirmați că portul switch-ului este setat la 10Gbps. Unele switch-uri necesită dezactivarea auto-negocierii și setarea manuală a vitezei legăturii; consultați documentația switch-ului dumneavoastră.
 
 <!-- @os:end -->
 
@@ -179,21 +179,21 @@ Ethernet  Up      10 Gbps
 
 Sunt disponibile două opțiuni de instalare:
 
-- [Opțiunea 1: Lemonade SDK (Recomandat)](#option-1-lemonade-sdk-recommended) - binare precompilate, cea mai rapidă configurare
-- [Opțiunea 2: Compilare manuală din sursă](#option-2-manual-source-build) - compilare din sursă cu control complet asupra flag-urilor de build
+- [Opțiunea 1: Lemonade SDK (Recomandat)](#option-1-lemonade-sdk-recommended) - binare precompilate, configurare cea mai rapidă
+- [Opțiunea 2: Compilare manuală din sursă](#option-2-manual-source-build) - compilare din sursă cu control complet asupra flag-urilor de compilare
 
 ### Opțiunea 1: Lemonade SDK (Recomandat)
 
-Lemonade SDK oferă build-uri nightly ale llama.cpp cu accelerare AMD ROCm 7, având ca țintă GPU-uri precum gfx1151 (Strix Halo / Ryzen AI Max+ 395) și alte arhitecturi Radeon recente.
+Lemonade SDK oferă build-uri nocturne ale llama.cpp cu accelerare AMD ROCm 7, vizând GPU-uri precum gfx1151 (Strix Halo / Ryzen AI Max+ 395) și alte arhitecturi Radeon recente.
 
 <!-- @os:windows -->
 #### Pasul 1: Descărcați binarele precompilate
 
-Navigați la pagina cu cea mai recentă versiune și descărcați arhiva corespunzătoare platformei și țintei GPU:
+Navigați la pagina cu ultima versiune și descărcați arhiva corespunzătoare platformei și țintei GPU:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-Descărcați fișierul numit `llama-bxxxx-windows-rocm-gfx1151-x64.zip` (unde `xxxx` este numărul versiunii de compilare).
+Descărcați fișierul numit `llama-bxxxx-windows-rocm-gfx1151-x64.zip` (unde `xxxx` este numărul versiunii de build).
 
 #### Pasul 2: Extrageți binarele
 
@@ -203,7 +203,7 @@ Dezarhivați arhiva descărcată:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-Acest director conține acum compilări cu suport ROCm ale `llama-cli.exe`, `llama-server.exe` și `rpc-server.exe`, precompilate pentru sistemul dumneavoastră Ryzen AI Halo.
+Acest director conține acum versiunile build cu suport ROCm ale `llama-cli.exe`, `llama-server.exe` și `rpc-server.exe`, precompilate pentru sistemul dumneavoastră Ryzen AI Halo.
 
 #### Pasul 3: Verificați detectarea GPU
 
@@ -224,11 +224,11 @@ Available devices:
 <!-- @os:linux -->
 #### Pasul 1: Descărcați binarele precompilate
 
-Navigați la pagina cu cea mai recentă versiune și descărcați arhiva corespunzătoare platformei și țintei GPU:
+Navigați la pagina cu ultima versiune și descărcați arhiva corespunzătoare platformei și țintei GPU:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-Descărcați fișierul numit `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` (unde `xxxx` este numărul versiunii de compilare).
+Descărcați fișierul numit `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` (unde `xxxx` este numărul versiunii de build).
 
 #### Pasul 2: Extrageți și pregătiți binarele
 
@@ -238,7 +238,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-Acest director conține acum compilări cu suport ROCm ale `llama-cli`, `llama-server` și `rpc-server`, precompilate pentru sistemul dumneavoastră Ryzen AI Halo.
+Acest director conține acum versiunile build cu suport ROCm ale `llama-cli`, `llama-server` și `rpc-server`, precompilate pentru sistemul dumneavoastră Ryzen AI Halo.
 
 #### Pasul 3: Verificați detectarea GPU
 
@@ -256,7 +256,7 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-Cu llama.cpp pregătit pe fiecare nod, continuați la [Descărcarea modelului](#downloading-the-model).
+Odată ce llama.cpp este pregătit pe fiecare nod, continuați cu [Descărcarea modelului](#downloading-the-model).
 
 ### Opțiunea 2: Compilare manuală din sursă
 
@@ -270,7 +270,7 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Adăugați HIP la calea dumneavoastră și compilați cu suport ROCm și RPC:
+Adăugați HIP în calea dumneavoastră și compilați cu suport ROCm și RPC:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -278,12 +278,12 @@ cmake -S . -B rocm -G Ninja -DGGML_HIP=ON -DGGML_RPC=ON -DGPU_TARGETS=gfx1151 -D
 cmake --build rocm --config Release
 ```
 
-| Indicator de compilare | Scop |
+| Semnalizator de build | Scop |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Activează stiva software ROCm/HIP |
-| `-DGGML_RPC=ON` | Activează RPC pentru inferență distribuită |
+| `-DGGML_RPC=ON` | Activează RPC pentru inferența distribuită |
 | `-DGPU_TARGETS=gfx1151` | Vizează GPU-ul Ryzen AI Halo (Radeon 8060s) |
-| `-G Ninja` | Utilizează sistemul de compilare Ninja |
+| `-G Ninja` | Utilizează sistemul de build Ninja |
 
 #### Pasul 2: Verificați detectarea GPU
 
@@ -301,15 +301,15 @@ Available devices:
   ROCm0: AMD Radeon(TM) Graphics (110511 MiB, 110357 MiB free)
 ```
 
-#### Pasul 3: Adăugați HIP la calea dumneavoastră de utilizator
+#### Pasul 3: Adăugați HIP în calea de utilizator
 
-Pasul de compilare de mai sus a setat `%HIP_PATH%\bin` doar pentru sesiunea curentă. Pentru a face bibliotecile HIP disponibile în orice terminal (nu doar în x64 Native Tools Command Prompt), adăugați-l permanent la `PATH`-ul dumneavoastră de utilizator:
+Pasul de compilare de mai sus a setat `%HIP_PATH%\bin` doar pentru sesiunea curentă. Pentru a face bibliotecile HIP disponibile în orice terminal (nu doar în x64 Native Tools Command Prompt), adăugați-l permanent în `PATH`-ul dumneavoastră de utilizator:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-Cu llama.cpp pregătit pe fiecare nod, continuați la [Descărcarea modelului](#downloading-the-model).
+Odată ce llama.cpp este pregătit pe fiecare nod, continuați cu [Descărcarea modelului](#downloading-the-model).
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -325,18 +325,17 @@ cd llama.cpp
 Compilați cu suport ROCm și RPC:
 
 ```bash
-cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DGGML_HIP_ROCWMMA_FATTN=ON -DAMDGPU_TARGETS="gfx1151"
+cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
-| Indicator de compilare | Scop |
+| Semnalizator de build | Scop |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Activează stiva software ROCm |
-| `-DGGML_RPC=ON` | Activează RPC pentru inferență distribuită |
-| `-DGGML_HIP_ROCWMMA_FATTN=ON` | Activează rocWMMA pentru Flash Attention îmbunătățit pe GPU-uri AMD |
+| `-DGGML_RPC=ON` | Activează RPC pentru inferența distribuită |
 | `-DAMDGPU_TARGETS="gfx1151"` | Vizează GPU-ul Ryzen AI Halo (Radeon 8060s) |
 
-Pentru mai multe opțiuni de compilare, consultați [documentația de compilare llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+Pentru mai multe opțiuni de compilare, consultați [documentația de build a llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
 #### Pasul 2: Verificați detectarea GPU
 
@@ -355,14 +354,14 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-Cu llama.cpp pregătit pe fiecare nod, continuați la [Descărcarea modelului](#downloading-the-model).
+Odată ce llama.cpp este pregătit pe fiecare nod, continuați cu [Descărcarea modelului](#downloading-the-model).
 <!-- @os:end -->
 
 ## Descărcarea modelului
 
-Acest playbook utilizează [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), un model cu 358B parametri în cuantizarea `Q4_K_XL` de la [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). La această cuantizare, modelul necesită aproximativ 205GB de stocare și încape în memoria GPU combinată a două noduri Ryzen AI Halo.
+Acest ghid utilizează [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), un model cu 358 miliarde de parametri în cuantizarea `Q4_K_XL` de la [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). La această cuantizare, modelul necesită aproximativ 205 GB de stocare și se încadrează în memoria GPU combinată a două noduri Ryzen AI Halo.
 
-Descărcați fișierele GGUF utilizând Hugging Face CLI:
+Descărcați fișierele GGUF folosind interfața de linie de comandă Hugging Face:
 <!-- @os:linux -->
 ```bash
 pip install huggingface-hub
@@ -381,17 +380,17 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **Notă**: Descărcarea modelului trebuie finalizată pe Mașina 1 (controlerul). Nodurile de lucru RPC nu au nevoie de o copie locală a fișierelor modelului.
+> **Notă**: Descărcarea modelului trebuie finalizată pe Mașina 1 (controlorul). Nodurile de lucru RPC nu au nevoie de o copie locală a fișierelor modelului.
 
 ## Lansarea modelului pe cluster
 
-Motorul RPC (Remote Procedure Call) llama.cpp permite unei singure instanțe llama.cpp să transfere straturile modelului către lucrători la distanță prin rețea. O mașină acționează ca **controler** (Mașina 1), gestionând tokenizarea, programarea și orchestrarea. Cealaltă mașină rulează un **server RPC** ușor (Mașina 2) care expune memoria GPU și puterea de calcul către controler.
+Motorul RPC (Remote Procedure Call) al llama.cpp permite unei singure instanțe llama.cpp să distribuie straturile modelului către lucrători aflați la distanță, prin rețea. O mașină acționează ca **controlor** (Mașina 1), gestionând tokenizarea, planificarea și orchestrarea. Cealaltă mașină rulează un **server RPC** ușor (Mașina 2) care expune memoria sa GPU și puterea de calcul către controlor.
 
-La momentul încărcării, llama.cpp fragmentează modelul pe ambele noduri. Odată încărcat, inferența continuă ca și cum ar rula pe un singur accelerator. RPC gestionează transferurile de tensori și sincronizarea în fundal.
+La momentul încărcării, llama.cpp fragmentează modelul între ambele noduri. Odată încărcat, inferența se desfășoară ca și cum ar rula pe un singur accelerator. RPC gestionează transferurile de tensori și sincronizarea în fundal.
 
 ### Pasul 1: Porniți serverul RPC (Mașina 2)
 
-Pe Mașina 2, porniți serverul RPC pentru a expune resursele sale GPU către controler:
+Pe Mașina 2, porniți serverul RPC pentru a expune resursele sale GPU către controlor:
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -404,21 +403,21 @@ Pe Mașina 2, porniți serverul RPC pentru a expune resursele sale GPU către co
 ```
 <!-- @os:end -->
 
-| Indicator | Scop |
+| Semnalizator | Scop |
 |------|---------|
-| `-p` | Portul pe care se difuzează serverul RPC |
-| `-c` | Activează un cache local pentru tensori mari, evitând transferurile repetate prin rețea în timpul încărcării modelului |
-| `--host` | Adresa IP la care este legat serverul RPC (`0.0.0.0` pentru toate interfețele) |
+| `-p` | Portul pe care este difuzat serverul RPC |
+| `-c` | Activează o memorie cache locală pentru tensorii mari, evitând transferurile repetate în rețea la încărcarea modelului |
+| `--host` | Adresa IP la care este asociat serverul RPC (`0.0.0.0` pentru toate interfețele) |
 
-Pentru mai multe opțiuni, consultați [documentația RPC llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+Pentru mai multe opțiuni, consultați [documentația RPC a llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
 ### Pasul 2: Lansați modelul (Mașina 1)
 
-Cu serverul RPC rulând pe Mașina 2, lansați inferența de pe Mașina 1 utilizând fie `llama-cli`, fie `llama-server`.
+Cu serverul RPC pornit pe Mașina 2, lansați inferența de pe Mașina 1 folosind fie `llama-cli`, fie `llama-server`.
 
 #### llama-cli
 
-`llama-cli` oferă o interfață bazată pe terminal pentru interacțiunea directă cu modelul. Este ideală pentru benchmarking, depanare și experimentare la nivel scăzut.
+`llama-cli` oferă o interfață bazată pe terminal pentru interacțiunea directă cu modelul. Este ideală pentru testarea performanței, depanare și experimentare la nivel scăzut.
 
 <!-- @os:linux -->
 ```bash
@@ -427,7 +426,7 @@ Cu serverul RPC rulând pe Mașina 2, lansați inferența de pe Mașina 1 utiliz
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
@@ -443,7 +442,7 @@ Cu serverul RPC rulând pe Mașina 2, lansați inferența de pe Mașina 1 utiliz
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
@@ -456,7 +455,7 @@ Odată pornit, `llama-cli` afișează progresul încărcării modelului și intr
 ![llama-cli rulând GLM 4.7 pe două noduri](assets/llama-cli-example.png)
 #### llama-server
 
-`llama-server` expune același motor de inferență printr-un proces server persistent cu o interfață web integrată și un API HTTP compatibil cu OpenAI. Aceasta este interfața preferată pentru implementări de durată mai lungă, acces multi-utilizator și integrare cu instrumente externe.
+`llama-server` expune același motor de inferență printr-un proces de server persistent cu o interfață web integrată și un API HTTP compatibil cu OpenAI. Aceasta este interfața preferată pentru implementări de durată mai lungă, acces multi-utilizator și integrare cu instrumente externe.
 
 <!-- @os:linux -->
 ```bash
@@ -465,13 +464,13 @@ Odată pornit, `llama-cli` afișează progresul încărcării modelului și intr
   -c 32768 \
   -fa on \
   -ngl 999 \
-  --no-mmap \
+  -lm none \
   --host 0.0.0.0 \
   --port 8081 \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Găsirea `<RPC_WORKER_IP>`**: Pe Mașina 2, rulați `hostname -I | awk '{print $1}'` pentru a găsi adresa sa IP locală.
+> **Găsirea `<RPC_WORKER_IP>`**: Pe Mașina 2, rulați `hostname -I | awk '{print $1}'` pentru a găsi adresa IP locală.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -483,44 +482,44 @@ Odată pornit, `llama-cli` afișează progresul încărcării modelului și intr
   -c 32768 `
   -fa on `
   -ngl 999 `
-  --no-mmap `
+  -lm none `
   --host 0.0.0.0 `
   --port 8081 `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Găsirea `<RPC_WORKER_IP>`**: Pe Mașina 2, rulați `ipconfig | findstr /C:"IPv4"` în Terminal (Powershell) pentru a găsi adresa sa IP locală.
+> **Găsirea `<RPC_WORKER_IP>`**: Pe Mașina 2, rulați `ipconfig | findstr /C:"IPv4"` în Terminal (Powershell) pentru a găsi adresa IP locală.
 <!-- @os:end -->
 
-Odată pornit, deschideți `http://<HOST_IP>:8081` în browser pentru a accesa interfața web integrată. Aceasta oferă o interfață de chat bazată pe browser pentru interacțiunea cu modelul:
+După pornire, deschideți `http://<HOST_IP>:8081` în browser pentru a accesa interfața web integrată. Aceasta oferă o interfață de chat bazată pe browser pentru interacțiunea cu modelul:
 
 ![Interfața web llama-server rulând GLM 4.7 pe două noduri](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **Găsirea `<HOST_IP>`**: Pe Mașina 1, rulați `hostname -I | awk '{print $1}'` pentru a găsi adresa sa IP locală.
+> **Găsirea `<HOST_IP>`**: Pe Mașina 1, rulați `hostname -I | awk '{print $1}'` pentru a găsi adresa IP locală.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Găsirea `<HOST_IP>`**: Pe Mașina 1, rulați `ipconfig | findstr /C:"IPv4"` în Terminal (Powershell) pentru a găsi adresa sa IP locală.
+> **Găsirea `<HOST_IP>`**: Pe Mașina 1, rulați `ipconfig | findstr /C:"IPv4"` în Terminal (Powershell) pentru a găsi adresa IP locală.
 <!-- @os:end -->
 
 #### Referință parametri
 
-| Flag | Scop |
+| Indicator | Scop |
 |------|---------|
 | `-m` | Calea către fișierul model GGUF (utilizați primul shard, `00001-of-00005`) |
-| `-c` | Dimensiunea contextului în tokeni. Valorile mai mari utilizează mai multă memorie |
-| `-fa on` | Activează rocWMMA Flash Attention pentru performanță îmbunătățită pe GPU-urile AMD |
-| `-ngl 999` | Transferă toate straturile modelului către GPU |
-| `--no-mmap` | Dezactivează mapping-ul de memorie, reducând timpii de încărcare atunci când dimensiunea modelului depășește RAM-ul sistemului, dar se încadrează în VRAM |
-| `--host` | IP-ul pe care va fi asociat `llama-server` (doar pentru `llama-server`) |
-| `--port` | Portul pe care va fi servit API-ul HTTP (doar pentru `llama-server`) |
-| `--rpc` | Listă separată prin virgulă de endpoint-uri worker RPC (`IP:port`) |
+| `-c` | Dimensiunea contextului în tokenuri. Valorile mai mari utilizează mai multă memorie |
+| `-fa on` | Activează rocWMMA Flash Attention pentru performanță îmbunătățită pe GPU-uri AMD |
+| `-ngl 999` | Descarcă toate straturile modelului pe GPU |
+| `-lm none` | Setează modul de încărcare a modelului la `none`, dezactivând maparea în memorie pentru a reduce timpii de încărcare atunci când dimensiunea modelului depășește RAM-ul sistemului, dar încape în VRAM |
+| `--host` | IP-ul la care se conectează `llama-server` (doar `llama-server`) |
+| `--port` | Portul pe care se servește API-ul HTTP (doar `llama-server`) |
+| `--rpc` | Listă separată prin virgule de endpoint-uri worker RPC (`IP:port`) |
 
 Pentru utilizarea completă a parametrilor, consultați [documentația llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) și [documentația llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Pașii următori
 
-- **Conectarea aplicațiilor terțe**: `llama-server` expune un API compatibil cu OpenAI. Direcționați orice aplicație compatibilă cu OpenAI (precum Open WebUI) către `http://<HOST_IP>:8081` cu orice cheie API de tip placeholder (de ex., `none`) pentru a vă conecta la cluster
-- **Explorarea altor modele**: Răsfoiți GGUF-urile cuantizate pe [Hugging Face](https://huggingface.co/models?search=gguf) pentru a găsi modele care se încadrează în memoria GPU combinată a clusterului dumneavoastră
-- **Extinderea la patru noduri**: Adăugați încă două sisteme Ryzen AI Halo ca workeri RPC suplimentari pentru a accesa modele la scara de 1 trilion de parametri. Transmiteți endpoint-uri suplimentare către `--rpc` sub forma unei liste separate prin virgulă (de ex., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Conectați aplicații terțe**: `llama-server` expune un API compatibil cu OpenAI. Direcționați orice aplicație compatibilă cu OpenAI (cum ar fi Open WebUI) către `http://<HOST_IP>:8081` cu orice cheie API de tip placeholder (de exemplu, `none`) pentru a vă conecta la cluster
+- **Explorați alte modele**: Răsfoiți fișierele GGUF cuantizate pe [Hugging Face](https://huggingface.co/models?search=gguf) pentru a găsi modele care încap în memoria GPU combinată a clusterului dumneavoastră
+- **Extindeți la patru noduri**: Adăugați încă două sisteme Ryzen AI Halo ca workeri RPC suplimentari pentru a accesa modele la scara de 1 trilion de parametri. Transmiteți endpoint-uri suplimentare către `--rpc` sub forma unei liste separate prin virgule (de exemplu, `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

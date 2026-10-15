@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 > **Traduction automatique.** Cette page a été traduite automatiquement depuis l'anglais et n'a pas été relue par un traducteur humain. Elle peut contenir des erreurs, et certaines instructions, commandes, téléchargements, disponibilités de produits ou autres contenus peuvent varier selon la langue ou la région. En cas d'incohérence ou de divergence, la version originale en anglais du playbook fait foi et prévaut.
 <!-- auto-translated-disclaimer:end -->
 
-Voici la traduction du document :
-
 <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
@@ -18,22 +16,22 @@ Voici la traduction du document :
 
 ## Aperçu
 
-Écrivez un kernel GPU à partir de zéro, compilez-le, lancez-le sur un GPU AMD, et observez la montée en flèche de l'utilisation. Ce playbook montre comment fonctionne réellement le calcul GPU : écrire le code du kernel, et l'exécuter en parallèle sur des milliers de threads.
+Écrivez un kernel GPU à partir de zéro, compilez-le, lancez-le sur un GPU AMD, et observez l'utilisation grimper en flèche. Ce playbook montre comment le calcul GPU fonctionne réellement : écrivez le code du kernel, et exécutez-le en parallèle sur des milliers de threads.
 
-> **Remarque** : Il s'agit d'un playbook assez complexe, qui peut nécessiter du débogage et des modifications supplémentaires.
+> **Remarque** : Ce playbook est assez complexe et peut nécessiter du débogage et des modifications supplémentaires.
 
 ## Ce que vous allez apprendre
 
 <!-- @os:windows -->
 - Comment fonctionnent les kernels GPU : grilles, blocs, threads, et le modèle d'indexation qui les associe aux données
-- Comment la pile AMD ROCm/HIP permet d'écrire du code de style CUDA qui s'exécute sur des GPU AMD sans modification
-- Comment compiler un kernel au moment de l'exécution avec `torch.cuda._compile_kernel`
+- Comment la pile AMD ROCm/HIP permet d'écrire du code au style CUDA qui s'exécute sur des GPU AMD sans modification
+- Comment compiler un kernel à l'exécution avec `torch.cuda._compile_kernel`
 - Comment construire une extension de kernel C++ native avec `CUDAExtension` + pybind11, importable depuis Python
 <!-- @os:end -->
 <!-- @os:linux -->
 - Comment fonctionnent les kernels GPU : grilles, blocs, threads, et le modèle d'indexation qui les associe aux données
-- Comment la pile AMD ROCm/HIP permet d'écrire du code de style CUDA qui s'exécute sur des GPU AMD sans modification
-- Comment compiler un kernel au moment de l'exécution avec `torch.cuda._compile_kernel`
+- Comment la pile AMD ROCm/HIP permet d'écrire du code au style CUDA qui s'exécute sur des GPU AMD sans modification
+- Comment compiler un kernel à l'exécution avec `torch.cuda._compile_kernel`
 - Comment construire une extension de kernel C++ native avec `CUDAExtension` + pybind11, importable depuis Python
 - Comment mesurer le temps d'exécution d'un kernel et surveiller en direct l'utilisation du GPU avec `amd-smi`
 <!-- @os:end -->
@@ -45,17 +43,17 @@ Ce playbook couvre deux approches pour le développement de kernels :
 <!-- @os:windows -->
 | Approche | Point d'entrée |
 |---|---|
-| **Compilation JIT** | `torch.cuda._compile_kernel`, écrire un kernel sous forme de chaîne Python, sans étape de compilation |
-| **Extension C++** | `CUDAExtension` + pybind11 : compiler un fichier `.cu` en un fichier `.pyd` natif et l'importer |
+| **Compilation JIT** | `torch.cuda._compile_kernel`, écrivez un kernel sous forme de chaîne Python, sans étape de compilation |
+| **Extension C++** | `CUDAExtension` + pybind11 : compilez un fichier `.cu` en un fichier `.pyd` natif et importez-le |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Approche | Point d'entrée |
 |---|---|
-| **Compilation JIT** | `torch.cuda._compile_kernel`, écrire un kernel sous forme de chaîne Python, sans étape de compilation |
-| **Extension C++** | `CUDAExtension` + pybind11 : compiler un fichier `.cu` en un fichier `.so` natif et l'importer |
+| **Compilation JIT** | `torch.cuda._compile_kernel`, écrivez un kernel sous forme de chaîne Python, sans étape de compilation |
+| **Extension C++** | `CUDAExtension` + pybind11 : compilez un fichier `.cu` en un fichier `.so` natif et importez-le |
 <!-- @os:end -->
 
-Les deux approches s'exécutent sur des GPU AMD. Cela est possible car la version ROCm de PyTorch fait correspondre l'intégralité de la surface d'API CUDA à HIP. Cela signifie que `torch.cuda`, `CUDAExtension`, et la syntaxe des kernels CUDA fonctionnent tous de manière transparente sur du matériel AMD.
+Les deux approches fonctionnent sur des GPU AMD. Cela est possible car la version ROCm de PyTorch mappe l'ensemble de la surface d'API CUDA vers HIP. Cela signifie que `torch.cuda`, `CUDAExtension`, et la syntaxe des kernels CUDA fonctionnent tous de manière transparente sur du matériel AMD.
 
 ---
 
@@ -63,7 +61,7 @@ Les deux approches s'exécutent sur des GPU AMD. Cela est possible car la versio
 
 ### Qu'est-ce qu'un kernel GPU ?
 
-Un kernel GPU est une fonction qui s'exécute en parallèle sur des milliers de threads GPU simultanément. Contrairement à une fonction CPU qui s'exécute une fois par appel, un kernel est lancé avec une **grille** de **blocs**, chacun contenant de nombreux **threads**, exécutant tous le même code sur des données différentes.
+Un kernel GPU est une fonction qui s'exécute en parallèle sur des milliers de threads GPU simultanément. Contrairement à une fonction CPU qui s'exécute une seule fois par appel, un kernel est lancé avec une **grille** de **blocs**, chacun contenant de nombreux **threads**, exécutant tous le même code sur des données différentes.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
@@ -82,11 +80,11 @@ Chaque thread a accès à trois variables intégrées en lecture seule :
 
 | Variable | Signification |
 |---|---|
-| `blockIdx.x` | Bloc auquel appartient ce thread |
+| `blockIdx.x` | Le bloc auquel ce thread appartient |
 | `blockDim.x` | Nombre de threads dans un bloc |
 | `threadIdx.x` | Index du thread au sein de son bloc |
 
-### ID de thread global
+### ID global du thread
 
 Ces variables sont combinées pour calculer un index de thread globalement unique :
 
@@ -98,25 +96,25 @@ Nombre total de threads = `gridDim.x * blockDim.x`. Chaque thread traite un él�
 
 ---
 
-### Modèle d'exécution GPU : wavefronts
+### Modèle d'exécution GPU : les wavefronts
 
 Les GPU AMD exécutent les threads par groupes de **32** appelés **wavefronts**. Tous les threads d'un wavefront exécutent la même instruction simultanément. Cela influence le choix optimal de la taille des blocs (256 threads = 8 wavefronts = bonne efficacité d'ordonnancement).
 
 ### Programmation GPU AMD : HIP + ROCm
 
-**ROCm** est la pile de calcul GPU open source d'AMD (pilotes, compilateurs, bibliothèques, runtime). **HIP** se situe au-dessus, conçu pour être syntaxiquement identique à CUDA. La version ROCm de PyTorch fait correspondre de manière transparente `torch.cuda.*` à HIP, de sorte que le même code fonctionne sur les GPU AMD.
+**ROCm** est la pile de calcul GPU open source d'AMD (pilotes, compilateurs, bibliothèques, runtime). **HIP** se situe au-dessus, conçu pour être syntaxiquement identique à CUDA. La version ROCm de PyTorch mappe de manière transparente `torch.cuda.*` vers HIP, de sorte que le même code fonctionne sur les GPU AMD.
 
 ---
 
 ### PyTorch + AMD/HIP
 
-PyTorch fournit une version ROCm où la surface d'API CUDA (`torch.cuda.*`) est prise en charge de manière transparente par HIP. Cela signifie que :
+PyTorch propose une version ROCm où la surface d'API CUDA (`torch.cuda.*`) est prise en charge de manière transparente par HIP. Cela signifie que :
 
 - `torch.cuda.is_available()` fonctionne sur les GPU AMD avec ROCm
 - `tensor.to("cuda")` alloue sur le GPU AMD
 - `torch.version.hip` expose la version de HIP
 
-PyTorch expose également `torch.cuda._compile_kernel()`, un raccourci de haut niveau permettant de compiler en JIT une chaîne de kernel brute et d'obtenir en retour un appelable, sans nécessiter d'étape de compilation séparée.
+PyTorch expose également `torch.cuda._compile_kernel()`, un raccourci de haut niveau pour compiler en JIT une chaîne de kernel brute et récupérer un appelable, sans avoir besoin d'une étape de compilation séparée.
 
 ---
 
@@ -130,7 +128,7 @@ PyTorch expose également `torch.cuda._compile_kernel()`, un raccourci de haut n
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Prérequis - Windows
-- Installer la dernière version : [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- Installez la dernière version de : [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -138,8 +136,8 @@ PyTorch expose également `torch.cuda._compile_kernel()`, un raccourci de haut n
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Sur Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+Pytorch déjà installés.
-<!-- @test:id=create-venv timeout=60 -->
+Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv avec ROCm+Pytorch déjà installés.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -151,14 +149,14 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Accordez à votre utilisateur l'accès aux périphériques GPU** (déconnectez-vous et reconnectez-vous pour que cela prenne effet) :
+**Accordez à votre utilisateur l'accès aux périphériques GPU** (déconnectez-vous puis reconnectez-vous pour que cela prenne effet) :
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Sur Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
-<!-- @test:id=create-venv timeout=60 -->
+Sous Linux, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -171,8 +169,8 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Sur Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
-<!-- @test:id=create-venv timeout=60 -->
+Sous Windows, ouvrez un terminal dans le répertoire de votre choix et suivez les commandes pour créer un venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv kernel-env
 kernel-env\Scripts\activate
@@ -180,10 +178,12 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **Astuce** : Les utilisateurs de Windows devront peut-être modifier leur stratégie d'exécution PowerShell (par exemple,
-> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes PowerShell.
+> **Astuce** : Les utilisateurs de Windows devront peut-être modifier leur stratégie d'exécution PowerShell (par exemple
+> en la définissant sur RemoteSigned ou Unrestricted) avant d'exécuter certaines commandes Powershell.
 
 <!-- @os:end -->
+
+
 ### Installation des dépendances de base
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -200,14 +200,14 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Remarque :** Pour ce guide, ROCm et PyTorch doivent être installés dans l'environnement virtuel même sur le Ryzen AI Halo, car la compilation de noyaux personnalisés nécessite les en-têtes de développement complets.
+> **Remarque :** Pour ce playbook, ROCm et PyTorch doivent être installés dans l'environnement virtuel même sur le Ryzen AI Halo, car la compilation de kernels personnalisés nécessite les en-têtes de développement complets.
 
-Installer ROCm :
+Installez ROCm :
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "rocm[libraries,devel]"
 ```
 
-Installer PyTorch :
+Installez PyTorch :
 ```powershell
 python -m pip install --index-url https://repo.amd.com/rocm/whl/gfx1151/ "torch==2.11.0+rocm7.13.0" "torchvision==0.26.0+rocm7.13.0" "torchaudio==2.11.0+rocm7.13.0"
 ```
@@ -230,13 +230,12 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 <!-- @test:end -->
 <!-- @os:end -->
 ---
-
-### Installation des dépendances supplémentaires
+### Installation de dépendances supplémentaires
 
 <!-- @os:linux -->
-Installer la chaîne d'outils de compilation C/C++ pour Linux. Il s'agit d'une dépendance au niveau du système et elle est requise pour les tutoriels d'extension C++, car `CUDAExtension` compile des modules `.so` natifs à partir de fichiers `.cu`.
+Installez la chaîne d'outils de compilation C/C++ pour Linux. Il s'agit d'une dépendance au niveau du système, requise pour les tutoriels d'extension C++, car `CUDAExtension` compile des modules natifs `.so` à partir de fichiers `.cu`.
 
-Exécutez cette commande une seule fois sur la machine Linux, en dehors de l'environnement virtuel Python créé :
+Exécutez ceci une fois sur la machine Linux, en dehors de l'environnement virtuel Python créé :
 
 ```bash
 sudo apt update
@@ -267,22 +266,22 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Veuillez vous assurer que [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) ou une [version plus récente](https://visualstudio.microsoft.com/vs/community/) est installé avec la charge de travail **Desktop development with C++**.
+Veuillez vous assurer que [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) ou une [version plus récente](https://visualstudio.microsoft.com/vs/community/) est installé avec la charge de travail **Développement Desktop en C++**.
 
-> **Remarque** : Cette configuration de l'environnement Visual Studio C++ n'est requise que pour l'approche **Extension C++**. Elle n'est pas requise pour l'approche de compilation JIT.
+> **Remarque** : Cette configuration de l'environnement Visual Studio C++ n'est requise que pour l'approche **Extension C++**. Elle n'est pas nécessaire pour l'approche de compilation JIT.
 
 Ouvrez un terminal PowerShell et exécutez les commandes suivantes avant de compiler l'extension C++.
 
 **Étape 1 : Trouver l'environnement Visual Studio C++ installé**
 
-**(A) Localiser `vswhere.exe`, qui est installé avec le programme d'installation de Visual Studio**
+**(A) Localiser `vswhere.exe`, installé avec le programme d'installation de Visual Studio**
 ```powershell
 $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) Trouver `vcvars64.bat` à partir de Visual Studio 2022 ou d'une version plus récente avec les outils de compilation C++**
+**(B) Trouver `vcvars64.bat` à partir de Visual Studio 2022 ou d'une version plus récente disposant des outils de compilation C++**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -305,7 +304,7 @@ Write-Host "Using Visual Studio C++ environment: $Vcvars"
 
 **(A) Exécuter `vcvars64.bat` et capturer l'environnement qu'il configure**
 
-Cela rend `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` et les chemins du SDK Windows disponibles.
+Cela rend disponibles `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` et les chemins du Windows SDK.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -327,7 +326,7 @@ $VsEnv | ForEach-Object {
 }
 ```
 
-**Étape 3 : Vérifier que le compilateur C++ de Microsoft est disponible**
+**Étape 3 : Vérifier que le compilateur C++ Microsoft est disponible**
 
 ```powershell
 where.exe cl
@@ -557,23 +556,21 @@ $code | python -
 
 ---
 
-## Télécharger les fichiers requis
+## Téléchargement des fichiers requis
 
 Créez la structure de répertoires suivante en créant les **2 nouveaux dossiers** et en téléchargeant les fichiers correspondants :
 
 | Répertoire | Fichiers à télécharger | Description |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Fichiers JIT et d'extension C++ pour le noyau d'addition vectorielle |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Fichiers JIT et d'extension C++ pour le noyau de multiplication matricielle |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Fichiers JIT et extension C++ pour le kernel d'addition de vecteurs |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Fichiers JIT et extension C++ pour le kernel de multiplication de matrices |
 
 
-## Tutoriels
-
-### Tutoriel 1 : Addition vectorielle
+## Tutoriel 1 : Addition de vecteurs
 
 #### Approche A : Compilation JIT
 
-La compilation JIT (Just-In-Time) signifie que le noyau est écrit sous forme de chaîne C++ brute à l'intérieur de Python et compilé à l'exécution, sans nécessiter d'étapes de compilation supplémentaires.
+La compilation JIT (Just-In-Time) signifie que le kernel est écrit sous forme de chaîne C++ brute dans Python et compilé à l'exécution, sans nécessiter d'étapes de compilation supplémentaires.
 
 Pour utiliser [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py), assurez-vous qu'il est téléchargé et exécutez :
 ```bash
@@ -621,28 +618,28 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **Astuce** : Le script génère également un thread en arrière-plan qui interroge `amd-smi` toutes les 100 ms pour enregistrer l'utilisation maximale et moyenne du GPU pendant l'exécution du noyau.
+> **Astuce** : Le script lance également un thread en arrière-plan qui interroge `amd-smi` toutes les 100 ms pour enregistrer l'utilisation maximale et moyenne du GPU pendant l'exécution du kernel.
 <!-- @os:end -->
 
 > **Remarque** : **Pourquoi la taille de bloc est-elle de 256 ?** <br>
-> - Le noyau utilise **256 threads par bloc** car cela s'aligne bien avec le **modèle d'exécution en wavefront des GPU AMD**.
-> - Rappelez-vous que le matériel AMD exécute les threads par groupes de 32 threads, ce qui donne 8 wavefronts par bloc. (8 wavefronts x 32 threads = 1 bloc)
+> - Le kernel utilise **256 threads par bloc** car cela s'aligne bien avec le **modèle d'exécution en wavefront des GPU AMD**.
+> - Rappelons que le matériel AMD exécute les threads par groupes de 32 threads, ce qui donne 8 wavefronts par bloc. (8 wavefronts x 32 threads = 1 bloc)
 
 
 **Ce que fait la charge de travail :**
 
-Le noyau ajoute artificiellement du travail supplémentaire pour démontrer l'utilisation du GPU :
+Le kernel ajoute artificiellement du travail supplémentaire pour démontrer l'utilisation du GPU :
 
 - **100 000 000 éléments** dans le tenseur
-- **La boucle interne s'exécute 1 000 fois** par élément à chaque lancement de noyau  
-- **200 lancements de noyau** au total
+- **La boucle interne s'exécute 1 000 fois** par élément à chaque lancement de kernel
+- **200 lancements de kernel** au total
 
 **Calcul :**  
 - Chaque élément : est incrémenté de 1 × 1 000 itérations × 200 lancements = 200 000  
 - Résultat final : 1,0 (valeur de départ) + 200 000 (additions) = 200 001,0
 
 **Pourquoi la boucle interne ?**  
-- Sans la boucle `for (int i = 0; i < 1000; i++)`, les 200 lancements se termineraient instantanément et les outils de surveillance ne capteraient pas d'utilisation significative du GPU. Le travail artificiel fait durer chaque exécution de noyau suffisamment longtemps pour que les outils de surveillance puissent mesurer les performances.
+- Sans la boucle `for (int i = 0; i < 1000; i++)`, les 200 lancements se termineraient instantanément et les outils de surveillance ne capteraient pas une utilisation significative du GPU. Le travail artificiel fait durer chaque exécution de kernel suffisamment longtemps pour que les outils de surveillance puissent mesurer les performances.
 
 <!-- @os:linux -->
 **Sortie attendue :**[Les chiffres de performance varieront]
@@ -655,7 +652,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Remarque** : Sous Windows, `amd-smi` n'est pas pris en charge. Pour suivre l'utilisation du GPU, vous pouvez utiliser le Gestionnaire des tâches, où vous devriez voir un bref pic d'utilisation lorsque vous exécutez le programme.
+> **Remarque** : Sous Windows, `amd-smi` n'est pas pris en charge. Pour suivre l'utilisation du GPU, vous pouvez utiliser le Gestionnaire des tâches, où vous devriez observer un bref pic d'utilisation lors de l'exécution du programme.
 
 **Sortie attendue :**
 ```
@@ -664,7 +661,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Bon travail ! Vous venez d'exécuter votre premier noyau GPU.**
+**Bon travail ! Vous venez d'exécuter votre premier kernel GPU.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -810,7 +807,7 @@ $code | python -
 La deuxième approche est plus manuelle : écrire le kernel et la liaison Python dans un seul fichier `.cu`, le compiler nativement à l'aide du système de build de PyTorch, puis l'importer dans Python.
 
 <!-- @os:windows -->
-> **Remarque** : L'approche par extension C++ nécessite l'environnement de build Visual Studio C++, car PyTorch compile le fichier source `.cu` en un module d'extension natif `.pyd`. La création de cette extension native dépend de la chaîne d'outils C++ de Microsoft (compilateur, éditeur de liens et outils de build) fournie par Visual Studio. Exécutez les commandes d'activation de Visual Studio de la section de configuration avant de créer l'extension.
+> **Remarque** : L'approche par extension C++ nécessite l'environnement de build Visual Studio C++, car PyTorch compile le fichier source `.cu` en un module d'extension natif `.pyd`. La compilation de cette extension native dépend de la chaîne d'outils C++ Microsoft (compilateur, éditeur de liens et outils de build) fournie par Visual Studio. Exécutez les commandes d'activation de Visual Studio de la section de configuration avant de compiler l'extension.
 <!-- @os:end -->
 
 Téléchargez les fichiers suivants si ce n'est pas déjà fait :
@@ -819,7 +816,7 @@ Téléchargez les fichiers suivants si ce n'est pas déjà fait :
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + lanceur + liaison pybind11, le tout dans un seul fichier |
 | [setup.py](assets/Vector_Addition/setup.py) | Script de build, utilise `CUDAExtension` pour compiler le `.cu` en `.pyd` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python qui exécute les artefacts créés |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python qui exécute les artefacts compilés |
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -827,7 +824,7 @@ Téléchargez les fichiers suivants si ce n'est pas déjà fait :
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Kernel + lanceur + liaison pybind11, le tout dans un seul fichier |
 | [setup.py](assets/Vector_Addition/setup.py) | Script de build, utilise `CUDAExtension` pour compiler le `.cu` en `.so` |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python qui exécute les artefacts créés |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Script Python qui exécute les artefacts compilés |
 <!-- @os:end -->
 
 #### **Étape 1 : Le kernel, le lanceur et la liaison** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)) :
@@ -857,7 +854,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 >**Astuce** : Pourquoi utiliser `hipDeviceSynchronize()` ? <br>
-> - Les lancements de kernels GPU sont asynchrones. Lorsque le CPU exécute `add_one<<<grid_size, block_size>>>(data, n);`, il exécute immédiatement l'instruction suivante sans attendre le GPU. `hipDeviceSynchronize()` force le CPU à attendre que le kernel GPU se termine.
+> - Les lancements de kernels GPU sont asynchrones. Lorsque le CPU exécute `add_one<<<grid_size, block_size>>>(data, n);`, il exécuterait immédiatement l'instruction suivante sans attendre le GPU. `hipDeviceSynchronize()` force le CPU à attendre la fin de l'exécution du kernel GPU.
 
 #### **Étape 2 : Compilation**
 ```bash
@@ -866,17 +863,16 @@ pip install --no-build-isolation -v .
 >**Remarque** : Cette commande recherche `setup.py` dans le répertoire courant pour compiler le fichier .cu que nous avons créé.
 
 
-`CUDAExtension` est un assistant de build CUDA de `torch.utils.cpp_extension`. Avec ROCm, PyTorch **redirige `CUDAExtension` pour utiliser `hipcc`** au lieu de `nvcc`. ROCm intercepte le chemin de build et l'achemine via le compilateur HIP, portant le code CUDA vers AMD.
+`CUDAExtension` est un assistant de build CUDA provenant de `torch.utils.cpp_extension`. Avec ROCm, PyTorch **redirige `CUDAExtension` pour utiliser `hipcc`** au lieu de `nvcc`. ROCm intercepte le chemin de build et le route via le compilateur HIP, portant le code CUDA vers AMD.
 
 Cela produit les fichiers suivants :
 <!-- @os:windows -->
 - `build/` : répertoire contenant les fichiers `.pyd`
-- `add_one_kernel.hip` : la source HIP générée par la hipification du fichier `.cu` ; c'est ce que `hipcc` a réellement compilé
+- `add_one_kernel.hip` : la source HIP générée en « hipifiant » le fichier `.cu` ; c'est ce que `hipcc` a réellement compilé
 <!-- @os:end -->
-
 <!-- @os:linux -->
 - `build/` : répertoire contenant les fichiers `.so`
-- `add_one_kernel.hip` : la source HIP générée par la hipification du fichier `.cu` ; c'est ce que `hipcc` a réellement compilé
+- `add_one_kernel.hip` : la source HIP générée en « hipifiant » le fichier `.cu` ; c'est ce que `hipcc` a réellement compilé
 <!-- @os:end -->
 
 #### **Étape 3 : Utilisation depuis Python** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)) :
@@ -1030,30 +1026,30 @@ finally {
 
 ---
 
-### Tutoriel 2 : Multiplication matricielle
+## Tutoriel 2 : Multiplication de matrices
 
-La multiplication matricielle calcule **C = A × B** où :
-- **A** est M×N (lignes × colonnes)
-- **B** est N×K  
-- **C** est M×K (le résultat)
+La multiplication de matrices calcule **C = A × B** où :
+- **A** est de dimension M×N (lignes × colonnes)
+- **B** est de dimension N×K  
+- **C** est de dimension M×K (le résultat)
 
-Chaque élément de sortie est défini comme :
+Chaque élément de sortie est défini comme suit :
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-Chaque élément de C est calculé indépendamment, ce qui rend cette opération parfaite pour le parallélisme GPU.
+Chaque élément de C est calculé indépendamment, ce qui en fait un cas parfait pour le parallélisme GPU.
 
-#### Comment cela se traduit sur les threads GPU
+#### Comment cela se traduit en threads GPU
 
-Contrairement à l'addition de vecteurs (1D), la multiplication matricielle produit une **sortie 2D**, nous utilisons donc une **grille 2D de threads** :
+Contrairement à l'addition de vecteurs (1D), la multiplication de matrices produit une **sortie 2D**, nous utilisons donc une **grille de threads 2D** :
 
-| | Addition de vecteurs | Multiplication matricielle |
+| | Addition de vecteurs | Multiplication de matrices |
 |---|---|---|
 | **Forme de sortie** | Tableau 1D | Matrice 2D (M×K) |
 | **Mappage des threads** | 1 thread → 1 élément | 1 thread → 1 élément de sortie |
 | **Modèle de lancement** | Grille 1D : `(grid_x, 1, 1)` | Grille 2D : `(grid_x, grid_y, 1)` |
 | **Taille de bloc** | `(256, 1, 1)` | `(16, 16, 1)` = 256 threads |
 
-Chaque thread calcule un élément de la matrice de sortie C. Le thread à la position `(row, col)` calcule `C[row][col]` en multipliant la ligne correspondante de A avec la colonne correspondante de B.
+Chaque thread calcule un élément de la matrice de sortie C. Le thread en position `(row, col)` calcule `C[row][col]` en multipliant la ligne correspondante de A avec la colonne correspondante de B.
 
 **Disposition mémoire** : La mémoire GPU est plate (1D), mais les matrices sont stockées ligne par ligne. Pour accéder à `A[row][col]`, le kernel utilise `A[row * N + col]`.
 
@@ -1063,7 +1059,7 @@ Chaque thread calcule un élément de la matrice de sortie C. Le thread à la po
 Comme pour le tutoriel 1, le kernel est écrit sous forme de chaîne C++ brute dans Python et compilé à l'exécution via le JIT intégré de PyTorch.
 
 
-Pour utiliser [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), assurez-vous qu'il est téléchargé et exécutez :
+Pour utiliser [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py), assurez-vous qu'il est téléchargé, puis exécutez :
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1123,7 +1119,7 @@ print(f"Max error vs torch.mm: {max_err:.6f}")
 Le script vérifie le résultat par rapport à `torch.mm` avec une petite tolérance. L'arithmétique en virgule flottante sur les GPU peut produire de légères différences numériques par rapport aux implémentations CPU en raison de l'ordre de réduction parallèle.
 
 <!-- @os:linux -->
-**Résultat attendu :**[Les chiffres de performance varieront]
+**Résultat attendu :** [Les chiffres de performance varieront]
 ```
 Elapsed time: 2.753s
 Max error vs torch.mm: 0.000160
@@ -1310,10 +1306,10 @@ $code | python -
 ---
 #### Approche B : Extension C++
 
-La deuxième approche est plus manuelle : écrire le kernel et la liaison Python dans un seul fichier `.cu`, le compiler nativement avec le système de build de PyTorch, et l'importer dans Python.
+La seconde approche est plus manuelle : écrivez le kernel et la liaison Python dans un seul fichier `.cu`, compilez-le nativement à l'aide du système de build de PyTorch, puis importez-le dans Python.
 
 <!-- @os:windows -->
-> **Remarque** : L'approche par extension C++ nécessite l'environnement de build Visual Studio C++, car PyTorch compile le fichier source `.cu` en un module d'extension natif `.pyd`. La construction de cette extension native dépend de la chaîne d'outils Microsoft C++ (compilateur, éditeur de liens et outils de build) fournie par Visual Studio. Exécutez les commandes d'activation de Visual Studio de la section configuration avant de compiler l'extension.
+> **Remarque** : L'approche par extension C++ nécessite l'environnement de build Visual Studio C++, car PyTorch compile le fichier source `.cu` en un module d'extension natif `.pyd`. La construction de cette extension native dépend de la chaîne d'outils C++ de Microsoft (compilateur, éditeur de liens et outils de build) fournie par Visual Studio. Exécutez les commandes d'activation de Visual Studio de la section de configuration avant de compiler l'extension.
 <!-- @os:end -->
 
 Téléchargez les fichiers suivants si ce n'est pas déjà fait :
@@ -1332,7 +1328,7 @@ Téléchargez les fichiers suivants si ce n'est pas déjà fait :
 | [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Script Python qui exécute les artefacts compilés |
 <!-- @os:end -->
 
-#### **Étape 1 : Le kernel, le lanceur et la liaison** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **Étape 1 : Le kernel, le lanceur et la liaison** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)) :
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1372,11 +1368,11 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 }
 ```
 
-Comparé à `add_one_launcher` dans la Marche à suivre 1, le lanceur ici :
+Par rapport à `add_one_launcher` dans le Tutoriel 1, le lanceur ici :
 - Prend deux tenseurs d'entrée au lieu d'un seul
-- Dérive les trois dimensions (M, N, K) à partir des formes des tenseurs, sans transmission manuelle de la taille depuis Python
-- Alloue et renvoie le tenseur de sortie C, plutôt que de le modifier en place
-- Utilise `dim3` à la fois pour la grille et le bloc afin d'exprimer la forme de lancement en 2D
+- Déduit les trois dimensions (M, N, K) à partir des formes des tenseurs, sans passage manuel des tailles depuis Python
+- Alloue et renvoie le tenseur de sortie C, plutôt que de le modifier sur place
+- Utilise `dim3` à la fois pour la grille et le bloc afin d'exprimer la forme de lancement 2D
 
 #### **Étape 2 : Compilation**
 ```bash
@@ -1395,7 +1391,7 @@ Cela produit les fichiers suivants :
 - `matmul_kernel.hip` : le code source HIP généré par la hipification du fichier `.cu` ; c'est ce que `hipcc` a réellement compilé
 <!-- @os:end -->
 
-#### **Étape 3 : Utilisation depuis Python** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
+#### **Étape 3 : Utilisation depuis Python** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)) :
 Exécutez ce script pour voir le kernel en action :
 ```bash
 cd Matrix_Multiplication # if not already in directory
@@ -1408,11 +1404,11 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Excellent ! Vous venez d'implémenter la multiplication matricielle sur le GPU.** Il s'agit d'une étape majeure, car la multiplication matricielle constitue le pilier des opérations modernes d'apprentissage automatique telles que :
+**Excellent ! Vous venez d'implémenter la multiplication matricielle sur le GPU.** Il s'agit d'une étape importante, car la multiplication matricielle est le pilier des opérations modernes de machine learning telles que :
 - Les couches de réseaux de neurones
 - Les mécanismes d'attention
 - Les embeddings
-- Les transformeurs
+- Les transformers
 
 <!-- @os:linux -->
 <!-- @test:id=matmul-extension-linux timeout=600 hidden=True setup=activate-venv -->
@@ -1565,13 +1561,13 @@ finally {
 Vous avez appris à écrire, compiler et lancer des kernels GPU en utilisant à la fois la compilation JIT et les extensions C++ pour des opérations parallèles de base.
 
 **Optimisations de performance :**
-- **Tuilage en mémoire partagée** - Mise en cache de blocs de données pour réduire les accès à la mémoire globale
-- **Coalescence mémoire** - Optimisation des schémas d'accès mémoire pour la bande passante
+- **Tuilage en mémoire partagée (shared memory tiling)** - Mettre en cache des blocs de données pour réduire les accès à la mémoire globale
+- **Coalescence mémoire** - Optimiser les schémas d'accès mémoire pour la bande passante
 
 **Algorithmes du monde réel :**
-- **Convolution 2D** - Un petit filtre (kernel) glisse sur une image, calculant chaque pixel de sortie à partir d'une somme pondérée des pixels voisins. Cela introduit les calculs de stencil et le tuilage en mémoire partagée, où les threads réutilisent des régions d'image se chevauchant pour réduire les accès à la mémoire globale.
-- **Fonction Softmax** : Softmax convertit un vecteur de nombres en probabilités dont la somme vaut 1, couramment utilisée dans les sorties des réseaux de neurones. L'implémenter efficacement sur GPU introduit les réductions parallèles et les techniques de stabilité numérique lors du traitement de grands vecteurs.
+- **Convolution 2D** - Un petit filtre (kernel) se déplace sur une image, calculant chaque pixel de sortie à partir d'une somme pondérée des pixels voisins. Cela introduit les calculs de type stencil et le tuilage en mémoire partagée, où les threads réutilisent des régions d'image se chevauchant afin de réduire les accès à la mémoire globale.
+- **Fonction Softmax** : Softmax convertit un vecteur de nombres en probabilités dont la somme vaut 1, couramment utilisée dans les sorties de réseaux de neurones. L'implémenter efficacement sur GPU introduit des réductions parallèles et des techniques de stabilité numérique lors du traitement de grands vecteurs.
 
-**Considérations de production :**
+**Considérations pour la production :**
 - **Gestion des erreurs** - Vérification des limites et gestion des périphériques
 - **Intégration à PyTorch** - Opérateurs personnalisés avec prise en charge de l'autograd
