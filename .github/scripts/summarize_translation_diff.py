@@ -6,9 +6,9 @@
 
 Reads the list of changed file paths (one per line) on stdin — the output of
 `git diff --name-only` restricted to `auto-translations/` — and prints a markdown
-summary of WHAT changed: how many locales, how many prose files (README /
-platform.md) vs title/description files (playbook.json) vs rescored-only
-manifests, and which playbooks were touched.
+summary of WHAT changed: how many locales, how many prose files (playbook
+README / platform.md and dependencies/*.md) vs title/description files
+(playbook.json) vs rescored-only manifests, and which playbooks were touched.
 
 This exists because the auto-opened translation PR previously carried a bland
 one-line body; the reviewer had to open hundreds of files to see what a run
@@ -27,11 +27,11 @@ PROSE_FILES = {"README.md", "platform.md"}
 def summarize(paths: list[str]) -> str:
     locales: set[str] = set()
     prose: set[str] = set()          # "<locale>/<playbook-or-dep>/<file>"
+    dep_prose: set[str] = set()      # subset of prose: dependencies/*.md
     titles: set[str] = set()         # playbook.json (title/description)
     manifest_locales: set[str] = set()
     content_locales: set[str] = set()  # locales with a real prose/title/dep change
     playbooks: set[str] = set()
-    deps_touched = False
     other = 0
 
     for raw in paths:
@@ -53,9 +53,12 @@ def summarize(paths: list[str]) -> str:
         content_locales.add(locale)
         # <locale>/dependencies/<file>
         if len(parts) >= 2 and parts[1] == "dependencies":
-            deps_touched = True
-            if base in PROSE_FILES:
+            # Dependency docs (lemonade.md, podman.md, ...) are translated prose too.
+            if base.endswith(".md"):
                 prose.add(rel)
+                dep_prose.add(rel)
+            else:
+                other += 1
             continue
         # <locale>/<category>/<playbook>/<file>
         if len(parts) >= 4 and parts[1] in ("core", "supplemental"):
@@ -73,16 +76,16 @@ def summarize(paths: list[str]) -> str:
     if locales:
         shown = ", ".join(sorted(locales))
         lines.append(f"- **Locales:** {len(locales)} ({shown})")
+    label = "Prose (README / platform.md / dependency docs)"
     if prose:
-        lines.append(f"- **Prose (README / platform.md):** {len(prose)} file(s)")
+        detail = f" ({len(dep_prose)} dependency doc(s))" if dep_prose else ""
+        lines.append(f"- **{label}:** {len(prose)} file(s){detail}")
     else:
-        lines.append("- **Prose (README / platform.md):** none")
+        lines.append(f"- **{label}:** none")
     if titles:
         lines.append(
             f"- **Titles & descriptions (playbook.json):** {len(titles)} file(s)"
         )
-    if deps_touched:
-        lines.append("- **Shared dependency content:** updated")
     # Locales whose manifest changed but had no prose/title/dep change: a pure
     # quality re-score (e.g. a judge-model bump), not a content change.
     rescore_only = manifest_locales - content_locales

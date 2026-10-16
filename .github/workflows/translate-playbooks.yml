@@ -203,8 +203,14 @@ jobs:
               TRIGGER="$TRIGGER Shared dependency files also changed."
             fi
           fi
+          # The summary is cosmetic: if it can't be built, warn and fall back to a
+          # stub so a successful translation run never fails over it.
           WHAT=$(git diff --name-only HEAD~1 HEAD -- auto-translations \
-            | python .github/scripts/summarize_translation_diff.py)
+            | python .github/scripts/summarize_translation_diff.py) || WHAT=""
+          if [ -z "$WHAT" ]; then
+            echo "::warning::Could not build the translation diff summary; opening the PR without it."
+            WHAT="_Change summary unavailable; see the Files changed tab._"
+          fi
           {
             echo "summary<<SUMMARY_EOF"
             echo "### Trigger"
@@ -213,7 +219,8 @@ jobs:
             echo ""
             echo "$WHAT"
             echo "SUMMARY_EOF"
-          } >> "$GITHUB_OUTPUT"
+          } >> "$GITHUB_OUTPUT" \
+            || echo "::warning::Could not write the summary output; PR will have no summary."
 
   # PR/issue creation runs on a GitHub-hosted runner: `gh` is preinstalled and
   # api.github.com is reachable. The self-hosted `translation` runner has neither
