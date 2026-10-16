@@ -185,16 +185,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
-      # Free the GPU before every job. A prior playbook can strand VRAM on the
-      # shared runner two ways: (a) a lemonade/LM Studio/ollama model left loaded
-      # when its unload teardown is skipped (an earlier test in that playbook
-      # failed), or (b) a crashed TRAINING job whose python process still holds
-      # the GPU. Both OOM/wedge the next job. The unloads below handle (a); the
-      # stray-process reclaim handles (b) (the gap left by #613, which only
-      # unloaded inference servers). This runs regardless of what ran before.
-      # Best-effort and time-bounded: a stuck cleanup must never wedge the job
-      # (see the ollama note below), so these steps are continue-on-error with a
-      # short timeout.
+      # Free the GPU before every job: (a) unload any loaded models, and
+      # (b) reclaim VRAM from stray GPU processes left by a prior job.
+      # Best-effort and time-bounded, so a stuck cleanup never wedges the job.
       - name: Free GPU before tests (Linux)
         if: matrix.platform == 'linux'
         shell: bash
@@ -210,46 +203,64 @@ jobs:
           if pgrep -x ollama >/dev/null 2>&1; then
             ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
           fi
-          # Reclaim VRAM stranded by a crashed TRAINING job (e.g. pytorch/unsloth/
-          # llama-factory finetuning). The inference unloads above do not touch a
-          # bare python process that still holds the GPU, so the heavy finetuning
-          # step OOMs or hangs (silent 600s timeout) on the shared dGPU runners.
-          # Safe to kill here: this step runs BEFORE our own tests launch, so any
-          # process holding the GPU is a prior-job orphan; and runners.json gives
-          # one job per box, so there is no concurrent sibling to disturb. Still,
-          # we explicitly exclude our own process tree and only target user-owned
-          # python (never root/system, so the runner agent and drivers are safe).
-          if command -v fuser >/dev/null 2>&1; then
-            echo "GPU VRAM before reclaim:"; (command -v rocm-smi >/dev/null 2>&1 && rocm-smi --showmeminfo vram) || echo "  (rocm-smi unavailable)"
-            # Build the ancestor set of this shell so we never kill ourselves.
-            self=$$; ancestors=" $self "; p=$self
-            while p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$p" ] && [ "$p" != 0 ]; do
-              ancestors="$ancestors$p "
+          # Kill stray user-owned python processes still holding the GPU. Runs
+          # before our tests, and never touches our own process tree or other
+          # users' processes. Uses /proc and sysfs so it does not depend on
+          # fuser or rocm-smi being installed.
+          log_vram() {
+            local smi
+            smi=$(command -v rocm-smi || ls /opt/rocm*/bin/rocm-smi 2>/dev/null | head -n1) || true
+            if [ -n "$smi" ] && "$smi" --showmeminfo vram 2>/dev/null; then
+              return
+            fi
+            local d found=0
+            for d in /sys/class/drm/card*/device; do
+              [ -r "$d/mem_info_vram_used" ] || continue
+              found=1
+              echo "  $d: $(( $(cat "$d/mem_info_vram_used") / 1048576 )) MiB used of $(( $(cat "$d/mem_info_vram_total") / 1048576 )) MiB"
             done
-            # PIDs holding the GPU compute (/dev/kfd) or render (/dev/dri/renderD*) nodes.
-            pids=$( { fuser /dev/kfd /dev/dri/renderD* 2>/dev/null | tr -s ' ' '\n'; } | grep -E '^[0-9]+$' | sort -u )
-            me=$(id -un)
-            for pid in $pids; do
-              case "$ancestors" in *" $pid "*) continue ;; esac
-              comm=$(ps -o comm= -p "$pid" 2>/dev/null || true)
-              owner=$(ps -o user= -p "$pid" 2>/dev/null | tr -d ' ' || true)
-              # Only user-owned python training processes; leave root/system alone.
-              if [ "$owner" = "$me" ]; then
-                case "$comm" in
-                  python|python3|pt_main_thread)
-                    echo "Killing stray GPU process $pid ($comm, owner $owner)"
-                    kill -TERM "$pid" 2>/dev/null || true
-                    ;;
-                esac
-              fi
-            done
+            [ "$found" = 1 ] || echo "  (no VRAM info available: rocm-smi and sysfs both missing)"
+          }
+
+          echo "GPU VRAM before reclaim:"; log_vram
+          # Ancestor set of this shell so we never kill ourselves.
+          self=$$; ancestors=" $self "; p=$self
+          while p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$p" ] && [ "$p" != 0 ]; do
+            ancestors="$ancestors$p "
+          done
+          # PIDs holding the GPU compute (/dev/kfd) or render (/dev/dri/renderD*) nodes.
+          pids=$(
+            for fd in /proc/[0-9]*/fd/*; do
+              case "$(readlink "$fd" 2>/dev/null)" in
+                /dev/kfd|/dev/dri/renderD*) pid=${fd#/proc/}; echo "${pid%%/*}" ;;
+              esac
+            done | sort -u
+          )
+          me=$(id -un)
+          termed=""
+          for pid in $pids; do
+            case "$ancestors" in *" $pid "*) continue ;; esac
+            comm=$(ps -o comm= -p "$pid" 2>/dev/null || true)
+            owner=$(ps -o user= -p "$pid" 2>/dev/null | tr -d ' ' || true)
+            # Only user-owned python training processes; leave root/system alone.
+            if [ "$owner" = "$me" ]; then
+              case "$comm" in
+                python|python3|pt_main_thread)
+                  echo "Killing stray GPU process $pid ($comm, owner $owner)"
+                  kill -TERM "$pid" 2>/dev/null || true
+                  termed="$termed $pid"
+                  ;;
+              esac
+            fi
+          done
+          if [ -n "$termed" ]; then
             sleep 3
-            for pid in $pids; do
-              case "$ancestors" in *" $pid "*) continue ;; esac
+            # Escalate only on the PIDs we sent SIGTERM to.
+            for pid in $termed; do
               kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
             done
-            echo "GPU VRAM after reclaim:"; (command -v rocm-smi >/dev/null 2>&1 && rocm-smi --showmeminfo vram) || echo "  (rocm-smi unavailable)"
           fi
+          echo "GPU VRAM after reclaim:"; log_vram
 
       - name: Free GPU before tests (Windows)
         if: matrix.platform == 'windows'
