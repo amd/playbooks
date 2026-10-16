@@ -16,6 +16,7 @@ localized-playbooks/**  text eol=lf
 *.jpeg binary
 *.gif  binary
 *.webp binary
+*.avif binary
 *.pdf  binary
 *.wav  binary
 *.zip  binary

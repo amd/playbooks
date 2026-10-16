@@ -47,6 +47,7 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## Downloading Models
 
@@ -57,10 +58,12 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
 ## Chatting with an LLM

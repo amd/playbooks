@@ -1,0 +1,288 @@
+{
+    "name": "Financial news with Lemonade",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          320,
+          328
+        ],
+        "id": "0c40282b-5f50-4fd6-94ec-d3dcbdb9f10d",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "url": "https://www.news.cn/fortune/index.htm",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "87c304c3-b21f-4b92-9e7c-c422bd587e1c",
+        "name": "Fetch Financial News Webpage\t1",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          544,
+          328
+        ],
+        "notesInFlow": true,
+        "typeVersion": 4.2,
+        "notes": "Url : https://www.news.cn/fortune/index.htm"
+      },
+      {
+        "parameters": {},
+        "id": "baa5bf14-3521-48f5-b3e2-4a72c2165332",
+        "name": "Delay to Ensure Page Load\t1",
+        "type": "n8n-nodes-base.wait",
+        "position": [
+          768,
+          328
+        ],
+        "webhookId": "adff7750-f9b0-4796-915d-9c28dcc878b0",
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "rollingHeadlines",
+                "cssSelector": "ul.infoList li a",
+                "returnValue": "text",
+                "returnArray": true
+              },
+              {
+                "key": "mainHeadlines",
+                "cssSelector": "#recommendDepth .column-center-item .tit a",
+                "returnValue": "text",
+                "returnArray": true
+              },
+              {
+                "key": "dataHeadlines",
+                "cssSelector": ".whlft .lftimg h3 a",
+                "returnValue": "text",
+                "returnArray": true
+              },
+              {
+                "key": "insightHeadlines",
+                "cssSelector": ".whrt h3 a, .whrt .rtlist li a",
+                "returnValue": "text",
+                "returnArray": true
+              }
+            ]
+          },
+          "options": {
+            "cleanUpText": true
+          }
+        },
+        "id": "d6f85a25-fc4a-46bb-a73f-4868828ddd90",
+        "name": "Extract News Headlines & Text\t1",
+        "type": "n8n-nodes-base.html",
+        "position": [
+          992,
+          328
+        ],
+        "notesInFlow": true,
+        "typeVersion": 1.2,
+        "notes": "Extract selected Xinhua Finance headlines."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "5412a5ee-dbbe-4fcc-98a5-6fafc37b94d1",
+                "name": "All data",
+                "type": "string",
+                "value": "=新华网财经新闻标题：\n\n{{ [\n  ...($json.rollingHeadlines ?? []),\n  ...($json.mainHeadlines ?? []),\n  ...($json.dataHeadlines ?? []),\n  ...($json.insightHeadlines ?? [])\n]\n  .map(item => String(item).replace(/\\s+/g, ' ').trim())\n  .filter(Boolean)\n  .filter((item, index, arr) => arr.indexOf(item) === index)\n  .slice(0, 35)\n  .map((item, index) => `${index + 1}. ${item}`)\n  .join('\\n') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "1fc334d6-8186-43f4-b880-b78749645221",
+        "name": "Clean Extracted News Data\t1",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1216,
+          328
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=请总结以下中文财经新闻：\n\n{{ $json['All data'] }}",
+          "hasOutputParser": true,
+          "options": {
+            "systemMessage": "你是一名 AI 财经分析师。你的职责是阅读、理解并总结今天的重要财经新闻。目标是为投资者提供清晰、简洁的市场概览，以支持更好的投资决策。\n\n投资者展望\n今天的新闻指向[偏多/偏空/中性]的市场情绪。请关注明天的[经济事件/财报]，这可能会影响市场方向。\n\n要求：\n1. 全部输出使用简体中文。\n2. 只基于输入新闻内容总结，不要编造原文没有出现的信息。\n3. 如果输入内容不足，请明确说明“原文信息不足”。\n4. 如果系统要求输出 JSON，请只输出符合结构要求的 JSON，不要在 JSON 外添加解释。"
+          }
+        },
+        "id": "218d120d-53ce-4572-8f65-e3fe34344e6d",
+        "name": "AI Financial News Summarizer\t1",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "position": [
+          1440,
+          328
+        ],
+        "typeVersion": 1.6
+      },
+      {
+        "parameters": {
+          "model": "Qwen3.5-35B-A3B-GGUF",
+          "options": {
+            "maxTokens": 1024
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatLemonade",
+        "typeVersion": 1,
+        "position": [
+          1456,
+          560
+        ],
+        "id": "f70c3f05-cf68-4906-9635-f1787074746a",
+        "name": "Lemonade Chat Model1",
+        "credentials": {
+          "lemonadeApi": {
+            "id": "1aZHn9bNeMhAkXlz",
+            "name": "Lemonade account 2"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"summary\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+        },
+        "id": "c67531cc-cdb7-477c-a7e5-7d3356114fdb",
+        "name": "Structured Output Parser1",
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "position": [
+          1576,
+          552
+        ],
+        "typeVersion": 1.2
+      },
+      {
+        "parameters": {
+          "operation": "toText",
+          "sourceProperty": "=",
+          "binaryPropertyName": "=data {{ $json.output }}",
+          "options": {
+            "fileName": "test"
+          }
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1,
+        "position": [
+          1792,
+          328
+        ],
+        "id": "01244f07-05ed-4f20-a94c-27f6594e7281",
+        "name": "Convert to File"
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Fetch Financial News Webpage\t1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Financial News Webpage\t1": {
+        "main": [
+          [
+            {
+              "node": "Delay to Ensure Page Load\t1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delay to Ensure Page Load\t1": {
+        "main": [
+          [
+            {
+              "node": "Extract News Headlines & Text\t1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract News Headlines & Text\t1": {
+        "main": [
+          [
+            {
+              "node": "Clean Extracted News Data\t1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Clean Extracted News Data\t1": {
+        "main": [
+          [
+            {
+              "node": "AI Financial News Summarizer\t1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Financial News Summarizer\t1": {
+        "main": [
+          [
+            {
+              "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lemonade Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Financial News Summarizer\t1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser1": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "AI Financial News Summarizer\t1",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to File": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "active": false,
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "tags": []
+  }

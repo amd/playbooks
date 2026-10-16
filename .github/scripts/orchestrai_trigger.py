@@ -87,6 +87,9 @@ def apply_env_overrides(cfg):
     therock = os.environ.get("ORCHESTRAI_THEROCK_URL")
     if therock:
         prov["therock_url"] = therock
+    windows_therock = os.environ.get("ORCHESTRAI_WINDOWS_THEROCK_URL")
+    if windows_therock:
+        prov["windows_therock_url"] = windows_therock
     linux_driver = os.environ.get("ORCHESTRAI_LINUX_DRIVER_SOURCE")
     if linux_driver:
         prov.setdefault("linux_kernel_driver", {})["source"] = linux_driver
@@ -190,6 +193,9 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "machines_per_hw_group": machines_per_hw_group,
         },
     }
+
+
+WINDOWS_THEROCK_SCRIPT = "InstallationScripts/gfx/windows-therock-tarball.ps1"
 
 
 def make_builds(batch, cfg):
@@ -337,6 +343,9 @@ def make_builds(batch, cfg):
             plats = entry.get("platforms")
             if plats and platform not in plats:
                 continue
+            devs = entry.get("devices")
+            if devs and batch.get("arch") not in devs:
+                continue
             script = entry.get("script")
             if not script or script in seen:
                 continue
@@ -345,6 +354,15 @@ def make_builds(batch, cfg):
                 "script": script,
                 "reboot_after": bool(entry.get("reboot_after", False)),
             })
+
+    # TheRock is scheduled via extra_install_scripts (hipInfo for GPU isolation).
+    # The installer needs a Windows source, and THEROCK_PUBLISH_ENV=0 keeps it
+    # off the machine env/PATH so it can't leak into other playbooks.
+    if any(s["script"] == WINDOWS_THEROCK_SCRIPT for s in scripts):
+        url = prov.get("windows_therock_url", "")
+        if not url:
+            missing.append("ORCHESTRAI_WINDOWS_THEROCK_URL")
+        build_vars.update(THEROCK_URL=url, THEROCK_PUBLISH_ENV="0")
 
     builds = {"install_scripts": scripts, "vars": build_vars}
     return builds, missing

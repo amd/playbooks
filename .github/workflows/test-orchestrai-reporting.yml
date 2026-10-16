@@ -31,3 +31,5 @@ jobs:
         run: python3 .github/tests/test_orchestrai_trigger.py
       - name: Run OrchestrAI acquire-retry tests
         run: python3 .github/tests/test_orchestrai_acquire_retry.py
+      - name: Run Windows TheRock provisioning tests
+        run: python3 .github/tests/test_orchestrai_windows_therock.py

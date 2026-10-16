@@ -53,6 +53,26 @@
         "linux": [],
         "windows": []
       },
+      "validate": {
+        "linux": {
+          "cmd": "lms --help >/dev/null && systemctl is-active --quiet lmstudio",
+          "expect_rc": 0
+        },
+        "windows": {
+          "script": "lmstudio.validate.ps1",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "lmstudio.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "lmstudio.install.ps1",
+          "timeout": 1200
+        }
+      },
       "versionable": true
     },
     "vllm": {
@@ -90,6 +110,18 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "windows": {
+          "cmd": "n8n --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "windows": {
+          "cmd": "npm install -g n8n",
+          "timeout": 1200
+        }
+      },
       "versionable": true
     },
     "vscode": {
@@ -104,6 +136,27 @@
       "preinstalled": {
         "linux": [],
         "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "code --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "script": "vscode.validate.ps1",
+          "timeout": 120,
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "vscode.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements --silent",
+          "timeout": 900
+        }
       },
       "versionable": true
     },
@@ -124,6 +177,26 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 2 http://127.0.0.1:13305/api/v1/health",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "lemonade.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "lemonade.install.ps1",
+          "timeout": 180
+        }
+      },
       "versionable": true
     },
     "lemonade-ready": {
@@ -136,6 +209,577 @@
         "linux": [],
         "windows": []
       }
+    },
+    "lemonade-models-gpt-oss-120b": {
+      "name": "GPT-OSS 120B Model (Lemonade)",
+      "description": "OpenAI GPT-OSS 120B MXFP4 GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gpt_oss_120b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q gpt-oss-120b-mxfp-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:gpt-oss-120b-mxfp-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-gpt-oss-120b",
+          "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lemonade-models-gpt-oss-120b",
+          "cmd": "lemonade pull gpt-oss-120b-mxfp-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B Model (Lemonade)",
+      "description": "OpenAI GPT-OSS 20B MXFP4 GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gpt_oss_20b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q gpt-oss-20b-mxfp4-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:gpt-oss-20b-mxfp4-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-gpt-oss-20b",
+          "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lemonade-models-gpt-oss-20b",
+          "cmd": "lemonade pull gpt-oss-20b-mxfp4-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-6-35b-a3b": {
+      "name": "Qwen3.6 35B A3B Model (Lemonade)",
+      "description": "Qwen3.6-35B-A3B GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_6_35b_a3b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.6-35B-A3B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.6-35B-A3B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-qwen3-6-35b-a3b",
+          "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lemonade-models-qwen3-6-35b-a3b",
+          "cmd": "lemonade pull Qwen3.6-35B-A3B-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-coder-30b": {
+      "name": "Qwen3-Coder 30B A3B Model (Lemonade)",
+      "description": "Qwen3-Coder-30B-A3B-Instruct GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_coder_30b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-qwen3-coder-30b",
+          "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lemonade-models-qwen3-coder-30b",
+          "cmd": "lemonade pull Qwen3-Coder-30B-A3B-Instruct-GGUF",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-gemma-4-e2b": {
+      "name": "Gemma-4 E2B Model (Lemonade)",
+      "description": "Gemma-4-E2B-it GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_gemma_4_e2b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Gemma-4-E2B-it-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Gemma-4-E2B-it-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-gemma-4-e2b",
+          "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
+          "timeout": 1800
+        },
+        "windows": {
+          "mirror": "lemonade-models-gemma-4-e2b",
+          "cmd": "lemonade pull Gemma-4-E2B-it-GGUF",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-5-4b": {
+      "name": "Qwen3.5 4B Model (Lemonade)",
+      "description": "Qwen3.5-4B GGUF model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_qwen3_5_4b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q Qwen3.5-4B-GGUF",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3.5-4B-GGUF",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-qwen3-5-4b",
+          "cmd": "lemonade pull Qwen3.5-4B-GGUF",
+          "timeout": 1800
+        },
+        "windows": {
+          "mirror": "lemonade-models-qwen3-5-4b",
+          "cmd": "lemonade pull Qwen3.5-4B-GGUF",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-qwen3-4b-hybrid": {
+      "name": "Qwen3 4B Hybrid Model (Lemonade)",
+      "description": "Qwen3-4B NPU+GPU hybrid model served by Lemonade (Ryzen AI)",
+      "category": "model",
+      "platforms": [
+        "windows"
+      ],
+      "file": "lemonade_models_qwen3_4b_hybrid.md",
+      "preinstalled": {
+        "windows": []
+      },
+      "validate": {
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:Qwen3-4B-Hybrid",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "windows": {
+          "mirror": "lemonade-models-qwen3-4b-hybrid",
+          "cmd": "lemonade pull Qwen3-4B-Hybrid",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "lemonade-models-sdxl-turbo": {
+      "name": "SDXL-Turbo Model (Lemonade)",
+      "description": "SDXL-Turbo image-generation model served by Lemonade",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lemonade_models_sdxl_turbo.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "curl -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | grep -q SDXL-Turbo",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:13305/api/v1/models | findstr /C:SDXL-Turbo",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lemonade-models-sdxl-turbo",
+          "cmd": "lemonade pull SDXL-Turbo",
+          "timeout": 1800
+        },
+        "windows": {
+          "mirror": "lemonade-models-sdxl-turbo",
+          "cmd": "lemonade pull SDXL-Turbo",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
+    },
+    "uv": {
+      "name": "uv",
+      "description": "Fast Python package/environment manager used by Agent Canvas",
+      "category": "runtime",
+      "platforms": [
+        "linux"
+      ],
+      "file": "uv.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; uv --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -LsSf https://astral.sh/uv/install.sh | sh",
+          "timeout": 300
+        }
+      },
+      "versionable": true
+    },
+    "agent-canvas": {
+      "name": "Agent Canvas",
+      "description": "OpenHands browser UI / CLI (npm @openhands/agent-canvas); requires Node.js >= 24",
+      "category": "app",
+      "platforms": [
+        "linux"
+      ],
+      "file": "agent_canvas.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; agent-canvas --version",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "npm config set prefix \"$HOME/.npm-global\" && npm install -g @openhands/agent-canvas@1.5.2",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "ollama": {
+      "name": "Ollama",
+      "description": "Local LLM runner with a simple CLI and model library",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "ollama.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "ollama --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "Get-Command ollama -ErrorAction Stop | Out-Null",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://ollama.com/install.sh | sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "ollama.install.ps1",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "ollama-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B Model (Ollama)",
+      "description": "OpenAI GPT-OSS 20B model pulled into Ollama",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "ollama_models_gpt_oss_20b.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "ollama list | grep -q 'gpt-oss:20b'",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "curl.exe -sf --max-time 5 http://127.0.0.1:11434/api/tags | findstr /C:gpt-oss:20b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "ollama-models-gpt-oss-20b",
+          "script": "ollama-models-gpt-oss-20b.install.sh",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "ollama-models-gpt-oss-20b",
+          "script": "ollama-models-gpt-oss-20b.install.ps1",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hermes": {
+      "name": "Hermes",
+      "description": "Nous Research Hermes agent CLI",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hermes.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; hermes --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'export PATH=$HOME/.local/bin:$PATH; hermes --version'; exit $LASTEXITCODE",
+          "timeout": 120,
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup'; exit $LASTEXITCODE",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "distrobox": {
+      "name": "Distrobox toolchain",
+      "description": "podman, distrobox, and pipx used to run containerized toolboxes",
+      "category": "framework",
+      "platforms": [
+        "linux"
+      ],
+      "file": "distrobox.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "script": "distrobox.validate.sh",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "sudo apt-get update && sudo apt-get install -y podman distrobox pipx",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "ds4-toolbox-image": {
+      "name": "ds4 toolbox container image",
+      "description": "Container image used by ds4-cockpit to run the ds4 inference engine",
+      "category": "model",
+      "platforms": [
+        "linux"
+      ],
+      "file": "ds4_toolbox_image.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "podman pull docker.io/kyuz0/strix-halo-ds4-toolbox:rocm-7.2.4 && podman images --format '{{.Repository}}:{{.Tag}}' | grep -i 'strix-halo-ds4-toolbox'",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "ds4-cockpit": {
+      "name": "ds4-cockpit",
+      "description": "Terminal UI for running DeepSeek V4 Flash toolboxes on Strix Halo",
+      "category": "app",
+      "platforms": [
+        "linux"
+      ],
+      "file": "ds4_cockpit.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.local/bin:$PATH\"; command -v ds4-cockpit",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "ds4-cockpit.install.sh",
+          "timeout": 900
+        }
+      },
+      "versionable": true
+    },
+    "openclaw": {
+      "name": "OpenClaw",
+      "description": "Agentic coding assistant that connects to a local Lemonade server",
+      "category": "app",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "openclaw.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; openclaw --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'export PATH=$HOME/.npm-global/bin:$HOME/.local/bin:$PATH; openclaw --version'; exit $LASTEXITCODE",
+          "timeout": 120,
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "cmd": "curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard",
+          "timeout": 900
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard'; exit $LASTEXITCODE",
+          "timeout": 900
+        }
+      },
+      "versionable": true
     },
     "gaia": {
       "name": "GAIA",
@@ -169,6 +813,26 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "test -f /opt/model_cache/ComfyUI/models/diffusion_models/z_image_turbo_bf16.safetensors && test -f /opt/model_cache/ComfyUI/models/text_encoders/qwen_3_4b.safetensors && test -f /opt/model_cache/ComfyUI/models/vae/ae.safetensors",
+          "expect_rc": 0
+        },
+        "windows": {
+          "script": "comfyui-models.validate.ps1",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "comfyui-models.install.sh",
+          "timeout": 3600
+        },
+        "windows": {
+          "script": "comfyui-models.install.ps1",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-gpt-oss-120b": {
@@ -188,6 +852,28 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i gpt-oss-120b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I gpt-oss-120b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lmstudio-models-gpt-oss-120b",
+          "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lmstudio-models-gpt-oss-120b",
+          "cmd": "lms get ggml-org/gpt-oss-120b-GGUF",
+          "timeout": 3600
+        }
+      },
       "versionable": false
     },
     "lmstudio-models-qwen3-9b": {
@@ -202,6 +888,69 @@
       "preinstalled": {
         "linux": [],
         "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i qwen3.5-9b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I qwen3.5-9b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lmstudio-models-qwen3-9b",
+          "cmd": "lms get qwen3.5-9b --yes",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lmstudio-models-qwen3-9b",
+          "cmd": "lms get qwen3.5-9b --yes",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "lmstudio-models-qwen3-coder-30b": {
+      "name": "Qwen3-Coder 30B Model",
+      "description": "Qwen3-Coder-30B-A3B model for LM Studio",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "lmstudio_models_qwen3_coder_30b.md",
+      "preinstalled": {
+        "linux": [
+          "halo_box"
+        ],
+        "windows": [
+          "halo_box"
+        ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "lms ls --llm | grep -i qwen3-coder-30b",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "lms ls --llm | findstr /I qwen3-coder-30b",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "lmstudio-models-qwen3-coder-30b",
+          "cmd": "lms get qwen3-coder-30b --yes",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "lmstudio-models-qwen3-coder-30b",
+          "cmd": "lms get qwen3-coder-30b --yes",
+          "timeout": 3600
+        }
       },
       "versionable": false
     },
@@ -222,6 +971,16 @@
           "halo_box"
         ]
       },
+      "validate": {
+        "linux": {
+          "cmd": "test -d /sys/module/amdgpu && test -r /dev/kfd && test -w /dev/kfd && ls /dev/dri/renderD* >/dev/null",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "exit [int](-not (Test-Path 'C:\\Program Files\\AMD\\CNext\\CNext\\RadeonSoftware.exe'))",
+          "expect_rc": 0
+        }
+      },
       "versionable": true
     },
     "nodejs": {
@@ -241,6 +1000,26 @@
         "windows": [
           "halo_box"
         ]
+      },
+      "validate": {
+        "linux": {
+          "cmd": "node --version && npm --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "script": "nodejs.validate.ps1",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "nodejs.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "nodejs.install.ps1",
+          "timeout": 900
+        }
       },
       "versionable": true
     },
@@ -282,6 +1061,7 @@
       "description": "Container management tool for running OCI containers",
       "category": "framework",
       "platforms": [
+        "windows",
         "linux"
       ],
       "file": "podman.md",
@@ -291,7 +1071,62 @@
         ],
         "windows": []
       },
+      "validate": {
+        "linux": {
+          "cmd": "podman --version && podman-compose --version",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 --exec bash -c 'command -v podman'; exit $LASTEXITCODE",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "podman.install.sh",
+          "timeout": 600
+        },
+        "windows": {
+          "cmd": "wsl -d Ubuntu-24.04 -u root --exec bash -c 'apt-get update && apt-get install -y podman'; exit $LASTEXITCODE",
+          "timeout": 900
+        }
+      },
       "versionable": true
+    },
+    "docker": {
+      "name": "Docker",
+      "description": "Container engine: Docker Desktop on Windows, Docker Engine on Linux",
+      "category": "framework",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "docker.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "validate": {
+        "linux": {
+          "cmd": "docker version --format '{{.Server.Version}}'",
+          "expect_rc": 0
+        },
+        "windows": {
+          "cmd": "docker version --format '{{.Server.Version}}'",
+          "expect_rc": 0
+        }
+      },
+      "install": {
+        "linux": {
+          "script": "docker.install.sh",
+          "timeout": 900
+        },
+        "windows": {
+          "script": "docker.install.ps1",
+          "timeout": 1800
+        }
+      },
+      "versionable": false
     },
     "software-update": {
       "name": "Software Updates",
@@ -305,6 +1140,330 @@
       "preinstalled": {
         "linux": [],
         "windows": []
+      },
+      "versionable": false
+    },
+    "hf-models-gpt-oss-20b": {
+      "name": "GPT-OSS 20B (Hugging Face)",
+      "description": "openai/gpt-oss-20b, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gpt-oss-20b"
+        },
+        "windows": {
+          "mirror": "hf-models-gpt-oss-20b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gpt-oss-20b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gpt-oss-20b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-qwen3-5-4b": {
+      "name": "Qwen3.5 4B (Hugging Face)",
+      "description": "Qwen/Qwen3.5-4B, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-qwen3-5-4b"
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-5-4b"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-qwen3-5-4b",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-5-4b",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-qwen3-4b-instruct-2507": {
+      "name": "Qwen3 4B Instruct 2507 (Hugging Face)",
+      "description": "Qwen/Qwen3-4B-Instruct-2507, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507"
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-qwen3-4b-instruct-2507",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-gemma-3-4b-it": {
+      "name": "Gemma 3 4B IT (Hugging Face)",
+      "description": "unsloth/gemma-3-4b-it, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gemma-3-4b-it"
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-3-4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gemma-3-4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-3-4b-it",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-gemma-4-e4b-it": {
+      "name": "Gemma 4 E4B IT (Hugging Face)",
+      "description": "unsloth/gemma-4-E4B-it, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-gemma-4-e4b-it"
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-4-e4b-it"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-gemma-4-e4b-it",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-gemma-4-e4b-it",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-seamless-m4t-v2-large": {
+      "name": "SeamlessM4T v2 Large (Hugging Face)",
+      "description": "facebook/seamless-m4t-v2-large, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-models-seamless-m4t-v2-large"
+        },
+        "windows": {
+          "mirror": "hf-models-seamless-m4t-v2-large"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-models-seamless-m4t-v2-large",
+          "timeout": 3600
+        },
+        "windows": {
+          "mirror": "hf-models-seamless-m4t-v2-large",
+          "timeout": 3600
+        }
+      },
+      "versionable": false
+    },
+    "hf-models-all-minilm-l6-v2": {
+      "name": "all-MiniLM-L6-v2 (Hugging Face)",
+      "description": "sentence-transformers/all-MiniLM-L6-v2, which the tests otherwise download from Hugging Face on first use",
+      "category": "model",
+      "platforms": [
+        "windows"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "windows": {
+          "mirror": "hf-models-all-minilm-l6-v2"
+        }
+      },
+      "install": {
+        "windows": {
+          "mirror": "hf-models-all-minilm-l6-v2",
+          "timeout": 1200
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-databricks-dolly-15k": {
+      "name": "databricks-dolly-15k dataset (Hugging Face)",
+      "description": "databricks/databricks-dolly-15k, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-databricks-dolly-15k"
+        },
+        "windows": {
+          "mirror": "hf-datasets-databricks-dolly-15k"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-databricks-dolly-15k",
+          "timeout": 600
+        },
+        "windows": {
+          "mirror": "hf-datasets-databricks-dolly-15k",
+          "timeout": 600
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-english-quotes": {
+      "name": "english_quotes dataset (Hugging Face)",
+      "description": "Abirate/english_quotes, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-english-quotes"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-english-quotes",
+          "timeout": 600
+        }
+      },
+      "versionable": false
+    },
+    "hf-datasets-finetome-100k": {
+      "name": "FineTome-100k dataset (Hugging Face)",
+      "description": "mlabonne/FineTome-100k, which the tests otherwise download from Hugging Face on first use",
+      "category": "dataset",
+      "platforms": [
+        "windows",
+        "linux"
+      ],
+      "file": "hf_models.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "optional": true,
+      "validate": {
+        "linux": {
+          "mirror": "hf-datasets-finetome-100k"
+        },
+        "windows": {
+          "mirror": "hf-datasets-finetome-100k"
+        }
+      },
+      "install": {
+        "linux": {
+          "mirror": "hf-datasets-finetome-100k",
+          "timeout": 600
+        },
+        "windows": {
+          "mirror": "hf-datasets-finetome-100k",
+          "timeout": 600
+        }
       },
       "versionable": false
     }
