@@ -33,3 +33,5 @@ jobs:
         run: python3 .github/tests/test_orchestrai_acquire_retry.py
       - name: Run Windows TheRock provisioning tests
         run: python3 .github/tests/test_orchestrai_windows_therock.py
+      - name: Run Windows driver selection tests
+        run: python3 .github/tests/test_orchestrai_windows_driver.py

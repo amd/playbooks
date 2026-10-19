@@ -21,6 +21,9 @@
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
 # points to the approved multi-architecture wheel index.
+# Required for default Windows provisioning: ORCHESTRAI_WINDOWS_DRIVER_URL
+# pins the released Adrenalin installer. ORCHESTRAI_WINDOWS_DRIVER=internal
+# explicitly opts back into ORCHESTRAI_WINDOWS_DRIVER_SOURCE (internal share).
 # All other settings live in .github/orchestrai-config.yml.
 
 name: Test Playbooks (OrchestrAI)
@@ -57,6 +60,15 @@ on:
         required: false
         type: string
         default: '1'
+      windows_driver:
+        description: 'Windows driver: default uses repo setting (released Adrenalin); internal uses the build share'
+        required: false
+        type: choice
+        default: default
+        options:
+          - default
+          - public
+          - internal
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
   # `!orc` or `!localized-orc` on it (see orchestrai-pr-command.yml) — that runs
@@ -197,6 +209,8 @@ jobs:
           ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON }}
           ORCHESTRAI_RYZENAI_NPU_XRT_URL: ${{ secrets.ORCHESTRAI_RYZENAI_NPU_XRT_URL }}
           ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
+          ORCHESTRAI_WINDOWS_DRIVER: ${{ (inputs.windows_driver != 'default' && inputs.windows_driver) || vars.ORCHESTRAI_WINDOWS_DRIVER || '' }}
+          ORCHESTRAI_WINDOWS_DRIVER_URL: ${{ vars.ORCHESTRAI_WINDOWS_DRIVER_URL }}
           # On a pull_request, test the PR's OWN code (same as the !orc path),
           # not the configured repo@main. These are empty on schedule/dispatch, so
           # orchestrai_trigger.py falls back to playbook_repo@main there. Fork PRs
