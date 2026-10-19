@@ -226,7 +226,7 @@ def _kill_process_tree(proc: subprocess.Popen) -> None:
                            capture_output=True, timeout=60, check=False)
     else:
         with contextlib.suppress(ProcessLookupError):
-            os.killpg(proc.pid, signal.SIGKILL)  # the step leads its own session
+            os.killpg(proc.pid, signal.SIGKILL)  # the step leads its own process group
 
 
 def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
@@ -247,13 +247,14 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         started = time.monotonic()
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
-                                start_new_session=(os.name != "nt"))
+                                # Own group (not session) so it keeps the terminal, e.g. for sudo.
+                                preexec_fn=None if os.name == "nt" else os.setpgrp)
         timed_out = False
         try:
             proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             timed_out = True
-        except BaseException:  # Ctrl-C/cancel: the step's own session doesn't get it
+        except BaseException:  # Ctrl-C/SIGTERM: the step's own group doesn't get it
             _kill_process_tree(proc)
             raise
         ran = time.monotonic() - started
@@ -267,8 +268,8 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
         output = []
         for f in (out, err):
             f.seek(0)
-            # text=True used to normalize Windows \r\n; write_text would double the \r.
-            output.append(f.read().decode(encoding, errors="replace").replace("\r\n", "\n"))
+            # Universal newlines, as text=True did: \r\n and lone \r (progress bars) -> \n.
+            output.append(f.read().decode(encoding, errors="replace").replace("\r\n", "\n").replace("\r", "\n"))
     return {"returncode": None if timed_out else proc.returncode, "timed_out": timed_out,
             "stdout": output[0], "stderr": output[1], "ran": ran, "terminate": terminate}
 
@@ -1591,6 +1592,9 @@ def main():
         help="Disable canonical fallback for localized content",
     )
     args = parser.parse_args()
+    # A step runs in its own process group, so a SIGTERM to ours misses it. Raise
+    # instead, so run_step_command kills the step's tree on the way out.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
     success = run_playbook_tests(
         args.playbook,

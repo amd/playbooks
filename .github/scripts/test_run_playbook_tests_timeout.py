@@ -77,6 +77,10 @@ class TimeoutKillsTheTree(unittest.TestCase):
         self.assertEqual((run["returncode"], run["stdout"], run["stderr"]), (3, "out\n", "err\n"))
         self.assertEqual(run["terminate"], 0.0)
 
+    def test_progress_bar_carriage_returns_become_lines(self):
+        run = rpt.run_step_command(["bash", "-c", r"printf '10%%\r20%%\r\n'"], self.tmp, 10, dict(os.environ))
+        self.assertEqual(run["stdout"], "10%\n20%\n")
+
     def test_run_test_reports_the_timeout_with_partial_output_and_timings(self):
         test = rpt.TestBlock(id="slow", language="bash", platform="linux",
                                 code=f"echo before; sleep 60 & echo $! > {self.pidfile}; wait",
