@@ -363,9 +363,23 @@ provisioning:
   # hardware if it is unset.
   windows_therock_url: ""
 
-  # Windows AMD GPU driver source (UNC path) copied onto the machine.
-  # The UNC path is internal — set it as a repo variable, not in this public file:
-  #   ORCHESTRAI_WINDOWS_DRIVER_SOURCE   e.g. \\<host>\<share>\...\ATI
+  # Use the approved released Adrenalin installer by default, avoiding the
+  # internal build-share copy. ORCHESTRAI_WINDOWS_DRIVER (or the manual run
+  # input) can explicitly select internal for a comparison run.
   windows_driver:
+    use: public
+    # Only required for an explicitly selected internal-driver run.
+    # ORCHESTRAI_WINDOWS_DRIVER_SOURCE supplies the UNC path at runtime.
     source: ""
     copy: "direct"
+
+  # Pin the approved, hardware-compatible installer in the repo variable
+  # ORCHESTRAI_WINDOWS_DRIVER_URL. Do not commit an internal mirror URL here.
+  # The provisioning script verifies the AMD Authenticode signature, extracts
+  # locally, and delegates installation to windows.ps1; no SMB copy is needed.
+  # Requires windows-public-url.ps1 on the configured provisioning ref.
+  windows_public_driver:
+    url: ""
+    install_scripts:
+      - script: "InstallationScripts/gfx/windows-public-url.ps1"
+        reboot_after: true
