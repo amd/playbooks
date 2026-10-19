@@ -155,9 +155,11 @@ import dataclasses
 import hashlib
 import io
 import json
+import locale
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -208,6 +210,67 @@ class TestResult:
     duration: float
     error_message: str = ""
     skipped: bool = False
+    timed_out: bool = False
+    terminate_seconds: float = 0.0  # killing the step's process tree after a timeout
+
+
+# After a step times out, how long to wait for its killed process tree to exit.
+TIMEOUT_KILL_GRACE_SECONDS = 15
+
+
+def _kill_process_tree(proc: subprocess.Popen) -> None:
+    """Kill a step and everything it started (pip, python, installers...)."""
+    if os.name == "nt":
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                           capture_output=True, timeout=60, check=False)
+    else:
+        with contextlib.suppress(ProcessLookupError):
+            os.killpg(proc.pid, signal.SIGKILL)  # the step leads its own session
+
+
+def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
+    """Run one step with a hard time limit.
+
+    subprocess.run(capture_output=True, timeout=...) is not bounded on Windows:
+    on timeout it kills only the shell (cmd/powershell), then waits with no limit
+    for the output pipes to close, and the step's children (pip, python, an
+    installer) still hold them. Steps declared at 300s ran 1,857s. On Linux it
+    returns on time but leaves those children running into the next step.
+
+    Output goes to files, so nothing waits on a pipe. On timeout the whole
+    process tree is killed and its exit waited for at most
+    TIMEOUT_KILL_GRACE_SECONDS. Processes a step starts in the background and
+    leaves running on a normal exit (servers) are not touched.
+    """
+    encoding = locale.getpreferredencoding(False)
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        started = time.monotonic()
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
+                                start_new_session=(os.name != "nt"))
+        timed_out = False
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+        except BaseException:  # Ctrl-C/cancel: the step's own session doesn't get it
+            _kill_process_tree(proc)
+            raise
+        ran = time.monotonic() - started
+        terminate = 0.0
+        if timed_out:
+            t = time.monotonic()
+            _kill_process_tree(proc)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=TIMEOUT_KILL_GRACE_SECONDS)
+            terminate = time.monotonic() - t
+        output = []
+        for f in (out, err):
+            f.seek(0)
+            # text=True used to normalize Windows \r\n; write_text would double the \r.
+            output.append(f.read().decode(encoding, errors="replace").replace("\r\n", "\n"))
+    return {"returncode": None if timed_out else proc.returncode, "timed_out": timed_out,
+            "stdout": output[0], "stderr": output[1], "ran": ran, "terminate": terminate}
 
 
 @dataclass
@@ -1000,62 +1063,53 @@ def run_test(
     # Execute the test
     start_time = time.time()
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=workdir,
-            capture_output=True,
-            text=True,
-            timeout=test.timeout,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
-        )
+        run = run_step_command(cmd, workdir, test.timeout, {**os.environ, "PYTHONUNBUFFERED": "1"})
         duration = time.time() - start_time
-
-        # Save output to files
-        stdout_file = results_dir / f"{test.id}_stdout.txt"
-        stderr_file = results_dir / f"{test.id}_stderr.txt"
-        stdout_file.write_text(result.stdout, encoding="utf-8")
-        stderr_file.write_text(result.stderr, encoding="utf-8")
-
-        success = result.returncode == 0
-
-        print(f"Exit code: {result.returncode}")
-        print(f"Duration: {duration:.2f}s")
-        console_log_chars = 10000
-        if result.stdout:
-            print(f"STDOUT (last {console_log_chars} chars):\n{result.stdout[-console_log_chars:]}")
-        if result.stderr:
-            print(f"STDERR (last {console_log_chars} chars):\n{result.stderr[-console_log_chars:]}")
-
-        return TestResult(
-            test_id=test.id,
-            success=success,
-            exit_code=result.returncode,
-            stdout=result.stdout,
-            stderr=result.stderr,
-            duration=duration,
-        )
-
-    except subprocess.TimeoutExpired as e:
-        duration = time.time() - start_time
-        error_msg = f"Test timed out after {test.timeout} seconds"
-        print(f"TIMEOUT: {error_msg}")
-        # What it printed before it was killed (e.g. apt waiting for a lock); bytes despite text=True.
-        stdout, stderr = (o.decode("utf-8", "replace") if isinstance(o, bytes) else o or "" for o in (e.stdout, e.stderr))
+        stdout, stderr = run["stdout"], run["stderr"]
         (results_dir / f"{test.id}_stdout.txt").write_text(stdout, encoding="utf-8")
         (results_dir / f"{test.id}_stderr.txt").write_text(stderr, encoding="utf-8")
+        timing = f"ran {run['ran']:.1f}s"
+        if run["timed_out"]:
+            timing += f", process tree killed in {run['terminate']:.1f}s"
+        console_log_chars = 10000
+
+        if run["timed_out"]:
+            error_msg = f"Test timed out after {test.timeout} seconds"
+            print(f"TIMEOUT: {error_msg}")
+            print(f"Duration: {duration:.2f}s ({timing})")
+            # What it printed before it was killed (e.g. apt waiting for a lock).
+            if stdout:
+                print(f"STDOUT before the timeout (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
+            if stderr:
+                print(f"STDERR before the timeout (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
+            return TestResult(
+                test_id=test.id,
+                success=False,
+                exit_code=-1,
+                stdout=stdout,
+                stderr=stderr,
+                duration=duration,
+                error_message=error_msg,
+                timed_out=True,
+                terminate_seconds=run["terminate"],
+            )
+
+        print(f"Exit code: {run['returncode']}")
+        print(f"Duration: {duration:.2f}s ({timing})")
         if stdout:
-            print(f"STDOUT before the timeout (last 10000 chars):\n{stdout[-10000:]}")
+            print(f"STDOUT (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
         if stderr:
-            print(f"STDERR before the timeout (last 10000 chars):\n{stderr[-10000:]}")
+            print(f"STDERR (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
+
         return TestResult(
             test_id=test.id,
-            success=False,
-            exit_code=-1,
+            success=run["returncode"] == 0,
+            exit_code=run["returncode"],
             stdout=stdout,
             stderr=stderr,
             duration=duration,
-            error_message=error_msg,
         )
+
     except Exception as e:
         duration = time.time() - start_time
         error_msg = f"Test execution failed: {str(e)}"
@@ -1111,6 +1165,8 @@ def write_failure_metadata(
         "result": {
             "exit_code": result.exit_code,
             "duration": result.duration,
+            "timed_out": result.timed_out,
+            "terminate_seconds": result.terminate_seconds,
             "error_message": result.error_message,
             "stdout_excerpt": stdout_excerpt,
             "stderr_excerpt": stderr_excerpt,
