@@ -845,12 +845,8 @@
       ],
       "file": "lmstudio_models_gpt_oss_120b.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {
