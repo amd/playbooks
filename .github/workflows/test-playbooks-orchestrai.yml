@@ -69,6 +69,26 @@ on:
           - default
           - public
           - internal
+      use_v2:
+        description: 'Opt-in English-only Control Plane pilot; localized locale is not used'
+        type: boolean
+        default: false
+      v2_workspace:
+        description: 'V2 workspace override (blank = repository variable ORCHESTRAI_V2_WORKSPACE)'
+        type: string
+        default: ''
+      v2_prepare_only:
+        description: 'V2: validate the plan without acquiring hardware'
+        type: boolean
+        default: true
+      v2_publish_reportportal:
+        description: 'V2: also export to ReportPortal (native results remain authoritative)'
+        type: boolean
+        default: false
+      playbook_ref:
+        description: 'V2: amd/playbooks branch, tag or commit to test'
+        type: string
+        default: main
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
   # `!orc` or `!localized-orc` on it (see orchestrai-pr-command.yml) — that runs
@@ -89,8 +109,31 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  v2:
+    name: Dedicated V2 validation
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.use_v2 }}
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    uses: ./.github/workflows/test-playbooks-orchestrai-v2.yml
+    with:
+      playbook_id: ${{ inputs.playbook_id }}
+      device: ${{ inputs.device }}
+      platform: ${{ inputs.platform }}
+      playbook_ref: ${{ inputs.playbook_ref }}
+      locale: ''
+      machines_per_hw_group: ${{ inputs.machines_per_hw_group }}
+      workspace: ${{ inputs.v2_workspace }}
+      catalog_release_id: ${{ vars.ORCHESTRAI_V2_CATALOG_RELEASE_ID }}
+      prepare_only: ${{ inputs.v2_prepare_only }}
+      publish_reportportal: ${{ inputs.v2_publish_reportportal }}
+      windows_driver: ${{ inputs.windows_driver }}
+    secrets: inherit
+
   detect-and-trigger:
     name: Detect & Trigger
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.use_v2) }}
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
@@ -371,7 +414,7 @@ jobs:
   test-gate:
     name: Test Gate (Required)
     needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
-    if: always()
+    if: ${{ always() && !(github.event_name == 'workflow_dispatch' && inputs.use_v2) }}
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests

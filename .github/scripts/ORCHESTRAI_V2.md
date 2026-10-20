@@ -1,0 +1,69 @@
+# Opt-in OrchestrAI V2 pilot
+
+The existing `test-playbooks-orchestrai.yml` entrypoint can opt into a separate
+English-only V2 helper with `use_v2=true`. Scheduled runs, ChatOps and the default
+manual V1 path are unchanged. The localized input is not used by the V2 pilot.
+
+GitHub calls the supported Control Plane CI API using GitHub OIDC. It does not
+call Jenkins directly, check out a private actions library, or use a stored
+OrchestrAI/Jenkins access token. The Control Plane still selects Jenkins as the
+executor. This is a submission-path change, not a replacement of that executor.
+
+The controller resolves `amd/playbooks` at `playbook_ref` to an immutable SHA and
+uses that checkout for both selection metadata and DUT test source. It reuses this
+repository's existing matrix and provisioning helpers. One machine is requested
+per hardware/OS/tag configuration; playbooks on that configuration run sequentially.
+At most two configurations execute concurrently.
+
+## Configuration
+
+Keep deployment coordinates in repository variables, not source:
+
+- `ORCHESTRAI_V2_CI_API_URL`: the deployment's supported CI API base URL.
+- `ORCHESTRAI_V2_OIDC_AUDIENCE`: the audience trusted by its CI rule.
+- `ORCHESTRAI_V2_PORTAL_URL`: the user-facing run-link base URL.
+- `ORCHESTRAI_V2_WORKSPACE`: the production workspace slug, not its display name.
+- `ORCHESTRAI_CONTROL_RUNNER` / `ORCHESTRAI_WAIT_RUNNER`: existing runner labels
+  with network access to that deployment.
+- Optional `ORCHESTRAI_V2_LINUX_IMAGE` / `ORCHESTRAI_V2_WINDOWS_IMAGE`: exact image
+  catalog names. Otherwise the Ubuntu/Windows families are requested.
+- Existing driver, hardware-tag, ROCm index and TheRock variables are reused.
+
+The workspace CI rule must authorize `amd/playbooks`, the exact testing branch,
+`workflow_dispatch`, and the token-requesting reusable workflow's
+`job_workflow_ref`: `.github/workflows/test-playbooks-orchestrai-v2.yml` at that
+branch. Grant run start/read/cancel, results read and plan write/publish permissions.
+Do not broaden mainline/nightly/PR authorization merely to run this pilot.
+
+## Test before merging
+
+Dispatch the already-registered existing workflow on the pilot branch:
+
+```sh
+gh workflow run test-playbooks-orchestrai.yml --repo amd/playbooks \
+  --ref saman/orchestrai-v2-public-pilot \
+  -f use_v2=true -f v2_prepare_only=true \
+  -f playbook_id=lemonade-getting-started -f device=halo -f platform=linux \
+  -f playbook_ref=main
+```
+
+Plan-only mode does not contact the Control Plane or acquire hardware. Inspect
+the selected playbooks, tags, scripts, image and external SHA. Change
+`v2_prepare_only=false` only after confirming the matching CI rule. Begin with
+one playbook/configuration rather than blank/all selections.
+
+Native OAI verdicts own the GitHub gate. ReportPortal is an additional, opt-in
+destination: set `ORCHESTRAI_V2_RP_CREDENTIAL` to the workspace credential name,
+`ORCHESTRAI_V2_RP_PROJECT` to the project, and `v2_publish_reportportal=true`.
+The token stays in the workspace credential. Explicitly requested publishing is
+required; a publishing failure must not be silently ignored.
+
+This pilot reports configuration-level native verdicts and links to OAI evidence.
+It does not yet recreate the V1 named per-playbook checks or use ReportPortal as
+the verdict source. Repeated adapter paths are not mapped to playbooks by order.
+Missing, skipped, interrupted or mismatched result counts cannot pass the gate.
+
+Cancellation requests target only the saved job/attempt/configuration submission.
+Verify a terminal native run and machine release in the Portal; a cancellation
+acknowledgement is not proof of release. Runner loss is bounded by the server-side
+run timeout, not by an independent GitHub watchdog.

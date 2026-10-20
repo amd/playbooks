@@ -1,0 +1,289 @@
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+
+name: Test Playbooks (OrchestrAI V2)
+run-name: "V2 playbooks — ${{ inputs.playbook_id }} / ${{ inputs.device }} / ${{ inputs.platform }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      playbook_id:
+        description: 'External playbook IDs, comma-separated (blank or all = all eligible)'
+        type: string
+        default: ollama-getting-started
+        required: false
+      device:
+        description: 'Device IDs, comma-separated (blank or all = all configured devices)'
+        type: string
+        default: halo
+        required: false
+      platform:
+        description: 'OS to test'
+        type: choice
+        options: [all, linux, windows]
+        default: all
+      playbook_ref:
+        description: 'amd/playbooks branch, tag or commit (resolved to a SHA before planning)'
+        type: string
+        default: main
+      workspace:
+        description: 'Workspace override (blank = repository variable ORCHESTRAI_V2_WORKSPACE)'
+        type: string
+        default: ''
+      catalog_release_id:
+        description: 'Optional V2 catalog release ID; blank uses the platform active release'
+        type: string
+        default: ''
+      prepare_only:
+        description: 'Validate plans and provisioning without acquiring hardware'
+        type: boolean
+        default: true
+      publish_reportportal:
+        description: 'Also export to ReportPortal (requires its workspace credential); native results are always used'
+        type: boolean
+        default: false
+      windows_driver:
+        description: 'Windows driver: internal (build share) or public (released Adrenalin, ORCHESTRAI_WINDOWS_DRIVER_URL). default = repo variable ORCHESTRAI_WINDOWS_DRIVER, else internal'
+        type: choice
+        options: [default, internal, public]
+        default: default
+  workflow_call:
+    inputs:
+      locale:
+        type: string
+        default: ''
+      machines_per_hw_group:
+        type: string
+        default: '1'
+      playbook_id:
+        type: string
+        required: true
+      device:
+        type: string
+        required: true
+      platform:
+        type: string
+        default: all
+      playbook_ref:
+        type: string
+        default: main
+      workspace:
+        type: string
+        default: ''
+      catalog_release_id:
+        type: string
+        default: ''
+      prepare_only:
+        type: boolean
+        default: true
+      publish_reportportal:
+        type: boolean
+        default: false
+      windows_driver:
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+concurrency:
+  group: playbooks-v2-${{ github.ref }}-${{ inputs.workspace || vars.ORCHESTRAI_V2_WORKSPACE }}-${{ inputs.device }}-${{ inputs.platform }}
+  cancel-in-progress: false
+
+env:
+  ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
+  ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
+  ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
+  ORCHESTRAI_WINDOWS_THEROCK_RUN_ID: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_RUN_ID }}
+  ORCHESTRAI_WINDOWS_THEROCK_RUN_REPO: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_RUN_REPO }}
+  ORCHESTRAI_WINDOWS_THEROCK_REF: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_REF }}
+  ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
+  ORCHESTRAI_LINUX_DRIVER_SOURCE: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCE }}
+  ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON }}
+  ORCHESTRAI_RYZENAI_NPU_XRT_URL: ${{ secrets.ORCHESTRAI_RYZENAI_NPU_XRT_URL }}
+  ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
+  # Windows driver choice, as in the V1 workflows (internal build share or
+  # public Adrenalin URL); "" = repo variable, else the config default.
+  ORCHESTRAI_WINDOWS_DRIVER: ${{ (inputs.windows_driver != 'default' && inputs.windows_driver) || vars.ORCHESTRAI_WINDOWS_DRIVER || '' }}
+  ORCHESTRAI_WINDOWS_DRIVER_URL: ${{ vars.ORCHESTRAI_WINDOWS_DRIVER_URL }}
+  ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+  ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+  ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+  ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+  ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+  ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+  ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+  ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+
+jobs:
+  prepare:
+    name: Resolve external source & validate V2 plans
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      external_sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: amd/playbooks
+          ref: ${{ inputs.playbook_ref }}
+          path: playbook-source
+          persist-credentials: false
+      - id: source
+        name: Pin the external commit for every configuration
+        run: echo "sha=$(git -C playbook-source rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install --quiet pyyaml
+      - name: Generate the exact V2 configurations
+        id: plan
+        env:
+          PLAYBOOKS: ${{ inputs.playbook_id }}
+          DEVICES: ${{ inputs.device }}
+          PLATFORM: ${{ inputs.platform }}
+          EXTERNAL_SHA: ${{ steps.source.outputs.sha }}
+          V2_WORKSPACE: ${{ inputs.workspace }}
+          CATALOG_RELEASE: ${{ inputs.catalog_release_id }}
+          PREPARE_ONLY: ${{ inputs.prepare_only }}
+          PUBLISH_REPORTPORTAL: ${{ inputs.publish_reportportal }}
+          REQUESTED_LOCALE: ${{ inputs.locale }}
+          REQUESTED_MACHINES: ${{ inputs.machines_per_hw_group || '1' }}
+        run: |
+          if [ -n "$REQUESTED_LOCALE" ] || [ "$REQUESTED_MACHINES" != 1 ]; then
+            echo '::error::This V2 validation lane supports English and one machine per configuration.'
+            exit 1
+          fi
+          flags=()
+          if [ "$PREPARE_ONLY" = true ]; then flags+=(--prepare-only); fi
+          if [ "$PUBLISH_REPORTPORTAL" = true ]; then flags+=(--publish-reportportal); fi
+          python3 .github/scripts/orchestrai_v2.py prepare \
+            --playbooks "$PLAYBOOKS" --devices "$DEVICES" --platform "$PLATFORM" \
+            --sha "$EXTERNAL_SHA" --workspace "$V2_WORKSPACE" --catalog "$CATALOG_RELEASE" \
+            --requests "$RUNNER_TEMP/v2-requests" "${flags[@]}"
+      - name: Publish the plan preview (no credentials or provisioning values)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: orchestrai-v2-plan
+          path: v2-preview/
+          if-no-files-found: ignore
+
+  execute:
+    name: "V2 ${{ matrix.batch_id }} (${{ matrix.playbook_count }} playbooks)"
+    needs: prepare
+    if: ${{ !inputs.prepare_only }}
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: amd/playbooks
+          ref: ${{ needs.prepare.outputs.external_sha }}
+          path: playbook-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install --quiet pyyaml
+      - name: Prepare request using the pinned external metadata
+        env:
+          PLAYBOOKS: ${{ inputs.playbook_id }}
+          DEVICES: ${{ inputs.device }}
+          PLATFORM: ${{ inputs.platform }}
+          EXTERNAL_SHA: ${{ needs.prepare.outputs.external_sha }}
+          V2_WORKSPACE: ${{ inputs.workspace }}
+          CATALOG_RELEASE: ${{ inputs.catalog_release_id }}
+          PUBLISH_REPORTPORTAL: ${{ inputs.publish_reportportal }}
+        run: |
+          flags=()
+          if [ "$PUBLISH_REPORTPORTAL" = true ]; then flags+=(--publish-reportportal); fi
+          python3 .github/scripts/orchestrai_v2.py prepare \
+            --playbooks "$PLAYBOOKS" --devices "$DEVICES" --platform "$PLATFORM" \
+            --sha "$EXTERNAL_SHA" --workspace "$V2_WORKSPACE" --catalog "$CATALOG_RELEASE" \
+            --requests "$RUNNER_TEMP/v2-requests" "${flags[@]}"
+      - name: Start and wait for this configuration through V2
+        env:
+          BATCH_KEY: ${{ matrix.key }}
+        run: |
+          python3 .github/scripts/orchestrai_v2.py run \
+            --request "$RUNNER_TEMP/v2-requests/$BATCH_KEY.json" \
+            --state "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json"
+      - name: Cancel unfinished V2 work after failure or cancellation
+        if: ${{ always() && (cancelled() || failure()) }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          BATCH_KEY: ${{ matrix.key }}
+        run: |
+          if [ -f "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json" ]; then
+            python3 .github/scripts/orchestrai_v2.py cleanup \
+              --request "$RUNNER_TEMP/v2-requests/$BATCH_KEY.json" \
+              --state "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json"
+          fi
+      - name: Preserve V2 results and tested-source identity
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: orchestrai-v2-results-${{ matrix.key }}
+          path: v2-results/
+          if-no-files-found: ignore
+
+  results:
+    name: V2 results by configuration
+    needs: [prepare, execute]
+    if: ${{ always() && needs.prepare.result == 'success' && !inputs.prepare_only }}
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install --quiet pyyaml
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: orchestrai-v2-*
+          path: v2-artifacts
+      - name: Summarize native verdicts, missing work and run failures
+        run: |
+          python3 .github/scripts/orchestrai_v2.py summary \
+            --plan v2-artifacts/orchestrai-v2-plan/plan.json --artifacts v2-artifacts
+
+  gate:
+    name: V2 Validation Gate
+    needs: [prepare, execute, results]
+    if: always()
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 5
+    steps:
+      - env:
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          EXECUTE_RESULT: ${{ needs.execute.result }}
+          SUMMARY_RESULT: ${{ needs.results.result }}
+          PREPARE_ONLY: ${{ inputs.prepare_only }}
+        run: |
+          [ "$PREPARE_RESULT" = success ] || exit 1
+          if [ "$PREPARE_ONLY" != true ]; then
+            [ "$EXECUTE_RESULT" = success ] || exit 1
+            [ "$SUMMARY_RESULT" = success ] || exit 1
+          fi
