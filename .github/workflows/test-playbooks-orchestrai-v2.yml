@@ -164,7 +164,7 @@ jobs:
           flags=()
           if [ "$PREPARE_ONLY" = true ]; then flags+=(--prepare-only); fi
           if [ "$PUBLISH_REPORTPORTAL" = true ]; then flags+=(--publish-reportportal); fi
-          python3 .github/scripts/orchestrai_v2.py prepare \
+          python3 .github/orchestrai/orchestrai_v2.py prepare \
             --playbooks "$PLAYBOOKS" --devices "$DEVICES" --platform "$PLATFORM" \
             --sha "$EXTERNAL_SHA" --workspace "$V2_WORKSPACE" --catalog "$CATALOG_RELEASE" \
             --requests "$RUNNER_TEMP/v2-requests" "${flags[@]}"
@@ -214,7 +214,7 @@ jobs:
         run: |
           flags=()
           if [ "$PUBLISH_REPORTPORTAL" = true ]; then flags+=(--publish-reportportal); fi
-          python3 .github/scripts/orchestrai_v2.py prepare \
+          python3 .github/orchestrai/orchestrai_v2.py prepare \
             --playbooks "$PLAYBOOKS" --devices "$DEVICES" --platform "$PLATFORM" \
             --sha "$EXTERNAL_SHA" --workspace "$V2_WORKSPACE" --catalog "$CATALOG_RELEASE" \
             --requests "$RUNNER_TEMP/v2-requests" "${flags[@]}"
@@ -222,7 +222,7 @@ jobs:
         env:
           BATCH_KEY: ${{ matrix.key }}
         run: |
-          python3 .github/scripts/orchestrai_v2.py run \
+          python3 .github/orchestrai/orchestrai_v2.py run \
             --request "$RUNNER_TEMP/v2-requests/$BATCH_KEY.json" \
             --state "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json"
       - name: Cancel unfinished V2 work after failure or cancellation
@@ -233,7 +233,7 @@ jobs:
           BATCH_KEY: ${{ matrix.key }}
         run: |
           if [ -f "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json" ]; then
-            python3 .github/scripts/orchestrai_v2.py cleanup \
+            python3 .github/orchestrai/orchestrai_v2.py cleanup \
               --request "$RUNNER_TEMP/v2-requests/$BATCH_KEY.json" \
               --state "$RUNNER_TEMP/orchestrai-v2-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$BATCH_KEY.json"
           fi
@@ -266,7 +266,7 @@ jobs:
           path: v2-artifacts
       - name: Summarize native verdicts, missing work and run failures
         run: |
-          python3 .github/scripts/orchestrai_v2.py summary \
+          python3 .github/orchestrai/orchestrai_v2.py summary \
             --plan v2-artifacts/orchestrai-v2-plan/plan.json --artifacts v2-artifacts
 
   gate:

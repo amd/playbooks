@@ -14,6 +14,8 @@ import re
 import sys
 from urllib.parse import quote, urlsplit
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+
 import orchestrai_matrix as matrix
 import orchestrai_trigger as legacy
 import orchestrai_v2_api as api

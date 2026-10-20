@@ -2,7 +2,7 @@
 # Copyright Advanced Micro Devices, Inc.
 #
 # SPDX-License-Identifier: MIT
-"""Small OIDC-only client for the supported OrchestrAI CI API.
+"""OIDC-only client shared by the opt-in OrchestrAI V2 controller.
 
 Contract reference: ucicd-pipeline/.github/actions/orchestrai-run and
 ci-actions-lib/ci_classes/orchestrai_controlplane.py. No private checkout,

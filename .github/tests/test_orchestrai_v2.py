@@ -24,7 +24,7 @@ from urllib import error
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / ".github/scripts"))
+sys.path.insert(0, str(ROOT / ".github/orchestrai"))
 import orchestrai_v2 as v2
 import orchestrai_v2_api as api
 
@@ -403,11 +403,21 @@ class NativeReporting(unittest.TestCase):
 
     def test_public_validation_runs_the_ported_suite_without_hardware_permissions(self):
         import yaml
-        validation = yaml.load((ROOT / ".github/workflows/validate-playbooks.yml").read_text(),
+        validation = yaml.load((ROOT / ".github/workflows/test-orchestrai-reporting.yml").read_text(),
                                Loader=yaml.BaseLoader)
-        job = validation["jobs"]["v2-controller-tests"]
-        self.assertEqual(job["permissions"], {"contents": "read"})
+        job = validation["jobs"]["reporting-tests"]
+        self.assertEqual(validation["permissions"], {"contents": "read"})
         self.assertIn("test_orchestrai_v2.py", job["steps"][-1]["run"])
+
+    def test_v2_only_files_do_not_change_the_unrelated_native_harness(self):
+        import build_test_matrix as native
+        signed = native.harness_files(ROOT)
+        self.assertIn(".github/scripts/run_playbook_tests.py", signed)
+        for path in (".github/orchestrai/orchestrai_v2.py",
+                     ".github/orchestrai/orchestrai_v2_api.py",
+                     ".github/orchestrai/V2.md", ".github/tests/test_orchestrai_v2.py"):
+            self.assertNotIn(path, signed)
+        self.assertNotIn("orchestrai_v2", (ROOT / ".github/workflows/test-playbooks.yml").read_text())
 
 
 class FakeApi:
@@ -766,7 +776,7 @@ settings = api.Settings('https://ci.example.invalid/api/ci/v1', 'https://portal.
 result = api.Client(settings, dict(os.environ), transport=local_http).execute(doc, sys.argv[3])
 print('RESULT=' + json.dumps(result))
 """
-        process = subprocess.Popen([sys.executable, "-c", code, str(ROOT / ".github/scripts"),
+        process = subprocess.Popen([sys.executable, "-c", code, str(ROOT / ".github/orchestrai"),
                                     str(doc_path), self.path, f"http://127.0.0.1:{server.server_port}"],
                                    env={**os.environ, **self.env}, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    text=True)
