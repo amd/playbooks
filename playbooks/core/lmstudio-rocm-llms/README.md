@@ -13,6 +13,10 @@ SPDX-License-Identifier: MIT
 
 LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggml-org/llama.cpp) and also provides an [OpenAI compliant endpoint](https://lmstudio.ai/docs/developer/openai-compat) for local model serving. LM Studio provides a simple but powerful interface to easily download and deploy models. LM Studio offers both Vulkan and AMD ROCm™ software backends (called runtimes) for AMD users.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the **Downloading Models** section, check whether the model is already available in LM Studio — if it is, you can skip the download; if not, follow the steps there to download it.
+<!-- @device:end -->
+
 
 ## What You'll Learn
 - How to configure and use LM Studio to leverage your local hardware
