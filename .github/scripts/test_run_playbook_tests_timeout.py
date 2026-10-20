@@ -142,7 +142,17 @@ class TimeoutKillsTheTree(unittest.TestCase):
         self.assertEqual(marker.read_text(), "yes")
 
 
+@unittest.skipIf(os.name == "nt", "POSIX signals; Windows uses taskkill /T")
 class SignalTree(unittest.TestCase):
+    def test_a_reaped_steps_reused_pid_is_not_followed(self):
+        # The step exited and was reaped; another process now has its pid.
+        proc = mock.Mock(pid=111, returncode=0)
+        now = {111: (1, "b"), 112: (111, "b")}
+        with mock.patch.object(rpt, "_process_table", return_value=now), \
+                mock.patch.object(rpt.os, "kill") as kill:
+            rpt._signal_tree(proc, {}, signal.SIGKILL)
+        kill.assert_not_called()
+
     def test_root_processes_are_killed_with_sudo_unless_their_pid_was_reused(self):
         proc = mock.Mock()
         tree = {111: "Mon Oct 19 10:00:00 2026", 222: "Mon Oct 19 10:00:00 2026"}

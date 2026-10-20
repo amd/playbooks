@@ -241,6 +241,13 @@ def _kill_process_tree(proc: subprocess.Popen, job=None, grace: float = 0,
     if grace:
         _signal_tree(proc, tree, signal.SIGTERM)
         _wait_tree(proc, tree, grace)  # the shell often dies at once; its children clean up
+    # Freeze the tree until a listing finds nothing new, so no child forked between a
+    # listing and its parent's kill is orphaned out of reach; then kill it.
+    for _ in range(10):
+        seen = len(tree)
+        _signal_tree(proc, tree, signal.SIGSTOP)
+        if len(tree) == seen:
+            break
     _signal_tree(proc, tree, signal.SIGKILL)
     return _wait_tree(proc, tree, wait)
 
@@ -268,7 +275,9 @@ def _signal_tree(proc: subprocess.Popen, tree: dict, sig: signal.Signals) -> Non
     # listing failed), and add any started since the last listing.
     live = {pid: started for pid, started in tree.items()
             if not now or now.get(pid, (None, None))[1] == started}
-    live.update((pid, now[pid][1]) for pid in _descendants([proc.pid, *live], now))
+    # Once the step is reaped its pid can be reused: don't follow an unrelated process's children.
+    roots = [*live, proc.pid] if proc.returncode is None else [*live]
+    live.update((pid, now[pid][1]) for pid in _descendants(roots, now))
     tree.update(live)
     proc.send_signal(sig)  # a no-op once the step has been reaped
     denied = []
@@ -342,7 +351,7 @@ def _kernel32():
 # Windows: the step starts suspended, so nothing it starts can run before it is in its Job Object.
 CREATE_SUSPENDED = 0x4
 JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x800
-JOB_OBJECT_BASIC_LIMIT_INFORMATION_CLASS = 2
+JOB_OBJECT_EXTENDED_LIMIT_INFORMATION_CLASS = 9  # BREAKAWAY_OK is an extended limit
 
 
 def _job_object(proc: subprocess.Popen):
@@ -362,16 +371,26 @@ def _job_object(proc: subprocess.Popen):
                     ("ActiveProcessLimit", wintypes.DWORD), ("Affinity", ctypes.c_size_t),
                     ("PriorityClass", wintypes.DWORD), ("SchedulingClass", wintypes.DWORD)]
 
-    k32 = _kernel32()
+    class ExtendedLimits(ctypes.Structure):  # JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+        _fields_ = [("BasicLimitInformation", Limits), ("IoInfo", ctypes.c_uint64 * 6),
+                    ("ProcessMemoryLimit", ctypes.c_size_t), ("JobMemoryLimit", ctypes.c_size_t),
+                    ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                    ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+    job = None
     try:
+        k32 = _kernel32()
         job = k32.CreateJobObjectW(None, None)
         if job:
-            limits = Limits(LimitFlags=JOB_OBJECT_LIMIT_BREAKAWAY_OK)
-            k32.SetInformationJobObject(job, JOB_OBJECT_BASIC_LIMIT_INFORMATION_CLASS,
+            limits = ExtendedLimits(Limits(LimitFlags=JOB_OBJECT_LIMIT_BREAKAWAY_OK))
+            k32.SetInformationJobObject(job, JOB_OBJECT_EXTENDED_LIMIT_INFORMATION_CLASS,
                                         ctypes.byref(limits), ctypes.sizeof(limits))
             if not k32.AssignProcessToJobObject(job, int(proc._handle)):
                 k32.CloseHandle(job)
                 job = None
+    except Exception as e:  # fall back to taskkill /T alone
+        print(f"WARNING: could not set up the step's Job Object: {e}")
+        job = None
     finally:
         # Popen closed the main thread's handle; NtResumeProcess resumes the process.
         ntdll = ctypes.WinDLL("ntdll")
