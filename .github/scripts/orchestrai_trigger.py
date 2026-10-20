@@ -105,7 +105,18 @@ def apply_env_overrides(cfg):
     driver = os.environ.get("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
     if driver:
         prov.setdefault("windows_driver", {})["source"] = driver
+    driver_choice = os.environ.get("ORCHESTRAI_WINDOWS_DRIVER")
+    if driver_choice:
+        prov.setdefault("windows_driver", {})["use"] = driver_choice
+    driver_url = os.environ.get("ORCHESTRAI_WINDOWS_DRIVER_URL")
+    if driver_url:
+        prov.setdefault("windows_public_driver", {})["url"] = driver_url
     return cfg
+
+
+def windows_driver_choice(prov):
+    """The repository opts into public; legacy configs retain internal behavior."""
+    return str((prov.get("windows_driver") or {}).get("use") or "internal").strip().lower()
 
 
 def validate_config(cfg, batches):
@@ -135,8 +146,15 @@ def validate_config(cfg, batches):
     platforms = {b.get("platform") for b in batches.values()}
     if "linux" in platforms and not prov.get("linux_install_scripts"):
         errs.append("provisioning.linux_install_scripts")
-    if "windows" in platforms and not prov.get("windows_install_scripts"):
-        errs.append("provisioning.windows_install_scripts")
+    if "windows" in platforms:
+        choice = windows_driver_choice(prov)
+        if choice not in {"internal", "public"}:
+            errs.append("provisioning.windows_driver.use (must be internal or public)")
+        elif choice == "public":
+            if not (prov.get("windows_public_driver") or {}).get("install_scripts"):
+                errs.append("provisioning.windows_public_driver.install_scripts")
+        elif not prov.get("windows_install_scripts"):
+            errs.append("provisioning.windows_install_scripts")
     return errs
 
 
@@ -206,12 +224,35 @@ def make_builds(batch, cfg):
 
     if platform == "windows":
         # Copy so appending per-playbook extras below doesn't mutate cfg.
-        scripts = list(prov.get("windows_install_scripts", []))
-        drv = prov.get("windows_driver", {})
-        source = drv.get("source", "")
-        if not source:
-            missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
-        build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
+        choice = windows_driver_choice(prov)
+        if choice == "public":
+            public = prov.get("windows_public_driver") or {}
+            scripts = list(public.get("install_scripts", []))
+            url = str(public.get("url") or "").strip()
+            if not url:
+                missing.append("ORCHESTRAI_WINDOWS_DRIVER_URL")
+            else:
+                try:
+                    parsed = urllib.parse.urlsplit(url)
+                    valid = (parsed.scheme == "https" and bool(parsed.hostname)
+                             and not parsed.username and not parsed.password
+                             and not re.search(r"\s", url))
+                except ValueError:
+                    valid = False
+                if not valid:
+                    missing.append("ORCHESTRAI_WINDOWS_DRIVER_URL (must be an HTTPS installer URL without embedded credentials or whitespace)")
+            # Pipeline build vars become DRIVER_URL on the DUT. Do not send the
+            # internal share or driver_copy in this mode, even if configured.
+            build_vars = {"driver_url": url}
+        elif choice == "internal":
+            scripts = list(prov.get("windows_install_scripts", []))
+            drv = prov.get("windows_driver", {})
+            source = drv.get("source", "")
+            if not source:
+                missing.append("ORCHESTRAI_WINDOWS_DRIVER_SOURCE")
+            build_vars = {"driver_source": source, "driver_copy": drv.get("copy", "direct")}
+        else:
+            return {"install_scripts": [], "vars": {}}, ["provisioning.windows_driver.use (must be internal or public)"]
     else:
         scripts = list(prov.get("linux_install_scripts", []))
         device = batch.get("arch", "")
