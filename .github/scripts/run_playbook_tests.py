@@ -224,9 +224,42 @@ def _kill_process_tree(proc: subprocess.Popen) -> None:
         with contextlib.suppress(subprocess.TimeoutExpired):
             subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
                            capture_output=True, timeout=60, check=False)
-    else:
-        with contextlib.suppress(ProcessLookupError):
-            os.killpg(proc.pid, signal.SIGKILL)  # the step leads its own process group
+        return
+    pids = _descendants(proc.pid)  # before killing: a dead parent's children get reparented
+    with contextlib.suppress(ProcessLookupError):
+        if os.getpgid(proc.pid) == proc.pid:  # the step leads its own group (not in a terminal)
+            os.killpg(proc.pid, signal.SIGKILL)
+    denied = []
+    for pid in [proc.pid, *pids]:
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        except PermissionError:
+            denied.append(str(pid))
+    if denied:
+        # `sudo apt ...` runs as root (and, with use_pty, in its own session); the
+        # runners have passwordless sudo. -n: fail rather than prompt.
+        with contextlib.suppress(OSError, subprocess.SubprocessError):
+            subprocess.run(["sudo", "-n", "kill", "-KILL", *denied],
+                           capture_output=True, timeout=30, check=False)
+
+
+def _descendants(pid: int) -> list:
+    """PIDs below pid, from `ps` (Linux and macOS); empty if ps is unavailable."""
+    children = {}
+    with contextlib.suppress(OSError, subprocess.SubprocessError):
+        ps = subprocess.run(["ps", "-A", "-o", "pid=,ppid="], capture_output=True,
+                            text=True, timeout=30, check=False).stdout
+        for line in ps.splitlines():
+            child, parent = map(int, line.split())
+            children.setdefault(parent, []).append(child)
+    found, todo = [], [pid]
+    while todo:
+        kids = children.get(todo.pop(), [])
+        found += kids
+        todo += kids
+    return found
 
 
 def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
@@ -247,8 +280,11 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         started = time.monotonic()
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
-                                # Own group (not session) so it keeps the terminal, e.g. for sudo.
-                                preexec_fn=None if os.name == "nt" else os.setpgrp)
+                                # Own group in CI, so a timeout can killpg it. In a terminal, stay in
+                                # the foreground group: a background group is stopped (SIGTTIN/SIGTTOU)
+                                # when it prompts (sudo), and Ctrl-C must still reach servers that
+                                # earlier steps left running.
+                                preexec_fn=None if os.name == "nt" or os.isatty(0) else os.setpgrp)
         timed_out = False
         try:
             proc.wait(timeout=timeout)
@@ -1592,7 +1628,7 @@ def main():
         help="Disable canonical fallback for localized content",
     )
     args = parser.parse_args()
-    # A step runs in its own process group, so a SIGTERM to ours misses it. Raise
+    # In CI a step runs in its own process group, so a SIGTERM to ours misses it. Raise
     # instead, so run_step_command kills the step's tree on the way out.
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
