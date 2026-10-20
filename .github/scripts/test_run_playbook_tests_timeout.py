@@ -14,11 +14,14 @@ Windows path is the same code with taskkill /T).
 
 import importlib.util
 import os
+import shutil
 import signal
+import subprocess
 import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 _SPEC = importlib.util.spec_from_file_location(
@@ -47,6 +50,7 @@ class TimeoutKillsTheTree(unittest.TestCase):
             pid = int(self.pidfile.read_text())
             if _alive(pid):
                 os.kill(pid, signal.SIGKILL)
+        shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_a_child_holding_the_output_does_not_extend_the_timeout(self):
         # The pip-install case: the shell's child keeps running and keeps the
@@ -91,7 +95,47 @@ class TimeoutKillsTheTree(unittest.TestCase):
         self.assertTrue(result.timed_out)
         self.assertFalse(result.success)
         self.assertIn("before", result.stdout)
-        self.assertGreaterEqual(result.terminate_seconds, 0.0)
+        self.assertLess(result.terminate_seconds, rpt.TIMEOUT_KILL_GRACE_SECONDS)
+
+    def test_a_stopped_runner_lets_the_step_clean_up_then_kills_its_tree(self):
+        # SIGTERM to the runner alone (docker stop): the step gets SIGTERM and time
+        # to clean up, and nothing it started outlives the runner.
+        marker = self.tmp / "cleaned"
+        step = f"trap 'echo yes > {marker}; exit' TERM; sleep 60 & echo $! > {self.pidfile}; wait"
+        runner = subprocess.Popen([sys.executable, "-c", (
+            "import importlib.util, os, signal, sys\n"
+            f"spec = importlib.util.spec_from_file_location('r', {str(Path(rpt.__file__))!r})\n"
+            "r = importlib.util.module_from_spec(spec); spec.loader.exec_module(r)\n"
+            "signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))\n"
+            f"r.run_step_command(['bash', '-c', {step!r}], {str(self.tmp)!r}, 60, dict(os.environ))\n"
+        )])
+        deadline = time.monotonic() + 10
+        while not (self.pidfile.exists() and self.pidfile.read_text().strip()):
+            self.assertLess(time.monotonic(), deadline, "the step never started")
+            time.sleep(0.05)
+        runner.send_signal(signal.SIGTERM)
+        self.assertEqual(runner.wait(timeout=30), 128 + signal.SIGTERM)
+        self.assertEqual(marker.read_text().strip(), "yes")
+        time.sleep(0.2)
+        self.assertFalse(_alive(int(self.pidfile.read_text())), "the step's child outlived the runner")
+
+
+class SignalTree(unittest.TestCase):
+    def test_root_processes_are_killed_with_sudo_unless_their_pid_was_reused(self):
+        proc = mock.Mock()
+        tree = {111: "Mon Oct 19 10:00:00 2026", 222: "Mon Oct 19 10:00:00 2026"}
+        now = {111: (1, "Mon Oct 19 10:00:00 2026"), 222: (1, "Mon Oct 19 10:00:05 2026")}
+        with mock.patch.object(rpt, "_process_table", return_value=now), \
+                mock.patch.object(rpt.os, "kill", side_effect=PermissionError), \
+                mock.patch.object(rpt.subprocess, "run") as run:
+            rpt._signal_tree(proc, tree, signal.SIGKILL)
+        proc.send_signal.assert_called_once_with(signal.SIGKILL)
+        # 222's start time changed: a different process now has that pid.
+        self.assertEqual(run.call_args.args[0], ["sudo", "-n", "kill", "-KILL", "111"])
+
+    def test_descendants_follow_the_whole_tree(self):
+        table = {10: (1, "a"), 11: (10, "a"), 12: (11, "a"), 20: (1, "a")}
+        self.assertEqual(sorted(rpt._descendants(10, table)), [11, 12])
 
 
 if __name__ == "__main__":

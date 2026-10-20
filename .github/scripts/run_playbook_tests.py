@@ -155,7 +155,6 @@ import dataclasses
 import hashlib
 import io
 import json
-import locale
 import os
 import re
 import shutil
@@ -216,23 +215,42 @@ class TestResult:
 
 # After a step times out, how long to wait for its killed process tree to exit.
 TIMEOUT_KILL_GRACE_SECONDS = 15
+# When the runner itself is stopped, how long a step gets after SIGTERM to clean up
+# (release the dpkg lock, remove a container) before it is killed (POSIX).
+STOP_GRACE_SECONDS = 5
 
 
-def _kill_process_tree(proc: subprocess.Popen) -> None:
-    """Kill a step and everything it started (pip, python, installers...)."""
+def _kill_process_tree(proc: subprocess.Popen, job=None, grace: float = 0) -> None:
+    """Kill a step and everything it started (pip, python, installers...).
+
+    With grace (POSIX), SIGTERM the tree first and give it that long to exit.
+    """
     if os.name == "nt":
         with contextlib.suppress(subprocess.TimeoutExpired):
             subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
                            capture_output=True, timeout=60, check=False)
+        if job:  # what taskkill /T misses: processes whose parent already exited
+            _kernel32().TerminateJobObject(job, 1)
         return
-    pids = _descendants(proc.pid)  # before killing: a dead parent's children get reparented
-    with contextlib.suppress(ProcessLookupError):
-        if os.getpgid(proc.pid) == proc.pid:  # the step leads its own group (not in a terminal)
-            os.killpg(proc.pid, signal.SIGKILL)
+    table = _process_table()  # before killing: a dead parent's children get reparented
+    tree = {pid: table[pid][1] for pid in _descendants(proc.pid, table)}
+    if grace:
+        _signal_tree(proc, tree, signal.SIGTERM)
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=grace)
+    _signal_tree(proc, tree, signal.SIGKILL)
+
+
+def _signal_tree(proc: subprocess.Popen, tree: dict, sig: signal.Signals) -> None:
+    """Send sig to the step and to the descendants in tree ({pid: start time})."""
+    proc.send_signal(sig)  # a no-op once the step has been reaped
+    now = _process_table()
     denied = []
-    for pid in [proc.pid, *pids]:
+    for pid, started in tree.items():
+        if now.get(pid, (None, None))[1] != started:
+            continue  # exited, or its pid now belongs to another process
         try:
-            os.kill(pid, signal.SIGKILL)
+            os.kill(pid, sig)
         except ProcessLookupError:
             pass
         except PermissionError:
@@ -241,25 +259,70 @@ def _kill_process_tree(proc: subprocess.Popen) -> None:
         # `sudo apt ...` runs as root (and, with use_pty, in its own session); the
         # runners have passwordless sudo. -n: fail rather than prompt.
         with contextlib.suppress(OSError, subprocess.SubprocessError):
-            subprocess.run(["sudo", "-n", "kill", "-KILL", *denied],
+            subprocess.run(["sudo", "-n", "kill", f"-{sig.name[3:]}", *denied],
                            capture_output=True, timeout=30, check=False)
 
 
-def _descendants(pid: int) -> list:
-    """PIDs below pid, from `ps` (Linux and macOS); empty if ps is unavailable."""
-    children = {}
-    with contextlib.suppress(OSError, subprocess.SubprocessError):
-        ps = subprocess.run(["ps", "-A", "-o", "pid=,ppid="], capture_output=True,
+def _process_table() -> dict:
+    """{pid: (ppid, start time)} from `ps` (Linux and macOS); empty if ps is unavailable."""
+    table = {}
+    with contextlib.suppress(OSError, subprocess.SubprocessError, ValueError):
+        ps = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,lstart="], capture_output=True,
                             text=True, timeout=30, check=False).stdout
         for line in ps.splitlines():
-            child, parent = map(int, line.split())
-            children.setdefault(parent, []).append(child)
+            pid, ppid, started = line.split(None, 2)
+            table[int(pid)] = (int(ppid), started.strip())
+    return table
+
+
+def _descendants(pid: int, table: dict) -> list:
+    """PIDs below pid in a _process_table()."""
+    children = {}
+    for child, (parent, _) in table.items():
+        children.setdefault(parent, []).append(child)
     found, todo = [], [pid]
     while todo:
         kids = children.get(todo.pop(), [])
         found += kids
         todo += kids
     return found
+
+
+def _kernel32():
+    import ctypes
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.CreateJobObjectW.argtypes = (wintypes.LPVOID, wintypes.LPCWSTR)
+    k32.CreateJobObjectW.restype = wintypes.HANDLE
+    k32.AssignProcessToJobObject.argtypes = (wintypes.HANDLE, wintypes.HANDLE)
+    k32.TerminateJobObject.argtypes = (wintypes.HANDLE, wintypes.UINT)
+    k32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    return k32
+
+
+def _job_object(proc: subprocess.Popen):
+    """Windows: a Job Object holding the step, so a timeout kills every process it
+    started however it is parented. No KILL_ON_JOB_CLOSE: servers a passing step
+    leaves running survive. None if it can't be set up."""
+    k32 = _kernel32()
+    job = k32.CreateJobObjectW(None, None)
+    if job and not k32.AssignProcessToJobObject(job, int(proc._handle)):
+        k32.CloseHandle(job)
+        job = None
+    return job
+
+
+@contextlib.contextmanager
+def _signals_deferred():
+    """Hold SIGINT/SIGTERM until the block ends (POSIX), so a stop signal can't cut a kill short."""
+    if not hasattr(signal, "pthread_sigmask"):
+        yield
+        return
+    old = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGINT, signal.SIGTERM})
+    try:
+        yield
+    finally:
+        signal.pthread_sigmask(signal.SIG_SETMASK, old)
 
 
 def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
@@ -272,40 +335,50 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
     returns on time but leaves those children running into the next step.
 
     Output goes to files, so nothing waits on a pipe. On timeout the whole
-    process tree is killed and its exit waited for at most
-    TIMEOUT_KILL_GRACE_SECONDS. Processes a step starts in the background and
+    process tree is killed, then its exit is waited for at most
+    TIMEOUT_KILL_GRACE_SECONDS. The kill commands have their own limits
+    (taskkill 60s; ps twice and sudo kill, 30s each), so in the worst case a
+    step ends about 75s (Windows) or 105s (POSIX) after its timeout; "terminate"
+    reports the actual time. Processes a step starts in the background and
     leaves running on a normal exit (servers) are not touched.
     """
-    encoding = locale.getpreferredencoding(False)
-    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+    # Text mode reads as text=True did: locale encoding, and \r\n and lone \r
+    # (progress bars) -> \n.
+    with tempfile.TemporaryFile("w+", errors="replace") as out, \
+            tempfile.TemporaryFile("w+", errors="replace") as err:
         started = time.monotonic()
-        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
-                                # Own group in CI, so a timeout can killpg it. In a terminal, stay in
-                                # the foreground group: a background group is stopped (SIGTTIN/SIGTTOU)
-                                # when it prompts (sudo), and Ctrl-C must still reach servers that
-                                # earlier steps left running.
-                                preexec_fn=None if os.name == "nt" or os.isatty(0) else os.setpgrp)
+        # The step stays in the runner's process group: a signal to that group
+        # (Ctrl-C, `timeout`, a supervisor's killpg) still reaches it and the servers
+        # earlier steps left running, and in a terminal sudo can still prompt.
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err)
+        job = _job_object(proc) if os.name == "nt" else None
         timed_out = False
         try:
             proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             timed_out = True
-        except BaseException:  # Ctrl-C/SIGTERM: the step's own group doesn't get it
-            _kill_process_tree(proc)
+        except BaseException:  # Ctrl-C/SIGTERM, maybe sent to the runner alone
+            with _signals_deferred():
+                _kill_process_tree(proc, job, grace=STOP_GRACE_SECONDS)
             raise
         ran = time.monotonic() - started
         terminate = 0.0
         if timed_out:
             t = time.monotonic()
-            _kill_process_tree(proc)
-            with contextlib.suppress(subprocess.TimeoutExpired):
-                proc.wait(timeout=TIMEOUT_KILL_GRACE_SECONDS)
+            with _signals_deferred():
+                _kill_process_tree(proc, job)
+                with contextlib.suppress(subprocess.TimeoutExpired):
+                    proc.wait(timeout=TIMEOUT_KILL_GRACE_SECONDS)
             terminate = time.monotonic() - t
+            if proc.poll() is None:
+                print(f"WARNING: the step was still running {terminate:.0f}s after its process "
+                      "tree was killed; it may overlap the next step")
+        if job:
+            _kernel32().CloseHandle(job)
         output = []
         for f in (out, err):
             f.seek(0)
-            # Universal newlines, as text=True did: \r\n and lone \r (progress bars) -> \n.
-            output.append(f.read().decode(encoding, errors="replace").replace("\r\n", "\n").replace("\r", "\n"))
+            output.append(f.read())
     return {"returncode": None if timed_out else proc.returncode, "timed_out": timed_out,
             "stdout": output[0], "stderr": output[1], "ran": ran, "terminate": terminate}
 
@@ -1110,41 +1183,26 @@ def run_test(
             timing += f", process tree killed in {run['terminate']:.1f}s"
         console_log_chars = 10000
 
-        if run["timed_out"]:
-            error_msg = f"Test timed out after {test.timeout} seconds"
-            print(f"TIMEOUT: {error_msg}")
-            print(f"Duration: {duration:.2f}s ({timing})")
-            # What it printed before it was killed (e.g. apt waiting for a lock).
-            if stdout:
-                print(f"STDOUT before the timeout (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
-            if stderr:
-                print(f"STDERR before the timeout (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
-            return TestResult(
-                test_id=test.id,
-                success=False,
-                exit_code=-1,
-                stdout=stdout,
-                stderr=stderr,
-                duration=duration,
-                error_message=error_msg,
-                timed_out=True,
-                terminate_seconds=run["terminate"],
-            )
-
-        print(f"Exit code: {run['returncode']}")
+        error_msg = f"Test timed out after {test.timeout} seconds" if run["timed_out"] else ""
+        print(f"TIMEOUT: {error_msg}" if error_msg else f"Exit code: {run['returncode']}")
         print(f"Duration: {duration:.2f}s ({timing})")
+        # On a timeout, what it printed before it was killed (e.g. apt waiting for a lock).
+        when = " before the timeout" if run["timed_out"] else ""
         if stdout:
-            print(f"STDOUT (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
+            print(f"STDOUT{when} (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
         if stderr:
-            print(f"STDERR (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
+            print(f"STDERR{when} (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
 
         return TestResult(
             test_id=test.id,
             success=run["returncode"] == 0,
-            exit_code=run["returncode"],
+            exit_code=-1 if run["timed_out"] else run["returncode"],
             stdout=stdout,
             stderr=stderr,
             duration=duration,
+            error_message=error_msg,
+            timed_out=run["timed_out"],
+            terminate_seconds=run["terminate"],
         )
 
     except Exception as e:
@@ -1322,6 +1380,8 @@ def _run_playbook_tests_at_path(
                 "skipped": r.skipped,
                 "exit_code": r.exit_code,
                 "duration": r.duration,
+                "timed_out": r.timed_out,
+                "terminate_seconds": r.terminate_seconds,
                 "error_message": r.error_message,
             }
             for r in suite.results
@@ -1628,8 +1688,8 @@ def main():
         help="Disable canonical fallback for localized content",
     )
     args = parser.parse_args()
-    # In CI a step runs in its own process group, so a SIGTERM to ours misses it. Raise
-    # instead, so run_step_command kills the step's tree on the way out.
+    # A SIGTERM to the runner alone (docker stop, a supervisor) doesn't reach the step.
+    # Raise instead, so run_step_command stops the step's tree on the way out.
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
     success = run_playbook_tests(
