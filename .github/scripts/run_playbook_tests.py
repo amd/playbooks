@@ -424,8 +424,8 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
     Output goes to files, so nothing waits on a pipe. On timeout the whole
     process tree is killed, then its exit is waited for at most
     TIMEOUT_KILL_GRACE_SECONDS. The kill commands have their own limits
-    (taskkill 60s; sudo kill 30s, and on macOS ps 30s per listing), so in the
-    worst case a step ends about 75s (Windows) or 45s (Linux) after its timeout;
+    (taskkill 60s; on POSIX sudo kill 30s per pass, about three passes), so a step
+    ends about 75s (Windows) or minutes (POSIX, if sudo hangs) late at worst;
     "terminate" reports the actual time. Processes a step starts in the background
     and leaves running on a normal exit (servers) are not touched.
     """
