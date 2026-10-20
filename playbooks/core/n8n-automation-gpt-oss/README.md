@@ -20,6 +20,10 @@ n8n is a workflow automation platform that lets you connect apps and services us
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that pulls the latest business headlines from a news RSS feed and uses a local LLM running on your system to generate an investor-focused summary.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the **Launching Lemonade** section, check whether the model is already available in Lemonade — if it is, you can load it directly; if not, download it there first.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 - How to install and launch n8n
@@ -322,16 +326,16 @@ n8n starts a local web server. Press `'o'` or Open your browser to `http://local
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it might stop the server.
 
-## Launching Lemonade
+## Launching Models with Lemonade
 
 Lemonade is the local server that will run a model and connect to n8n. 
 
 <!-- @os:linux -->
-Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. You can browse models, backends, and load the pre-installed models from here.
+Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can add models, backends, and load the pre-installed models.
+Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 >**Tip**: Once running, the Lemonade GUI is also accessible at http://localhost:13305

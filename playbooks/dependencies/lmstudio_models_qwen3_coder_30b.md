@@ -6,6 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### Downloading Qwen3-Coder 30B on LM Studio
 
+<!-- @device:halo_box -->
+> **Note:** If this model is already available in LM Studio, you can skip this section. Otherwise, follow the steps below to download it.
+<!-- @device:end -->
+
 To download the Qwen3-Coder 30B model:
 
 1. Press "Ctrl" + "Shift" + "M" on your keyboard or click on the "Discover" tab (Magnifying Glass icon) on the left sidebar
