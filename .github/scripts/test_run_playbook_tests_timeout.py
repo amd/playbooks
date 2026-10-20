@@ -14,6 +14,7 @@ Windows path is the same code with taskkill /T).
 
 import importlib.util
 import os
+import shlex
 import shutil
 import signal
 import subprocess
@@ -97,11 +98,9 @@ class TimeoutKillsTheTree(unittest.TestCase):
         self.assertIn("before", result.stdout)
         self.assertLess(result.terminate_seconds, rpt.TIMEOUT_KILL_GRACE_SECONDS)
 
-    def test_a_stopped_runner_lets_the_step_clean_up_then_kills_its_tree(self):
-        # SIGTERM to the runner alone (docker stop): the step gets SIGTERM and time
-        # to clean up, and nothing it started outlives the runner.
-        marker = self.tmp / "cleaned"
-        step = f"trap 'echo yes > {marker}; exit' TERM; sleep 60 & echo $! > {self.pidfile}; wait"
+    def _stop_runner_during(self, step: str) -> int:
+        """Run step in a runner, SIGTERM the runner once the step wrote its pid file,
+        and return the runner's exit code."""
         runner = subprocess.Popen([sys.executable, "-c", (
             "import importlib.util, os, signal, sys\n"
             f"spec = importlib.util.spec_from_file_location('r', {str(Path(rpt.__file__))!r})\n"
@@ -109,15 +108,38 @@ class TimeoutKillsTheTree(unittest.TestCase):
             "signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))\n"
             f"r.run_step_command(['bash', '-c', {step!r}], {str(self.tmp)!r}, 60, dict(os.environ))\n"
         )])
+        self.addCleanup(lambda: runner.poll() is None and runner.kill())
         deadline = time.monotonic() + 10
         while not (self.pidfile.exists() and self.pidfile.read_text().strip()):
             self.assertLess(time.monotonic(), deadline, "the step never started")
             time.sleep(0.05)
         runner.send_signal(signal.SIGTERM)
-        self.assertEqual(runner.wait(timeout=30), 128 + signal.SIGTERM)
+        return runner.wait(timeout=30)
+
+    def test_a_stopped_runner_lets_the_step_clean_up_then_kills_its_tree(self):
+        # SIGTERM to the runner alone (docker stop): the step gets SIGTERM and time
+        # to clean up, and nothing it started outlives the runner.
+        marker = self.tmp / "cleaned"
+        step = f"trap 'echo yes > {marker}; exit' TERM; sleep 60 & echo $! > {self.pidfile}; wait"
+        self.assertEqual(self._stop_runner_during(step), 128 + signal.SIGTERM)
         self.assertEqual(marker.read_text().strip(), "yes")
         time.sleep(0.2)
         self.assertFalse(_alive(int(self.pidfile.read_text())), "the step's child outlived the runner")
+
+    def test_a_stopped_runner_gives_the_steps_children_time_to_clean_up(self):
+        # The usual step: the shell has no TERM trap and dies at once, but its child
+        # (apt, dpkg) still gets the grace to clean up.
+        marker = self.tmp / "cleaned"
+        child = (
+            "import os, signal, sys, time\n"
+            "signal.signal(signal.SIGTERM, lambda *_: (time.sleep(1),"
+            f" open({str(marker)!r}, 'w').write('yes'), sys.exit()))\n"
+            f"open({str(self.pidfile)!r}, 'w').write(str(os.getpid()))\n"
+            "time.sleep(60)\n"
+        )
+        step = f"{shlex.quote(sys.executable)} -c {shlex.quote(child)}; echo done"
+        self.assertEqual(self._stop_runner_during(step), 128 + signal.SIGTERM)
+        self.assertEqual(marker.read_text(), "yes")
 
 
 class SignalTree(unittest.TestCase):
@@ -135,7 +157,7 @@ class SignalTree(unittest.TestCase):
 
     def test_descendants_follow_the_whole_tree(self):
         table = {10: (1, "a"), 11: (10, "a"), 12: (11, "a"), 20: (1, "a")}
-        self.assertEqual(sorted(rpt._descendants(10, table)), [11, 12])
+        self.assertEqual(sorted(rpt._descendants([10], table)), [11, 12])
 
 
 if __name__ == "__main__":

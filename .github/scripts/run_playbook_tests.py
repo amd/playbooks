@@ -152,6 +152,7 @@ Usage:
 import argparse
 import contextlib
 import dataclasses
+import functools
 import hashlib
 import io
 import json
@@ -220,10 +221,12 @@ TIMEOUT_KILL_GRACE_SECONDS = 15
 STOP_GRACE_SECONDS = 5
 
 
-def _kill_process_tree(proc: subprocess.Popen, job=None, grace: float = 0) -> None:
+def _kill_process_tree(proc: subprocess.Popen, job=None, grace: float = 0,
+                       wait: float = TIMEOUT_KILL_GRACE_SECONDS) -> bool:
     """Kill a step and everything it started (pip, python, installers...).
 
     With grace (POSIX), SIGTERM the tree first and give it that long to exit.
+    Returns whether the step and its tree had exited within wait seconds of the kill.
     """
     if os.name == "nt":
         with contextlib.suppress(subprocess.TimeoutExpired):
@@ -231,24 +234,45 @@ def _kill_process_tree(proc: subprocess.Popen, job=None, grace: float = 0) -> No
                            capture_output=True, timeout=60, check=False)
         if job:  # what taskkill /T misses: processes whose parent already exited
             _kernel32().TerminateJobObject(job, 1)
-        return
-    table = _process_table()  # before killing: a dead parent's children get reparented
-    tree = {pid: table[pid][1] for pid in _descendants(proc.pid, table)}
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=wait)
+        return proc.poll() is not None
+    tree = {}  # every descendant seen so far: a dead parent's children get reparented
     if grace:
         _signal_tree(proc, tree, signal.SIGTERM)
-        with contextlib.suppress(subprocess.TimeoutExpired):
-            proc.wait(timeout=grace)
+        _wait_tree(proc, tree, grace)  # the shell often dies at once; its children clean up
     _signal_tree(proc, tree, signal.SIGKILL)
+    return _wait_tree(proc, tree, wait)
+
+
+def _wait_tree(proc: subprocess.Popen, tree: dict, timeout: float) -> bool:
+    """Wait up to timeout for the step and the descendants in tree to exit; True if they did."""
+    deadline = time.monotonic() + timeout
+    while True:
+        now = _process_table()
+        if proc.poll() is not None and not any(
+                now.get(pid, (None, None))[1] == started for pid, started in tree.items()):
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.2)
 
 
 def _signal_tree(proc: subprocess.Popen, tree: dict, sig: signal.Signals) -> None:
-    """Send sig to the step and to the descendants in tree ({pid: start time})."""
+    """Send sig to the step and its descendants. tree ({pid: start time}) collects every
+    descendant seen, so ones reparented after an earlier signal still get later ones."""
+    now = _process_table()  # before signalling the step, while its children are still its own
+    if not now:
+        print("WARNING: could not list processes; the step's children may not be killed")
+    # Skip the ones that exited or whose pid now belongs to another process (unless the
+    # listing failed), and add any started since the last listing.
+    live = {pid: started for pid, started in tree.items()
+            if not now or now.get(pid, (None, None))[1] == started}
+    live.update((pid, now[pid][1]) for pid in _descendants([proc.pid, *live], now))
+    tree.update(live)
     proc.send_signal(sig)  # a no-op once the step has been reaped
-    now = _process_table()
     denied = []
-    for pid, started in tree.items():
-        if now.get(pid, (None, None))[1] != started:
-            continue  # exited, or its pid now belongs to another process
+    for pid in live:
         try:
             os.kill(pid, sig)
         except ProcessLookupError:
@@ -264,23 +288,35 @@ def _signal_tree(proc: subprocess.Popen, tree: dict, sig: signal.Signals) -> Non
 
 
 def _process_table() -> dict:
-    """{pid: (ppid, start time)} from `ps` (Linux and macOS); empty if ps is unavailable."""
+    """{pid: (ppid, start time)} of live (non-zombie) processes: from /proc on Linux,
+    else `ps` (macOS); empty if neither works."""
     table = {}
+    if os.path.isdir("/proc/self"):
+        for pid in filter(str.isdigit, os.listdir("/proc")):
+            with contextlib.suppress(OSError, ValueError, IndexError):
+                with open(f"/proc/{pid}/stat") as f:
+                    # Fields after "(comm)": state, ppid, ..., starttime (field 22, in clock
+                    # ticks since boot: exact, unlike ps lstart, which can drift by a second).
+                    fields = f.read().rpartition(")")[2].split()
+                if fields[0] != "Z":
+                    table[int(pid)] = (int(fields[1]), fields[19])
+        return table
     with contextlib.suppress(OSError, subprocess.SubprocessError, ValueError):
-        ps = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,lstart="], capture_output=True,
+        ps = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,stat=,lstart="], capture_output=True,
                             text=True, timeout=30, check=False).stdout
         for line in ps.splitlines():
-            pid, ppid, started = line.split(None, 2)
-            table[int(pid)] = (int(ppid), started.strip())
+            pid, ppid, stat, started = line.split(None, 3)
+            if not stat.startswith("Z"):
+                table[int(pid)] = (int(ppid), started.strip())
     return table
 
 
-def _descendants(pid: int, table: dict) -> list:
-    """PIDs below pid in a _process_table()."""
+def _descendants(pids, table: dict) -> list:
+    """PIDs below any of pids in a _process_table()."""
     children = {}
     for child, (parent, _) in table.items():
         children.setdefault(parent, []).append(child)
-    found, todo = [], [pid]
+    found, todo = [], list(pids)
     while todo:
         kids = children.get(todo.pop(), [])
         found += kids
@@ -288,27 +324,59 @@ def _descendants(pid: int, table: dict) -> list:
     return found
 
 
+@functools.cache
 def _kernel32():
     import ctypes
     from ctypes import wintypes
     k32 = ctypes.WinDLL("kernel32", use_last_error=True)
     k32.CreateJobObjectW.argtypes = (wintypes.LPVOID, wintypes.LPCWSTR)
     k32.CreateJobObjectW.restype = wintypes.HANDLE
+    k32.SetInformationJobObject.argtypes = (wintypes.HANDLE, ctypes.c_int, wintypes.LPVOID,
+                                            wintypes.DWORD)
     k32.AssignProcessToJobObject.argtypes = (wintypes.HANDLE, wintypes.HANDLE)
     k32.TerminateJobObject.argtypes = (wintypes.HANDLE, wintypes.UINT)
     k32.CloseHandle.argtypes = (wintypes.HANDLE,)
     return k32
 
 
+# Windows: the step starts suspended, so nothing it starts can run before it is in its Job Object.
+CREATE_SUSPENDED = 0x4
+JOB_OBJECT_LIMIT_BREAKAWAY_OK = 0x800
+JOB_OBJECT_BASIC_LIMIT_INFORMATION_CLASS = 2
+
+
 def _job_object(proc: subprocess.Popen):
-    """Windows: a Job Object holding the step, so a timeout kills every process it
-    started however it is parented. No KILL_ON_JOB_CLOSE: servers a passing step
-    leaves running survive. None if it can't be set up."""
+    """Windows: put the (suspended) step in a Job Object, so a timeout kills every
+    process it started however it is parented, then resume it. No KILL_ON_JOB_CLOSE:
+    servers a passing step leaves running survive. BREAKAWAY_OK: a child that asks to
+    leave the job (CREATE_BREAKAWAY_FROM_JOB) still can, as before. None if the job
+    can't be set up; the step is resumed either way."""
+    import ctypes
+    from ctypes import wintypes
+
+    class Limits(ctypes.Structure):  # JOBOBJECT_BASIC_LIMIT_INFORMATION
+        _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64),
+                    ("PerJobUserTimeLimit", ctypes.c_int64), ("LimitFlags", wintypes.DWORD),
+                    ("MinimumWorkingSetSize", ctypes.c_size_t),
+                    ("MaximumWorkingSetSize", ctypes.c_size_t),
+                    ("ActiveProcessLimit", wintypes.DWORD), ("Affinity", ctypes.c_size_t),
+                    ("PriorityClass", wintypes.DWORD), ("SchedulingClass", wintypes.DWORD)]
+
     k32 = _kernel32()
-    job = k32.CreateJobObjectW(None, None)
-    if job and not k32.AssignProcessToJobObject(job, int(proc._handle)):
-        k32.CloseHandle(job)
-        job = None
+    try:
+        job = k32.CreateJobObjectW(None, None)
+        if job:
+            limits = Limits(LimitFlags=JOB_OBJECT_LIMIT_BREAKAWAY_OK)
+            k32.SetInformationJobObject(job, JOB_OBJECT_BASIC_LIMIT_INFORMATION_CLASS,
+                                        ctypes.byref(limits), ctypes.sizeof(limits))
+            if not k32.AssignProcessToJobObject(job, int(proc._handle)):
+                k32.CloseHandle(job)
+                job = None
+    finally:
+        # Popen closed the main thread's handle; NtResumeProcess resumes the process.
+        ntdll = ctypes.WinDLL("ntdll")
+        ntdll.NtResumeProcess.argtypes = (wintypes.HANDLE,)
+        ntdll.NtResumeProcess(int(proc._handle))
     return job
 
 
@@ -337,10 +405,10 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
     Output goes to files, so nothing waits on a pipe. On timeout the whole
     process tree is killed, then its exit is waited for at most
     TIMEOUT_KILL_GRACE_SECONDS. The kill commands have their own limits
-    (taskkill 60s; ps twice and sudo kill, 30s each), so in the worst case a
-    step ends about 75s (Windows) or 105s (POSIX) after its timeout; "terminate"
-    reports the actual time. Processes a step starts in the background and
-    leaves running on a normal exit (servers) are not touched.
+    (taskkill 60s; sudo kill 30s, and on macOS ps 30s per listing), so in the
+    worst case a step ends about 75s (Windows) or 45s (Linux) after its timeout;
+    "terminate" reports the actual time. Processes a step starts in the background
+    and leaves running on a normal exit (servers) are not touched.
     """
     # Text mode reads as text=True did: locale encoding, and \r\n and lone \r
     # (progress bars) -> \n.
@@ -350,31 +418,34 @@ def run_step_command(cmd, cwd, timeout: int, env: dict) -> dict:
         # The step stays in the runner's process group: a signal to that group
         # (Ctrl-C, `timeout`, a supervisor's killpg) still reaches it and the servers
         # earlier steps left running, and in a terminal sudo can still prompt.
-        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err)
-        job = _job_object(proc) if os.name == "nt" else None
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
+                                creationflags=CREATE_SUSPENDED if os.name == "nt" else 0)
+        job = None
         timed_out = False
         try:
-            proc.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            timed_out = True
-        except BaseException:  # Ctrl-C/SIGTERM, maybe sent to the runner alone
-            with _signals_deferred():
-                _kill_process_tree(proc, job, grace=STOP_GRACE_SECONDS)
-            raise
-        ran = time.monotonic() - started
-        terminate = 0.0
-        if timed_out:
-            t = time.monotonic()
-            with _signals_deferred():
-                _kill_process_tree(proc, job)
-                with contextlib.suppress(subprocess.TimeoutExpired):
-                    proc.wait(timeout=TIMEOUT_KILL_GRACE_SECONDS)
-            terminate = time.monotonic() - t
-            if proc.poll() is None:
-                print(f"WARNING: the step was still running {terminate:.0f}s after its process "
-                      "tree was killed; it may overlap the next step")
-        if job:
-            _kernel32().CloseHandle(job)
+            try:
+                if os.name == "nt":
+                    job = _job_object(proc)
+                proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+            except BaseException:  # Ctrl-C/SIGTERM, maybe sent to the runner alone
+                with _signals_deferred():
+                    _kill_process_tree(proc, job, grace=STOP_GRACE_SECONDS, wait=0)
+                raise
+            ran = time.monotonic() - started
+            terminate = 0.0
+            if timed_out:
+                t = time.monotonic()
+                with _signals_deferred():
+                    exited = _kill_process_tree(proc, job)
+                terminate = time.monotonic() - t
+                if not exited:
+                    print(f"WARNING: the step's process tree was still running {terminate:.0f}s "
+                          "after it was killed; it may overlap the next step")
+        finally:
+            if job:
+                _kernel32().CloseHandle(job)
         output = []
         for f in (out, err):
             f.seek(0)
@@ -1174,7 +1245,7 @@ def run_test(
     start_time = time.time()
     try:
         run = run_step_command(cmd, workdir, test.timeout, {**os.environ, "PYTHONUNBUFFERED": "1"})
-        duration = time.time() - start_time
+        duration = run["ran"] + run["terminate"]
         stdout, stderr = run["stdout"], run["stderr"]
         (results_dir / f"{test.id}_stdout.txt").write_text(stdout, encoding="utf-8")
         (results_dir / f"{test.id}_stderr.txt").write_text(stderr, encoding="utf-8")
