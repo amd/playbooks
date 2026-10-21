@@ -135,47 +135,6 @@ class V2Contract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "immutable"):
             v2.request_for("linux/halo", self.batch, self.cfg, "main", "workspace", "", "")
 
-    def test_selection_reads_external_metadata_and_respects_requested_subset(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            source = Path(tmp)
-            for pb in ("ollama-getting-started", "gaia-agents"):
-                path = source / "playbooks/core" / pb / "playbook.json"
-                path.parent.mkdir(parents=True)
-                path.write_text(json.dumps({"tested_platforms": {"halo": ["linux", "windows"]}}))
-            cfg = copy.deepcopy(self.cfg)
-            batches = v2.select(cfg, source, "ollama-getting-started,ollama-getting-started", "halo", "linux")
-            self.assertEqual(list(batches), ["linux/halo"])
-            self.assertEqual(batches["linux/halo"]["playbooks"], ["ollama-getting-started"])
-            with self.assertRaisesRegex(ValueError, "absent from the external"):
-                v2.select(cfg, source, "not-present", "halo", "linux")
-
-    def test_blank_and_all_selection_preserve_existing_dispatch_semantics(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            source = Path(tmp)
-            cfg = copy.deepcopy(self.cfg)
-            # This fixture checks metadata discovery, not production tag/extra-device policy.
-            for key in ("extra_tags", "device_extra_tags", "extra_devices"):
-                cfg[key] = {}
-            for category, pb, platforms in (
-                ("core", "ollama-getting-started", {"halo": ["linux", "windows"]}),
-                ("supplemental", "gaia-agents", {"halo": ["linux"]}),
-                ("core", "windows-only", {"halo": ["windows"]}),
-            ):
-                path = source / "playbooks" / category / pb / "playbook.json"
-                path.parent.mkdir(parents=True)
-                path.write_text(json.dumps({"tested_platforms": platforms}))
-            for playbooks in ("", "all"):
-                for devices in ("", "all", "halo"):
-                    with self.subTest(playbooks=playbooks, devices=devices):
-                        batches = v2.select(cfg, source, playbooks, devices, "linux")
-                        self.assertEqual(set(batches), {"linux/halo"})
-                        self.assertEqual(set(batches["linux/halo"]["playbooks"]),
-                                         {"ollama-getting-started", "gaia-agents"})
-            with self.assertRaisesRegex(ValueError, "No eligible configured hardware"):
-                v2.select(cfg, source, "windows-only", "halo", "linux")
-            with self.assertRaisesRegex(ValueError, "No eligible playbooks"):
-                v2.select(cfg, source, "all", "rx9070xt", "linux")
-
     def test_workspace_uses_repository_configuration_with_explicit_override(self):
         env = {"ORCHESTRAI_V2_WORKSPACE": "production-workspace"}
         self.assertEqual(v2.resolve_workspace("", env), "production-workspace")
@@ -203,207 +162,20 @@ class V2Contract(unittest.TestCase):
         self.assertNotIn("result_publishers", request["parameters"]["PLAN_JSON"]["run_settings"])
         self.assertNotIn("RP_PROJECT", request["parameters"])
 
-    def prepare(self, root, export=False):
-        args = SimpleNamespace(config="unused", source=str(root), playbooks="ollama-getting-started",
-                               devices="halo", platform="linux", sha="a" * 40,
-                               workspace="playbooks", catalog="", prepare_only=False,
-                               publish_reportportal=export, requests=str(root / "requests"),
-                               preview=str(root / "preview"))
-        with mock.patch.object(v2.legacy, "load_config", return_value=self.cfg), \
-                mock.patch.object(v2.legacy, "apply_env_overrides", side_effect=lambda x: x), \
-                mock.patch.object(v2.legacy, "validate_config", return_value=[]), \
-                mock.patch.object(v2, "select", return_value={"linux/halo": self.batch}), \
-                mock.patch.object(api.Settings, "from_env"):
-            v2.prepare(args)
-        return json.loads((root / "requests/linux_halo.json").read_text())
 
-    def test_prepare_native_ignores_existing_reportportal_variable(self):
-        for credential in ("", "old-credential"):
-            with self.subTest(credential=credential), tempfile.TemporaryDirectory() as tmp, \
-                    mock.patch.dict(os.environ, {"ORCHESTRAI_V2_RP_CREDENTIAL": credential}):
-                request = self.prepare(Path(tmp))
-                self.assertNotIn("result_publishers", request["config"]["control_plane"])
-
-    def test_explicit_export_requires_credential_and_remains_required(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaisesRegex(ValueError, "export was requested"):
-                self.prepare(Path(tmp), export=True)
-            with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_RP_CREDENTIAL": "rp"}):
-                request = self.prepare(Path(tmp), export=True)
-            publisher = request["config"]["control_plane"]["result_publishers"][0]
-            self.assertEqual(publisher["credential"], "rp")
-            self.assertTrue(publisher["required"])
-
-    def test_nested_metadata_does_not_reject_a_complete_pass(self):
-        result = {"verdict": "success", "tests_summary": {
-            "total": 17, "passed": 17, "failed": 0, "running": 0,
-            "per_test": {"total": 1, "machines": 17, "passed": 1},
-        }}
-        self.assertEqual(v2.validate_result(result, 17), result)
-
-    def test_nested_metadata_cannot_hide_bad_outcome_counters(self):
-        for field in ("not_run", "interrupted", "cancelled", "unknown", "errors"):
-            result = {"verdict": "success", "tests_summary": {
-                "total": 1, "passed": 1, "per_test": {}, field: 1}}
-            self.assertEqual(v2.validate_result(result, 1)["verdict"], "failure")
-        for counts in ([], "not an object", {"total": -1, "passed": 1},
-                       {"total": 1, "passed": 1, "not_run": True}):
-            self.assertEqual(v2.validate_result({"verdict": "success", "tests_summary": counts}, 1)["verdict"],
-                             "failure")
-
-    def test_zero_missing_skipped_and_extra_verdicts_cannot_pass(self):
-        for counts in ({}, {"total": 0, "passed": 0}, {"total": 2, "passed": 1, "skipped": 1},
-                       {"total": 3, "passed": 3}, {"total": 2, "passed": 2, "errors": 1}):
-            result = v2.validate_result({"verdict": "success", "tests_summary": counts}, 2)
-            self.assertEqual(result["verdict"], "failure")
-            self.assertEqual(result["status"], "tests-errored")
-
-    def test_success_and_failure_verdicts_are_preserved(self):
-        success = {"verdict": "success", "tests_summary": {"total": 2, "passed": 2}}
-        failure = {"verdict": "failure", "status": "timeout"}
-        self.assertEqual(v2.validate_result(success, 2), success)
-        self.assertEqual(v2.validate_result(failure, 2), failure)
-
-    def test_boolean_and_string_counts_cannot_pass(self):
-        for counts in ({"total": 1, "passed": True}, {"total": 1, "passed": "1"}):
-            self.assertEqual(v2.validate_result({"verdict": "success", "tests_summary": counts}, 1)["verdict"],
-                             "failure")
-
-
-class NativeReporting(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
-        self.plan = [{"batch_id": "linux/halo", "playbook_sha": "a" * 40, "playbook_count": 2},
-                     {"batch_id": "windows/halo", "playbook_sha": "a" * 40, "playbook_count": 2}]
-        self.args = SimpleNamespace(plan=str(self.root / "plan.json"), artifacts=str(self.root / "artifacts"))
-        v2.write_json(self.args.plan, self.plan)
-        self.result = {"batch_id": "linux/halo", "playbook_sha": "a" * 40, "expected": 2,
-                       "status": "passed", "verdict": "success", "result_destination": "native",
-                       "url": "https://example.invalid/#/runs/one", "pipeline_url": "https://jenkins.invalid/1/",
-                       "tests": [{"path": "shared-adapter", "outcome": "passed"},
-                                 {"path": "shared-adapter", "outcome": "passed"}]}
-        self.output = redirect_stdout(io.StringIO())
-        self.output.__enter__()
-        self.addCleanup(self.output.__exit__, None, None, None)
-
-    def save(self, result, folder):
-        v2.write_json(Path(self.args.artifacts) / folder / "result.json", result)
-
-    def test_aggregate_duplicate_adapter_paths_and_not_run_without_guessing_names(self):
-        self.save(self.result, "linux")
-        other = {**self.result, "batch_id": "windows/halo", "status": "failed", "verdict": "failure",
-                 "tests": [{"path": "shared-adapter", "outcome": "failed"},
-                           {"path": "shared-adapter", "outcome": "not_run"}]}
-        self.save(other, "windows")
-        report = v2.summary(self.args)
-        self.assertIn("linux/halo | 2 | 2 | 0 | 0 | 0 | 0 | passed | success", report)
-        self.assertIn("windows/halo | 2 | 0 | 1 | 1 | 0 | 0 | failed | failure", report)
-        self.assertIn("V2 logs", report)
-        self.assertIn("does not infer identity", report)
-        self.assertNotIn("ReportPortal]", report)
-
-    def test_missing_result_is_written_as_unknown_then_fails_reporting(self):
-        self.save(self.result, "linux")
-        step_summary = self.root / "step.md"
-        with mock.patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": str(step_summary)}):
-            with self.assertRaisesRegex(ValueError, "artifacts are missing"):
-                v2.summary(self.args)
-        report = step_summary.read_text()
-        self.assertIn("windows/halo | 2 | 0 | 0 | 0 | 0 | 2 | UNKNOWN | UNKNOWN", report)
-
-    def test_reports_link_only_to_native_runs_not_executor(self):
-        self.save(self.result, "linux")
-        self.save({**self.result, "batch_id": "windows/halo"}, "windows")
-        for report in (v2.result_report(self.result, "linux/halo"), v2.summary(self.args)):
-            self.assertIn(self.result["url"], report)
-            self.assertNotIn(self.result["pipeline_url"], report)
-            self.assertNotIn("Jenkins", report)
-        # Keep executor coordinates in diagnostic metadata, not rendered links.
-        self.assertEqual(self.result["pipeline_url"], "https://jenkins.invalid/1/")
-
-    def test_missing_native_link_does_not_fall_back_to_executor(self):
-        result = {**self.result, "url": ""}
-        self.save(result, "linux")
-        self.save({**result, "batch_id": "windows/halo"}, "windows")
-        report = v2.summary(self.args)
-        self.assertIn("No V2 run link", report)
-        for rendered in (report, v2.result_report(result, "linux/halo")):
-            self.assertNotIn(result["pipeline_url"], rendered)
-
-    def test_source_mismatch_and_duplicate_configuration_are_rejected(self):
-        self.save({**self.result, "playbook_sha": "b" * 40}, "linux")
-        with self.assertRaisesRegex(ValueError, "source mismatch"):
-            v2.summary(self.args)
-        self.save(self.result, "linux")
-        self.save(self.result, "duplicate")
-        with self.assertRaisesRegex(ValueError, "Duplicate"):
-            v2.summary(self.args)
-
-    def test_all_tests_passed_but_pipeline_failed_is_not_a_test_failure(self):
-        result = {**self.result, "status": "failed", "verdict": "failure", "pipeline_status": "FAILURE"}
-        report = v2.result_report(result, "linux/halo")
-        self.assertIn("2 passed · 0 failed", report)
-        self.assertIn("All returned test executions passed", report)
-        self.assertIn("Executor/publishing status: **FAILURE**", report)
-        self.assertEqual(result["verdict"], "failure")
-
-    def test_links_and_cells_cannot_inject_markdown_html_or_credentials(self):
-        for url in ("http://example.invalid", "https://user:secret@example.invalid", "https://bad.invalid:wrong",
-                    "https://example.invalid\n::error::bad", "javascript:alert(1)"):
-            self.assertEqual(v2.result_link(url, "V2"), "")
-        self.assertNotIn(")evil", v2.result_link("https://example.invalid/)evil", "V2"))
-        self.assertEqual(v2.cell("<x>|a\nb"), "&lt;x&gt;\\|a b")
-
-    def test_both_dispatch_forms_default_to_reportportal_and_aggregate_after_failure(self):
-        import yaml
-        workflow = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").read_text(),
-                             Loader=yaml.BaseLoader)
-        bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
-                           Loader=yaml.BaseLoader)
-        for event in ("workflow_dispatch", "workflow_call"):
-            self.assertEqual(workflow["on"][event]["inputs"]["publish_reportportal"]["default"], "true")
-        self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["v2_publish_reportportal"]["default"], "true")
-        self.assertIn("inputs.v2_publish_reportportal", bridge["jobs"]["v2"]["with"]["publish_reportportal"])
-        self.assertIn("always()", workflow["jobs"]["results"]["if"])
-        self.assertIn("execute", workflow["jobs"]["results"]["needs"])
-        self.assertIn("results", workflow["jobs"]["gate"]["needs"])
-        self.assertEqual(workflow["jobs"]["results"]["permissions"]["actions"], "read")
-
-    def test_workspace_defaults_are_portable_and_public_nightly_is_unchanged(self):
-        import yaml
-        workflow = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").read_text(),
-                             Loader=yaml.BaseLoader)
-        bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
-                           Loader=yaml.BaseLoader)
-        for event in ("workflow_dispatch", "workflow_call"):
-            self.assertEqual(workflow["on"][event]["inputs"]["workspace"]["default"], "")
-        self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["v2_workspace"]["default"], "")
-        self.assertEqual(workflow["env"]["ORCHESTRAI_V2_WORKSPACE"],
-                         "${{ vars.ORCHESTRAI_V2_WORKSPACE }}")
-        self.assertEqual(bridge["jobs"]["v2"]["uses"],
-                         "./.github/workflows/test-playbooks-orchestrai-v2.yml")
-        self.assertEqual(bridge["jobs"]["v2"]["permissions"]["id-token"], "write")
-        self.assertEqual(workflow["jobs"]["execute"]["permissions"]["id-token"], "write")
-        self.assertEqual(bridge["on"]["schedule"], [{"cron": "0 1 * * *"}])
-
+class StandardWorkflow(unittest.TestCase):
     def test_v2_hardware_runs_use_the_standard_per_playbook_jobs(self):
         import yaml
         bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
                            Loader=yaml.BaseLoader)
         self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["use_v2"]["default"], "false")
-        # Plan-only validation stays in the dedicated lane; hardware runs go
-        # through Detect & Trigger -> per-playbook jobs -> Test Gate.
-        self.assertIn("inputs.use_v2 && inputs.v2_prepare_only", bridge["jobs"]["v2"]["if"])
-        for name in ("detect-and-trigger", "test-gate"):
-            self.assertIn("!(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only)",
-                          bridge["jobs"][name]["if"])
+        # One workflow: V2 changes only how Detect & Trigger starts the builds.
+        self.assertNotIn("v2", bridge["jobs"])
+        self.assertNotIn("if", bridge["jobs"]["detect-and-trigger"])
+        self.assertFalse((ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").exists())
         self.assertEqual(bridge["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
         trigger = next(st for st in bridge["jobs"]["detect-and-trigger"]["steps"] if st.get("id") == "trigger")
         self.assertIn("inputs.use_v2", trigger["env"]["ORCHESTRAI_USE_V2"])
-        self.assertEqual(bridge["jobs"]["v2"]["with"]["locale"], "")
-        self.assertIn("inputs.windows_driver", bridge["jobs"]["v2"]["with"]["windows_driver"])
 
     def test_trigger_batches_returns_each_executor_build_url(self):
         polls = {"a": [{"status": "queued"}, {"status": "running", "pipeline_url": "https://j/b/1"}],
@@ -454,6 +226,7 @@ class NativeReporting(unittest.TestCase):
                      ".github/orchestrai/V2.md", ".github/tests/test_orchestrai_v2.py"):
             self.assertNotIn(path, signed)
         self.assertNotIn("orchestrai_v2", (ROOT / ".github/workflows/test-playbooks.yml").read_text())
+
 
 
 class FakeApi:
@@ -596,49 +369,6 @@ class DirectApiContract(unittest.TestCase):
                                api.ApiError("transport failed", True), (502, None)]
         self.assertEqual(self.client.execute(self.doc, self.path)["verdict"], "success")
 
-    def test_failed_test_result_is_preserved(self):
-        self.fake.states = ["unstable"]
-        self.fake.tests = [{"path": "adapter", "outcome": "failed", "error": "model allocation failed"}]
-        result = self.client.execute(self.doc, self.path)
-        self.assertEqual(result["verdict"], "failure")
-        self.assertIn("model allocation failed", v2.result_report(result, "linux/halo"))
-
-    def test_controller_rejects_green_summary_with_missing_or_wrong_actual_records(self):
-        doc_path = Path(self.tmp.name) / "request.json"
-        doc_path.write_text(json.dumps(self.doc))
-        args = SimpleNamespace(request=str(doc_path), state=self.path,
-                               results=str(Path(self.tmp.name) / "results"))
-        for tests in ([], [{"path": "wrong-adapter", "outcome": "passed"}],
-                      [{"path": "adapter", "outcome": "skipped"}],
-                      [{"path": ["invalid"], "outcome": "passed"}]):
-            result = {"run_id": "run-1", "verdict": "success", "status": "passed",
-                      "tests_summary": {"total": 1, "passed": 1}, "tests": tests}
-            with mock.patch.object(api.Settings, "from_env", return_value=self.settings), \
-                    mock.patch.object(api, "Client") as client:
-                client.return_value.execute.return_value = result
-                with self.assertRaisesRegex(ValueError, "exact requested passed adapters"):
-                    v2.execute(args)
-            saved = json.loads((Path(args.results) / "result.json").read_text())
-            self.assertEqual(saved["verdict"], "failure")
-            self.assertEqual(saved["tests"], tests)
-
-    def test_controller_accepts_exact_adapters_and_saves_external_identity(self):
-        doc_path = Path(self.tmp.name) / "request.json"
-        doc_path.write_text(json.dumps(self.doc))
-        args = SimpleNamespace(request=str(doc_path), state=self.path,
-                               results=str(Path(self.tmp.name) / "results"))
-        self.doc["playbook_sha"] = "a" * 40
-        doc_path.write_text(json.dumps(self.doc))
-        result = {"run_id": "run-1", "verdict": "success", "status": "passed",
-                  "tests_summary": {"total": 1, "passed": 1}, "tests": self.fake.tests}
-        with mock.patch.object(api.Settings, "from_env", return_value=self.settings), \
-                mock.patch.object(api, "Client") as client:
-            client.return_value.execute.return_value = result
-            v2.execute(args)
-        identity = json.loads((Path(args.results) / "identity.json").read_text())
-        self.assertEqual(identity["playbook_repo"], "https://github.com/amd/playbooks")
-        self.assertEqual(identity["playbook_sha"], "a" * 40)
-
     def test_timeout_requests_cancellation_without_claiming_release(self):
         self.fake.states = ["running"]
         result = self.client.execute(self.doc, self.path)
@@ -742,13 +472,6 @@ class DirectApiContract(unittest.TestCase):
             self.assertNotIn(secret, text)
         self.assertNotIn("\n", text)
         self.assertIn("request_id=valid-42", text)
-
-    def test_workflow_has_no_library_checkout_or_secret_requirement(self):
-        workflow = (ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").read_text()
-        for old in ("ORCHESTRAI_V2_LIBRARY_TOKEN", "SSH_DEPLOY_KEY", "ci-actions-lib", "ci/requirements.txt"):
-            self.assertNotIn(old, workflow)
-        for new in ("ORCHESTRAI_V2_CI_API_URL", "ORCHESTRAI_V2_OIDC_AUDIENCE", "ORCHESTRAI_V2_PORTAL_URL"):
-            self.assertIn(new, workflow)
 
     def test_body_read_disconnect_is_a_retryable_error(self):
         opener = mock.MagicMock()

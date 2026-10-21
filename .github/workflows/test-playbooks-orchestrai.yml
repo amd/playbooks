@@ -70,17 +70,13 @@ on:
           - public
           - internal
       use_v2:
-        description: 'Opt-in English-only Control Plane pilot; localized locale is not used'
+        description: 'Start the builds through the OrchestrAI Control Plane (V2) instead of Jenkins'
         type: boolean
         default: false
       v2_workspace:
         description: 'V2 workspace override (blank = repository variable ORCHESTRAI_V2_WORKSPACE)'
         type: string
         default: ''
-      v2_prepare_only:
-        description: 'V2: validate the plan without acquiring hardware'
-        type: boolean
-        default: false
       v2_publish_reportportal:
         description: 'V2: also export to ReportPortal (on until V2 reporting replaces it; native results remain authoritative)'
         type: boolean
@@ -109,31 +105,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  v2:
-    name: Dedicated V2 validation
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only }}
-    permissions:
-      contents: read
-      id-token: write
-      actions: read
-    uses: ./.github/workflows/test-playbooks-orchestrai-v2.yml
-    with:
-      playbook_id: ${{ inputs.playbook_id }}
-      device: ${{ inputs.device }}
-      platform: ${{ inputs.platform }}
-      playbook_ref: ${{ inputs.playbook_ref }}
-      locale: ''
-      machines_per_hw_group: ${{ inputs.machines_per_hw_group }}
-      workspace: ${{ inputs.v2_workspace }}
-      catalog_release_id: ${{ vars.ORCHESTRAI_V2_CATALOG_RELEASE_ID }}
-      prepare_only: ${{ inputs.v2_prepare_only }}
-      publish_reportportal: ${{ inputs.v2_publish_reportportal }}
-      windows_driver: ${{ inputs.windows_driver }}
-    secrets: inherit
-
   detect-and-trigger:
     name: Detect & Trigger
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only) }}
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -438,7 +411,7 @@ jobs:
   test-gate:
     name: Test Gate (Required)
     needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
-    if: ${{ always() && !(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only) }}
+    if: always()
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests
