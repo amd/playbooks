@@ -115,13 +115,17 @@ def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir, **plan_a
             except api.ApiError as exc:
                 print(f"::warning::{bid}: V2 status unavailable: {exc}", file=sys.stderr)
                 continue
-            if run.get("pipeline_url"):
-                urls[bid] = run["pipeline_url"].rstrip("/") + "/"
+            url = run.get("pipeline_url") or ""
+            # Until Jenkins starts the build this is its queue item, which never
+            # reports a result; only a build URL can be handed to the test jobs.
+            if url and "/queue/" not in url:
+                urls[bid] = url.rstrip("/") + "/"
                 print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
                 del pending[bid]
             elif run.get("status") in api.TERMINAL:
-                print(f"::error::{bid}: V2 run {rid} ended {run.get('status')} without a build",
-                      file=sys.stderr)
+                reason = run.get("error") or run.get("status_reason") or run.get("message") or ""
+                print(f"::error::{bid}: run {rid} ended {run.get('status')} without a build"
+                      + (f": {reason}" if reason else ""), file=sys.stderr)
                 del pending[bid]
         if pending:
             time.sleep(settings.poll)

@@ -182,8 +182,9 @@ class StandardWorkflow(unittest.TestCase):
         self.assertEqual(command["permissions"]["id-token"], "write")
 
     def test_trigger_batches_returns_each_executor_build_url(self):
-        polls = {"a": [{"status": "queued"}, {"status": "running", "pipeline_url": "https://j/b/1"}],
-                 "b": [{"status": "error"}]}
+        polls = {"a": [{"status": "queued"}, {"status": "running", "pipeline_url": "https://j/queue/item/7/"},
+                       {"status": "running", "pipeline_url": "https://j/b/1"}],
+                 "b": [{"status": "error", "error": "no image"}]}
 
         class FakeClient:
             def __init__(self, *_):
