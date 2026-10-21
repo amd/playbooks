@@ -141,13 +141,11 @@ class WindowsDriverSelection(unittest.TestCase):
 
     def test_missing_url_stops_main_before_any_submission(self):
         env = {"BATCHES_JSON": json.dumps({"windows/rx7900xt": self.batch}),
-               "ORCHESTRAI_PIPELINE_URL": "https://example.invalid",
-               "ORCHESTRAI_PIPELINE_JOB": "pipeline",
-               "ORCHESTRAI_PIPELINE_USER": "test-user", "ORCHESTRAI_PIPELINE_TOKEN": "test-token",
                "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://example.invalid/wheels"}
+        import orchestrai_v2
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", str(GITHUB / "orchestrai-config.yml")]), \
-                mock.patch.object(trigger, "trigger") as submit, \
+                mock.patch.object(orchestrai_v2, "trigger_batches") as submit, \
                 contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()), \
                 self.assertRaises(SystemExit) as exited:
             trigger.main()

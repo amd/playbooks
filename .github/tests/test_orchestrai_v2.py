@@ -164,18 +164,22 @@ class V2Contract(unittest.TestCase):
 
 
 class StandardWorkflow(unittest.TestCase):
-    def test_v2_hardware_runs_use_the_standard_per_playbook_jobs(self):
+    def test_runs_start_through_the_control_plane_with_a_reporting_switch(self):
         import yaml
         bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
                            Loader=yaml.BaseLoader)
-        self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["use_v2"]["default"], "false")
-        # One workflow: V2 changes only how Detect & Trigger starts the builds.
-        self.assertNotIn("v2", bridge["jobs"])
+        reporting = bridge["on"]["workflow_dispatch"]["inputs"]["reporting"]
+        self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
+        self.assertEqual(list(bridge["jobs"]), ["detect-and-trigger", "test-playbooks",
+                                                "test-localized-playbooks", "test-gate"])
         self.assertNotIn("if", bridge["jobs"]["detect-and-trigger"])
         self.assertFalse((ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").exists())
         self.assertEqual(bridge["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
         trigger = next(st for st in bridge["jobs"]["detect-and-trigger"]["steps"] if st.get("id") == "trigger")
-        self.assertIn("inputs.use_v2", trigger["env"]["ORCHESTRAI_USE_V2"])
+        self.assertIn("inputs.reporting", trigger["env"]["ORCHESTRAI_REPORTING"])
+        command = yaml.load((ROOT / ".github/workflows/orchestrai-pr-command.yml").read_text(),
+                            Loader=yaml.BaseLoader)["jobs"]["command"]
+        self.assertEqual(command["permissions"]["id-token"], "write")
 
     def test_trigger_batches_returns_each_executor_build_url(self):
         polls = {"a": [{"status": "queued"}, {"status": "running", "pipeline_url": "https://j/b/1"}],
@@ -194,11 +198,13 @@ class StandardWorkflow(unittest.TestCase):
         env = {"ORCHESTRAI_V2_CI_API_URL": "https://o/api/ci/v1", "ORCHESTRAI_V2_OIDC_AUDIENCE": "https://o",
                "ORCHESTRAI_V2_PORTAL_URL": "https://o"}
         with mock.patch.dict(os.environ, env), mock.patch.object(v2.api, "Client", FakeClient), \
-                mock.patch.object(v2, "request_for", lambda bid, *_: {"batch_id": bid}), \
+                mock.patch.object(v2, "request_for", lambda bid, *_, **__: {"batch_id": bid}), \
                 mock.patch.object(v2.api, "start_body", lambda *_: {}), \
                 mock.patch.object(v2.time, "sleep", lambda _: None):
-            urls = v2.trigger_batches({"x/a": {}, "x/b": {}}, {}, "0" * 40, "ws", "", "/tmp")
+            urls, runs = v2.trigger_batches({"x/a": {"playbooks": ["p"]}, "x/b": {"playbooks": ["q"]}},
+                                            {}, "0" * 40, "ws", "", "/tmp")
         self.assertEqual(urls, {"x/a": "https://j/b/1/"})
+        self.assertEqual(runs, {"x/a": "https://o/#/runs/a", "x/b": "https://o/#/runs/b"})
 
     def test_verdict_takes_the_reportportal_launch_from_the_v2_publisher_log(self):
         sys.path.insert(0, str(ROOT / ".github/scripts"))

@@ -4,22 +4,19 @@
 # SPDX-License-Identifier: MIT
 
 """
-Regression tests for what orchestrai_trigger.py sends to the pipeline.
-
-run_settings.acquire_timeout was written into PLAN_JSON, but the pipeline reads
-its machine-acquire timeout only from the ACQUIRE_TIMEOUT build parameter, so the
-setting was silently ignored and every run waited the pipeline's 2400 s default.
-These tests pin that the value in orchestrai-config.yml is what the pipeline
-actually receives.
+Regression tests for orchestrai_trigger.py's config validation, scheduling
+policy and the reporting switch (reportportal | api).
 
 Usage:
     python3 .github/tests/test_orchestrai_trigger.py
 """
 
+import contextlib
+import io
+import json
 import os
 import sys
 import unittest
-import urllib.parse
 from unittest import mock
 
 import yaml
@@ -41,59 +38,36 @@ def load_config():
         return yaml.safe_load(f)
 
 
-def submitted_params(plan, platform="linux"):
-    """Run submit() against a fake pipeline server and return the form it posted."""
-    captured = {}
+class ReportingSwitch(unittest.TestCase):
+    """reportportal adds the required ReportPortal publisher; api does not."""
 
-    class Response:
-        headers = {"Location": "https://pipeline.example/queue/item/1/"}
+    def run_main(self, reporting, credential="playbooks-reportportal"):
+        env = {"BATCHES_JSON": json.dumps({"linux/stx": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_V2_WORKSPACE": "ws",
+               "ORCHESTRAI_REPORTING": reporting, "ORCHESTRAI_V2_RP_CREDENTIAL": credential}
+        start = mock.Mock(return_value=({"linux/stx": "https://j/1/"}, {"linux/stx": "https://o/#/runs/r"}))
+        import orchestrai_v2
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                mock.patch.object(orchestrai_v2, "trigger_batches", start), \
+                contextlib.redirect_stderr(io.StringIO()):
+            trigger.main()
+        return start.call_args.args[4]
 
-        def __enter__(self):
-            return self
+    def test_reportportal_is_the_default_and_exports(self):
+        self.assertEqual(self.run_main(""), "playbooks-reportportal")
+        self.assertEqual(self.run_main("reportportal"), "playbooks-reportportal")
 
-        def __exit__(self, *exc):
-            return False
+    def test_api_keeps_results_in_orchestrai(self):
+        self.assertEqual(self.run_main("api"), "")
 
-    class Opener:
-        def open(self, req, timeout=None):
-            captured["body"] = req.data
-            return Response()
-
-    with mock.patch.object(trigger.urllib.request, "build_opener", lambda *a: Opener()):
-        queue = trigger.submit(plan, {"builds": []}, platform,
-                               {"url": "https://pipeline.example", "job": "pipeline"},
-                               "user", "token")
-    assert queue == "https://pipeline.example/queue/item/1/"
-    return {k: v[0] for k, v in urllib.parse.parse_qs(captured["body"].decode()).items()}
-
-
-def plan_with(acquire_timeout):
-    return {"groups": [], "run_settings": {"max_duration": 240, "max_test_case_duration": 90,
-                                           "acquire_timeout": acquire_timeout,
-                                           "machines_per_hw_group": 1}}
-
-
-class AcquireTimeoutReachesThePipeline(unittest.TestCase):
-
-    def test_acquire_timeout_is_sent_as_the_build_parameter_in_seconds(self):
-        self.assertEqual(submitted_params(plan_with(60))["ACQUIRE_TIMEOUT"], "3600")
-        self.assertEqual(submitted_params(plan_with(45))["ACQUIRE_TIMEOUT"], "2700")
-
-    def test_the_configured_value_is_what_the_pipeline_receives(self):
-        """End to end from the shipped orchestrai-config.yml."""
-        cfg = load_config()
-        plan = trigger.make_plan(BATCH, "refs/heads/main", cfg, 1,
-                                 "https://github.com/amd/playbooks", "main",
-                                 "https://index.example")
-        params = submitted_params(plan)
-        self.assertEqual(params["ACQUIRE_TIMEOUT"],
-                         str(cfg["run_settings"]["acquire_timeout"] * 60))
-        self.assertEqual(params["ACQUIRE_TIMEOUT"], "3600")
-
-    def test_the_other_parameters_are_unchanged(self):
-        params = submitted_params(plan_with(60), platform="windows")
-        self.assertEqual(set(params), {"PLAN_JSON", "BUILDS_JSON", "OS_IMAGE", "ACQUIRE_TIMEOUT"})
-        self.assertEqual(params["OS_IMAGE"], "windows")
+    def test_reportportal_without_its_credential_fails_before_submitting(self):
+        with self.assertRaises(SystemExit):
+            self.run_main("reportportal", credential="")
+        with self.assertRaises(SystemExit):
+            self.run_main("both")
 
 
 class AcquireTimeoutValidation(unittest.TestCase):

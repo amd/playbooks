@@ -7,19 +7,15 @@
 OrchestrAI pipeline trigger
 ==========================
 
-For each batch (one per platform/device[+extra-tags]) builds a pipeline plan —
-one group per playbook, sharing the batch's hardware — and POSTs it to the
-OrchestrAI pipeline job (buildWithParameters). Polls the queue item until the
-build starts and records its URL so the matrix job can wait on it.
+For each batch (one per platform/device[+extra-tags]) builds a plan -- one
+session per playbook, sharing the batch's hardware -- and starts it through the
+OrchestrAI Control Plane CI API (GitHub OIDC; see .github/orchestrai/V2.md).
+Waits until the Control Plane has started each batch's pipeline build and
+records its URL so the matrix jobs can wait on it.
 
-Then watches each build until it has acquired machines, and resubmits a batch
-whose build timed out waiting for machines before anything ran, up to
-run_settings.acquire_retries times (see .github/orchestrai/acquire_retry.py).
-
-Environment-specific values (OrchestrAI pipeline URL/job, provisioning scripts, TheRock
-URLs, Linux/Windows driver sources, run settings) come from
-.github/orchestrai-config.yml. Credentials come from env
-(ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN).
+Environment-specific values (provisioning scripts, TheRock URLs, Linux/Windows
+driver sources, run settings) come from .github/orchestrai-config.yml and the
+repo variables that override it.
 
 Usage:
     orchestrai_trigger.py [--config .github/orchestrai-config.yml] [--dry-run]
@@ -28,49 +24,28 @@ Inputs (env):
     BATCHES_JSON            batches from orchestrai_matrix.py
     GIT_REF                 github.ref (recorded as PLAYBOOK_REF)
     MACHINES_PER_HW_GROUP   override; falls back to config default
-    ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN
+    ORCHESTRAI_REPORTING    reportportal (default) or api
+    ORCHESTRAI_V2_*         Control Plane endpoint, workspace and ReportPortal credential
 
 Outputs:
-    build_urls={...}  -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI pipeline build URL)
-    --dry-run prints each plan/builds payload and POSTs nothing.
-
-Fails fast (exit 1) on a misconfigured run rather than acquiring scarce
-hardware that can't provision: missing config keys, missing creds, or a batch
-whose required provisioning value (TheRock URL or Linux/Windows driver source)
-is unset.
+    build_urls={...}  -> $GITHUB_OUTPUT   (batch_id -> pipeline build URL)
+    run_urls={...}    -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run URL)
+    --dry-run prints each plan/builds payload and starts nothing.
 """
 
 import argparse
-import base64
 import json
 import os
 import re
+import subprocess
 import sys
-import time
-import urllib.error
 import urllib.parse
-import urllib.request
 
 import yaml
 
 ORCHESTRAI_LIB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               "orchestrai")
 sys.path.insert(0, ORCHESTRAI_LIB)
-
-import acquire_retry  # noqa: E402
-
-# Request timeouts so a stalled OrchestrAI pipeline can never hang the job (vs the
-# default: wait forever). Values are generous; the point is a finite ceiling, not
-# tight SLAs.
-POST_TIMEOUT = 120
-POLL_TIMEOUT = 30
-# The submit (buildWithParameters POST) is retried, because a submit that fails
-# before Jenkins creates a queue item leaves nothing behind and re-sending is
-# safe. A submit that DID create a queue item is never retried (see trigger()),
-# so a slow queue can never produce a duplicate build on scarce hardware.
-SUBMIT_ATTEMPTS = 3
-SUBMIT_BACKOFF = 5  # seconds, multiplied by the attempt number
-
 
 def load_config(path):
     with open(path) as f:
@@ -80,9 +55,6 @@ def load_config(path):
 def apply_env_overrides(cfg):
     """Internal coordinates are kept out of the committed (public) config and
     supplied at run time via repo variables. Env values win over config."""
-    j = cfg.setdefault("pipeline", {})
-    j["url"] = os.environ.get("ORCHESTRAI_PIPELINE_URL") or j.get("url", "")
-    j["job"] = os.environ.get("ORCHESTRAI_PIPELINE_JOB") or j.get("job", "")
     prov = cfg.setdefault("provisioning", {})
     therock = os.environ.get("ORCHESTRAI_THEROCK_URL")
     if therock:
@@ -139,9 +111,6 @@ def validate_config(cfg, batches):
         # timeout this long would leave no time to run anything.
         errs.append(f"run_settings.acquire_timeout ({acquire}m) must be shorter than "
                     f"run_settings.max_duration ({rs['max_duration']}m)")
-    bad_retries = acquire_retry.check_retries(rs.get("acquire_retries", 0))
-    if bad_retries:
-        errs.append(bad_retries)
     prov = cfg.get("provisioning") or {}
     platforms = {b.get("platform") for b in batches.values()}
     if "linux" in platforms and not prov.get("linux_install_scripts"):
@@ -409,142 +378,15 @@ def make_builds(batch, cfg):
     return builds, missing
 
 
-def auth_header(user, token):
-    """Basic-auth header value, built in memory.
-
-    SECURITY: the credentials are deliberately NOT handed to a `curl -u
-    user:token` subprocess. argv is world-readable via /proc/<pid>/cmdline and
-    `ps` for the lifetime of the process, so on a shared/persistent self-hosted
-    runner any other local process could read the pipeline token. Doing the HTTP
-    in-process keeps the secret in this process's memory only.
-    """
-    return "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode()
-
-
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    """Match curl's default (no -L): don't follow redirects, so the queue URL is
-    read from the original response's Location header."""
-
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
-
-
-def submit(plan, builds, platform, pipeline, user, token):
-    """POST the build request; return the queue-item URL, or None on failure.
-
-    A None return means no queue item was created (network error, timeout, or a
-    non-redirect HTTP error), so the caller may safely retry without risking a
-    duplicate build.
-    """
-    os_image = "windows" if platform == "windows" else "ubuntu"
-    # Same wire format as the previous `curl --data-urlencode NAME@file`: a
-    # urlencoded form body. Building it here also drops the temp files entirely.
-    body = urllib.parse.urlencode({
-        "PLAN_JSON": json.dumps(plan),
-        "BUILDS_JSON": json.dumps(builds),
-        "OS_IMAGE": os_image,
-        # The pipeline takes its machine-acquire timeout ONLY from this
-        # parameter (seconds); the acquire_timeout inside PLAN_JSON is never
-        # read. Without it every run silently used the pipeline's default
-        # (2400 s) whatever orchestrai-config.yml said. Derived from the plan
-        # being submitted, so the two can never disagree.
-        "ACQUIRE_TIMEOUT": str(plan["run_settings"]["acquire_timeout"] * 60),
-    }).encode()
-
-    req = urllib.request.Request(
-        f"{pipeline['url']}/job/{pipeline['job']}/buildWithParameters",
-        data=body, method="POST")
-    req.add_header("Authorization", auth_header(user, token))
-    req.add_header("Content-Type", "application/x-www-form-urlencoded")
-
-    try:
-        with urllib.request.build_opener(_NoRedirect).open(req, timeout=POST_TIMEOUT) as r:
-            return (r.headers.get("Location") or "").strip() or None
-    except urllib.error.HTTPError as e:
-        # Redirects surface as HTTPError because they're disabled above; a 3xx
-        # still carries the queue item in Location. Anything else is a failure
-        # (matches `curl -sf`, which fails on HTTP errors).
-        if 300 <= e.code < 400:
-            return (e.headers.get("Location") or "").strip() or None
-        return None
-    except Exception:
-        return None
-
-
-def await_build(queue_url, user, token):
-    """Poll a queue item until Jenkins assigns it an executable; return its URL."""
-    for _ in range(60):
-        time.sleep(10)
-        try:
-            q = urllib.request.Request(f"{queue_url}api/json")
-            q.add_header("Authorization", auth_header(user, token))
-            with urllib.request.urlopen(q, timeout=POLL_TIMEOUT) as resp:
-                payload = json.loads(resp.read().decode("utf-8", "replace"))
-            exe = payload.get("executable", {})
-            if exe and exe.get("url"):
-                return exe["url"]
-        except Exception:
-            pass
-    return None
-
-
-def trigger(plan, builds, platform, pipeline, user, token):
-    """Submit a build and return its URL, or None if it could not be created.
-
-    Only the submit is retried: a failed submit leaves no queue item, so
-    re-sending is safe. Once a submit succeeds we hold that one queue URL and
-    only wait on it, so a slow queue never spawns a duplicate build.
-    """
-    queue_url = None
-    for attempt in range(1, SUBMIT_ATTEMPTS + 1):
-        queue_url = submit(plan, builds, platform, pipeline, user, token)
-        if queue_url:
-            break
-        if attempt < SUBMIT_ATTEMPTS:
-            print(f"  submit attempt {attempt}/{SUBMIT_ATTEMPTS} failed; retrying",
-                  file=sys.stderr)
-            time.sleep(SUBMIT_BACKOFF * attempt)
-    if not queue_url:
-        return None
-    return await_build(queue_url, user, token)
-
-
-def retry_acquire_timeouts(build_urls, prepared, cfg, retries, user, token):
-    """Resubmit batches whose build timed out acquiring machines before anything
-    ran; return the build URL each batch's playbook jobs should wait on.
-
-    See .github/orchestrai/acquire_retry.py for how a timeout is recognised and
-    why the retry lives here rather than in the per-playbook wait jobs. The
-    retry is best-effort: if watching fails for any reason, the original builds
-    stand.
-    """
-    by_bid = {bid: (batch, plan, builds) for bid, batch, plan, builds in prepared}
-    auth = auth_header(user, token)
-
-    def resubmit(bid):
-        batch, plan, builds = by_bid[bid]
-        return trigger(plan, builds, batch["platform"], cfg["pipeline"], user, token)
-
-    print(f"\nWatching {len(build_urls)} build(s) through machine acquisition "
-          f"(up to {retries} retries per batch on acquire timeout)", file=sys.stderr)
-    try:
-        watches = acquire_retry.watch_acquisition(
-            build_urls, resubmit, retries=retries,
-            fetch_building=lambda url: acquire_retry.fetch_building(url, auth),
-            fetch_console=lambda url, start: acquire_retry.fetch_console(url, start, auth))
-    except Exception as exc:
-        print(f"::warning::Acquire-retry watch failed ({exc}); the playbook jobs will "
-              f"wait on the original builds", file=sys.stderr)
-        return build_urls
-
-    annotations, summary = acquire_retry.report(watches, retries)
-    for line in annotations:
-        print(line, file=sys.stderr)
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary and summary_path:
-        with open(summary_path, "a") as f:
-            f.write(summary)
-    return {bid: w.url for bid, w in watches.items()}
+def resolve_sha(repo, ref):
+    """The commit the test machines check out: pinned before submitting."""
+    if re.fullmatch(r"[0-9a-f]{40}", ref):
+        return ref
+    out = subprocess.run(["git", "ls-remote", repo, ref], capture_output=True, text=True,
+                         timeout=60, check=True).stdout.split()
+    if not out:
+        raise ValueError(f"{repo} has no ref {ref!r}")
+    return out[0]
 
 
 def main():
@@ -556,26 +398,12 @@ def main():
     cfg = apply_env_overrides(load_config(args.config))
     batches = json.loads(os.environ.get("BATCHES_JSON", "{}") or "{}")
     git_ref = os.environ.get("GIT_REF", "")
-    user = os.environ.get("ORCHESTRAI_PIPELINE_USER", "")
-    token = os.environ.get("ORCHESTRAI_PIPELINE_TOKEN", "")
 
     cfg_errs = validate_config(cfg, batches)
     if cfg_errs:
         print(f"::error::orchestrai-config.yml has missing or invalid keys: {', '.join(cfg_errs)}",
               file=sys.stderr)
         sys.exit(1)
-
-    if not args.dry_run:
-        need = [f"pipeline.{k}" for k in ("url", "job") if not cfg["pipeline"].get(k)]
-        if not user:
-            need.append("ORCHESTRAI_PIPELINE_USER")
-        if not token:
-            need.append("ORCHESTRAI_PIPELINE_TOKEN")
-        if need:
-            print(f"::error::OrchestrAI not configured — missing: {', '.join(need)} "
-                  f"(set ORCHESTRAI_PIPELINE_URL/JOB vars and ORCHESTRAI_PIPELINE_* secrets)",
-                  file=sys.stderr)
-            sys.exit(1)
 
     rs = cfg["run_settings"]
     try:
@@ -584,97 +412,72 @@ def main():
     except ValueError:
         mphg = 1
 
-    # The pipeline clones PLAYBOOK_REPO@PLAYBOOK_SHA on the test machine. By
-    # default that's the configured repo at main; the !orc PR path overrides both
-    # so the PR's own code (including a fork head) is what actually gets tested.
+    # The test machines clone PLAYBOOK_REPO@PLAYBOOK_SHA. By default that's the
+    # configured repo at main (or the dispatch's playbook_ref); the !orc PR path
+    # passes the PR head commit so the PR's own code is what gets tested.
     repo = os.environ.get("ORCHESTRAI_PLAYBOOK_REPO") or cfg["playbook_repo"]
-    sha = os.environ.get("ORCHESTRAI_PLAYBOOK_SHA") or "main"
+    sha = os.environ.get("ORCHESTRAI_PLAYBOOK_SHA") or os.environ.get("ORCHESTRAI_PLAYBOOK_REF") or "main"
     rocm_index_url = os.environ.get("ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL", "")
     if not rocm_index_url:
         print("::error::ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL repository variable is required",
               file=sys.stderr)
         sys.exit(1)
 
-    # Optional: HuggingFace token so live HF pulls (dep cache misses, uncached
-    # datasets) are authenticated and avoid the shared-IP rate limit. Not
-    # required -- runs still work unauthenticated, just exposed to 429s.
-    hf_token = os.environ.get("ORCHESTRAI_HF_TOKEN", "")
-    if not hf_token:
-        print("::warning::ORCHESTRAI_HF_TOKEN not set — HuggingFace traffic will be "
-              "unauthenticated and may hit the shared-IP rate limit (429)", file=sys.stderr)
-
-    # Prepare every batch first, and fail fast (before any POST) if a batch is
-    # missing required provisioning — otherwise we'd acquire a scarce machine
-    # that can't install its GPU stack and only fail much later on hardware.
-    prepared = []
+    # Prepare every batch first, and fail fast (before any submission) if a
+    # batch is missing required provisioning -- otherwise we'd acquire a scarce
+    # machine that can't install its GPU stack and only fail much later.
     prov_missing = {}
     for bid, batch in batches.items():
         builds, missing = make_builds(batch, cfg)
         if missing:
             prov_missing[bid] = missing
-        prepared.append((bid, batch,
-                         make_plan(batch, git_ref, cfg, mphg, repo, sha,
-                                   rocm_index_url, hf_token),
-                         builds))
-
-    if not args.dry_run and prov_missing:
+        if args.dry_run:
+            print(f"--- plan for {bid} ---")
+            print(json.dumps(make_plan(batch, git_ref, cfg, mphg, repo, sha, rocm_index_url), indent=2))
+            print(f"--- builds for {bid} ---")
+            print(json.dumps(builds, indent=2))
+    if args.dry_run:
+        return
+    if prov_missing:
         for bid, miss in prov_missing.items():
             print(f"::error::batch {bid}: unset provisioning {miss} — "
                   f"set the corresponding repo variable(s)", file=sys.stderr)
         sys.exit(1)
 
-    build_urls = {}
-    failed = []
-    use_v2 = os.environ.get("ORCHESTRAI_USE_V2") == "true" and not args.dry_run
-    if use_v2:
-        # Same batches and downstream jobs; the Control Plane starts the builds.
-        import orchestrai_v2  # noqa: E402
-        publisher = ""
-        if os.environ.get("ORCHESTRAI_V2_PUBLISH_REPORTPORTAL") == "true":
-            publisher = os.environ.get("ORCHESTRAI_V2_RP_CREDENTIAL", "").strip()
-            if not publisher:
-                print("::error::ReportPortal export was requested; set ORCHESTRAI_V2_RP_CREDENTIAL",
-                      file=sys.stderr)
-                sys.exit(1)
-        try:
-            build_urls = orchestrai_v2.trigger_batches(
-                batches, cfg, sha, orchestrai_v2.resolve_workspace(""), publisher,
-                os.environ.get("RUNNER_TEMP", ".") + "/orchestrai-v2-state")
-        except ValueError as exc:
-            print(f"::error::{exc}", file=sys.stderr)
+    import orchestrai_v2  # noqa: E402  (imports this module; loaded lazily)
+    # reportportal: the Control Plane also publishes each run to ReportPortal
+    # (required). api: results stay in OrchestrAI; jobs link to the run.
+    reporting = os.environ.get("ORCHESTRAI_REPORTING") or "reportportal"
+    if reporting not in ("reportportal", "api"):
+        print(f"::error::ORCHESTRAI_REPORTING must be reportportal or api, got {reporting!r}",
+              file=sys.stderr)
+        sys.exit(1)
+    publisher = ""
+    if reporting == "reportportal":
+        publisher = os.environ.get("ORCHESTRAI_V2_RP_CREDENTIAL", "").strip()
+        if not publisher:
+            print("::error::ReportPortal reporting needs the ORCHESTRAI_V2_RP_CREDENTIAL variable",
+                  file=sys.stderr)
             sys.exit(1)
-        failed = [bid for bid in batches if bid not in build_urls]
-    for bid, batch, plan, builds in ([] if use_v2 else prepared):
-        print(f"Batch {bid}: {', '.join(batch['playbooks'])}", file=sys.stderr)
-        if args.dry_run:
-            print(f"--- plan for {bid} ---")
-            print(json.dumps(plan, indent=2))
-            print(f"--- builds for {bid} ---")
-            print(json.dumps(builds, indent=2))
-            continue
-        url = trigger(plan, builds, batch["platform"], cfg["pipeline"], user, token)
-        if url:
-            print(f"  Build: {url}", file=sys.stderr)
-            build_urls[bid] = url
-        else:
-            failed.append(bid)
-            print(f"  WARNING: trigger failed / timed out for {bid}", file=sys.stderr)
-
+    try:
+        sha = resolve_sha(repo, sha)
+        build_urls, run_urls = orchestrai_v2.trigger_batches(
+            batches, cfg, sha, orchestrai_v2.resolve_workspace(""), publisher,
+            os.environ.get("RUNNER_TEMP", ".") + "/orchestrai-v2-state",
+            git_ref=git_ref, machines_per_hw_group=mphg)
+    except (ValueError, subprocess.SubprocessError) as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        sys.exit(1)
+    failed = [bid for bid in batches if bid not in build_urls]
     print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
-
-    retries = rs.get("acquire_retries", 0)
-    if build_urls and retries and not args.dry_run and not use_v2:
-        build_urls = retry_acquire_timeouts(build_urls, prepared, cfg, retries, user, token)
 
     # Emit the URLs FIRST so the batches that did trigger still run downstream,
     # even if we exit non-zero for an empty result below.
     out = os.environ.get("GITHUB_OUTPUT")
-    if out and not args.dry_run:
+    if out:
         with open(out, "a") as f:
             f.write(f"build_urls={json.dumps(build_urls)}\n")
-
-    if args.dry_run:
-        return
+            f.write(f"run_urls={json.dumps(run_urls)}\n")
 
     # Surface dropped batches HERE, at the trigger, instead of letting each of
     # their downstream test jobs discover the gap one-by-one as "No build URL".
@@ -682,8 +485,7 @@ def main():
         # Nothing triggered at all: fail hard. There is no partial run to
         # preserve, and every downstream job would otherwise fail identically.
         print("::error::No OrchestrAI pipeline builds were triggered — every batch "
-              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)}). "
-              "The pipeline was likely unreachable or rejecting builds.",
+              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)}).",
               file=sys.stderr)
         sys.exit(1)
     if failed:

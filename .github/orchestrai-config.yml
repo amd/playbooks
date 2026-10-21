@@ -8,24 +8,10 @@
 # OrchestrAI workflow needs to know about the test fleet lives here, so the
 # workflow YAML and the .github/scripts/orchestrai_*.py helpers stay generic.
 #
-# Secrets (OrchestrAI pipeline credentials) are NOT here — they come from repo secrets
-# ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN. Only non-secret coordinates live in this file.
-
-# ---------------------------------------------------------------------------
-# OrchestrAI pipeline entry point
-# ---------------------------------------------------------------------------
-# NOTE: this repo is public, so the internal OrchestrAI pipeline coordinates are NOT
-# committed here. Set them as repo variables (Settings -> Variables):
-#   ORCHESTRAI_PIPELINE_URL   e.g. https://<your-pipeline-host>
-#   ORCHESTRAI_PIPELINE_JOB   e.g. <your-pipeline-job>
-# The pipeline URL must be a variable, not a secret: the build URL derived from
-# it is passed between jobs as a job output, and GitHub redacts secret values
-# from job outputs, which would blank the build_urls handed to the test jobs.
-# The values below are only fallbacks for local runs; the workflow passes the
-# repo variables through and they take precedence.
-pipeline:
-  url: ""
-  job: ""
+# Secrets are NOT here. Runs start through the OrchestrAI Control Plane with a
+# GitHub OIDC token; its endpoint, workspace and ReportPortal credential name are
+# repo variables (ORCHESTRAI_V2_*, see .github/orchestrai/V2.md). The test jobs
+# read each run's pipeline build with ORCHESTRAI_PIPELINE_USER/TOKEN (secrets).
 
 # The playbook repo the pipeline clones on the test machine.
 playbook_repo: "https://github.com/amd/playbooks"
@@ -293,16 +279,9 @@ run_settings:
   max_duration: 240            # minutes, whole batch
   max_test_case_duration: 90   # minutes, single playbook
   # Minutes to wait for the broker to supply machines before the build gives
-  # up. Sent to the pipeline as its ACQUIRE_TIMEOUT build parameter (before
-  # that, this value was ignored and every run waited the pipeline's 40-minute
-  # default). The wait counts against the build's overall time limit, so a
-  # longer wait leaves less time for the batch's playbooks.
+  # up. The wait counts against the build's overall time limit, so a longer
+  # wait leaves less time for the batch's playbooks.
   acquire_timeout: 60
-  # Resubmit a batch whose build timed out waiting for machines before anything
-  # ran, up to this many times (0 disables, max 3). Each attempt waits the
-  # pipeline's full acquire timeout and re-enters the broker queue. Details in
-  # .github/orchestrai/acquire_retry.py.
-  acquire_retries: 3
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.

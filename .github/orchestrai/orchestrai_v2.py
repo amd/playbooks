@@ -28,7 +28,8 @@ def resolve_workspace(value, env=None):
     return workspace
 
 
-def request_for(batch_id, batch, cfg, sha, workspace, catalog, publisher):
+def request_for(batch_id, batch, cfg, sha, workspace, catalog, publisher, git_ref=None,
+                machines_per_hw_group=1):
     if not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("The external checkout must resolve to an immutable commit SHA")
     workspace = resolve_workspace(workspace)
@@ -38,7 +39,8 @@ def request_for(batch_id, batch, cfg, sha, workspace, catalog, publisher):
     builds, missing = legacy.make_builds(batch, cfg)
     if missing:
         raise ValueError(f"{batch_id}: missing provisioning: {', '.join(missing)}")
-    old_plan = legacy.make_plan(batch, f"external/{sha}", cfg, 1, EXTERNAL_REPO, sha, index)
+    old_plan = legacy.make_plan(batch, git_ref or f"external/{sha}", cfg, machines_per_hw_group,
+                                EXTERNAL_REPO, sha, index)
     platform = batch["platform"]
     image = os.environ.get(f"ORCHESTRAI_V2_{platform.upper()}_IMAGE") or (
         "windows" if platform == "windows" else "ubuntu"
@@ -84,16 +86,16 @@ def request_for(batch_id, batch, cfg, sha, workspace, catalog, publisher):
     }
 
 
-def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir):
-    """Start each batch through V2; return {batch_id: executor build URL}.
+def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir, **plan_args):
+    """Start each batch; return ({batch_id: build URL}, {batch_id: run URL}).
 
-    Used by the standard workflow (use_v2): the per-playbook jobs keep reading
-    the executor build's summary.json, so only the submission changes.
+    The per-playbook jobs read the build's summary.json; the run URL is the
+    OrchestrAI page linked when results are not exported to ReportPortal.
     """
     settings = api.Settings.from_env(workspace, os.environ)
-    pending = {}
+    pending, run_urls = {}, {}
     for bid, batch in batches.items():
-        request = request_for(bid, batch, cfg, sha, workspace, "", publisher)
+        request = request_for(bid, batch, cfg, sha, workspace, "", publisher, **plan_args)
         client = api.Client(settings, dict(os.environ))
         try:
             rid = client.start(request, api.start_body(request, os.environ),
@@ -101,7 +103,8 @@ def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir):
         except api.ApiError as exc:
             print(f"::error::{bid}: V2 refused the run: {exc}", file=sys.stderr)
             continue
-        print(f"Batch {bid}: V2 run {settings.portal}/#/runs/{rid}", file=sys.stderr)
+        run_urls[bid] = f"{settings.portal}/#/runs/{quote(rid, safe='')}"
+        print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
         pending[bid] = (client, rid)
     urls = {}
     deadline = time.monotonic() + settings.timeout
@@ -124,4 +127,4 @@ def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir):
             time.sleep(settings.poll)
     for bid in pending:
         print(f"::error::{bid}: V2 run did not start a build in time", file=sys.stderr)
-    return urls
+    return urls, run_urls
