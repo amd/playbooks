@@ -625,7 +625,26 @@ def main():
 
     build_urls = {}
     failed = []
-    for bid, batch, plan, builds in prepared:
+    use_v2 = os.environ.get("ORCHESTRAI_USE_V2") == "true" and not args.dry_run
+    if use_v2:
+        # Same batches and downstream jobs; the Control Plane starts the builds.
+        import orchestrai_v2  # noqa: E402
+        publisher = ""
+        if os.environ.get("ORCHESTRAI_V2_PUBLISH_REPORTPORTAL") == "true":
+            publisher = os.environ.get("ORCHESTRAI_V2_RP_CREDENTIAL", "").strip()
+            if not publisher:
+                print("::error::ReportPortal export was requested; set ORCHESTRAI_V2_RP_CREDENTIAL",
+                      file=sys.stderr)
+                sys.exit(1)
+        try:
+            build_urls = orchestrai_v2.trigger_batches(
+                batches, cfg, sha, orchestrai_v2.resolve_workspace(""), publisher,
+                os.environ.get("RUNNER_TEMP", ".") + "/orchestrai-v2-state")
+        except ValueError as exc:
+            print(f"::error::{exc}", file=sys.stderr)
+            sys.exit(1)
+        failed = [bid for bid in batches if bid not in build_urls]
+    for bid, batch, plan, builds in ([] if use_v2 else prepared):
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}", file=sys.stderr)
         if args.dry_run:
             print(f"--- plan for {bid} ---")
@@ -644,7 +663,7 @@ def main():
     print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
 
     retries = rs.get("acquire_retries", 0)
-    if build_urls and retries and not args.dry_run:
+    if build_urls and retries and not args.dry_run and not use_v2:
         build_urls = retry_acquire_timeouts(build_urls, prepared, cfg, retries, user, token)
 
     # Emit the URLs FIRST so the batches that did trigger still run downstream,

@@ -388,18 +388,54 @@ class NativeReporting(unittest.TestCase):
         self.assertEqual(workflow["jobs"]["execute"]["permissions"]["id-token"], "write")
         self.assertEqual(bridge["on"]["schedule"], [{"cron": "0 1 * * *"}])
 
-    def test_public_pilot_is_opt_in_and_does_not_dispatch_v1_as_well(self):
+    def test_v2_hardware_runs_use_the_standard_per_playbook_jobs(self):
         import yaml
         bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
                            Loader=yaml.BaseLoader)
         self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["use_v2"]["default"], "false")
-        self.assertIn("workflow_dispatch", bridge["jobs"]["v2"]["if"])
-        self.assertIn("inputs.use_v2", bridge["jobs"]["v2"]["if"])
+        # Plan-only validation stays in the dedicated lane; hardware runs go
+        # through Detect & Trigger -> per-playbook jobs -> Test Gate.
+        self.assertIn("inputs.use_v2 && inputs.v2_prepare_only", bridge["jobs"]["v2"]["if"])
         for name in ("detect-and-trigger", "test-gate"):
-            self.assertIn("!(github.event_name == 'workflow_dispatch' && inputs.use_v2)",
+            self.assertIn("!(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only)",
                           bridge["jobs"][name]["if"])
+        self.assertEqual(bridge["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
+        trigger = next(st for st in bridge["jobs"]["detect-and-trigger"]["steps"] if st.get("id") == "trigger")
+        self.assertIn("inputs.use_v2", trigger["env"]["ORCHESTRAI_USE_V2"])
         self.assertEqual(bridge["jobs"]["v2"]["with"]["locale"], "")
         self.assertIn("inputs.windows_driver", bridge["jobs"]["v2"]["with"]["windows_driver"])
+
+    def test_trigger_batches_returns_each_executor_build_url(self):
+        polls = {"a": [{"status": "queued"}, {"status": "running", "pipeline_url": "https://j/b/1"}],
+                 "b": [{"status": "error"}]}
+
+        class FakeClient:
+            def __init__(self, *_):
+                pass
+
+            def start(self, request, _body, _path):
+                return request["batch_id"].split("/")[-1]
+
+            def retry(self, _method, path, **_):
+                return {"run": {"id": path.rsplit("/", 1)[-1], **polls[path.rsplit("/", 1)[-1]].pop(0)}}
+
+        env = {"ORCHESTRAI_V2_CI_API_URL": "https://o/api/ci/v1", "ORCHESTRAI_V2_OIDC_AUDIENCE": "https://o",
+               "ORCHESTRAI_V2_PORTAL_URL": "https://o"}
+        with mock.patch.dict(os.environ, env), mock.patch.object(v2.api, "Client", FakeClient), \
+                mock.patch.object(v2, "request_for", lambda bid, *_: {"batch_id": bid}), \
+                mock.patch.object(v2.api, "start_body", lambda *_: {}), \
+                mock.patch.object(v2.time, "sleep", lambda _: None):
+            urls = v2.trigger_batches({"x/a": {}, "x/b": {}}, {}, "0" * 40, "ws", "", "/tmp")
+        self.assertEqual(urls, {"x/a": "https://j/b/1/"})
+
+    def test_verdict_takes_the_reportportal_launch_from_the_v2_publisher_log(self):
+        sys.path.insert(0, str(ROOT / ".github/scripts"))
+        import orchestrai_verdict
+        log = ("[publish] reportportal project p (credential c): published: "
+               "https://rp.example/ui/#p/launches/all/69554\n")
+        with mock.patch.object(orchestrai_verdict, "fetch", lambda *_: log):
+            self.assertEqual(orchestrai_verdict.rp_url_from_console("https://j/b/1/", "u", "t"),
+                             "https://rp.example/ui/#p/launches/all/69554")
 
     def test_public_validation_runs_the_ported_suite_without_hardware_permissions(self):
         import yaml

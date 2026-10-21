@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import sys
+import time
 from urllib.parse import quote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -158,6 +159,49 @@ def request_for(batch_id, batch, cfg, sha, workspace, catalog, publisher):
         "parameters": parameters,
         "batch_id": batch_id, "playbook_sha": sha,
     }
+
+
+def trigger_batches(batches, cfg, sha, workspace, publisher, state_dir):
+    """Start each batch through V2; return {batch_id: executor build URL}.
+
+    Used by the standard workflow (use_v2): the per-playbook jobs keep reading
+    the executor build's summary.json, so only the submission changes.
+    """
+    settings = api.Settings.from_env(workspace, os.environ)
+    pending = {}
+    for bid, batch in batches.items():
+        request = request_for(bid, batch, cfg, sha, workspace, "", publisher)
+        client = api.Client(settings, dict(os.environ))
+        try:
+            rid = client.start(request, api.start_body(request, os.environ),
+                               Path(state_dir) / f"{bid.replace('/', '_')}.json")
+        except api.ApiError as exc:
+            print(f"::error::{bid}: V2 refused the run: {exc}", file=sys.stderr)
+            continue
+        print(f"Batch {bid}: V2 run {settings.portal}/#/runs/{rid}", file=sys.stderr)
+        pending[bid] = (client, rid)
+    urls = {}
+    deadline = time.monotonic() + settings.timeout
+    while pending and time.monotonic() < deadline:
+        for bid, (client, rid) in list(pending.items()):
+            try:
+                run = api.run_of(client.retry("GET", f"/runs/{quote(rid, safe='')}")) or {}
+            except api.ApiError as exc:
+                print(f"::warning::{bid}: V2 status unavailable: {exc}", file=sys.stderr)
+                continue
+            if run.get("pipeline_url"):
+                urls[bid] = run["pipeline_url"].rstrip("/") + "/"
+                print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
+                del pending[bid]
+            elif run.get("status") in api.TERMINAL:
+                print(f"::error::{bid}: V2 run {rid} ended {run.get('status')} without a build",
+                      file=sys.stderr)
+                del pending[bid]
+        if pending:
+            time.sleep(settings.poll)
+    for bid in pending:
+        print(f"::error::{bid}: V2 run did not start a build in time", file=sys.stderr)
+    return urls
 
 
 def prepare(args):

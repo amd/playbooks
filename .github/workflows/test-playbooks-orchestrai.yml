@@ -80,7 +80,7 @@ on:
       v2_prepare_only:
         description: 'V2: validate the plan without acquiring hardware'
         type: boolean
-        default: true
+        default: false
       v2_publish_reportportal:
         description: 'V2: also export to ReportPortal (on until V2 reporting replaces it; native results remain authoritative)'
         type: boolean
@@ -111,7 +111,7 @@ concurrency:
 jobs:
   v2:
     name: Dedicated V2 validation
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.use_v2 }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only }}
     permissions:
       contents: read
       id-token: write
@@ -133,8 +133,11 @@ jobs:
 
   detect-and-trigger:
     name: Detect & Trigger
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.use_v2) }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only) }}
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      id-token: write  # V2: GitHub OIDC token for the Control Plane CI API
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
       localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
@@ -229,6 +232,15 @@ jobs:
           LOCALIZED_BATCHES: ${{ steps.build-localized.outputs.batches }}
         run: python3 .github/scripts/orchestrai_prepare_matrices.py
 
+      - name: Resolve the amd/playbooks commit for V2
+        id: v2-source
+        if: steps.gate.outputs.enabled == 'true' && github.event_name == 'workflow_dispatch' && inputs.use_v2
+        env:
+          REF: ${{ inputs.playbook_ref }}
+        run: |
+          git fetch --quiet https://github.com/amd/playbooks "$REF"
+          echo "sha=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Trigger OrchestrAI pipeline builds
         id: trigger
         if: steps.gate.outputs.enabled == 'true' && steps.prepare-matrices.outputs.has_entries == 'true'
@@ -259,7 +271,19 @@ jobs:
           # orchestrai_trigger.py falls back to playbook_repo@main there. Fork PRs
           # never reach this step: the secret gate above is false without secrets.
           ORCHESTRAI_PLAYBOOK_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
-          ORCHESTRAI_PLAYBOOK_SHA: ${{ github.event.pull_request.head.sha }}
+          ORCHESTRAI_PLAYBOOK_SHA: ${{ steps.v2-source.outputs.sha || github.event.pull_request.head.sha }}
+          # use_v2: the Control Plane starts each batch's build (GitHub OIDC); the
+          # per-playbook jobs below read that build exactly as for V1.
+          ORCHESTRAI_USE_V2: ${{ github.event_name == 'workflow_dispatch' && inputs.use_v2 }}
+          ORCHESTRAI_V2_PUBLISH_REPORTPORTAL: ${{ inputs.v2_publish_reportportal }}
+          ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+          ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+          ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+          ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ inputs.v2_workspace || vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
@@ -414,7 +438,7 @@ jobs:
   test-gate:
     name: Test Gate (Required)
     needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
-    if: ${{ always() && !(github.event_name == 'workflow_dispatch' && inputs.use_v2) }}
+    if: ${{ always() && !(github.event_name == 'workflow_dispatch' && inputs.use_v2 && inputs.v2_prepare_only) }}
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests

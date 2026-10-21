@@ -294,6 +294,13 @@ def write_artifact(doc):
         json.dump(doc, f, indent=2)
 
 
+def rp_url_from_console(build_url, user, token):
+    """ReportPortal launch logged by a Control Plane (V2) result publisher."""
+    console = fetch(f"{build_url}consoleText", user, token) or ""
+    m = re.search(r"\[publish\] reportportal .*? published: (https://\S+)", console)
+    return m.group(1) if m else ""
+
+
 def _run():
     user = os.environ.get("ORCHESTRAI_PIPELINE_USER", "")
     token = os.environ.get("ORCHESTRAI_PIPELINE_TOKEN", "")
@@ -346,7 +353,7 @@ def _run():
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
-            f.write(f"rp_url={summary.get('rp_launch_url', '')}\n")
+            f.write(f"rp_url={summary.get('rp_launch_url', '') or rp_url_from_console(build_url, user, token)}\n")
 
     # Primary: per-group rollup in summary.json.
     status, how = None, ""
