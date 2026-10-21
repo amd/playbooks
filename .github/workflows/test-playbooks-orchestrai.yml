@@ -82,9 +82,9 @@ on:
         type: boolean
         default: true
       v2_publish_reportportal:
-        description: 'V2: also export to ReportPortal (native results remain authoritative)'
+        description: 'V2: also export to ReportPortal (on until V2 reporting replaces it; native results remain authoritative)'
         type: boolean
-        default: false
+        default: true
       playbook_ref:
         description: 'V2: amd/playbooks branch, tag or commit to test'
         type: string

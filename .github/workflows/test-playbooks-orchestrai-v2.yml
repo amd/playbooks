@@ -42,7 +42,7 @@ on:
       publish_reportportal:
         description: 'Also export to ReportPortal (requires its workspace credential); native results are always used'
         type: boolean
-        default: false
+        default: true
       windows_driver:
         description: 'Windows driver: internal (build share) or public (released Adrenalin, ORCHESTRAI_WINDOWS_DRIVER_URL). default = repo variable ORCHESTRAI_WINDOWS_DRIVER, else internal'
         type: choice
@@ -79,7 +79,7 @@ on:
         default: true
       publish_reportportal:
         type: boolean
-        default: false
+        default: true
       windows_driver:
         type: string
         default: ''

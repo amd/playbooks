@@ -356,15 +356,15 @@ class NativeReporting(unittest.TestCase):
         self.assertNotIn(")evil", v2.result_link("https://example.invalid/)evil", "V2"))
         self.assertEqual(v2.cell("<x>|a\nb"), "&lt;x&gt;\\|a b")
 
-    def test_both_dispatch_forms_default_to_native_and_aggregate_after_failure(self):
+    def test_both_dispatch_forms_default_to_reportportal_and_aggregate_after_failure(self):
         import yaml
         workflow = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai-v2.yml").read_text(),
                              Loader=yaml.BaseLoader)
         bridge = yaml.load((ROOT / ".github/workflows/test-playbooks-orchestrai.yml").read_text(),
                            Loader=yaml.BaseLoader)
         for event in ("workflow_dispatch", "workflow_call"):
-            self.assertEqual(workflow["on"][event]["inputs"]["publish_reportportal"]["default"], "false")
-        self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["v2_publish_reportportal"]["default"], "false")
+            self.assertEqual(workflow["on"][event]["inputs"]["publish_reportportal"]["default"], "true")
+        self.assertEqual(bridge["on"]["workflow_dispatch"]["inputs"]["v2_publish_reportportal"]["default"], "true")
         self.assertIn("inputs.v2_publish_reportportal", bridge["jobs"]["v2"]["with"]["publish_reportportal"])
         self.assertIn("always()", workflow["jobs"]["results"]["if"])
         self.assertIn("execute", workflow["jobs"]["results"]["needs"])
