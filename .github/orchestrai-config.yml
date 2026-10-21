@@ -8,10 +8,22 @@
 # OrchestrAI workflow needs to know about the test fleet lives here, so the
 # workflow YAML and the .github/scripts/orchestrai_*.py helpers stay generic.
 #
-# Secrets are NOT here. Runs start through the OrchestrAI Control Plane with a
-# GitHub OIDC token; its endpoint, workspace and ReportPortal credential name are
-# repo variables (ORCHESTRAI_V2_*, see .github/orchestrai/V2.md). The test jobs
-# read each run's pipeline build with ORCHESTRAI_PIPELINE_USER/TOKEN (secrets).
+# Secrets are NOT here. Runs start through the OrchestrAI Control Plane CI API
+# with the job's GitHub OIDC token (orchestrai_trigger.py); the Test jobs read
+# each run's pipeline build with ORCHESTRAI_PIPELINE_USER/TOKEN (repo secrets).
+#
+# Control Plane repo variables:
+#   ORCHESTRAI_V2_CI_API_URL      CI API base URL (ends in /api/ci/v1)
+#   ORCHESTRAI_V2_OIDC_AUDIENCE   audience its CI access rule trusts
+#   ORCHESTRAI_V2_PORTAL_URL      base of the OrchestrAI run links
+#   ORCHESTRAI_V2_WORKSPACE       workspace slug
+#   ORCHESTRAI_V2_RP_CREDENTIAL   workspace credential for ReportPortal export
+#   ORCHESTRAI_V2_RP_PROJECT      ReportPortal project
+#   ORCHESTRAI_REPORTING          reportportal (default) | api, for runs without inputs
+#   ORCHESTRAI_V2_LINUX_IMAGE / ORCHESTRAI_V2_WINDOWS_IMAGE   optional exact images
+# The workspace's CI access rules must trust amd/playbooks with
+# test-playbooks-orchestrai.yml (workflow_dispatch, schedule) and
+# orchestrai-pr-command.yml (issue_comment) at refs/heads/main.
 
 # The playbook repo the pipeline clones on the test machine.
 playbook_repo: "https://github.com/amd/playbooks"

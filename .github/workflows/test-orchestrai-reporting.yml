@@ -33,5 +33,3 @@ jobs:
         run: python3 .github/tests/test_orchestrai_windows_therock.py
       - name: Run Windows driver selection tests
         run: python3 .github/tests/test_orchestrai_windows_driver.py
-      - name: Run Control Plane submission tests (no hardware)
-        run: python3 .github/tests/test_orchestrai_v2.py

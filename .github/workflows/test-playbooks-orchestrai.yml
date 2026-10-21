@@ -7,7 +7,8 @@
 # Runs each playbook on real AMD hardware through the OrchestrAI Control Plane
 # instead of on a device-attached GitHub runner. Detect & Trigger starts one run
 # per hardware batch with a GitHub OIDC token; each Test job waits on its batch's
-# pipeline build and reports that playbook's result. See .github/orchestrai/V2.md.
+# pipeline build and reports that playbook's result. Settings and access rules:
+# .github/orchestrai-config.yml.
 #
 # Required repo secrets:   ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN
 #   (read the pipeline builds; the workflow no-ops on a fork without them)

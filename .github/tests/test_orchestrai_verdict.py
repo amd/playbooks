@@ -32,6 +32,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "orchestrai_verdict", Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_verdict.py"
@@ -350,6 +351,19 @@ class TestExitCodeMap(unittest.TestCase):
         self.assertEqual(verdict.exit_code_for("FAILED"), 1)
         self.assertEqual(verdict.exit_code_for("NOT_RUN"), 2)
         self.assertEqual(verdict.exit_code_for("INTERRUPTED"), 2)
+
+
+class TestReportPortalLinkFromPublisherLog(unittest.TestCase):
+    """The Control Plane publishes to ReportPortal itself and logs the launch."""
+
+    def test_launch_url_is_read_from_the_publisher_log_line(self):
+        log = ("[publish] reportportal project p (credential c): published: "
+               "https://rp.example.invalid/ui/#p/launches/all/69554\n")
+        with mock.patch.object(verdict, "fetch", lambda *_: log):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"),
+                             "https://rp.example.invalid/ui/#p/launches/all/69554")
+        with mock.patch.object(verdict, "fetch", lambda *_: None):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"), "")
 
 
 if __name__ == "__main__":

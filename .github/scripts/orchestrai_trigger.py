@@ -9,7 +9,7 @@ OrchestrAI pipeline trigger
 
 For each batch (one per platform/device[+extra-tags]) builds a plan -- one
 session per playbook, sharing the batch's hardware -- and starts it through the
-OrchestrAI Control Plane CI API (GitHub OIDC; see .github/orchestrai/V2.md).
+OrchestrAI Control Plane CI API with the job's GitHub OIDC token.
 Waits until the Control Plane has started each batch's pipeline build and
 records its URL so the matrix jobs can wait on it.
 
@@ -34,18 +34,28 @@ Outputs:
 """
 
 import argparse
+import hashlib
+import http.client
 import json
 import os
 import re
 import subprocess
 import sys
+import time
+import urllib.error
 import urllib.parse
+import urllib.request
 
 import yaml
 
-ORCHESTRAI_LIB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                              "orchestrai")
-sys.path.insert(0, ORCHESTRAI_LIB)
+# Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
+# for API_RETRY_SECONDS; a run must start its build within BUILD_WAIT_SECONDS.
+API_TIMEOUT = 30
+API_RETRY_SECONDS = 600
+BUILD_WAIT_SECONDS = 300 * 60
+POLL_SECONDS = 30
+TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
+
 
 def load_config(path):
     with open(path) as f:
@@ -389,6 +399,161 @@ def resolve_sha(repo, ref):
     return out[0]
 
 
+# ---------------------------------------------------------------------------
+# OrchestrAI Control Plane CI API. One run per batch; the Control Plane queues it
+# for machines and starts its pipeline build. Auth is the job's GitHub OIDC token
+# (the job needs `id-token: write`); no stored OrchestrAI token is used.
+# ---------------------------------------------------------------------------
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never forward a bearer token to a redirect target."""
+
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def control_plane():
+    """Endpoint settings from the ORCHESTRAI_V2_* repo variables."""
+    cp = {}
+    for key in ("CI_API_URL", "OIDC_AUDIENCE", "PORTAL_URL", "WORKSPACE"):
+        value = os.environ.get(f"ORCHESTRAI_V2_{key}", "").strip().rstrip("/")
+        if not value:
+            raise ValueError(f"Set repository variable ORCHESTRAI_V2_{key}")
+        if key != "WORKSPACE" and not value.startswith("https://"):
+            raise ValueError(f"ORCHESTRAI_V2_{key} must be an https:// URL")
+        cp[key.lower()] = value
+    return cp
+
+
+def http_json(method, url, headers, body=None):
+    """(status, JSON body or None). Raises OSError/HTTPException on transport failure."""
+    data = None if body is None else json.dumps(body).encode()
+    req = urllib.request.Request(url, data=data, method=method, headers=headers)
+    try:
+        resp = urllib.request.build_opener(_NoRedirect).open(req, timeout=API_TIMEOUT)
+    except urllib.error.HTTPError as e:
+        resp = e
+    with resp:
+        raw = resp.read()
+    try:
+        return resp.code, (json.loads(raw) if raw else None)
+    except ValueError:
+        return resp.code, None
+
+
+def oidc_token(audience):
+    url = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_URL", "")
+    request_token = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN", "")
+    if not url or not request_token:
+        raise ValueError("GitHub OIDC is unavailable; the job needs permissions id-token: write")
+    sep = "&" if "?" in url else "?"
+    status, payload = http_json("GET", f"{url}{sep}audience={urllib.parse.quote(audience, safe='')}",
+                                {"Authorization": f"Bearer {request_token}"})
+    token = payload.get("value") if isinstance(payload, dict) else None
+    if status != 200 or not token:
+        raise ValueError(f"GitHub could not issue an OIDC token (HTTP {status})")
+    print(f"::add-mask::{token}")
+    return token
+
+
+def api(cp, method, path, body=None, key=None):
+    """Call the CI API and return its JSON body, retrying transient failures.
+
+    A start is retried with the same Idempotency-Key, so a lost response can
+    never start a second run. A fresh OIDC token is used for every call.
+    """
+    deadline, delay = time.monotonic() + API_RETRY_SECONDS, 2
+    while True:
+        headers = {"Authorization": "Bearer " + oidc_token(cp["oidc_audience"]),
+                   "Accept": "application/json", "Content-Type": "application/json",
+                   "X-OrchestrAI-Workspace": cp["workspace"]}
+        if key:
+            headers["Idempotency-Key"] = key
+        try:
+            status, payload = http_json(method, cp["ci_api_url"] + path, headers, body)
+        except (OSError, http.client.HTTPException) as exc:
+            status, payload = None, {"error": {"message": f"network error ({type(exc).__name__})"}}
+        if status and 200 <= status < 300 and isinstance(payload, dict):
+            return payload
+        err = payload.get("error") if isinstance(payload, dict) else None
+        err = err if isinstance(err, dict) else {}
+        code = err.get("code", "")
+        if (status is None or status in (408, 429) or status >= 500
+                or code == "idempotency_in_progress") and time.monotonic() < deadline:
+            time.sleep(delay)
+            delay = min(delay * 2, 30)
+            continue
+        request_id = payload.get("request_id", "") if isinstance(payload, dict) else ""
+        raise ValueError(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
+                         + (f" (request_id={request_id})" if request_id else ""))
+
+
+def start_run(cp, bid, plan, builds, platform, publisher, sha):
+    """Start one batch as a Control Plane run; return its run id."""
+    image = os.environ.get(f"ORCHESTRAI_V2_{platform.upper()}_IMAGE") or (
+        "windows" if platform == "windows" else "ubuntu")
+    settings = {**plan["run_settings"], "executor": "jenkins", "os_image": image}
+    gh_run = os.environ.get("GITHUB_RUN_ID", "")
+    attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "")
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if publisher:
+        # Required: a failed ReportPortal export fails the run, never silently.
+        settings["result_publishers"] = [{
+            "kind": "reportportal", "credential": publisher,
+            "project": os.environ.get("ORCHESTRAI_V2_RP_PROJECT") or "ucicd_project_slim",
+            "when": "always", "required": True, "sources": "published",
+            "attributes": {"lane": "playbooks", "batch": bid, "playbook_sha": sha,
+                           "github_run_id": gh_run},
+        }]
+    sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
+                 "os_image": image, "tests": g["tests"], "variables": g["variables"]}
+                for g in plan["groups"]]
+    body = {
+        "require_capacity": "queue",
+        "plan_document": {
+            "name": f"Playbooks {bid} {gh_run}/{attempt}",
+            "description": f"Started by https://github.com/{repo}/actions/runs/{gh_run}",
+            "document": {"sessions": sessions, "run_settings": settings},
+        },
+        "builds_json": builds,
+    }
+    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid]).encode()).hexdigest()
+    run = api(cp, "POST", "/runs", body, key).get("run") or {}
+    if not run.get("id"):
+        raise ValueError("the CI API start response has no run id")
+    return run["id"]
+
+
+def await_builds(cp, runs):
+    """Wait until each run has started its pipeline build; {batch_id: build URL}."""
+    urls, pending = {}, dict(runs)
+    deadline = time.monotonic() + BUILD_WAIT_SECONDS
+    while pending and time.monotonic() < deadline:
+        for bid, rid in list(pending.items()):
+            try:
+                run = api(cp, "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
+            except ValueError as exc:
+                print(f"::warning::{bid}: run status unavailable: {exc}", file=sys.stderr)
+                continue
+            url = run.get("pipeline_url") or ""
+            # Until Jenkins starts the build this is its queue item, which never
+            # reports a result; only a build URL can be handed to the test jobs.
+            if url and "/queue/" not in url:
+                urls[bid] = url.rstrip("/") + "/"
+                print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
+                del pending[bid]
+            elif run.get("status") in TERMINAL:
+                reason = run.get("error") or run.get("status_reason") or run.get("message") or ""
+                print(f"::error::{bid}: run {rid} ended {run.get('status')} without a build"
+                      + (f": {reason}" if reason else ""), file=sys.stderr)
+                del pending[bid]
+        if pending:
+            time.sleep(POLL_SECONDS)
+    for bid in pending:
+        print(f"::error::{bid}: run did not start a build in time", file=sys.stderr)
+    return urls
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
@@ -426,14 +591,23 @@ def main():
     # Prepare every batch first, and fail fast (before any submission) if a
     # batch is missing required provisioning -- otherwise we'd acquire a scarce
     # machine that can't install its GPU stack and only fail much later.
+    if not args.dry_run:
+        try:
+            sha = resolve_sha(repo, sha)
+        except (ValueError, subprocess.SubprocessError) as exc:
+            print(f"::error::cannot resolve {repo}@{sha}: {exc}", file=sys.stderr)
+            sys.exit(1)
+    prepared = []
     prov_missing = {}
     for bid, batch in batches.items():
         builds, missing = make_builds(batch, cfg)
         if missing:
             prov_missing[bid] = missing
+        plan = make_plan(batch, git_ref, cfg, mphg, repo, sha, rocm_index_url)
+        prepared.append((bid, batch, plan, builds))
         if args.dry_run:
             print(f"--- plan for {bid} ---")
-            print(json.dumps(make_plan(batch, git_ref, cfg, mphg, repo, sha, rocm_index_url), indent=2))
+            print(json.dumps(plan, indent=2))
             print(f"--- builds for {bid} ---")
             print(json.dumps(builds, indent=2))
     if args.dry_run:
@@ -444,7 +618,6 @@ def main():
                   f"set the corresponding repo variable(s)", file=sys.stderr)
         sys.exit(1)
 
-    import orchestrai_v2  # noqa: E402  (imports this module; loaded lazily)
     # reportportal: the Control Plane also publishes each run to ReportPortal
     # (required). api: results stay in OrchestrAI; jobs link to the run.
     reporting = os.environ.get("ORCHESTRAI_REPORTING") or "reportportal"
@@ -460,14 +633,20 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
     try:
-        sha = resolve_sha(repo, sha)
-        build_urls, run_urls = orchestrai_v2.trigger_batches(
-            batches, cfg, sha, orchestrai_v2.resolve_workspace(""), publisher,
-            os.environ.get("RUNNER_TEMP", ".") + "/orchestrai-v2-state",
-            git_ref=git_ref, machines_per_hw_group=mphg)
-    except (ValueError, subprocess.SubprocessError) as exc:
+        cp = control_plane()
+    except ValueError as exc:
         print(f"::error::{exc}", file=sys.stderr)
         sys.exit(1)
+    runs, run_urls = {}, {}
+    for bid, batch, plan, builds in prepared:
+        try:
+            runs[bid] = start_run(cp, bid, plan, builds, batch["platform"], publisher, sha)
+        except ValueError as exc:
+            print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
+            continue
+        run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
+        print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
+    build_urls = await_builds(cp, runs)
     failed = [bid for bid in batches if bid not in build_urls]
     print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
 
