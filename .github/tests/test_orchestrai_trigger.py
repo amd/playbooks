@@ -166,7 +166,7 @@ class ReportingSwitch(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
-                mock.patch.object(trigger, "await_builds", return_value={"linux/stx": "https://j/1/"}), \
+                mock.patch.object(trigger, "await_builds", side_effect=AssertionError("Detect must not wait")), \
                 contextlib.redirect_stderr(io.StringIO()):
             trigger.main()
         return start.call_args.args[5]
@@ -194,7 +194,7 @@ class MachinesPerBatch(unittest.TestCase):
                "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
                "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
         start, err = mock.Mock(return_value="r1"), io.StringIO()
-        self.wait = mock.Mock(side_effect=lambda _cp, runs, _s: {b: "https://j/1/" for b in runs})
+        self.wait = mock.Mock()
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
@@ -217,10 +217,46 @@ class MachinesPerBatch(unittest.TestCase):
         self.assertEqual(requested, {"linux/stx": 1})
         self.assertIn("1 batch(es), 1 machine(s) requested", log)
 
-    def test_builds_are_awaited_as_long_as_the_control_plane_queues(self):
+    def test_detect_and_trigger_does_not_wait_for_builds(self):
+        # Each Test job waits for its own batch (--await-build).
         self.run_main(1, {"linux/stx": BATCH})
-        wait = load_config()["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN
-        self.assertEqual(self.wait.call_args.args[2], wait)
+        self.wait.assert_not_called()
+
+
+class AwaitBuild(unittest.TestCase):
+    """--await-build: one Test job waits for its own batch's build."""
+
+    def run_it(self, run_id, found):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": run_id, "BATCH_ID": "linux/stx",
+                                          "GITHUB_OUTPUT": os.devnull}), \
+                mock.patch.object(trigger, "await_builds", return_value=found) as wait, \
+                mock.patch.object(trigger, "acquire_timeout_minutes", return_value=360), \
+                mock.patch("builtins.open", mock.mock_open()) as opened, \
+                contextlib.redirect_stderr(out):
+            trigger.await_build_main(CONFIG)
+        written = "".join(c.args[0] for c in opened().write.call_args_list)
+        return wait, written, out.getvalue()
+
+    def test_writes_the_build_url_for_this_batch_only(self):
+        wait, written, _ = self.run_it("r1", {"linux/stx": "https://j/job/p/9/"})
+        self.assertEqual(wait.call_args.args[1], {"linux/stx": "r1"})
+        # As long as the Control Plane keeps the run queued, plus the margin.
+        self.assertEqual(wait.call_args.args[2], 360 * 60 + trigger.BUILD_WAIT_MARGIN)
+        self.assertEqual(written, "build_url=https://j/job/p/9/\n")
+
+    def test_no_build_leaves_the_url_unset_for_not_run(self):
+        _, written, _ = self.run_it("r1", {})
+        self.assertEqual(written, "")
+
+    def test_a_batch_that_never_started_says_so(self):
+        wait, written, err = self.run_it("", {})
+        wait.assert_not_called()
+        self.assertIn("failed to start", err)
+
+    def test_acquire_timeout_is_read_from_the_config_without_yaml(self):
+        self.assertEqual(trigger.acquire_timeout_minutes(CONFIG),
+                         load_config()["run_settings"]["acquire_timeout"])
 
 
 class WorkflowWiring(unittest.TestCase):
@@ -252,6 +288,17 @@ class WorkflowWiring(unittest.TestCase):
         self.assertEqual(self.load("orchestrai-pr-command.yml")["jobs"]["command"]["permissions"]["id-token"],
                          "write")
 
+    def test_every_test_job_waits_for_its_own_batch(self):
+        for name, job in (("test-playbooks-orchestrai.yml", "test-playbooks"),
+                          ("orchestrai-test-matrix.yml", "test-playbooks"),
+                          ("orchestrai-pr-command.yml", "test-playbooks")):
+            steps = self.load(name)["jobs"][job]["steps"]
+            ids = [s.get("id") for s in steps]
+            self.assertLess(ids.index("build"), ids.index("wait"), name)
+            self.assertIn("--await-build", steps[ids.index("build")]["run"])
+            self.assertIn("steps.build.outputs.build_url", steps[ids.index("wait")]["env"]["STARTED_BUILD_URL"])
+            self.assertEqual(self.load(name)["jobs"][job]["permissions"]["id-token"], "write", name)
+
 
 class AcquireTimeoutValidation(unittest.TestCase):
 
@@ -272,10 +319,14 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # wait no longer comes out of max_duration.
         self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
 
-    def test_jobs_outlast_the_build_wait(self):
-        need = load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
-        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
-                          ("orchestrai-pr-command.yml", "command")):
+    def test_test_jobs_outlast_the_machine_wait_and_the_build(self):
+        # Each Test job waits for its batch's build (acquire_timeout + margin),
+        # then for the build itself (4.5 h: 1080 polls x 15 s).
+        need = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+                + 1080 * 15 / 60)
+        for name, job in (("test-playbooks-orchestrai.yml", "test-playbooks"),
+                          ("orchestrai-pr-command.yml", "test-playbooks"),
+                          ("orchestrai-test-matrix.yml", "test-playbooks")):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
             self.assertGreater(limit, need, name)

@@ -36,7 +36,6 @@ jobs:
     if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     # Must exceed acquire_timeout + 30 min (tested).
-    timeout-minutes: 420
     permissions:
       contents: read
       pull-requests: write
@@ -45,7 +44,7 @@ jobs:
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       has_entries: ${{ steps.build-matrix.outputs.has_entries }}
-      build_urls: ${{ steps.trigger.outputs.build_urls }}
+      run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       head_ref: ${{ steps.pr.outputs.head_ref }}
@@ -214,6 +213,13 @@ jobs:
     needs: command
     if: needs.command.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
+    # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
+    # + 30 min) and then for the build itself (up to 4.5 h); self-hosted runners
+    # allow this.
+    timeout-minutes: 720
     continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false
@@ -225,15 +231,28 @@ jobs:
         with:
           ref: ${{ needs.command.outputs.head_sha }}
 
+      - name: Wait for the batch's build to start
+        id: build
+        # Each batch is handed off as soon as its own build starts, so a batch
+        # still queued for machines never holds back the others.
+        env:
+          RUN_ID: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-build
+
       - name: Wait for OrchestrAI pipeline build
         id: wait
         env:
-          BUILD_URLS_JSON: ${{ needs.command.outputs.build_urls }}
+          STARTED_BUILD_URL: ${{ steps.build.outputs.build_url }}
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
         run: |
-          BUILD_URL=$(python3 -c "import json,os;print(json.loads(os.environ.get('BUILD_URLS_JSON','{}') or '{}').get(os.environ['BATCH_ID'],''))")
+          BUILD_URL="${STARTED_BUILD_URL}"
           if [ -z "$BUILD_URL" ]; then
             echo "::error::No OrchestrAI pipeline build URL for batch ${BATCH_ID}"; exit 1
           fi
