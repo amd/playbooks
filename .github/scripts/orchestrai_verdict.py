@@ -128,6 +128,14 @@ def group_counts(grp):
     return out
 
 
+def not_run_count(grp):
+    """Tests the pipeline recorded as never run (cancelled included)."""
+    try:
+        return int(grp.get("not_run") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def status_from_group(grp):
     """Verdict from a group rollup, or None if it carries none.
 
@@ -139,16 +147,25 @@ def status_from_group(grp):
     status = (grp.get("status") or "").strip().upper() or None
     counts = group_counts(grp)
     ran_something = sum(counts.values()) > 0
+    # A cancelled or never-run test is reported as skipped AND not_run, and an
+    # older pipeline rolled that up as PASSED ({"passed":0,"skipped":1,
+    # "not_run":1,"status":"PASSED"}: 56 false greens on 2026-10-21). Only a
+    # group with a passed test and none left unrun is a pass.
+    unrun = counts["passed"] == 0 or not_run_count(grp) > 0
 
     if status in INFRA_STATUSES:
         return status
     if status == "PASSED" and not ran_something:
         return "INTERRUPTED"
+    if status == "PASSED" and unrun:
+        return "NOT_RUN"
     if status:
         return status
     if not ran_something:
         return None  # ambiguous: group exists but ran nothing — don't call it PASS
-    return "FAILED" if (counts["failed"] or counts["errors"]) else "PASSED"
+    if counts["failed"] or counts["errors"]:
+        return "FAILED"
+    return "NOT_RUN" if unrun else "PASSED"
 
 
 def status_from_console(console, playbook):
@@ -180,9 +197,27 @@ def has_infra_schema(summary):
     """
     if isinstance(summary.get("expected_groups"), list):
         return True
-    if (summary.get("status") or "").strip().upper() == "INTERRUPTED":
+    if (summary.get("status") or "").strip().upper() in ("INTERRUPTED", "NOT_RUN"):
+        return True
+    if batch_ran_nothing(summary):
         return True
     return summary.get("infrastructure_reason") is not None
+
+
+def batch_ran_nothing(summary):
+    """The batch recorded no test at all: provisioning or setup failed first.
+
+    The pipeline writes {"results": {all 0}, "groups": {}, "status": "not_run"}
+    for that (Jenkins #1260, #1282); a missing group then means the playbook
+    never ran, not that it ran and failed to report.
+    """
+    results = summary.get("results")
+    if not isinstance(results, dict) or not results:
+        return False
+    try:
+        return sum(int(results.get(k) or 0) for k in COUNT_KEYS) == 0
+    except (TypeError, ValueError):
+        return False
 
 
 def infrastructure_reason(summary, grp, group_key):
@@ -197,6 +232,14 @@ def infrastructure_reason(summary, grp, group_key):
             if isinstance(reason, str) and reason.strip():
                 return reason.strip()
 
+    if isinstance(grp, dict):
+        counts = group_counts(grp)
+        if counts["passed"] == 0 and (counts["skipped"] or not_run_count(grp)):
+            return (f"its test was cancelled, skipped or never ran (passed 0, skipped "
+                    f"{counts['skipped']}, not_run {not_run_count(grp)})")
+        if not_run_count(grp):
+            return f"{not_run_count(grp)} of its tests were cancelled or never ran"
+
     expected = summary.get("expected_groups")
     groups, _ = normalise_groups(summary)
     if isinstance(expected, list) and expected:
@@ -207,6 +250,9 @@ def infrastructure_reason(summary, grp, group_key):
         if missing:
             return (f"batch did not complete; {len(missing)} of {len(expected)} "
                     f"playbooks never ran")
+    if (summary.get("status") or "").strip().upper() == "NOT_RUN" or batch_ran_nothing(summary):
+        return ("the batch ran no tests: provisioning or setup failed before any playbook "
+                "started (see the pipeline build)")
     return "batch did not complete; this playbook produced no results"
 
 
@@ -294,6 +340,13 @@ def write_artifact(doc):
         json.dump(doc, f, indent=2)
 
 
+def rp_url_from_console(build_url, user, token):
+    """ReportPortal launch logged by a Control Plane (V2) result publisher."""
+    console = fetch(f"{build_url}consoleText", user, token) or ""
+    m = re.search(r"\[publish\] reportportal .*? published: (https://\S+)", console)
+    return m.group(1) if m else ""
+
+
 def _run():
     user = os.environ.get("ORCHESTRAI_PIPELINE_USER", "")
     token = os.environ.get("ORCHESTRAI_PIPELINE_TOKEN", "")
@@ -346,7 +399,7 @@ def _run():
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
-            f.write(f"rp_url={summary.get('rp_launch_url', '')}\n")
+            f.write(f"rp_url={summary.get('rp_launch_url', '') or rp_url_from_console(build_url, user, token)}\n")
 
     # Primary: per-group rollup in summary.json.
     status, how = None, ""
