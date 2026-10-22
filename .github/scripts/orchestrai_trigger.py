@@ -599,17 +599,26 @@ def main():
             sys.exit(1)
     prepared = []
     prov_missing = {}
+    machines = 0
     for bid, batch in batches.items():
         builds, missing = make_builds(batch, cfg)
         if missing:
             prov_missing[bid] = missing
-        plan = make_plan(batch, git_ref, cfg, mphg, repo, sha, rocm_index_url)
+        # Never more machines than the batch has playbooks: a spare machine
+        # sits idle and still counts against the CI identity's quota.
+        batch_machines = max(1, min(mphg, len(batch.get("playbooks") or [])))
+        machines += batch_machines
+        plan = make_plan(batch, git_ref, cfg, batch_machines, repo, sha, rocm_index_url)
         prepared.append((bid, batch, plan, builds))
         if args.dry_run:
             print(f"--- plan for {bid} ---")
             print(json.dumps(plan, indent=2))
             print(f"--- builds for {bid} ---")
             print(json.dumps(builds, indent=2))
+    # Every started batch holds its machines until it ends; a run that needs
+    # more than the CI identity's quota leaves the excess queued for admission.
+    print(f"{len(batches)} batch(es), {machines} machine(s) requested "
+          f"(machines_per_hw_group={mphg})", file=sys.stderr)
     if args.dry_run:
         return
     if prov_missing:

@@ -58,7 +58,7 @@ on:
           - linux
           - windows
       machines_per_hw_group:
-        description: 'Machines per hardware group (1 = same-HW playbooks share one machine, sequential)'
+        description: 'Machines per hardware group, capped at its playbook count (1 = share one machine; use 1 for full runs, more doubles quota use)'
         required: false
         type: string
         default: '1'
