@@ -197,9 +197,27 @@ def has_infra_schema(summary):
     """
     if isinstance(summary.get("expected_groups"), list):
         return True
-    if (summary.get("status") or "").strip().upper() == "INTERRUPTED":
+    if (summary.get("status") or "").strip().upper() in ("INTERRUPTED", "NOT_RUN"):
+        return True
+    if batch_ran_nothing(summary):
         return True
     return summary.get("infrastructure_reason") is not None
+
+
+def batch_ran_nothing(summary):
+    """The batch recorded no test at all: provisioning or setup failed first.
+
+    The pipeline writes {"results": {all 0}, "groups": {}, "status": "not_run"}
+    for that (Jenkins #1260, #1282); a missing group then means the playbook
+    never ran, not that it ran and failed to report.
+    """
+    results = summary.get("results")
+    if not isinstance(results, dict) or not results:
+        return False
+    try:
+        return sum(int(results.get(k) or 0) for k in COUNT_KEYS) == 0
+    except (TypeError, ValueError):
+        return False
 
 
 def infrastructure_reason(summary, grp, group_key):
@@ -232,6 +250,9 @@ def infrastructure_reason(summary, grp, group_key):
         if missing:
             return (f"batch did not complete; {len(missing)} of {len(expected)} "
                     f"playbooks never ran")
+    if (summary.get("status") or "").strip().upper() == "NOT_RUN" or batch_ran_nothing(summary):
+        return ("the batch ran no tests: provisioning or setup failed before any playbook "
+                "started (see the pipeline build)")
     return "batch did not complete; this playbook produced no results"
 
 
