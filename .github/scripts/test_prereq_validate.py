@@ -859,5 +859,16 @@ class LocaleTests(unittest.TestCase):
         self.assertIsNone(mirror_get.tool_of("zh-CN/msdataset-databricks-dolly-15k"))
 
 
+class CliTests(unittest.TestCase):
+    def test_bare_locale_selects_english(self):
+        """PowerShell drops an empty --locale "" value, leaving a bare --locale."""
+        with unittest.mock.patch.object(sys, "argv", ["prereq_validate.py", "--playbook", "p", "--platform", "linux", "--locale"]), \
+                unittest.mock.patch.object(pv, "validate_prereqs", return_value=True) as validate:
+            with self.assertRaises(SystemExit) as exit_:
+                pv.main()
+        self.assertEqual(exit_.exception.code, 0)
+        validate.assert_called_once_with("p", "linux", None, "")
+
+
 if __name__ == "__main__":
     unittest.main()

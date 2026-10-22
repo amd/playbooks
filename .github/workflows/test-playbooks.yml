@@ -161,7 +161,7 @@ jobs:
         run: python3 .github/scripts/test_prereq_validate.py
 
   test-playbooks:
-    name: English Playbooks
+    name: Test
     needs: detect-changes
     if: needs.detect-changes.outputs.has_english_entries == 'true'
     uses: ./.github/workflows/native-test-matrix.yml
@@ -170,7 +170,7 @@ jobs:
     secrets: inherit
 
   test-localized-playbooks:
-    name: Localized Playbooks
+    name: "Test [localized]"
     needs: detect-changes
     if: needs.detect-changes.outputs.has_localized_entries == 'true'
     uses: ./.github/workflows/native-test-matrix.yml

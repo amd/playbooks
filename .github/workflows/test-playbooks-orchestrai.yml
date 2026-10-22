@@ -242,7 +242,7 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
-    name: English Playbooks
+    name: Test
     needs: detect-and-trigger
     if: needs.detect-and-trigger.outputs.has_english_entries == 'true'
     uses: ./.github/workflows/orchestrai-test-matrix.yml
@@ -253,7 +253,7 @@ jobs:
     secrets: inherit
 
   test-localized-playbooks:
-    name: Localized Playbooks
+    name: "Test [localized]"
     needs: detect-and-trigger
     if: needs.detect-and-trigger.outputs.has_localized_entries == 'true'
     uses: ./.github/workflows/orchestrai-test-matrix.yml
