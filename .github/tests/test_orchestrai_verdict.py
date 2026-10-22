@@ -390,6 +390,37 @@ class TestCancelledOrSkippedNeverPass(unittest.TestCase):
         self.assertEqual((doc["outcome"], code), ("FAILED", 1))
 
 
+class TestBatchThatRanNothingIsNotRun(unittest.TestCase):
+    """2026-10-22: a batch whose provisioning failed was reported as one FAILED
+    playbook per member (29 + 5 false reds). The pipeline's summary says
+    not_run; the resolver did not count that as the infrastructure schema."""
+
+    # Recorded summary.json of Jenkins #1282 (Windows STX, Adrenalin DNS failure).
+    RECORDED = {"timestamp": "2026-10-22T18:34:04Z", "build_number": "1282",
+                "build_url": BUILD, "upstream_build_url": "",
+                "results": {"passed": 0, "failed": 0, "skipped": 0, "errors": 0},
+                "levels": {}, "groups": {}, "status": "not_run"}
+
+    def test_recorded_provisioning_failure_is_not_run(self):
+        code, doc, out = run_verdict(self.RECORDED, "lmstudio-rocm-llms", platform="windows")
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+        self.assertIn("provisioning or setup failed", doc["infrastructure_reason"])
+        self.assertNotIn("::error::No verdict", out)
+
+    def test_zero_results_without_a_status_is_also_not_run(self):
+        summary = {k: v for k, v in self.RECORDED.items() if k != "status"}
+        code, doc, _ = run_verdict(summary, "cvml")
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_batch_that_ran_tests_but_lost_this_group_still_fails(self):
+        summary = dict(self.RECORDED, status="FAILED",
+                       results={"passed": 3, "failed": 1, "skipped": 0, "errors": 0},
+                       groups={"playbook-other": {"passed": 3, "failed": 1, "skipped": 0,
+                                                  "errors": 0, "status": "FAILED"}})
+        code, doc, _ = run_verdict(summary, "cvml")
+        self.assertEqual((doc["outcome"], code), ("FAILED", 1))
+
+
 class TestExitCodeMap(unittest.TestCase):
     """STRUCTURAL: asserts the helper exists and maps as the contract says.
     (Against the pre-change script this errors rather than fails — the helper
