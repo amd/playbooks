@@ -756,14 +756,39 @@ def process_locale(playbook_id, cat, pb_dir, locale, cfg, glossary_terms, prompt
     return changed, failures
 
 
+def rendered_dependency_docs(playbooks_root=PLAYBOOKS_ROOT):
+    """Dependency docs a reader can reach: @require'd by a playbook or linked from one.
+    @prereq-only docs are CI-only and never rendered, so they are not translated."""
+    deps_dir = playbooks_root / "dependencies"
+    deps = json.loads((deps_dir / "registry.json").read_text(encoding="utf-8")).get("dependencies", {})
+    names = set()
+    for doc in (d for cat in CATEGORIES for d in playbooks_root.glob(f"{cat}/*/*.md")):
+        text = doc.read_text(encoding="utf-8")
+        for ids in re.findall(r"<!--\s*@require:([a-z0-9,\-]+)\s*-->", text):
+            names.update(deps[d]["file"] for d in ids.split(",") if deps.get(d, {}).get("file"))
+        names.update(re.findall(r"\]\([^)]*dependencies/([\w\-]+\.md)", text))
+    return sorted(p for p in (deps_dir / n for n in names) if p.parent == deps_dir and p.is_file())
+
+
 def process_dependencies(locale, cfg, glossary_terms, prompt_version, manifest, lock):
-    """Translate the shared dependency markdown files (playbooks/dependencies/*.md)
-    used by @require/@setup dropdowns, into translations/<locale>/playbooks/dependencies/."""
+    """Translate the shared dependency docs readers can reach (see rendered_dependency_docs)
+    into auto-translations/<locale>/dependencies/, and drop translations of docs no longer shown."""
     print(f"\n=== dependencies -> {locale} ===", flush=True)
     changed = 0
     failures = []
+    sources = rendered_dependency_docs()
 
-    for src in sorted(DEPENDENCIES_DIR.glob("*.md")):
+    out_dir = TRANSLATIONS_ROOT / locale / "dependencies"
+    keep = {src.name for src in sources}
+    for stale in sorted(out_dir.glob("*.md")) if out_dir.is_dir() else []:
+        if stale.name not in keep:
+            stale.unlink()
+            with lock:
+                manifest["files"].pop(f"playbooks/dependencies/{stale.name}", None)
+            changed += 1
+            print(f"  [drop] {stale.name} (not shown on the website)", flush=True)
+
+    for src in sources:
         rel = f"playbooks/dependencies/{src.name}"
         src_text = src.read_text(encoding="utf-8")
         src_hash = sha256(src_text)
