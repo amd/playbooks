@@ -107,7 +107,8 @@ $body = @{
   temperature = 0
   max_tokens = 500
 } | ConvertTo-Json -Depth 5
-$out = curl.exe -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+$out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions -H "Content-Type: application/json" -d $body
+if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $out" }
 if (-not $out) { throw "Empty response from Lemonade chat/completions" }
 Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 ```
@@ -173,9 +174,9 @@ body='{
   "max_tokens": 500
 }'
 
-out="$(curl -s --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
+out="$(curl -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d "$body" || true)"
+  -d "$body")" || { echo "Lemonade chat/completions failed: $out"; exit 1; }
 
 if [ -z "$out" ]; then
   echo "Empty response from Lemonade chat/completions"

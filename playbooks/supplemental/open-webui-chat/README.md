@@ -186,6 +186,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpChat"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $chatOut" }
   if (-not $chatOut) { throw "Empty response from chat/completions" }
   $chatParsed = $chatOut | ConvertFrom-Json
   $chatText = $chatParsed.choices[0].message.content
@@ -213,6 +214,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpVision"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $visionOut" }
   if (-not $visionOut) { throw "Empty response from vision chat/completions" }
   $visionParsed = $visionOut | ConvertFrom-Json
   if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
@@ -235,6 +237,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpImg"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $imgOut" }
   if (-not $imgOut) { throw "Empty response from images/generations" }
   $imgParsed = $imgOut | ConvertFrom-Json
   if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json. Raw response: $imgOut" }
@@ -298,6 +301,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpChat"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $chatOut" }
   if (-not $chatOut) { throw "Empty response from chat/completions" }
   $chatParsed = $chatOut | ConvertFrom-Json
   $chatText = $chatParsed.choices[0].message.content
@@ -325,6 +329,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpVision"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $visionOut" }
   if (-not $visionOut) { throw "Empty response from vision chat/completions" }
   $visionParsed = $visionOut | ConvertFrom-Json
   if (-not $visionParsed.choices -or $visionParsed.choices.Count -lt 1) { throw "Unexpected vision response (no choices). Raw response: $visionOut" }
@@ -347,6 +352,7 @@ try {
     -H "Content-Type: application/json" `
     -H "Authorization: Bearer -" `
     --data-binary "@$tmpImg"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $imgOut" }
   if (-not $imgOut) { throw "Empty response from images/generations" }
   $imgParsed = $imgOut | ConvertFrom-Json
   if (-not $imgParsed.data -or -not $imgParsed.data[0].b64_json) { throw "Image generation did not return data[0].b64_json. Raw response: $imgOut" }

@@ -304,6 +304,7 @@ try {
   $showOut = curl.exe -sS --fail-with-body --max-time 60 http://127.0.0.1:11434/api/show `
     -H "Content-Type: application/json" `
     --data-binary "@$tmpShow"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $showOut" }
   if (-not $showOut) { throw "Empty response from /api/show" }
   $showJson = $showOut | ConvertFrom-Json
   if (-not $showJson.details) { throw "/api/show did not return model details for gpt-oss:20b" }
@@ -327,6 +328,7 @@ try {
   $generateOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:11434/api/generate `
     -H "Content-Type: application/json" `
     --data-binary "@$tmpGenerate"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $generateOut" }
   if (-not $generateOut) { throw "Empty response from /api/generate" }
   $generateJson = $generateOut | ConvertFrom-Json
   if (-not $generateJson.response) { throw "/api/generate did not return a response field" }
@@ -349,6 +351,7 @@ try {
   $chatOut = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:11434/api/chat `
     -H "Content-Type: application/json" `
     --data-binary "@$tmpChat"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $chatOut" }
   if (-not $chatOut) { throw "Empty response from /api/chat" }
   $chatJson = $chatOut | ConvertFrom-Json
   $chatText = $chatJson.message.content

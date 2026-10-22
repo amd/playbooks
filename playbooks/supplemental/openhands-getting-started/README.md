@@ -302,6 +302,7 @@ try {
   $out = curl.exe -sS --fail-with-body --max-time 300 http://127.0.0.1:13305/api/v1/chat/completions `
     -H "Content-Type: application/json" `
     --data-binary "@$tmpBody"
+  if ($LASTEXITCODE -ne 0) { throw "Request failed (curl exit $LASTEXITCODE): $out" }
   if (-not $out) {throw "Empty response from Lemonade chat/completions"}
   Write-Host "OK: Lemonade chat/completions returned a response"
 }
