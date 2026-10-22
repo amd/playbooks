@@ -128,6 +128,14 @@ def group_counts(grp):
     return out
 
 
+def not_run_count(grp):
+    """Tests the pipeline recorded as never run (cancelled included)."""
+    try:
+        return int(grp.get("not_run") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def status_from_group(grp):
     """Verdict from a group rollup, or None if it carries none.
 
@@ -139,16 +147,25 @@ def status_from_group(grp):
     status = (grp.get("status") or "").strip().upper() or None
     counts = group_counts(grp)
     ran_something = sum(counts.values()) > 0
+    # A cancelled or never-run test is reported as skipped AND not_run, and an
+    # older pipeline rolled that up as PASSED ({"passed":0,"skipped":1,
+    # "not_run":1,"status":"PASSED"}: 56 false greens on 2026-10-21). Only a
+    # group with a passed test and none left unrun is a pass.
+    unrun = counts["passed"] == 0 or not_run_count(grp) > 0
 
     if status in INFRA_STATUSES:
         return status
     if status == "PASSED" and not ran_something:
         return "INTERRUPTED"
+    if status == "PASSED" and unrun:
+        return "NOT_RUN"
     if status:
         return status
     if not ran_something:
         return None  # ambiguous: group exists but ran nothing — don't call it PASS
-    return "FAILED" if (counts["failed"] or counts["errors"]) else "PASSED"
+    if counts["failed"] or counts["errors"]:
+        return "FAILED"
+    return "NOT_RUN" if unrun else "PASSED"
 
 
 def status_from_console(console, playbook):
@@ -196,6 +213,14 @@ def infrastructure_reason(summary, grp, group_key):
             reason = src.get("infrastructure_reason")
             if isinstance(reason, str) and reason.strip():
                 return reason.strip()
+
+    if isinstance(grp, dict):
+        counts = group_counts(grp)
+        if counts["passed"] == 0 and (counts["skipped"] or not_run_count(grp)):
+            return (f"its test was cancelled, skipped or never ran (passed 0, skipped "
+                    f"{counts['skipped']}, not_run {not_run_count(grp)})")
+        if not_run_count(grp):
+            return f"{not_run_count(grp)} of its tests were cancelled or never ran"
 
     expected = summary.get("expected_groups")
     groups, _ = normalise_groups(summary)
