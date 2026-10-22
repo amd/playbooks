@@ -49,6 +49,7 @@ HARNESS = (
     ".github/scripts/run_playbook_tests.py",
     ".github/scripts/build_test_matrix.py",
     ".github/workflows/test-playbooks.yml",
+    ".github/workflows/native-test-matrix.yml",
 )
 
 
@@ -160,6 +161,10 @@ class FixtureCase(unittest.TestCase):
 
     def test_harness_change_forces_full_matrix(self):
         self.edit(".github/workflows/test-playbooks.yml", lambda c: c + "\n# touched\n")
+        self.assertEqual(len(select(self.fx)), self.total)
+
+    def test_test_job_change_forces_full_matrix(self):
+        self.edit(".github/workflows/native-test-matrix.yml", lambda c: c + "\n# touched\n")
         self.assertEqual(len(select(self.fx)), self.total)
 
     def test_runner_change_forces_full_matrix(self):

@@ -72,7 +72,7 @@ jobs:
           }
           exit 0
 
-      # Same prerequisite check and self-heal as the English job, against the localized README.
+      # Validate and self-heal the playbook prerequisites before running its tests.
       - name: Validate & provision prerequisites (Windows)
         if: matrix.platform == 'windows'
         shell: powershell

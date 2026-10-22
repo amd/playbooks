@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: '{}'
+      ref:
+        description: Commit to check out; empty uses the triggering ref
+        required: false
+        type: string
+        default: ''
     secrets:
       ORCHESTRAI_PIPELINE_USER:
         required: true
@@ -38,6 +43,8 @@ jobs:
         include: ${{ fromJson(inputs.matrix_json) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Wait for OrchestrAI pipeline build
         id: wait
@@ -100,10 +107,7 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Resolve per-playbook verdict"), which is where the user-facing !orc
-        # sticky comment comes from. Deliberately duplicated rather than
-        # factored into .github/actions/ — see the rationale on that copy.
+        # Inline, not a ./.github/actions/ composite: !orc checks out PR heads that may predate it.
         #
         # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
         # INTERRUPTED (the batch never produced results for this playbook).
@@ -132,8 +136,6 @@ jobs:
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
           RUN_URL: ${{ fromJson(inputs.run_urls || '{}')[matrix.batch_id] }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Test summary"). See the sync note on the verdict step above.
         run: |
           # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
           # the job summary instead of letting it read as a failed playbook.
