@@ -15,6 +15,11 @@ on:
         description: OrchestrAI batch IDs mapped to their pipeline build URLs
         required: true
         type: string
+      run_urls:
+        description: OrchestrAI batch IDs mapped to their OrchestrAI run URLs
+        required: false
+        type: string
+        default: '{}'
     secrets:
       ORCHESTRAI_PIPELINE_USER:
         required: true
@@ -126,6 +131,7 @@ jobs:
         if: always()
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
+          RUN_URL: ${{ fromJson(inputs.run_urls || '{}')[matrix.batch_id] }}
         # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
         # ("Test summary"). See the sync note on the verdict step above.
         run: |
@@ -151,10 +157,14 @@ jobs:
               echo "${INFRA_NOTE}"
               echo ""
             fi
-            # Link to ReportPortal (test results) only. The pipeline build URL is
+            # Link to the test results: ReportPortal when the run exported there,
+            # otherwise the OrchestrAI run. The pipeline build URL is
             # intentionally not shown here.
             if [ -n "${RP_URL}" ]; then
               echo "| | |"; echo "|---|---|"
               echo "| ReportPortal | [View Results](${RP_URL}) |"
+            elif [ -n "${RUN_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

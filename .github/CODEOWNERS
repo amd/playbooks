@@ -26,7 +26,4 @@ test_*.py @sreeram-11 @harkgill-amd @adamlam2-amd
 # file — source, workflows, AND its tests under .github/tests/ — is @saman-amd.
 # This is placed after the test*.py patterns on purpose, so OrchestrAI test
 # files (e.g. .github/tests/test_orchestrai_*.py) go to Saman, not the test owners.
-# The directory rule also catches files whose basename lacks "orchestrai"
-# (e.g. .github/orchestrai/acquire_retry.py).
-/.github/orchestrai/ @saman-amd
 *orchestrai* @saman-amd

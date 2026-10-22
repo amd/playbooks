@@ -32,6 +32,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "orchestrai_verdict", Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_verdict.py"
@@ -340,6 +341,55 @@ class TestZeroCountsNeverPass(unittest.TestCase):
                 self.assertGreater(doc["total_tests"], 0)
 
 
+class TestCancelledOrSkippedNeverPass(unittest.TestCase):
+    """2026-10-21: 56 false greens. A cancelled test is reported as skipped AND
+    not_run, and the pipeline rolled the group up as PASSED."""
+
+    # The exact recorded group.
+    RECORDED = {"passed": 0, "failed": 0, "skipped": 1, "errors": 0, "not_run": 1,
+                "status": "PASSED"}
+
+    def verdict_for(self, group):
+        return run_verdict({"groups": {"playbook-alpha": group}}, "alpha")
+
+    def test_recorded_payload_is_not_run_not_passed(self):
+        code, doc, out = self.verdict_for(self.RECORDED)
+        self.assertEqual(doc["outcome"], "NOT_RUN")
+        self.assertEqual(code, 2)  # infrastructure, not a pass and not a test failure
+        self.assertIn("cancelled, skipped or never ran (passed 0, skipped 1, not_run 1)",
+                      doc["infrastructure_reason"])
+        self.assertNotIn("PASSED", out.split("(via")[0])
+
+    def test_all_skipped_group_claiming_passed_is_rejected(self):
+        code, doc, _ = self.verdict_for({"passed": 0, "failed": 0, "skipped": 2, "errors": 0,
+                                         "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_cancelled_test_beside_passes_is_not_a_pass(self):
+        code, doc, _ = self.verdict_for({"passed": 3, "failed": 0, "skipped": 1, "errors": 0,
+                                         "not_run": 1, "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+        self.assertIn("1 of its tests were cancelled or never ran", doc["infrastructure_reason"])
+
+    def test_the_same_counts_without_a_status_are_not_passed(self):
+        group = {k: v for k, v in self.RECORDED.items() if k != "status"}
+        code, doc, _ = self.verdict_for(group)
+        self.assertNotEqual(doc["outcome"], "PASSED")
+        self.assertNotEqual(code, 0)
+
+    def test_the_fixed_pipeline_status_is_reported_as_not_run(self):
+        code, doc, _ = self.verdict_for(dict(self.RECORDED, status="not_run"))
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_real_pass_and_a_real_failure_are_unchanged(self):
+        code, doc, _ = self.verdict_for({"passed": 1, "failed": 0, "skipped": 1, "errors": 0,
+                                         "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("PASSED", 0))
+        code, doc, _ = self.verdict_for({"passed": 0, "failed": 1, "skipped": 0, "errors": 0,
+                                         "not_run": 1, "status": "FAILED"})
+        self.assertEqual((doc["outcome"], code), ("FAILED", 1))
+
+
 class TestExitCodeMap(unittest.TestCase):
     """STRUCTURAL: asserts the helper exists and maps as the contract says.
     (Against the pre-change script this errors rather than fails — the helper
@@ -350,6 +400,19 @@ class TestExitCodeMap(unittest.TestCase):
         self.assertEqual(verdict.exit_code_for("FAILED"), 1)
         self.assertEqual(verdict.exit_code_for("NOT_RUN"), 2)
         self.assertEqual(verdict.exit_code_for("INTERRUPTED"), 2)
+
+
+class TestReportPortalLinkFromPublisherLog(unittest.TestCase):
+    """The Control Plane publishes to ReportPortal itself and logs the launch."""
+
+    def test_launch_url_is_read_from_the_publisher_log_line(self):
+        log = ("[publish] reportportal project p (credential c): published: "
+               "https://rp.example.invalid/ui/#p/launches/all/69554\n")
+        with mock.patch.object(verdict, "fetch", lambda *_: log):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"),
+                             "https://rp.example.invalid/ui/#p/launches/all/69554")
+        with mock.patch.object(verdict, "fetch", lambda *_: None):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"), "")
 
 
 if __name__ == "__main__":
