@@ -35,10 +35,16 @@ jobs:
     name: OrchestrAI PR command
     if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       has_entries: ${{ steps.build-matrix.outputs.has_entries }}
       build_urls: ${{ steps.trigger.outputs.build_urls }}
+      run_urls: ${{ steps.trigger.outputs.run_urls }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       head_ref: ${{ steps.pr.outputs.head_ref }}
       locale: ${{ steps.detect.outputs.locale }}
@@ -178,10 +184,6 @@ jobs:
         env:
           BATCHES_JSON: ${{ steps.build-matrix.outputs.batches }}
           GIT_REF: ${{ steps.pr.outputs.head_ref }}
-          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
-          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-          ORCHESTRAI_PIPELINE_URL: ${{ vars.ORCHESTRAI_PIPELINE_URL }}
-          ORCHESTRAI_PIPELINE_JOB: ${{ vars.ORCHESTRAI_PIPELINE_JOB }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
           ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
@@ -194,6 +196,15 @@ jobs:
           # Test the PR's own code, not the configured repo@main.
           ORCHESTRAI_PLAYBOOK_REPO: ${{ steps.pr.outputs.head_repo }}
           ORCHESTRAI_PLAYBOOK_SHA: ${{ steps.pr.outputs.head_sha }}
+          ORCHESTRAI_REPORTING: ${{ vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+          ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+          ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+          ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
@@ -297,6 +308,7 @@ jobs:
         if: always()
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
+          RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
         # KEEP IN SYNC with the identical step in test-playbooks-orchestrai.yml
         # ("Test summary"). See the sync note on the verdict step above.
         run: |
@@ -327,6 +339,9 @@ jobs:
             if [ -n "${RP_URL}" ]; then
               echo "| | |"; echo "|---|---|"
               echo "| ReportPortal | [View Results](${RP_URL}) |"
+            elif [ -n "${RUN_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
