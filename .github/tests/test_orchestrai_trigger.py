@@ -168,6 +168,39 @@ class ReportingSwitch(unittest.TestCase):
             self.run_main("both")
 
 
+class MachinesPerBatch(unittest.TestCase):
+    """A batch never asks for more machines than it has playbooks."""
+
+    def run_main(self, mphg, batches):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps(batches), "MACHINES_PER_HW_GROUP": str(mphg),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        start, err = mock.Mock(return_value="r1"), io.StringIO()
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                mock.patch.object(trigger, "start_run", start), \
+                mock.patch.object(trigger, "await_builds",
+                                  side_effect=lambda _cp, runs: {b: "https://j/1/" for b in runs}), \
+                contextlib.redirect_stderr(err):
+            trigger.main()
+        requested = {c.args[1]: c.args[2]["run_settings"]["machines_per_hw_group"]
+                     for c in start.call_args_list}
+        return requested, err.getvalue()
+
+    def test_machines_are_capped_at_the_playbook_count(self):
+        one = dict(BATCH, playbooks=["gaia-agents"])
+        five = dict(BATCH, playbooks=["gaia-agents", "lemonade-getting-started", "ollama-getting-started", "open-webui-chat", "lmstudio-rocm-llms"])
+        requested, log = self.run_main(2, {"linux/one": one, "linux/five": five})
+        self.assertEqual(requested, {"linux/one": 1, "linux/five": 2})
+        self.assertIn("2 batch(es), 3 machine(s) requested (machines_per_hw_group=2)", log)
+
+    def test_the_default_is_one_machine_per_batch(self):
+        requested, log = self.run_main(1, {"linux/stx": BATCH})
+        self.assertEqual(requested, {"linux/stx": 1})
+        self.assertIn("1 batch(es), 1 machine(s) requested", log)
+
+
 class WorkflowWiring(unittest.TestCase):
     """Same jobs as before; Detect & Trigger and !orc can request OIDC tokens."""
 
