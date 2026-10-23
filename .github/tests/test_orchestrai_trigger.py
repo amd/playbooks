@@ -131,7 +131,7 @@ class ControlPlaneApi(unittest.TestCase):
                        (200, {"run": {"id": "a", "status": "running", "pipeline_url": "https://j/job/p/9"}}))
         err = io.StringIO()
         with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
-            urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"})
+            urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"}, 3600)
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
         self.assertIn("run b ended error without a build: no image", err.getvalue())
 
@@ -177,11 +177,11 @@ class MachinesPerBatch(unittest.TestCase):
                "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
                "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
         start, err = mock.Mock(return_value="r1"), io.StringIO()
+        self.wait = mock.Mock(side_effect=lambda _cp, runs, _s: {b: "https://j/1/" for b in runs})
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
-                mock.patch.object(trigger, "await_builds",
-                                  side_effect=lambda _cp, runs: {b: "https://j/1/" for b in runs}), \
+                mock.patch.object(trigger, "await_builds", self.wait), \
                 contextlib.redirect_stderr(err):
             trigger.main()
         requested = {c.args[1]: c.args[2]["run_settings"]["machines_per_hw_group"]
@@ -199,6 +199,11 @@ class MachinesPerBatch(unittest.TestCase):
         requested, log = self.run_main(1, {"linux/stx": BATCH})
         self.assertEqual(requested, {"linux/stx": 1})
         self.assertIn("1 batch(es), 1 machine(s) requested", log)
+
+    def test_builds_are_awaited_as_long_as_the_control_plane_queues(self):
+        self.run_main(1, {"linux/stx": BATCH})
+        wait = load_config()["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN
+        self.assertEqual(self.wait.call_args.args[2], wait)
 
 
 class WorkflowWiring(unittest.TestCase):
@@ -245,9 +250,18 @@ class AcquireTimeoutValidation(unittest.TestCase):
         for bad in (0, -5, "60", True, 60.5, None):
             self.assertTrue(self.errors_for(acquire_timeout=bad), bad)
 
-    def test_a_timeout_that_leaves_no_time_to_run_is_rejected(self):
-        self.assertTrue(self.errors_for(acquire_timeout=240, max_duration=240))
-        self.assertEqual(self.errors_for(acquire_timeout=239, max_duration=240), [])
+    def test_a_wait_longer_than_the_build_limit_is_allowed(self):
+        # The Control Plane waits for machines before the build starts, so the
+        # wait no longer comes out of max_duration.
+        self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
+
+    def test_jobs_outlast_the_build_wait(self):
+        need = load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
+                          ("orchestrai-pr-command.yml", "command")):
+            with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
+                limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
+            self.assertGreater(limit, need, name)
 
     def test_no_overall_limit_means_no_comparison(self):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
@@ -286,8 +300,70 @@ class SchedulingPolicy(unittest.TestCase):
         for platform in ("linux", "windows"):
             self.assertEqual(batches[f"{platform}/stx"]["playbooks"],
                              ["ollama-getting-started"])
+            # KRK's untagged playbooks run on its 64 GB machine (superset_tags).
             self.assertEqual(batches[f"{platform}/krk+ram_64gb"]["playbooks"],
-                             list(affected))
+                             [*affected, "ollama-getting-started"])
+            self.assertNotIn(f"{platform}/krk", batches)
+
+
+class FoldIntoCapacityBatch(unittest.TestCase):
+    """A device with a ram_128gb batch runs its untagged playbooks there too."""
+
+    MIXED = ["deepseek-v4-flash-ds4", "lmstudio-rocm-llms", "ollama-getting-started",
+             "cvml"]
+
+    def build(self, playbooks=None, **overrides):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        cfg.update(overrides)
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            return build(playbooks or self.MIXED, cfg, devices={"halo"}, platforms={"linux"})
+        finally:
+            os.chdir(old_cwd)
+
+    def test_untagged_halo_playbooks_join_the_128gb_batch(self):
+        matrix, batches = self.build()
+        self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
+        self.assertEqual(sorted(batches["linux/halo+ram_128gb"]["playbooks"]), sorted(self.MIXED))
+        self.assertIn("ram_128gb", batches["linux/halo+ram_128gb"]["tags"])
+        # Every Test job waits on the batch its playbook now runs in.
+        self.assertEqual({e["batch_id"] for e in matrix}, {"linux/halo+ram_128gb"})
+
+    def test_without_superset_tags_the_batches_stay_separate(self):
+        matrix, batches = self.build(superset_tags=[])
+        self.assertEqual(sorted(batches), ["linux/halo", "linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
+
+    def test_untagged_only_runs_keep_their_own_batch(self):
+        _, batches = self.build(["ollama-getting-started", "cvml"])
+        self.assertEqual(sorted(batches), ["linux/halo"])
+
+    def test_two_capacity_batches_on_one_device_are_not_guessed_between(self):
+        _, batches = self.build(device_extra_tags={
+            **load_config()["device_extra_tags"],
+            "lmstudio-rocm-llms": {"halo": ["ram_64gb"]}},
+            extra_tag_devices={"ram_128gb": ["halo"], "ram_64gb": ["halo"]})
+        self.assertEqual(sorted(batches),
+                         ["linux/halo", "linux/halo+ram_128gb", "linux/halo+ram_64gb"])
+
+    def test_localized_batches_fold_the_same_way(self):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            matrix, batches = build(["lmstudio-rocm-llms", "comfyui-image-gen"], cfg,
+                                    devices={"halo"}, platforms={"linux"}, locale="zh-CN")
+        finally:
+            os.chdir(old_cwd)
+        if not batches:
+            self.skipTest("no zh-CN playbooks for this selection")
+        self.assertEqual(sorted(batches), ["localized/zh-CN/linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
 
 
 class OpenHandsProvisioning(unittest.TestCase):
