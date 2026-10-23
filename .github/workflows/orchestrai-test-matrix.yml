@@ -63,12 +63,13 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          # Bounded poll: ~4.5h cap (1080 * 15s) — covers max_duration (240m) plus
-          # provisioning/queue, but never hangs to the GitHub job timeout.
-          MAX=1080          # ~4.5h cap (1080 * 15s) — covers max_duration + queue
+          # Bounded poll: 330 min of wall-clock time (not a count of polls, which
+          # each take 15s plus the request) — max_duration (300m) plus 30 min for
+          # the build to wind down, and under GitHub's 360-minute job timeout.
+          DEADLINE=$((SECONDS + 330 * 60))
           FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
-          i=0; fails=0
-          while [ "$i" -lt "$MAX" ]; do
+          finished=""; fails=0
+          while [ "$SECONDS" -lt "$DEADLINE" ]; do
             if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
               fails=0
               building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
@@ -76,7 +77,7 @@ jobs:
               # The batch result reflects ALL its playbooks; this job's verdict is
               # resolved per-playbook in the next step from summary.json.
               if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result (per-playbook verdict resolved next)"; break
+                echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1; break
               fi
             else
               fails=$((fails + 1))
@@ -84,10 +85,9 @@ jobs:
                 echo "::error::OrchestrAI pipeline unreachable ($FAIL_MAX consecutive failures)"; exit 1
               fi
             fi
-            i=$((i + 1))
             sleep 15
           done
-          if [ "$i" -ge "$MAX" ]; then
+          if [ -z "$finished" ]; then
             echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1
           fi
 
