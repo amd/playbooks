@@ -50,11 +50,9 @@ import yaml
 
 # Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
 # for API_RETRY_SECONDS. A run waits for machines for its acquire_timeout; ours
-# waits that long plus BUILD_WAIT_MARGIN for its build, BUILD_WAIT_SECONDS when
-# no acquire_timeout is known.
+# waits that long plus BUILD_WAIT_MARGIN for its build.
 API_TIMEOUT = 30
 API_RETRY_SECONDS = 600
-BUILD_WAIT_SECONDS = 300 * 60
 BUILD_WAIT_MARGIN = 30 * 60
 POLL_SECONDS = 30
 TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
@@ -522,7 +520,7 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     return run["id"]
 
 
-def await_builds(cp, runs, wait_seconds=BUILD_WAIT_SECONDS):
+def await_builds(cp, runs, wait_seconds):
     """Wait until each run has started its pipeline build; {batch_id: build URL}."""
     urls, pending = {}, dict(runs)
     deadline = time.monotonic() + wait_seconds

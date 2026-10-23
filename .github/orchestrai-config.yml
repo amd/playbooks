@@ -290,13 +290,9 @@ skip_playbook_devices:
 run_settings:
   max_duration: 240            # minutes, whole batch
   max_test_case_duration: 90   # minutes, single playbook
-  # Minutes the OrchestrAI Control Plane keeps a batch queued for machines
-  # before dropping it (admission_expired: no build, its playbooks NOT_RUN).
-  # The queue also holds batches waiting for the CI identity's machine quota,
-  # so a full run whose batches outnumber the quota needs room to wait for the
-  # earlier batches to finish. The wait happens before the build starts and
-  # does not count against max_duration. Detect & Trigger waits this long plus
-  # 30 min for the builds, so its job timeout must stay above that.
+  # Minutes the Control Plane queues a batch for machines (including quota
+  # waits) before dropping it as NOT_RUN. Not counted in max_duration.
+  # Detect & Trigger waits this + 30 min for the builds.
   acquire_timeout: 360
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
