@@ -247,14 +247,15 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          MAX=1080; FAIL_MAX=20; i=0; fails=0
-          while [ "$i" -lt "$MAX" ]; do
+          # 330 min of wall-clock time: max_duration (300m) plus 30 min to wind down.
+          DEADLINE=$((SECONDS + 330 * 60)); FAIL_MAX=20; finished=""; fails=0
+          while [ "$SECONDS" -lt "$DEADLINE" ]; do
             if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
               fails=0
               building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
               result=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('result') or '')" 2>/dev/null || echo "")
               if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result"; break
+                echo "Batch build finished: $result"; finished=1; break
               fi
             else
               fails=$((fails + 1))
@@ -262,9 +263,9 @@ jobs:
                 echo "::error::OrchestrAI pipeline unreachable"; exit 1
               fi
             fi
-            i=$((i + 1)); sleep 15
+            sleep 15
           done
-          if [ "$i" -ge "$MAX" ]; then echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1; fi
+          if [ -z "$finished" ]; then echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1; fi
 
       - name: Resolve per-playbook verdict
         if: always()
