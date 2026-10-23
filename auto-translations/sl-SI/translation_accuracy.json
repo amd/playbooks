@@ -34,12 +34,12 @@
       "quality_issues": "UI labels left untranslated (Automatic Updates, Next) but appropriately quoted; otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui_models.md": {
-      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "source_sha256": "aca3c00aef9acd22b010f1407ebff7af8492d4407084f04d2fa09e4d5931cfa8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent; code/URL intact. 'Download' button label kept in English—acceptable if UI is untranslated."
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact; minor stylistic choices only."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "0b567e5e986ee1c34e6d6bfdf053f73e3630540235d56c7ac8cd08b17896f7d6",
@@ -66,20 +66,20 @@
       "quality_issues": "Excellent translation; code, URLs, brands intact. Minor: 'Nameščanje' slightly less idiomatic than 'Namestitev'."
     },
     "playbooks/dependencies/lmstudio.md": {
-      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Fluent, accurate; UI/menu terms left untranslated (acceptable). Minor phrasing 'omogočite ogled' slightly awkward but clear."
-    },
-    "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
-      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "source_sha256": "1b3bdd21937e48222d3a9b03b0d851773bd168a67c4c80a2f26ee884e714021d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent; code, URLs, brands intact. Minor: 'Download' button left untranslated (acceptable UI reference)."
+      "quality_issues": "Accurate, fluent translation; code, URLs, brand terms intact. UI labels left in English, consistent with original intent."
+    },
+    "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
+      "source_sha256": "b01f1bc19aae4624d867d4e5fe847a1f228d7f083436ffac2d49bc66510d772e",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent; code/URLs intact; minor untranslated UI terms (Discover, Download) acceptable."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
@@ -96,14 +96,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
       "quality_issues": "\"kolute (wheels)\" for Python wheels is awkward but explained; otherwise accurate, fluent, all code/markup intact."
-    },
-    "playbooks/dependencies/n8n.md": {
-      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent; code, URLs, brand terms intact. Minor natural phrasing choices only."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "ad48a5e1521ba90e7afd6f3a31abe2694999e7faec6a323be62d0a3ecf094f8c",
@@ -145,14 +137,6 @@
       "quality_score": 96,
       "quality_issues": "Accurate, fluent; tab names appropriately kept in English matching UI. Code, URLs, brands intact."
     },
-    "playbooks/dependencies/vllm.md": {
-      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "\"slike vsebnika\" awkward for container image; otherwise accurate, fluent, code/URLs intact."
-    },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
@@ -162,12 +146,12 @@
       "quality_issues": "Accurate, fluent; UI tab names left untranslated (acceptable). Code, URLs, brands intact."
     },
     "playbooks/core/lmstudio-rocm-llms/README.md": {
-      "source_sha256": "27c3416225166f7dcfeec23c7e18a85a54b6df8b83df790c286a7e9fafdb5354",
+      "source_sha256": "e4603e6a6cc2261f303cab49e1c19ffc25c2bb4592f0e07b9ddce938dd0d5440",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Fluent, accurate; code/URLs intact. Minor: 'spomin modela' slightly informal, 'osebnosti' for persona debatable."
+      "quality_score": 94,
+      "quality_issues": "Minor missing blank line before Example heading; otherwise accurate, fluent, code/URLs/tags intact."
     },
     "playbooks/core/lmstudio-rocm-llms/platform.md": {
       "source_sha256": "f731064c13c2ca273ea6bbc804e0b3309a1f4d385e3b58b35575f5e8430a3b86",
@@ -178,12 +162,12 @@
       "quality_issues": "Accurate, fluent, code/URLs/brands intact. 'priročnika' for playbook acceptable; minor terminology choice only."
     },
     "playbooks/core/lmstudio-rocm-llms/playbook.json": {
-      "source_sha256": "a63a9e649fc4c346593b47b1a3fe9b4f68abb9f41046456d0d5317cec87f3e7c",
+      "source_sha256": "7e39d03fdd81de9dc596f6fd2af964c357efb85649adf4b0911f282eb543aae0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 84,
-      "quality_issues": "\"strežba\" is awkward for serving LLMs; \"strežnik\"/\"gostovanje\" preferred, otherwise accurate."
+      "quality_score": 85,
+      "quality_issues": "Inconsistent translation of 'serving/serve' (strežba vs postrežbo); otherwise accurate and fluent."
     },
     "playbooks/core/n8n-automation-gpt-oss/README.md": {
       "source_sha256": "9bc128f29f40f1a7b56da55d7c22d3520c4a232d990259f020928394eb7b517e",

@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio можно установить из **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Updates** и установите LM Studio, если она ещё не установлена.
+LM Studio можно установить из **AMD Ryzen™ AI Developer Center**. Перейдите на вкладку **Updates** и установите LM Studio, если он ещё не установлен.
 
-Чтобы LM Studio могла видеть предустановленные модели, перейдите в Settings > General > Models Directory. Затем измените путь на `C:\Users\Public\models`
+Если на вашей системе уже предустановлены модели, перейдите в Settings > General > Models Directory. Затем измените путь на `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -22,6 +22,8 @@ LM Studio можно установить из **AMD Ryzen™ AI Developer Cente
 1. Скачайте установщик отсюда: [https://lmstudio.ai/download](https://lmstudio.ai/download)
 2. Установите. 
 <!-- @device:end -->
+
+> **Модели:** Если в вашей системе предустановлена модель из этого плейбука, укажите LM Studio на каталог предустановленных моделей выше, чтобы использовать её. В противном случае скачайте модель на вкладке **Discover** (значок поиска) в LM Studio, прежде чем продолжить.
 
 > Совет: После установки запустите LM Studio один раз, чтобы инициализировать CLI (`lms`).
 
@@ -42,12 +44,14 @@ lms --help
 > Совет: После установки запустите LM Studio один раз, чтобы инициализировать CLI (`lms`).
 
 <!-- @device:halo_box -->
-Чтобы LM Studio могла видеть предустановленные модели, перейдите в Settings > General > Models Directory. Затем измените путь на `/var/cache/models`.
+Если на вашей системе уже предустановлены модели, перейдите в Settings > General > Models Directory. Затем измените путь на `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Модели:** Если в вашей системе предустановлена модель из этого плейбука, укажите LM Studio на каталог предустановленных моделей выше, чтобы использовать её. В противном случае скачайте модель на вкладке **Discover** (значок поиска) в LM Studio, прежде чем продолжить.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

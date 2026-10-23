@@ -4,38 +4,38 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 
 | Locale | Files | Mean | Min | Judge |
 |--------|-------|------|-----|-------|
-| ar | 80 | 93.0 | 82 | Claude-Opus-4.8 |
-| cs-CZ | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| da-DK | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| de-DE | 80 | 93.1 | 78 | Claude-Opus-4.8 |
-| el-GR | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| es-LA | 80 | 92.8 | 78 | Claude-Opus-4.8 |
-| fi-FI | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| fr-CA | 80 | 90.7 | 72 | Claude-Opus-4.8 |
-| fr-FR | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| he | 80 | 92.2 | 60 | Claude-Opus-4.8 |
-| hu-HU | 80 | 92.1 | 78 | Claude-Opus-4.8 |
-| it-IT | 80 | 93.9 | 78 | Claude-Opus-4.8 |
-| ja-JP | 80 | 92.4 | 20 | Claude-Opus-4.8 |
-| ko-KR | 80 | 93.5 | 82 | Claude-Opus-4.8 |
-| nb-NO | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| nl-NL | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| pl-PL | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| pt-BR | 80 | 93.7 | 82 | Claude-Opus-4.8 |
-| pt-PT | 80 | 92.9 | 82 | Claude-Opus-4.8 |
-| ro-RO | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| ru-RU | 80 | 92.9 | 88 | Claude-Opus-4.8 |
-| sk-SK | 80 | 91.6 | 82 | Claude-Opus-4.8 |
-| sl-SI | 80 | 90.5 | 68 | Claude-Opus-4.8 |
-| sr-Latn | 80 | 91.1 | 78 | Claude-Opus-4.8 |
-| sv-SE | 80 | 93.0 | 88 | Claude-Opus-4.8 |
-| th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
-| tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
-| uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
-| zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
+| ar | 78 | 93.1 | 82 | Claude-Opus-4.8 |
+| cs-CZ | 78 | 92.4 | 78 | Claude-Opus-4.8 |
+| da-DK | 78 | 92.1 | 78 | Claude-Opus-4.8 |
+| de-DE | 78 | 93.1 | 78 | Claude-Opus-4.8 |
+| el-GR | 78 | 92.3 | 78 | Claude-Opus-4.8 |
+| es-LA | 78 | 92.9 | 78 | Claude-Opus-4.8 |
+| fi-FI | 78 | 91.8 | 82 | Claude-Opus-4.8 |
+| fr-CA | 78 | 90.7 | 72 | Claude-Opus-4.8 |
+| fr-FR | 78 | 93.2 | 78 | Claude-Opus-4.8 |
+| he | 78 | 92.1 | 60 | Claude-Opus-4.8 |
+| hu-HU | 78 | 92.1 | 78 | Claude-Opus-4.8 |
+| it-IT | 78 | 93.8 | 78 | Claude-Opus-4.8 |
+| ja-JP | 78 | 92.3 | 20 | Claude-Opus-4.8 |
+| ko-KR | 78 | 93.4 | 82 | Claude-Opus-4.8 |
+| nb-NO | 78 | 91.7 | 82 | Claude-Opus-4.8 |
+| nl-NL | 78 | 92.6 | 78 | Claude-Opus-4.8 |
+| pl-PL | 78 | 93.1 | 78 | Claude-Opus-4.8 |
+| pt-BR | 78 | 93.7 | 82 | Claude-Opus-4.8 |
+| pt-PT | 78 | 92.9 | 82 | Claude-Opus-4.8 |
+| ro-RO | 78 | 92.4 | 78 | Claude-Opus-4.8 |
+| ru-RU | 78 | 92.9 | 88 | Claude-Opus-4.8 |
+| sk-SK | 78 | 91.7 | 82 | Claude-Opus-4.8 |
+| sl-SI | 78 | 90.6 | 68 | Claude-Opus-4.8 |
+| sr-Latn | 78 | 91.1 | 78 | Claude-Opus-4.8 |
+| sv-SE | 78 | 93.1 | 88 | Claude-Opus-4.8 |
+| th-TH | 78 | 92.7 | 70 | Claude-Opus-4.8 |
+| tr-TR | 78 | 92.6 | 80 | Claude-Opus-4.8 |
+| uk-UA | 78 | 92.6 | 78 | Claude-Opus-4.8 |
+| zh-CN | 78 | 93.5 | 78 | Claude-Opus-4.8 |
+| zh-TW | 78 | 93.1 | 78 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (90)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -81,6 +81,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | cs-CZ | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Anglicism 'Clustrování' awkward; 'Halos' plural left untranslated in title; otherwise accurate and fluent. |
 | cs-CZ | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent terminology: 'jader' vs 'kernely' for kernels; otherwise accurate, fluent, brands intact. |
 | cs-CZ | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 82 | Added 'AMD' not in source; 'Clustrování' is awkward anglicism; otherwise accurate, terms/code intact. |
+| da-DK | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | "Servering"/"levere" for serving is awkward; "betjene" or keeping "serve" would be more natural in technical context. |
 | da-DK | playbooks/supplemental/cvml/playbook.json | 82 | Grammatical gender error: 'Lokal' should be 'Lokalt' for neuter 'computersyn'. Otherwise accurate, terms/brands intact. |
 | da-DK | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Gender agreement error: 'et...udviklingsoversigt' should be 'en'; 'udgiver' slightly off for 'posts'. |
 | de-DE | playbooks/supplemental/lemonade-getting-started/playbook.json | 82 | Omitted 'Gen AI' (Gen KI); translated as generic 'KI-Modelle', losing generative AI specificity. |
@@ -90,10 +91,9 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | el-GR | playbooks/supplemental/openhands-getting-started/playbook.json | 82 | "πράκτορα κωδικοποίησης" awkward; "coding agent" better as "προγραμματισμού". Otherwise accurate, brands intact. |
 | es-LA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; 'LLMs™' brand term altered; slightly verbose but adequate and fluent. |
 | fi-FI | playbooks/supplemental/lemonade-getting-started/playbook.json | 82 | Title awkward 'Aloita käytön kanssa'; otherwise accurate and fluent. |
-| fr-CA | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent 'diffusion'/'servir' for 'serving'; 'de grands modèles' preferred over 'des grands modèles'. |
+| fr-CA | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent 'diffusion'/'servir' for serving; 'de grands modèles' preferred over 'des grands'; otherwise accurate. |
 | fr-CA | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Slight inconsistency: 'Réglage fin' vs 'Ajustez avec précision' for fine-tune; otherwise accurate, fluent, terms intact. |
 | fr-CA | playbooks/supplemental/vllm-inference/playbook.json | 82 | "le service" ambiguous for serving; "GPU" acceptable but "processeur graphique" preferred by OQLF. |
-| fr-FR | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | 'diffusion' suboptimal for 'serving'; 'de grands modèles' more correct than 'des grands modèles' |
 | fr-FR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Inconsistent terminology: 'Réglage fin' vs 'Affinez'; 'de grands modèles' preferred over 'des grands'. |
 | fr-FR | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent terminology: 'noyaux' in title vs 'kernels' in body for same term. |
 | he | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark placement shifted (LLMs™ vs LLM™); 'memory-efficient' rendering slightly awkward but acceptable. |
@@ -115,7 +115,6 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | ro-RO | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 82 | "Clustering" left untranslated (anglicism); "unități" odd for "Halos"; otherwise accurate, terms/code intact. |
 | sk-SK | playbooks/supplemental/amd-sync/playbook.json | 82 | Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate. |
 | sl-SI | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency. |
-| sr-Latn | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent terminology: 'posluživanje' vs 'servisiranje' for 'serving'; minor fluency issues. |
 | sr-Latn | playbooks/supplemental/openclaw-lemonade-server/playbook.json | 82 | Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement). |
 | sr-Latn | playbooks/supplemental/pytorch-kernels/playbook.json | 82 | Inconsistent 'kernela' vs 'jezgra' terminology; otherwise accurate, brands intact. |
 | sr-Latn | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 82 | "rasporedite" awkward for deploy; "inferentni" unusual; otherwise accurate, brands intact |
@@ -129,5 +128,4 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | zh-CN | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method. |
 | zh-TW | playbooks/supplemental/clustering-rpc-server/playbook.json | 82 | Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate. |
 | ro-RO | playbooks/supplemental/pytorch-kernels/playbook.json | 84 | Inconsistent 'kernele' vs 'kernel-uri' plural; otherwise accurate, fluent, terms/brands intact. |
-| sl-SI | playbooks/core/lmstudio-rocm-llms/playbook.json | 84 | "strežba" is awkward for serving LLMs; "strežnik"/"gostovanje" preferred, otherwise accurate. |
 | sr-Latn | playbooks/supplemental/github-slack-development-digest/playbook.json | 84 | Inconsistent term: 'sažetak' vs untranslated 'digest'; otherwise accurate and fluent. |

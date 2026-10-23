@@ -1,6 +1,6 @@
 {
   "id": "lmstudio-rocm-llms",
   "title": "LM Studio ile LLM'leri Çalıştırma ve Sunma",
-  "description": "LM Studio ve LM Studio Server'ı büyük dil modellerini yerel olarak çalıştırıp sunacak şekilde kurun.",
+  "description": "LM Studio ve LM Studio Server'ı büyük dil modellerini yerel olarak çalıştırıp sunmak üzere kurun.",
   "auto_translated": true
 }
