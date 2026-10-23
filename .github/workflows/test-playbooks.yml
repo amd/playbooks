@@ -157,6 +157,8 @@ jobs:
         run: python3 .github/scripts/test_build_test_matrix.py
       - name: Run playbook-test extractor tests
         run: python3 .github/scripts/test_run_playbook_tests.py
+      - name: Run step timeout tests
+        run: python3 .github/scripts/test_run_playbook_tests_timeout.py
       - name: Run prereq validator tests
         run: python3 .github/scripts/test_prereq_validate.py
 
