@@ -395,7 +395,16 @@ def main():
         default=None,
         help="Target device (filters @device: blocks)",
     )
-    parser.add_argument("--locale", default="", help="Check a localized playbook, e.g. zh-CN")
+    parser.add_argument(
+        "--locale",
+        nargs="?",
+        const="",
+        default="",
+        help=(
+            "Check a localized playbook, e.g. zh-CN; an omitted value selects English "
+            "(supports PowerShell, which drops explicit empty arguments)"
+        ),
+    )
     args = parser.parse_args()
 
     ok = validate_prereqs(args.playbook, args.platform, args.device, args.locale)

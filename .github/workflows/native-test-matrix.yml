@@ -14,7 +14,7 @@ on:
 
 jobs:
   test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
+    name: "${{ matrix.locale && format('{0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
     runs-on: ${{ fromJson(matrix.runner) }}
     continue-on-error: ${{ !matrix.required }}
     env:
@@ -72,7 +72,7 @@ jobs:
           }
           exit 0
 
-      # Same prerequisite check and self-heal as the English job, against the localized README.
+      # Validate and self-heal the playbook prerequisites before running its tests.
       - name: Validate & provision prerequisites (Windows)
         if: matrix.platform == 'windows'
         shell: powershell
