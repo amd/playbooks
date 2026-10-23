@@ -35,6 +35,8 @@ jobs:
     name: OrchestrAI PR command
     if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    # Must exceed acquire_timeout + 30 min (tested).
+    timeout-minutes: 420
     permissions:
       contents: read
       pull-requests: write

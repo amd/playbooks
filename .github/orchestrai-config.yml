@@ -302,10 +302,10 @@ run_settings:
   # GitHub's 360-minute job timeout.
   max_duration: 300
   max_test_case_duration: 90   # minutes, single playbook
-  # Minutes to wait for the broker to supply machines before the build gives
-  # up. The wait counts against the build's overall time limit, so a longer
-  # wait leaves less time for the batch's playbooks.
-  acquire_timeout: 60
+  # Minutes the Control Plane queues a batch for machines (including quota
+  # waits) before dropping it as NOT_RUN. Not counted in max_duration.
+  # Detect & Trigger waits this + 30 min for the builds.
+  acquire_timeout: 360
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.
