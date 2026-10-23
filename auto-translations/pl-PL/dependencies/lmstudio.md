@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio można zainstalować z **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Updates** i zainstaluj LM Studio, jeśli nie jest jeszcze obecne.
+LM Studio można zainstalować z poziomu **AMD Ryzen™ AI Developer Center**. Przejdź do zakładki **Updates** i zainstaluj LM Studio, jeśli nie jest jeszcze obecne.
 
-Aby umożliwić LM Studio wykrycie wstępnie zainstalowanych modeli, przejdź do Settings > General > Models Directory. Następnie zmień ścieżkę na `C:\Users\Public\models`
+Jeśli system ma wstępnie zainstalowane modele, przejdź do Settings > General > Models Directory. Następnie zmień ścieżkę na `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -23,6 +23,8 @@ Aby umożliwić LM Studio wykrycie wstępnie zainstalowanych modeli, przejdź do
 2. Zainstaluj. 
 <!-- @device:end -->
 
+> **Modele:** Jeśli system został dostarczony z modelem wstępnie zainstalowanym dla tego playbooka, wskaż LM Studio na powyższy katalog wstępnie zainstalowanych modeli, aby go użyć. W przeciwnym razie pobierz model z zakładki **Discover** w LM Studio (ikona lupy) przed kontynuowaniem.
+
 > Wskazówka: Po instalacji uruchom LM Studio raz, aby zainicjować CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
@@ -33,7 +35,7 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Uwaga: Możesz wybrać instalację pliku .deb lub AppImage. 
+> Uwaga: Możesz wybrać instalację .deb lub AppImage. 
 1. Pobierz plik appimage stąd: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. uruchom `sudo apt install libfuse2`  
 3. uruchom `cd ~/Downloads`  
@@ -42,12 +44,14 @@ lms --help
 > Wskazówka: Po instalacji uruchom LM Studio raz, aby zainicjować CLI (`lms`).
 
 <!-- @device:halo_box -->
-Aby umożliwić LM Studio wykrycie wstępnie zainstalowanych modeli, przejdź do Settings > General > Models Directory. Następnie zmień ścieżkę na `/var/cache/models`.
+Jeśli system ma wstępnie zainstalowane modele, przejdź do Settings > General > Models Directory. Następnie zmień ścieżkę na `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modele:** Jeśli system został dostarczony z modelem wstępnie zainstalowanym dla tego playbooka, wskaż LM Studio na powyższy katalog wstępnie zainstalowanych modeli, aby go użyć. W przeciwnym razie pobierz model z zakładki **Discover** w LM Studio (ikona lupy) przed kontynuowaniem.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

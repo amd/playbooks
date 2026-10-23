@@ -16,13 +16,17 @@ SPDX-License-Identifier: MIT
 
 ## Visão Geral
 
-LM Studio é um poderoso wrapper baseado em GUI para [llama.cpp](https://github.com/ggml-org/llama.cpp) e também fornece um [endpoint compatível com OpenAI](https://lmstudio.ai/docs/developer/openai-compat) para o serviço de modelos localmente. LM Studio oferece uma interface simples, porém poderosa, para baixar e implantar modelos com facilidade. LM Studio oferece tanto Vulkan quanto backends de software AMD ROCm™ (chamados de runtimes) para usuários da AMD.
+LM Studio é um poderoso wrapper baseado em GUI para [llama.cpp](https://github.com/ggml-org/llama.cpp) e também fornece um [endpoint compatível com OpenAI](https://lmstudio.ai/docs/developer/openai-compat) para servir modelos localmente. LM Studio oferece uma interface simples, mas poderosa, para baixar e implantar modelos com facilidade. LM Studio oferece backends Vulkan e AMD ROCm™ software (chamados de runtimes) para usuários AMD.
+
+<!-- @device:halo_box -->
+> **Observação:** Alguns sistemas AMD Ryzen AI Halo já vêm com o modelo deste playbook instalado, enquanto outros não. Ambos os casos são suportados. Ao chegar na seção **Downloading Models**, verifique se o modelo já está disponível no LM Studio — se estiver, você pode pular o download; se não, siga as etapas indicadas lá para baixá-lo.
+<!-- @device:end -->
 
 
-## O que Você Vai Aprender
+## O Que Você Vai Aprender
 - Como configurar e usar o LM Studio para aproveitar seu hardware local
-- Testar e gerenciar LLMs em um ambiente completamente offline
-- Servir modelos por meio de uma API compatível com OpenAI para potencializar fluxos de trabalho e aplicativos personalizados
+- Testar e gerenciar LLMs em um ambiente totalmente offline
+- Servir modelos via API compatível com OpenAI para alimentar fluxos de trabalho e aplicativos personalizados
 
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -52,6 +56,7 @@ LM Studio é um poderoso wrapper baseado em GUI para [llama.cpp](https://github.
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## Baixando Modelos
 
@@ -62,19 +67,21 @@ LM Studio é um poderoso wrapper baseado em GUI para [llama.cpp](https://github.
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
 ## Conversando com um LLM
-Aprenda a começar a conversar com um LLM no nível do ChatGPT, completamente de forma local.  
+Aprenda como começar a conversar com um LLM de nível ChatGPT completamente de forma local.  
 
 1. Abra o LMStudio. 
 2. Pressione `Ctrl + L` para abrir o Model Loader, selecione `Manually choose model load parameters` e clique em `${model_name}`
 3. Certifique-se de que "show advanced settings" esteja marcado.  
-4. Altere o `Context Length` conforme desejado. Um comprimento de contexto maior significa mais memória do modelo, mas também mais uso de memória do sistema. O recomendado para este playbook é 4096.
+4. Altere `Context Length` conforme desejado. Um comprimento de contexto maior significa mais memória do modelo, mas mais memória do sistema utilizada. O recomendado para este playbook é 4096.
 5. Certifique-se de que `GPU Offload` esteja definido no máximo e que `Flash Attention` esteja ativado (Cache Quantizations pode permanecer desativado)
 6. Marque `Remember settings` e clique em `Load Model`.
 7. Se não estiver na janela de chat, pressione `Ctrl + 1` ou clique no botão 👾 no canto superior esquerdo da tela.
@@ -104,8 +111,8 @@ lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
-if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -136,7 +143,7 @@ lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -155,17 +162,17 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Dica**: Comprimento de contexto se refere à memória do modelo. Flash attention melhora a velocidade de processamento ao mesmo tempo em que reduz o uso de memória. GPU Offload transfere a computação para a placa de vídeo para respostas mais rápidas.
+> **Dica**: O comprimento de contexto se refere à memória do modelo. O flash attention melhora a velocidade de processamento ao mesmo tempo que reduz o uso de memória. O GPU Offload transfere a computação para a placa de vídeo para respostas mais rápidas.
 
-## Servir LLMs por meio de um endpoint compatível com OpenAI
+## Servir LLMs através de um endpoint compatível com OpenAI
 
-O LM Studio também oferece um endpoint compatível com OpenAI na forma do LM Studio Server. Isso já foi demonstrado em um fluxo de trabalho de codificação agentic com Cline [aqui](../playbooks/vscode-qwen3-coder). Outro caso de uso comum é conectar o LM Studio Server a qualquer aplicação web (React, Node.js, Python) enviando requisições HTTP padrão para o endpoint de inferência.
+O LM Studio também oferece um endpoint compatível com OpenAI na forma do LM Studio Server. Isso já foi demonstrado em um fluxo de trabalho de codificação agêntica com o Cline [aqui](../playbooks/vscode-qwen3-coder). Outro caso de uso comum é conectar o LM Studio Server a qualquer aplicativo web (React, Node.js, Python) enviando requisições HTTP padrão para o endpoint de inferência.
 
-Para configurar o LM Studio Server, siga as instruções abaixo:
+Para configurar o LM Studio Server, use as seguintes instruções:
 
-1. No lado esquerdo, clique na aba `Developer` (ícone de linha de comando) ou pressione `Ctrl + 2` e, em seguida, clique em `Server Settings`.  
-2. (Opcional): Se você quiser servir o modelo pela sua LAN, marque `Serve on Local Network`. Se quiser usar com um site ou fazer chamadas extensivas dentro do VS Code, marque `Enable CORS`. 
-3. No canto superior esquerdo, certifique-se de que o servidor esteja em execução clicando no botão de alternância à frente de `Status`.
+1. No lado esquerdo, clique na aba `Developer` (ícone de linha de comando) ou pressione `Ctrl + 2` e depois clique em `Server Settings`.  
+2. (Opcional): Se você quiser servir o modelo pela sua LAN, marque `Serve on Local Network`. Se quiser usar com um site ou realizar chamadas extensivas dentro do VS Code, marque `Enable CORS`. 
+3. No canto superior esquerdo, certifique-se de que o servidor esteja em execução clicando no botão de alternância em frente a `Status`.
 4. Um endpoint compatível com OpenAI estará agora em execução. O endereço normalmente é http://127.0.0.1:1234  
 5. Se um modelo ainda não estiver carregado, você pode carregá-lo clicando em `Load Model` e seguindo as etapas mencionadas anteriormente. 
 
@@ -188,17 +195,17 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Esse modelo agora estará acessível por meio do endpoint do LM Studio Server e oferecerá suporte a endpoints OpenAI, incluindo:
+Esse modelo agora estará acessível através do endpoint do LM Studio Server e suportará os endpoints do OpenAI, incluindo:
 
 | Endpoint | Método | Documentação |
 |------------|----------|----------|
-| /v1/models | GET | [Modelos](https://lmstudio.ai/docs/developer/openai-compat/models) |
-| /v1/responses | POST | [Respostas](https://lmstudio.ai/docs/developer/openai-compat/responses) |
+| /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
+| /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Exemplo: Fazendo Ping no seu Endpoint
-Tendo acabado de criar o endpoint OpenAI Compatible, vamos ver como integrá-lo em um ambiente de desenvolvimento Python (como o VSCode) e usar seu sistema como um provedor de API local.
+#### Exemplo: Testando seu Endpoint
+Tendo acabado de criar o endpoint compatível com OpenAI, vamos ver como integrar isso a um ambiente de desenvolvimento Python (como o VSCode) e usar seu sistema como um provedor de API local.
 
 1. Crie um ambiente virtual Python:
 
@@ -214,7 +221,7 @@ Tendo acabado de criar o endpoint OpenAI Compatible, vamos ver como integrá-lo 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Conceda ao seu usuário acesso aos dispositivos GPU** (faça logout e login novamente para que isso tenha efeito):
+**Conceda ao seu usuário acesso aos dispositivos GPU** (saia e entre novamente para que isso tenha efeito):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -238,7 +245,7 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **Dica**: Usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
+    > **Dica**: usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
     > definindo-a como RemoteSigned ou Unrestricted) antes de executar alguns comandos do Powershell.
 
 <!-- @device:end -->
@@ -250,7 +257,7 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **Dica**: Usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
+    > **Dica**: usuários do Windows podem precisar modificar sua Política de Execução do PowerShell (por exemplo,
     > definindo-a como RemoteSigned ou Unrestricted) antes de executar alguns comandos do Powershell.
 
 <!-- @device:end -->
@@ -261,7 +268,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Execute o script a seguir para fazer ping no endpoint que acabamos de criar.
+3. Execute o seguinte script para testar o endpoint que acabamos de criar.
     ```python
     from openai import OpenAI
 
@@ -367,12 +374,12 @@ lms server stop
 #### (Opcional): Alternando entre Runtimes
 
 1. Pressione `Ctrl + Shift + R` no teclado. Alternativamente, clique na aba `Discover` (Lupa) no lado esquerdo e, em seguida, clique em `Runtime` na janela pop-up.
-2. Você verá então `Runtime Selections`, onde o menu suspenso pode ser usado para alterar o runtime.
+2. Você deverá então ver `Runtime Selections`, onde o menu suspenso pode ser usado para alterar o runtime.
 
 
 ## Próximos Passos
 
-- **Integração de Aplicativo Personalizado**: Integre seus próprios scripts ou aplicativos Python usando a API local compatível com OpenAI.
-- **Frontends Avançados**: Conecte interfaces poderosas como o Open WebUI ao seu servidor para gerenciamento de histórico de chat e personas.
+- **Integração com Apps Personalizados**: integre seus próprios scripts ou aplicações Python usando a API local compatível com OpenAI.
+- **Frontends Avançados**: conecte interfaces poderosas como o Open WebUI ao seu servidor para histórico de chat e gerenciamento de personas.
 
 Para mais documentação, visite: https://lmstudio.ai/docs/developer

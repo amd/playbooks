@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Updates** och installera LM Studio om det inte redan finns installerat.
+LM Studio kan installeras från **AMD Ryzen™ AI Developer Center**. Gå till fliken **Updates** och installera LM Studio om det inte redan finns.
 
-För att LM Studio ska kunna se de förinstallerade modellerna, navigera till Settings > General > Models Directory. Ändra sedan sökvägen till `C:\Users\Public\models`
+Om ditt system har förinstallerade modeller, navigera till Settings > General > Models Directory. Ändra sedan sökvägen till `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -23,7 +23,9 @@ För att LM Studio ska kunna se de förinstallerade modellerna, navigera till Se
 2. Installera. 
 <!-- @device:end -->
 
-> Tips: Starta LM Studio en gång efter installationen för att initiera CLI:t (`lms`).
+> **Modeller:** Om ditt system levererades med den här guidens modell förinstallerad, peka LM Studio mot den förinstallerade modellkatalogen ovan för att använda den. Annars, ladda ner modellen från LM Studios flik **Discover** (sökikonen) innan du fortsätter.
+
+> Tips: Efter installationen, starta LM Studio en gång för att initiera CLI:t (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,21 +35,23 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Obs: Du kan välja att installera antingen .deb-filen eller AppImage-filen. 
+> Obs: Du kan välja att installera antingen .deb eller AppImage. 
 1. Ladda ner appimage-filen härifrån: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. kör `sudo apt install libfuse2`  
 3. kör `cd ~/Downloads`  
 4. kör `chmod +x LM-Studio-*.AppImage`  
 5. kör `./LM-Studio-*.AppImage`  
-> Tips: Starta LM Studio en gång efter installationen för att initiera CLI:t (`lms`).
+> Tips: Efter installationen, starta LM Studio en gång för att initiera CLI:t (`lms`).
 
 <!-- @device:halo_box -->
-För att LM Studio ska kunna se de förinstallerade modellerna, navigera till Settings > General > Models Directory. Ändra sedan sökvägen till `/var/cache/models`.
+Om ditt system har förinstallerade modeller, navigera till Settings > General > Models Directory. Ändra sedan sökvägen till `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modeller:** Om ditt system levererades med den här guidens modell förinstallerad, peka LM Studio mot den förinstallerade modellkatalogen ovan för att använda den. Annars, ladda ner modellen från LM Studios flik **Discover** (sökikonen) innan du fortsätter.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

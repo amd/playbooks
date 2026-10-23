@@ -16,11 +16,15 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-LM Studio 是一个功能强大的、基于图形界面的 [llama.cpp](https://github.com/ggml-org/llama.cpp) 封装工具，同时还提供了一个[兼容 OpenAI 的接口](https://lmstudio.ai/docs/developer/openai-compat)，用于本地模型服务。LM Studio 提供了简单而强大的界面，可轻松下载和部署模型。针对 AMD 用户，LM Studio 同时提供了 Vulkan 和 AMD ROCm™ 软件后端（称为运行时）。
+LM Studio 是一个基于图形界面的强大 [llama.cpp](https://github.com/ggml-org/llama.cpp) 封装工具，同时也提供了[兼容 OpenAI 的端点](https://lmstudio.ai/docs/developer/openai-compat)，用于本地模型服务。LM Studio 提供了一个简单而强大的界面，可轻松下载和部署模型。LM Studio 为 AMD 用户提供了 Vulkan 和 AMD ROCm™ software 两种后端（称为运行时）。
+
+<!-- @device:halo_box -->
+> **注意：** 部分 AMD Ryzen AI Halo 系统已预装本手册所使用的模型，而其他系统则没有。两种情况均受支持。当您阅读到**下载模型**部分时，请先检查该模型是否已在 LM Studio 中可用——如果已存在，您可以跳过下载步骤；如果不存在，请按照该部分的步骤进行下载。
+<!-- @device:end -->
 
 
 ## 您将学到什么
-- 如何配置和使用 LM Studio 以充分利用您的本地硬件
+- 如何配置并使用 LM Studio 来充分利用本地硬件
 - 在完全离线的环境中测试和管理 LLM
 - 通过兼容 OpenAI 的 API 提供模型服务，为自定义工作流和应用提供支持
 
@@ -35,23 +39,24 @@ LM Studio 是一个功能强大的、基于图形界面的 [llama.cpp](https://g
 ## 检查软件更新
 
 <!-- @os:linux -->
-> **提示**：您可以通过 AMD Ryzen™ AI Developer Center 安装 VS Code。至于 LM Studio，请按照下面的安装说明进行操作。
+> **注意**：您可以通过 AMD Ryzen™ AI Developer Center 安装 VS Code。至于 LM Studio，请按照以下安装说明进行操作。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **提示**：如果尚未安装 VS Code 或 LM Studio，您可以从 AMD Ryzen™ AI Developer Center 进行安装。 
+> **注意**：如果尚未安装 VS Code 或 LM Studio，您可以从 AMD Ryzen™ AI Developer Center 进行安装。
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## 安装软件前置条件
+## 安装软件先决条件
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## 下载模型
 
@@ -62,23 +67,25 @@ LM Studio 是一个功能强大的、基于图形界面的 [llama.cpp](https://g
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
 ## 与 LLM 对话
-了解如何以完全本地化的方式开始与 ChatGPT 级别的 LLM 进行对话。  
+了解如何开始完全在本地与 ChatGPT 级别的 LLM 进行对话。
 
-1. 打开 LMStudio。 
-2. 按 `Ctrl + L` 打开模型加载器，选择 `Manually choose model load parameters`，然后点击 `${model_name}`
-3. 确保已勾选“show advanced settings”。  
-4. 根据需要更改 `Context Length`（上下文长度）。上下文长度越高意味着模型占用的内存越多，但会消耗更多系统内存。此实践指南建议设置为 4096。
-5. 确保 `GPU Offload` 设置为最大值，并且 `Flash Attention` 处于开启状态（Cache Quantizations 可以保持关闭）
-6. 勾选 `Remember settings`，然后点击 `Load Model`。
-7. 如果不在聊天窗口中，请按 `Ctrl + 1` 或点击屏幕左上方的 👾 按钮。
-8. 发送一条消息，开始与模型交互！
+1. 打开 LMStudio。
+2. 按下 `Ctrl + L` 打开模型加载器，选择 `Manually choose model load parameters`，然后点击 `${model_name}`
+3. 确保已勾选 "show advanced settings"。
+4. 根据需要更改 `Context Length`。更高的上下文长度意味着更多的模型内存，但也会占用更多系统内存。本手册建议设置为 4096。
+5. 确保 `GPU Offload` 设置为最大值，并且 `Flash Attention` 处于开启状态（Cache Quantizations 可保持关闭）。
+6. 勾选 `Remember settings` 并点击 `Load Model`。
+7. 如果未处于聊天窗口中，请按下 `Ctrl + 1` 或点击屏幕左上方的 👾 按钮。
+8. 发送一条消息，开始与模型进行交互！
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -104,8 +111,8 @@ lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
-if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -136,7 +143,7 @@ lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -155,19 +162,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **提示**：上下文长度指的是模型的内存容量。Flash Attention 可以在减少内存占用的同时提升处理速度。GPU Offload 会将计算负载转移到显卡上，以加快响应速度。
+> **提示**：上下文长度指的是模型的“记忆”容量。Flash attention 可提升处理速度，同时降低内存占用。GPU Offload 会将计算转移到显卡上，以实现更快的响应速度。
 
-## 通过兼容 OpenAI 的接口提供 LLM 服务
+## 通过兼容 OpenAI 的端点提供 LLM 服务
 
-LM Studio 还以 LM Studio Server 的形式提供了兼容 OpenAI 的接口。这一功能已在 Cline 的智能编码工作流中得到展示，详情[请见此处](../playbooks/vscode-qwen3-coder)。另一个常见用例是将 LM Studio Server 连接到任意 Web 应用（React、Node.js、Python），方法是向推理接口发送标准的 HTTP 请求。
+LM Studio 还以 LM Studio Server 的形式提供了兼容 OpenAI 的端点。此功能已在与 Cline 的智能体编程工作流中进行过演示，详见[此处](../playbooks/vscode-qwen3-coder)。另一个常见用例是，通过向推理端点发送标准 HTTP 请求，将 LM Studio Server 连接到任意 Web 应用（React、Node.js、Python）。
 
 要设置 LM Studio Server，请按照以下说明操作：
 
-1. 在左侧，点击 `Developer` 标签（命令行图标）或按 `Ctrl + 2`，然后点击 `Server Settings`。  
-2. （可选）：如果您想在局域网内提供模型服务，请勾选 `Serve on Local Network`。如果您想在网站中使用该服务，或在 VS Code 中进行大量调用，请勾选 `Enable CORS`。 
-3. 在左上角，点击 `Status` 前面的开关按钮，确保服务器正在运行。
-4. 现在，一个兼容 OpenAI 的接口将开始运行。地址通常为 http://127.0.0.1:1234  
-5. 如果尚未加载模型，您可以点击 `Load Model` 并按照前面提到的步骤进行加载。 
+1. 在左侧，点击 `Developer` 选项卡（命令行图标），或按 `Ctrl + 2`，然后点击 `Server Settings`。
+2. （可选）：如果您希望在局域网内提供模型服务，请勾选 `Serve on Local Network`。如果您希望在网站中使用，或在 VS Code 中进行大量调用，请勾选 `Enable CORS`。
+3. 在左上角，点击 `Status` 前方的切换按钮，确保服务器正在运行。
+4. 此时，一个兼容 OpenAI 的端点将开始运行。该地址通常为 http://127.0.0.1:1234
+5. 如果尚未加载模型，您可以点击 `Load Model` 并按照前面提到的步骤进行加载。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -175,7 +182,7 @@ LM Studio 还以 LM Studio Server 的形式提供了兼容 OpenAI 的接口。�
 lms server start --port 1234
 curl.exe -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -184,27 +191,27 @@ curl.exe -s http://127.0.0.1:1234/v1/models
 lms server start --port 1234
 curl -s http://127.0.0.1:1234/v1/models
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 <!-- @os:end -->
 
 
-现在，该模型将可通过 LM Studio Server 接口进行访问，并支持包括以下在内的 OpenAI 接口：
+该模型现在可以通过 LM Studio Server 端点进行访问，并支持以下 OpenAI 端点：
 
-| 接口 | 方法 | 文档 |
+| 端点 | 方法 | 文档 |
 |------------|----------|----------|
-| /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
-| /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
-| /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
-| /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
-| /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### 示例：Ping 你的端点
-刚刚创建了 OpenAI 兼容端点后，让我们看看如何将其集成到 Python 开发者环境（例如 VSCode）中，并将你的系统用作本地 API 提供者。
+| /v1/models | GET | [模型](https://lmstudio.ai/docs/developer/openai-compat/models) |
+| /v1/responses | POST | [响应](https://lmstudio.ai/docs/developer/openai-compat/responses) |
+| /v1/chat/completions | POST |	[聊天补全](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
+| /v1/embeddings | POST | [嵌入向量](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
+| /v1/completions | POST | [补全](https://lmstudio.ai/docs/developer/openai-compat/completions) |
+#### 示例:Ping 你的端点
+刚刚创建了 OpenAI Compatible 端点,现在让我们看看如何将其集成到 Python 开发环境(例如 VSCode)中,并将你的系统用作本地 API 提供者。
 
-1. 创建一个 Python 虚拟环境：
+1. 创建一个 Python 虚拟环境:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    在 Linux 上，在你选择的目录中打开终端，按照以下命令创建 venv。
+    在 Linux 上,在你选择的目录中打开终端,并按照以下命令创建一个 venv。
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -214,13 +221,13 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
+**授予你的用户访问 GPU 设备的权限**(需要注销并重新登录才能生效):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    在 Linux 上，在你选择的目录中打开终端，按照以下命令创建 venv。
+    在 Linux 上,在你选择的目录中打开终端,并按照以下命令创建一个 venv。
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -232,36 +239,36 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    在 Windows 上，在你选择的目录中打开终端，按照以下命令创建 venv。
+    在 Windows 上,在你选择的目录中打开终端,并按照以下命令创建一个 venv。
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **提示**：Windows 用户在运行某些 Powershell 命令之前，可能需要修改其 PowerShell 执行策略（例如
-    > 将其设置为 RemoteSigned 或 Unrestricted）。
+    > **提示**:Windows 用户在运行某些 Powershell 命令之前,可能需要修改其 PowerShell 执行策略(例如
+    > 将其设置为 RemoteSigned 或 Unrestricted)。
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    在 Windows 上，在你选择的目录中打开终端，按照以下命令创建 venv。
+    在 Windows 上,在你选择的目录中打开终端,并按照以下命令创建一个 venv。
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **提示**：Windows 用户在运行某些 Powershell 命令之前，可能需要修改其 PowerShell 执行策略（例如
-    > 将其设置为 RemoteSigned 或 Unrestricted）。
+    > **提示**:Windows 用户在运行某些 Powershell 命令之前,可能需要修改其 PowerShell 执行策略(例如
+    > 将其设置为 RemoteSigned 或 Unrestricted)。
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-2. 安装 OpenAI 软件包
+2. 安装 OpenAI 包
     ```bash
     pip install openai
     ```
 
-3. 运行以下脚本以 ping 我们刚刚创建的端点。
+3. 运行以下脚本来 ping 我们刚刚创建的端点。
     ```python
     from openai import OpenAI
 
@@ -364,15 +371,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### （可选）：在运行时之间切换
+#### (可选):在运行时之间切换
 
-1. 在键盘上按 `Ctrl + Shift + R`。或者点击左侧的 `Discover` 标签页（放大镜图标），然后在弹出窗口中点击 `Runtime`。
-2. 随后你会看到 `Runtime Selections`，其中的下拉菜单可用于更改运行时。
+1. 在键盘上按 `Ctrl + Shift + R`。或者点击左侧的 `Discover` 选项卡(放大镜图标),然后在弹出窗口中点击 `Runtime`。
+2. 随后你应该会看到 `Runtime Selections`,可以使用下拉菜单来更改运行时。
 
 
 ## 后续步骤
 
-- **自定义应用集成**：使用本地的 OpenAI 兼容 API，集成你自己的 Python 脚本或应用程序。
-- **高级前端**：将 Open WebUI 等强大的界面连接到你的服务器，以实现聊天记录和角色管理。
+- **自定义应用集成**:使用本地 OpenAI 兼容 API 集成你自己的 Python 脚本或应用程序。
+- **高级前端**:将 Open WebUI 等强大的界面连接到你的服务器,以实现聊天历史记录和角色管理。
 
-如需更多文档，请访问：https://lmstudio.ai/docs/developer
+如需更多文档,请访问:https://lmstudio.ai/docs/developer

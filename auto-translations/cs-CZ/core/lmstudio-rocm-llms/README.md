@@ -16,13 +16,17 @@ SPDX-License-Identifier: MIT
 
 ## Přehled
 
-LM Studio je výkonný nástroj s grafickým rozhraním pro [llama.cpp](https://github.com/ggml-org/llama.cpp) a zároveň poskytuje [koncový bod kompatibilní s OpenAI](https://lmstudio.ai/docs/developer/openai-compat) pro lokální servírování modelů. LM Studio nabízí jednoduché, ale výkonné rozhraní pro snadné stahování a nasazování modelů. Pro uživatele AMD nabízí LM Studio jak Vulkan, tak backendy AMD ROCm™ (nazývané runtime prostředí).
+LM Studio je výkonný obal s grafickým rozhraním pro [llama.cpp](https://github.com/ggml-org/llama.cpp), který navíc poskytuje [koncový bod kompatibilní s OpenAI](https://lmstudio.ai/docs/developer/openai-compat) pro lokální obsluhu modelů. LM Studio nabízí jednoduché, ale výkonné rozhraní pro snadné stahování a nasazování modelů. Pro uživatele AMD nabízí LM Studio jak Vulkan, tak backendy AMD ROCm™ software (nazývané runtime).
+
+<!-- @device:halo_box -->
+> **Poznámka:** Některé systémy AMD Ryzen AI Halo mají model pro tento playbook již předinstalovaný, zatímco jiné ne. Obě varianty jsou podporovány. Jakmile dojdete k sekci **Downloading Models**, zkontrolujte, zda je model v LM Studio již dostupný – pokud ano, stahování můžete přeskočit; pokud ne, postupujte podle uvedených kroků a model stáhněte.
+<!-- @device:end -->
 
 
 ## Co se naučíte
-- Jak nakonfigurovat a používat LM Studio k plnému využití vašeho lokálního hardwaru
-- Testovat a spravovat LLM modely zcela offline
-- Servírovat modely prostřednictvím OpenAI kompatibilního API pro pohon vlastních pracovních postupů a aplikací
+- Jak nakonfigurovat a používat LM Studio k využití vašeho lokálního hardwaru
+- Testovat a spravovat LLM modely v zcela offline prostředí
+- Obsluhovat modely přes API kompatibilní s OpenAI pro vlastní workflow a aplikace
 
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -35,7 +39,7 @@ LM Studio je výkonný nástroj s grafickým rozhraním pro [llama.cpp](https://
 ## Kontrola aktualizací softwaru
 
 <!-- @os:linux -->
-> **Poznámka**: VS Code můžete nainstalovat prostřednictvím AMD Ryzen™ AI Developer Center. Pro LM Studio postupujte podle níže uvedených instalací.
+> **Poznámka**: VS Code lze nainstalovat přes AMD Ryzen™ AI Developer Center. Pro LM Studio postupujte podle instalačních pokynů níže.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -52,6 +56,7 @@ LM Studio je výkonný nástroj s grafickým rozhraním pro [llama.cpp](https://
 <!-- @device:end -->
 
 <!-- @require:lmstudio -->
+<!-- @prereq:lmstudio -->
 
 ## Stahování modelů
 
@@ -62,22 +67,24 @@ LM Studio je výkonný nástroj s grafickým rozhraním pro [llama.cpp](https://
 
 <!-- @device:halo,halo_box -->
 <!-- @require:lmstudio-models-gpt-oss-120b -->
+<!-- @prereq:lmstudio-models-gpt-oss-120b -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:lmstudio-models-qwen3-9b -->
+<!-- @prereq:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## Konverzace s LLM
+## Komunikace s LLM
 Naučte se, jak začít komunikovat s LLM na úrovni ChatGPT zcela lokálně.  
 
 1. Otevřete LMStudio. 
-2. Stiskněte `Ctrl + L` pro otevření nástroje pro načítání modelu, zvolte `Manually choose model load parameters` a klikněte na `${model_name}`
+2. Stiskněte `Ctrl + L` pro otevření Model Loaderu, vyberte `Manually choose model load parameters` a klikněte na `${model_name}`
 3. Ujistěte se, že je zaškrtnuto „show advanced settings“.  
-4. Změňte `Context Length` dle potřeby. Vyšší délka kontextu znamená větší paměťové nároky modelu, ale vyšší spotřebu systémové paměti. Doporučená hodnota pro tento playbook je 4096.
+4. Změňte `Context Length` podle potřeby. Vyšší délka kontextu znamená vyšší nároky na paměť modelu, ale i vyšší spotřebu systémové paměti. Doporučená hodnota pro tento playbook je 4096.
 5. Ujistěte se, že `GPU Offload` je nastaveno na maximum a `Flash Attention` je zapnuté (Cache Quantizations mohou zůstat vypnuté)
 6. Zaškrtněte `Remember settings` a klikněte na `Load Model`.
-7. Pokud nejste v okně chatu, stiskněte `Ctrl + 1` nebo klikněte na tlačítko 👾 v levém horním rohu obrazovky.
+7. Pokud nejste v okně chatu, stiskněte `Ctrl + 1` nebo klikněte na tlačítko 👾 v levé horní části obrazovky.
 8. Odešlete zprávu a začněte s modelem komunikovat!
 
 <!-- @os:windows -->
@@ -104,8 +111,8 @@ lms ps
 $ID = "${lms_model}-$env:GITHUB_RUN_ID"
 Set-Content -Path "$env:TEMP\lmstudio_model_id.txt" -Value $ID -Encoding utf8
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y
-if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y
+if ($LASTEXITCODE -ne 0) { lms unload --all; Start-Sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y }
 lms ps
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -136,7 +143,7 @@ lms ps
 ID="${lms_model}-${GITHUB_RUN_ID}"
 echo "$ID" > /tmp/lmstudio_model_id.txt
 # retry once: large-model loads can transiently fail under memory pressure
-lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 32768 --gpu max --identifier "$ID" -y; }
+lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y || { lms unload --all; sleep 5; lms load ${lms_model} --context-length 4096 --gpu max --identifier "$ID" -y; }
 lms ps # Verify model is really loaded
 lms chat "$ID" -p "Reply with exactly: OK"
 ```
@@ -157,17 +164,17 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 > **Tip**: Délka kontextu odkazuje na paměť modelu. Flash attention zlepšuje rychlost zpracování a zároveň snižuje spotřebu paměti. GPU Offload přesouvá výpočty na grafickou kartu pro rychlejší odezvy.
 
-## Servírování LLM prostřednictvím koncového bodu kompatibilního s OpenAI
+## Obsluha LLM přes koncový bod kompatibilní s OpenAI
 
-LM Studio také nabízí koncový bod kompatibilní s OpenAI v podobě LM Studio Server. To již bylo demonstrováno v agentním pracovním postupu kódování s Cline [zde](../playbooks/vscode-qwen3-coder). Dalším běžným případem použití je propojení LM Studio Server s libovolnou webovou aplikací (React, Node.js, Python) odesíláním standardních HTTP požadavků na inferenční koncový bod.
+LM Studio také nabízí koncový bod kompatibilní s OpenAI ve formě LM Studio Server. To již bylo ukázáno v rámci agentního workflow pro kódování s Cline [zde](../playbooks/vscode-qwen3-coder). Dalším běžným případem užití je propojení LM Studio Server s libovolnou webovou aplikací (React, Node.js, Python) odesíláním standardních HTTP požadavků na inferenční koncový bod.
 
-Pro nastavení LM Studio Server postupujte podle následujících instrukcí:
+Pro nastavení LM Studio Server postupujte podle následujících pokynů:
 
-1. Na levé straně klikněte na kartu `Developer` (ikona příkazové řádky) nebo stiskněte `Ctrl + 2` a poté klikněte na `Server Settings`.  
-2. (Volitelné): Pokud chcete model servírovat v rámci vaší LAN sítě, zaškrtněte `Serve on Local Network`. Pokud jej chcete používat s webovou stránkou nebo rozsáhlým voláním v rámci VS Code, zaškrtněte `Enable CORS`. 
-3. V levém horním rohu se ujistěte, že server běží kliknutím na přepínací tlačítko vedle `Status`.
-4. Nyní bude spuštěn koncový bod kompatibilní s OpenAI. Adresa je obvykle na http://127.0.0.1:1234  
-5. Pokud model ještě není načtený, můžete jej načíst kliknutím na `Load Model` a postupovat podle dříve uvedených kroků. 
+1. Na levé straně klikněte na záložku `Developer` (ikona příkazové řádky) nebo stiskněte `Ctrl + 2` a poté klikněte na `Server Settings`.  
+2. (Volitelné): Pokud chcete model obsluhovat ve vaší LAN síti, zaškrtněte `Serve on Local Network`. Pokud chcete model používat s webovou stránkou nebo prostřednictvím rozsáhlého volání ve VS Code, zaškrtněte `Enable CORS`. 
+3. V levém horním rohu se ujistěte, že server běží, kliknutím na přepínací tlačítko před `Status`.
+4. Nyní poběží koncový bod kompatibilní s OpenAI. Adresa je obvykle http://127.0.0.1:1234  
+5. Pokud model ještě není načten, můžete jej načíst kliknutím na `Load Model` a postupováním podle dříve uvedených kroků. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -188,23 +195,23 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Tento model bude nyní přístupný prostřednictvím koncového bodu LM Studio Server a bude podporovat koncové body OpenAI včetně:
+Tento model nyní bude přístupný prostřednictvím koncového bodu LM Studio Server a bude podporovat koncové body OpenAI, včetně:
 
-| Endpoint | Metoda | Dokumentace |
+| Koncový bod | Metoda | Dokumentace |
 |------------|----------|----------|
-| /v1/models | GET | [Modely](https://lmstudio.ai/docs/developer/openai-compat/models) |
-| /v1/responses | POST | [Odpovědi](https://lmstudio.ai/docs/developer/openai-compat/responses) |
+| /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
+| /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Příklad: Ping vašeho endpointu
-Nyní, když jsme vytvořili OpenAI Compatible endpoint, podívejme se, jak jej integrovat do vývojářského prostředí pro Python (například VSCode) a jak systém využít jako lokálního poskytovatele API.
+#### Příklad: Testování vašeho Endpointu
+Nyní, když jsme vytvořili OpenAI Compatible endpoint, podívejme se, jak jej integrovat do vývojového prostředí pro Python (jako je VSCode) a používat váš systém jako lokálního poskytovatele API.
 
-1. Vytvořte virtuální prostředí Pythonu:
+1. Vytvořte virtuální prostředí Python:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Na Linuxu otevřete terminál ve zvoleném adresáři a spusťte následující příkazy pro vytvoření venv.
+    Na Linuxu otevřete terminál v adresáři dle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -214,13 +221,13 @@ Nyní, když jsme vytvořili OpenAI Compatible endpoint, podívejme se, jak jej 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Udělte svému uživateli přístup ke GPU zařízením** (aby se změna projevila, odhlaste se a znovu přihlaste):
+**Udělte svému uživateli přístup k zařízením GPU** (aby se změna projevila, odhlaste se a znovu přihlaste):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Na Linuxu otevřete terminál ve zvoleném adresáři a spusťte následující příkazy pro vytvoření venv.
+    Na Linuxu otevřete terminál v adresáři dle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -232,26 +239,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Na Windows otevřete terminál ve zvoleném adresáři a spusťte následující příkazy pro vytvoření venv.
+    Ve Windows otevřete terminál v adresáři dle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění PowerShellu (Execution Policy) (například
-    > nastavit ji na RemoteSigned nebo Unrestricted), než budou moci spustit některé příkazy PowerShellu.
+    > **Tip**: Uživatelé Windows mohou potřebovat upravit zásady spouštění PowerShell (Execution Policy) (např.
+    > nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Na Windows otevřete terminál ve zvoleném adresáři a spusťte následující příkazy pro vytvoření venv.
+    Ve Windows otevřete terminál v adresáři dle vlastního výběru a postupujte podle příkazů pro vytvoření venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Tip**: Uživatelé Windows možná budou muset upravit zásady spouštění PowerShellu (Execution Policy) (například
-    > nastavit ji na RemoteSigned nebo Unrestricted), než budou moci spustit některé příkazy PowerShellu.
+    > **Tip**: Uživatelé Windows mohou potřebovat upravit zásady spouštění PowerShell (Execution Policy) (např.
+    > nastavit ji na RemoteSigned nebo Unrestricted) před spuštěním některých příkazů PowerShellu.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -261,7 +268,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Spusťte následující skript pro ping endpointu, který jsme právě vytvořili.
+3. Spusťte následující skript pro otestování endpointu, který jsme právě vytvořili.
     ```python
     from openai import OpenAI
 
@@ -364,15 +371,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Volitelné): Přepínání mezi runtime prostředími
+#### (Volitelné): Přepínání mezi Runtimes
 
-1. Stiskněte na klávesnici `Ctrl + Shift + R`. Případně klikněte na kartu `Discover` (ikona lupy) na levé straně a poté v zobrazeném okně klikněte na `Runtime`.   
-2. Poté by se vám mělo zobrazit okno `Runtime Selections`, kde lze pomocí rozbalovací nabídky změnit runtime.
+1. Stiskněte na klávesnici `Ctrl + Shift + R`. Případně klikněte na kartu `Discover` (lupa) na levé straně a poté klikněte na `Runtime` ve vyskakovacím okně.
+2. Poté by se vám mělo zobrazit okno `Runtime Selections`, kde lze pomocí rozevírací nabídky změnit runtime.
 
 
 ## Další kroky
 
-- **Integrace vlastní aplikace**: Integrujte vlastní Python skripty nebo aplikace pomocí lokálního API kompatibilního s OpenAI.
-- **Pokročilá frontend rozhraní**: Připojte ke svému serveru výkonná rozhraní, jako je Open WebUI, pro historii chatu a správu person.
+- **Vlastní integrace aplikace**: Integrujte své vlastní skripty v Pythonu nebo aplikace pomocí lokálního API kompatibilního s OpenAI.
+- **Pokročilá rozhraní**: Připojte k serveru výkonná rozhraní, jako je Open WebUI, pro historii chatu a správu person.
 
 Další dokumentaci naleznete na adrese: https://lmstudio.ai/docs/developer

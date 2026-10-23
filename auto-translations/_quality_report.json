@@ -1,182 +1,182 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
-      "mean": 93.0,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 78,
+      "mean": 92.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
-      "mean": 92.8,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 78,
+      "mean": 91.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-CA": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 90.7,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.2,
+      "files_scored": 78,
+      "mean": 92.1,
       "min": 60,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
-      "mean": 93.9,
+      "files_scored": 78,
+      "mean": 93.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.3,
       "min": 20,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.4,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 78,
+      "mean": 91.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-PT": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.9,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 80,
-      "mean": 91.6,
+      "files_scored": 78,
+      "mean": 91.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 80,
-      "mean": 90.5,
+      "files_scored": 78,
+      "mean": 90.6,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 80,
-      "mean": 93.0,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.7,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.6,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -436,6 +436,12 @@
     },
     {
       "locale": "da-DK",
+      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
+      "score": 82,
+      "issues": "\"Servering\"/\"levere\" for serving is awkward; \"betjene\" or keeping \"serve\" would be more natural in technical context."
+    },
+    {
+      "locale": "da-DK",
       "file": "playbooks/supplemental/cvml/playbook.json",
       "score": 82,
       "issues": "Grammatical gender error: 'Lokal' should be 'Lokalt' for neuter 'computersyn'. Otherwise accurate, terms/brands intact."
@@ -492,7 +498,7 @@
       "locale": "fr-CA",
       "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
       "score": 82,
-      "issues": "Inconsistent 'diffusion'/'servir' for 'serving'; 'de grands modèles' preferred over 'des grands modèles'."
+      "issues": "Inconsistent 'diffusion'/'servir' for serving; 'de grands modèles' preferred over 'des grands'; otherwise accurate."
     },
     {
       "locale": "fr-CA",
@@ -505,12 +511,6 @@
       "file": "playbooks/supplemental/vllm-inference/playbook.json",
       "score": 82,
       "issues": "\"le service\" ambiguous for serving; \"GPU\" acceptable but \"processeur graphique\" preferred by OQLF."
-    },
-    {
-      "locale": "fr-FR",
-      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
-      "score": 82,
-      "issues": "'diffusion' suboptimal for 'serving'; 'de grands modèles' more correct than 'des grands modèles'"
     },
     {
       "locale": "fr-FR",
@@ -640,12 +640,6 @@
     },
     {
       "locale": "sr-Latn",
-      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
-      "score": 82,
-      "issues": "Inconsistent terminology: 'posluživanje' vs 'servisiranje' for 'serving'; minor fluency issues."
-    },
-    {
-      "locale": "sr-Latn",
       "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
       "issues": "Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement)."
@@ -721,12 +715,6 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 84,
       "issues": "Inconsistent 'kernele' vs 'kernel-uri' plural; otherwise accurate, fluent, terms/brands intact."
-    },
-    {
-      "locale": "sl-SI",
-      "file": "playbooks/core/lmstudio-rocm-llms/playbook.json",
-      "score": 84,
-      "issues": "\"strežba\" is awkward for serving LLMs; \"strežnik\"/\"gostovanje\" preferred, otherwise accurate."
     },
     {
       "locale": "sr-Latn",
