@@ -279,9 +279,9 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          # Bounded poll: ~4.5h cap (1080 * 15s) — covers max_duration (240m) plus
+          # Bounded poll: ~5.5h cap (1320 * 15s) — covers max_duration (320m) plus
           # provisioning/queue, but never hangs to the GitHub job timeout.
-          MAX=1080          # ~4.5h cap (1080 * 15s) — covers max_duration + queue
+          MAX=1320          # ~5.5h cap (1320 * 15s) — covers max_duration + queue
           FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
           i=0; fails=0
           while [ "$i" -lt "$MAX" ]; do

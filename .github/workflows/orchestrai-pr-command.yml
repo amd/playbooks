@@ -247,7 +247,7 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          MAX=1080; FAIL_MAX=20; i=0; fails=0
+          MAX=1320; FAIL_MAX=20; i=0; fails=0
           while [ "$i" -lt "$MAX" ]; do
             if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
               fails=0
