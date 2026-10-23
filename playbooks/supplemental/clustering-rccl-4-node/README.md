@@ -87,8 +87,6 @@ You should see a speed of `10000Mb/s`:
 
 > **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
 
-> **Running models near or above 128 GB:** On AMD Ryzen™ AI Max 400 Series (Gorgon Halo) systems running Windows, models that approach or exceed 128 GB of memory require additional configuration to run without errors. Follow the [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) before loading the model.
-
 ### Memory Configuration for Running Large Models
 
 On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
