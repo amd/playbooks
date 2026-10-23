@@ -154,6 +154,13 @@ extra_tag_devices:
   ram_128gb: ["halo", "halo_box"]
   ram_64gb: ["krk"]
 
+# Extra tags that only add capacity: a machine with them can run everything the
+# untagged device can. When a run has both linux/halo and linux/halo+ram_128gb,
+# the untagged playbooks join the ram_128gb batch, so the device takes one
+# machine instead of two (they run one after another on it). Remove a tag here
+# to keep its batches separate.
+superset_tags: ["ram_64gb", "ram_128gb"]
+
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
 # Empty by default; example (commented) showing the format:
