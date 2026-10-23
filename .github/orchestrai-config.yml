@@ -154,6 +154,13 @@ extra_tag_devices:
   ram_128gb: ["halo", "halo_box"]
   ram_64gb: ["krk"]
 
+# Extra tags that only add capacity: a machine with them can run everything the
+# untagged device can. When a run has both linux/halo and linux/halo+ram_128gb,
+# the untagged playbooks join the ram_128gb batch, so the device takes one
+# machine instead of two (they run one after another on it). Remove a tag here
+# to keep its batches separate.
+superset_tags: ["ram_64gb", "ram_128gb"]
+
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
 # Empty by default; example (commented) showing the format:
@@ -288,7 +295,12 @@ skip_playbook_devices:
 # Per-run pipeline settings
 # ---------------------------------------------------------------------------
 run_settings:
-  max_duration: 240            # minutes, whole batch
+  # minutes, whole batch. superset_tags folds a device's untagged playbooks into
+  # its 64/128 GB batch (~20 in a row on Halo), so this is as high as the Test
+  # jobs' 330-minute build wait allows while keeping 30 min for the build to
+  # wind down. Raising it means raising that wait, which must stay under
+  # GitHub's 360-minute job timeout.
+  max_duration: 300
   max_test_case_duration: 90   # minutes, single playbook
   # Minutes the Control Plane queues a batch for machines (including quota
   # waits) before dropping it as NOT_RUN. Not counted in max_duration.

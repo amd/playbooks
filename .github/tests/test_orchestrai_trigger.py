@@ -290,8 +290,70 @@ class SchedulingPolicy(unittest.TestCase):
         for platform in ("linux", "windows"):
             self.assertEqual(batches[f"{platform}/stx"]["playbooks"],
                              ["ollama-getting-started"])
+            # KRK's untagged playbooks run on its 64 GB machine (superset_tags).
             self.assertEqual(batches[f"{platform}/krk+ram_64gb"]["playbooks"],
-                             list(affected))
+                             [*affected, "ollama-getting-started"])
+            self.assertNotIn(f"{platform}/krk", batches)
+
+
+class FoldIntoCapacityBatch(unittest.TestCase):
+    """A device with a ram_128gb batch runs its untagged playbooks there too."""
+
+    MIXED = ["deepseek-v4-flash-ds4", "lmstudio-rocm-llms", "ollama-getting-started",
+             "cvml"]
+
+    def build(self, playbooks=None, **overrides):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        cfg.update(overrides)
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            return build(playbooks or self.MIXED, cfg, devices={"halo"}, platforms={"linux"})
+        finally:
+            os.chdir(old_cwd)
+
+    def test_untagged_halo_playbooks_join_the_128gb_batch(self):
+        matrix, batches = self.build()
+        self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
+        self.assertEqual(sorted(batches["linux/halo+ram_128gb"]["playbooks"]), sorted(self.MIXED))
+        self.assertIn("ram_128gb", batches["linux/halo+ram_128gb"]["tags"])
+        # Every Test job waits on the batch its playbook now runs in.
+        self.assertEqual({e["batch_id"] for e in matrix}, {"linux/halo+ram_128gb"})
+
+    def test_without_superset_tags_the_batches_stay_separate(self):
+        matrix, batches = self.build(superset_tags=[])
+        self.assertEqual(sorted(batches), ["linux/halo", "linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
+
+    def test_untagged_only_runs_keep_their_own_batch(self):
+        _, batches = self.build(["ollama-getting-started", "cvml"])
+        self.assertEqual(sorted(batches), ["linux/halo"])
+
+    def test_two_capacity_batches_on_one_device_are_not_guessed_between(self):
+        _, batches = self.build(device_extra_tags={
+            **load_config()["device_extra_tags"],
+            "lmstudio-rocm-llms": {"halo": ["ram_64gb"]}},
+            extra_tag_devices={"ram_128gb": ["halo"], "ram_64gb": ["halo"]})
+        self.assertEqual(sorted(batches),
+                         ["linux/halo", "linux/halo+ram_128gb", "linux/halo+ram_64gb"])
+
+    def test_localized_batches_fold_the_same_way(self):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            matrix, batches = build(["lmstudio-rocm-llms", "comfyui-image-gen"], cfg,
+                                    devices={"halo"}, platforms={"linux"}, locale="zh-CN")
+        finally:
+            os.chdir(old_cwd)
+        if not batches:
+            self.skipTest("no zh-CN playbooks for this selection")
+        self.assertEqual(sorted(batches), ["localized/zh-CN/linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
 
 
 class OpenHandsProvisioning(unittest.TestCase):
