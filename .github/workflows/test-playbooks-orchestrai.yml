@@ -105,6 +105,8 @@ jobs:
   detect-and-trigger:
     name: Detect & Trigger
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    # Waits up to acquire_timeout (360 min) + 30 min for every batch's build.
+    timeout-minutes: 420
     permissions:
       contents: read
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API

@@ -49,10 +49,13 @@ import urllib.request
 import yaml
 
 # Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
-# for API_RETRY_SECONDS; a run must start its build within BUILD_WAIT_SECONDS.
+# for API_RETRY_SECONDS. A run waits for machines for its acquire_timeout; ours
+# waits that long plus BUILD_WAIT_MARGIN for its build, BUILD_WAIT_SECONDS when
+# no acquire_timeout is known.
 API_TIMEOUT = 30
 API_RETRY_SECONDS = 600
 BUILD_WAIT_SECONDS = 300 * 60
+BUILD_WAIT_MARGIN = 30 * 60
 POLL_SECONDS = 30
 TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
 
@@ -116,11 +119,6 @@ def validate_config(cfg, batches):
             isinstance(acquire, bool) or not isinstance(acquire, int) or acquire <= 0):
         errs.append(f"run_settings.acquire_timeout must be a positive number of "
                     f"minutes, got {acquire!r}")
-    elif isinstance(rs.get("max_duration"), int) and 0 < rs["max_duration"] <= (acquire or 0):
-        # The acquire wait counts against the build's overall time limit, so a
-        # timeout this long would leave no time to run anything.
-        errs.append(f"run_settings.acquire_timeout ({acquire}m) must be shorter than "
-                    f"run_settings.max_duration ({rs['max_duration']}m)")
     prov = cfg.get("provisioning") or {}
     platforms = {b.get("platform") for b in batches.values()}
     if "linux" in platforms and not prov.get("linux_install_scripts"):
@@ -524,10 +522,10 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     return run["id"]
 
 
-def await_builds(cp, runs):
+def await_builds(cp, runs, wait_seconds=BUILD_WAIT_SECONDS):
     """Wait until each run has started its pipeline build; {batch_id: build URL}."""
     urls, pending = {}, dict(runs)
-    deadline = time.monotonic() + BUILD_WAIT_SECONDS
+    deadline = time.monotonic() + wait_seconds
     while pending and time.monotonic() < deadline:
         for bid, rid in list(pending.items()):
             try:
@@ -655,7 +653,9 @@ def main():
             continue
         run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
-    build_urls = await_builds(cp, runs)
+    # The Control Plane holds a queued run for its acquire_timeout; never give up
+    # on it sooner.
+    build_urls = await_builds(cp, runs, rs["acquire_timeout"] * 60 + BUILD_WAIT_MARGIN)
     failed = [bid for bid in batches if bid not in build_urls]
     print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
 

@@ -181,7 +181,7 @@ class MachinesPerBatch(unittest.TestCase):
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
                 mock.patch.object(trigger, "await_builds",
-                                  side_effect=lambda _cp, runs: {b: "https://j/1/" for b in runs}), \
+                                  side_effect=lambda _cp, runs, *_: {b: "https://j/1/" for b in runs}), \
                 contextlib.redirect_stderr(err):
             trigger.main()
         requested = {c.args[1]: c.args[2]["run_settings"]["machines_per_hw_group"]
@@ -235,9 +235,34 @@ class AcquireTimeoutValidation(unittest.TestCase):
         for bad in (0, -5, "60", True, 60.5, None):
             self.assertTrue(self.errors_for(acquire_timeout=bad), bad)
 
-    def test_a_timeout_that_leaves_no_time_to_run_is_rejected(self):
-        self.assertTrue(self.errors_for(acquire_timeout=240, max_duration=240))
-        self.assertEqual(self.errors_for(acquire_timeout=239, max_duration=240), [])
+    def test_a_wait_longer_than_the_build_limit_is_allowed(self):
+        # The Control Plane waits for machines before the build starts, so the
+        # wait no longer comes out of max_duration.
+        self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
+
+    def test_the_shipped_wait_is_six_hours_and_jobs_outlast_it(self):
+        cfg = load_config()
+        self.assertEqual(cfg["run_settings"]["acquire_timeout"], 360)
+        need = (cfg["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN) / 60
+        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
+                          ("orchestrai-pr-command.yml", "command")):
+            with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
+                limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
+            self.assertGreater(limit, need, name)
+
+    def test_main_waits_for_builds_as_long_as_the_control_plane_queues(self):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/stx": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        wait = mock.Mock(return_value={"linux/stx": "https://j/1/"})
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                mock.patch.object(trigger, "start_run", return_value="r1"), \
+                mock.patch.object(trigger, "await_builds", wait), \
+                contextlib.redirect_stderr(io.StringIO()):
+            trigger.main()
+        self.assertEqual(wait.call_args.args[2], 360 * 60 + trigger.BUILD_WAIT_MARGIN)
 
     def test_no_overall_limit_means_no_comparison(self):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
