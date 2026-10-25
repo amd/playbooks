@@ -210,7 +210,60 @@ def build(playbooks, cfg, devices=None, platforms=None, locale=""):
     #    the device has exactly one such batch on that platform.
     fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for)
 
+    # 7) Split a batch whose playbooks would not finish within its time limit.
+    split_long_batches(matrix, batches, cfg)
+
     return matrix, batches
+
+
+def split_long_batches(matrix, batches, cfg):
+    """Split the batch_split.batches whose estimated minutes exceed budget_minutes.
+
+    Each part is its own run on its own machine, with the full time limit.
+    Playbooks are dealt longest first onto the least-loaded part (LPT), with as
+    few parts as fit the budget. Parts after the first are named <batch>#2, ...
+    """
+    split = cfg.get("batch_split") or {}
+    budget = split.get("budget_minutes")
+    targets = split.get("batches") or []
+    if not budget or not targets:
+        return
+    minutes = split.get("playbook_minutes") or {}
+    default = split.get("default_minutes", 15)
+
+    def est(pb):
+        return minutes.get(pb, default)
+
+    moved = {}  # (old batch id, playbook) -> new batch id
+    for bid in list(batches):
+        # Localized batches carry a localized/<locale>/ prefix.
+        if not any(bid == t or bid.endswith("/" + t) for t in targets):
+            continue
+        b = batches[bid]
+        pbs = sorted(b["playbooks"], key=est, reverse=True)
+        n = -(-sum(map(est, pbs)) // budget)  # ceil
+        while True:
+            parts = [[] for _ in range(n)]
+            for pb in pbs:
+                min(parts, key=lambda p: sum(map(est, p))).append(pb)
+            # A single playbook over budget gets a part of its own; stop there.
+            if n >= len(pbs) or all(sum(map(est, p)) <= budget for p in parts):
+                break
+            n += 1
+        if n <= 1:
+            continue
+        for i, part in enumerate(parts):
+            pid = bid if i == 0 else f"{bid}#{i + 1}"
+            nb = {**b, "playbooks": [pb for pb in b["playbooks"] if pb in part]}
+            if "localized_only" in b:
+                nb["localized_only"] = {k: v for k, v in b["localized_only"].items()
+                                        if k in part}
+            batches[pid] = nb
+            for pb in part:
+                moved[(bid, pb)] = pid
+        print(f"split {bid} (~{sum(map(est, pbs))} min) into {n} batches", file=sys.stderr)
+    for e in matrix:
+        e["batch_id"] = moved.get((e["batch_id"], e["playbook"]), e["batch_id"])
 
 
 def fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for):

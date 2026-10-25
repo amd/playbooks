@@ -311,6 +311,27 @@ run_settings:
   # the machines_per_hw_group workflow_dispatch input.
   default_machines_per_hw_group: 1
 
+# Split a listed batch that would not finish inside max_duration into several
+# batches, each a run on its own machine with the full time limit. Only
+# linux/rx9070xt ran out of time, two nights running: Jenkins #2148 cut off the
+# 16th of 17 playbooks, #2275 the 9th (8 never started); every other batch with
+# the same playbooks finished. Its hosts are in HYD, so model downloads from the
+# MKM Artifactory are slow there. budget_minutes leaves max_duration room for
+# driver install and reboots. playbook_minutes are the longest measured on
+# linux/rx9070xt, dependency setup included; a playbook not listed counts as
+# default_minutes. Remove the batch here once one machine fits it again.
+batch_split:
+  batches: ["linux/rx9070xt"]
+  budget_minutes: 240
+  default_minutes: 15
+  playbook_minutes:
+    lmstudio-rocm-llms: 90               # 95m12s in #2275, ~60 in #2148
+    github-slack-development-digest: 62  # #2275
+    comfyui-image-gen: 55                # #2275 (~36 in #2148)
+    gaia-agents: 32                      # #2148
+    n8n-automation-gpt-oss: 30           # #2275
+    hermes-lemonade-server: 24           # #2148
+
 # ---------------------------------------------------------------------------
 # Provisioning: GPU stack installed on the acquired machine before the playbook.
 # App-level tools are installed by the lib.amd.playbook-runner dependency, not here.
