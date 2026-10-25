@@ -168,13 +168,18 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         # secret is unset so runs still work (just unauthenticated).
         if hf_token:
             variables["HF_TOKEN"] = hf_token
-        groups.append({
+        group = {
             "id": f"playbook-{pb_id}",
             "level": "L4-sys",
             "tests": [test],
             "maas_tags": tags,
             "variables": variables,
-        })
+        }
+        # Only machines at these sites (device_site_ids in the config).
+        sites = (cfg.get("device_site_ids") or {}).get(device)
+        if sites:
+            group["site_ids"] = list(sites)
+        groups.append(group)
 
     return {
         "source": "external-playbook-batch",
@@ -502,7 +507,8 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
                            "github_run_id": gh_run},
         }]
     sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
-                 "os_image": image, "tests": g["tests"], "variables": g["variables"]}
+                 "os_image": image, "tests": g["tests"], "variables": g["variables"],
+                 **({"site_ids": g["site_ids"]} if g.get("site_ids") else {})}
                 for g in plan["groups"]]
     body = {
         "require_capacity": "queue",

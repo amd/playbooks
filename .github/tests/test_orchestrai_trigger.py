@@ -104,6 +104,23 @@ class ControlPlaneApi(unittest.TestCase):
                          ("rp-cred", True, "77"))
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
+    def test_device_sites_reach_every_session_of_that_device_only(self):
+        cfg = load_config()
+        self.assertEqual(cfg["device_site_ids"]["krk"], ["maas-mkm-mnb", "maas-mkm-cs"])
+        krk = trigger.make_plan(dict(BATCH, arch="krk", playbooks=["gaia-agents", "cvml"]), "refs/heads/main",
+                                cfg, 1, "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        self.assertEqual({tuple(g["site_ids"]) for g in krk["groups"]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        stx = trigger.make_plan(BATCH, "refs/heads/main", cfg, 1, "https://github.com/amd/playbooks",
+                                "a" * 40, "https://index.example")
+        self.assertNotIn("site_ids", stx["groups"][0])
+        fake = FakeApi((201, {"run": {"id": "r1"}}), (201, {"run": {"id": "r2"}}))
+        with mock.patch.object(trigger, "http_json", fake):
+            trigger.start_run(self.cp, "linux/krk", krk, {}, "linux", "", "a" * 40)
+            trigger.start_run(self.cp, "linux/stx", stx, {}, "linux", "", "a" * 40)
+        sessions = [c[3]["plan_document"]["document"]["sessions"] for c in fake.calls]
+        self.assertEqual({tuple(s["site_ids"]) for s in sessions[0]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        self.assertNotIn("site_ids", sessions[1][0])
+
     def test_windows_image_override(self):
         fake = FakeApi((201, {"run": {"id": "r1"}}))
         with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_WINDOWS_IMAGE": "windows/win11-x"}):
