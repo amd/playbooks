@@ -158,6 +158,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -869,6 +870,43 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
     return unique_tests
 
 
+def run_with_tree_timeout(cmd, cwd, env, timeout):
+    """subprocess.run(capture_output=True, text=True, timeout=...) that kills the
+    whole process tree on timeout.
+
+    subprocess.run kills only the shell it started; a grandchild such as pip keeps
+    the output pipes open, so run blocks until it finishes on its own, and it then
+    keeps running into the next test. Raises subprocess.TimeoutExpired with what
+    was printed before the kill.
+    """
+    with subprocess.Popen(
+        cmd, cwd=cwd, env=env, text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        # POSIX: own process group, so the whole tree can be killed at once.
+        start_new_session=os.name != "nt",
+    ) as proc:
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                               capture_output=True)
+            else:
+                with contextlib.suppress(ProcessLookupError):
+                    os.killpg(proc.pid, signal.SIGKILL)
+            proc.kill()
+            try:
+                stdout, stderr = proc.communicate(timeout=30)
+            except subprocess.TimeoutExpired as e:
+                # Something outside the tree still holds the pipes; report what we have.
+                stdout, stderr = e.stdout, e.stderr
+            raise subprocess.TimeoutExpired(cmd, timeout, output=stdout, stderr=stderr)
+        except BaseException:
+            proc.kill()
+            raise
+    return subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+
+
 def run_test(
     test: TestBlock,
     playbook_path: Path,
@@ -1000,13 +1038,11 @@ def run_test(
     # Execute the test
     start_time = time.time()
     try:
-        result = subprocess.run(
+        result = run_with_tree_timeout(
             cmd,
             cwd=workdir,
-            capture_output=True,
-            text=True,
-            timeout=test.timeout,
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
+            timeout=test.timeout,
         )
         duration = time.time() - start_time
 
