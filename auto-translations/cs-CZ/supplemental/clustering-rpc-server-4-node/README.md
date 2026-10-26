@@ -18,25 +18,31 @@ SPDX-License-Identifier: MIT
 
 ## Přehled
 
-Váš Ryzen™ AI Halo už umí lokálně spouštět velké jazykové modely. Clustrování jde ještě dál – kombinuje paměť GPU více systémů v rámci lokální sítě, čímž vám umožní přístup k ještě větším modelům se silnějším uvažováním, lepším generováním kódu a hlubším porozuměním více jazykům, a to zcela na vašem vlastním hardwaru.
+Váš Ryzen™ AI Halo již dokáže spouštět velké jazykové modely lokálně. Clustrování posouvá tuto schopnost ještě dál – kombinuje paměť GPU více systémů v rámci lokální sítě a umožňuje tak přístup k ještě větším modelům se silnějším uvažováním, lepším generováním kódu a hlubším vícejazyčným porozuměním, a to zcela na vašem vlastním hardwaru.
 
-Tento playbook vás naučí, jak vytvořit cluster ze čtyř systémů Ryzen AI Halo pomocí RPC enginu z llama.cpp a jak na všech čtyřech strojích spustit Kimi K2.6, velký model typu mixture-of-experts, s akcelerací AMD ROCm™.
+Tento playbook vás naučí, jak clustrovat čtyři systémy Ryzen AI Halo pomocí RPC engine nástroje llama.cpp a jak spustit Kimi K2.6, velký model typu mixture-of-experts, napříč všemi čtyřmi stroji s akcelerací AMD ROCm™.
 
 ## Co se naučíte
 
 - Jak rozšířit alokaci VRAM na systémech Ryzen AI Halo
 - Instalaci llama.cpp s podporou ROCm a RPC
-- Konfiguraci RPC workerů a spuštění distribuované inference napříč čtyřmi uzly
-- Spuštění modelu s 1 bilionem parametrů napříč čtyřmi propojenými systémy Ryzen AI Halo
+- Konfiguraci RPC workerů a spuštění distribuovaného inferencí napříč čtyřmi uzly
+- Spuštění modelu s 1T parametry napříč čtyřmi propojenými systémy Ryzen AI Halo
 
 ## Nastavení konfigurace paměti
 
 > **Poznámka**: Tento krok proveďte na všech čtyřech strojích (Stroj 1 až Stroj 4).
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-Ve Windows, pokud chcete spouštět větší modely vyžadující více paměti, musíme použít alokaci AMD Variable Graphics Memory (VRAM iGPU).
+> **Spouštění modelů blízkých nebo přesahujících 128 GB:** Na systémech AMD Ryzen™ AI Max 400 Series (Gorgon Halo) se systémem Windows vyžadují modely, které se blíží 128 GB paměti nebo ji přesahují, další konfiguraci, aby běžely bez chyb. Před načtením modelu postupujte podle [pokynů AMD Ryzen AI Max PRO 400 Series pro Windows OS](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines).
+<!-- @os:end -->
+<!-- @device:end -->
 
-To provedete otevřením ovládacího panelu AMD Software: Adrenalin Edition a přechodem na: `Performance > Tuning > AMD Variable Graphics Memory`. Nastavte hodnotu na **96 GB**. Pro projevení změn restartujte systém.
+<!-- @os:windows -->
+Ve Windows je pro spouštění větších modelů vyžadujících vyšší paměť nutné použít alokaci AMD Variable Graphics Memory (iGPU VRAM).
+
+To lze provést otevřením ovládacího panelu AMD Software: Adrenalin Edition a přechodem na: `Performance > Tuning > AMD Variable Graphics Memory`. Nastavte hodnotu na **96 GB**. Pro uplatnění změn restartujte systém.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,18 +51,18 @@ To provedete otevřením ovládacího panelu AMD Software: Adrenalin Edition a p
 <!-- @os:end -->
 
 <!-- @os:linux -->
-V Linuxu ROCm využívá sdílenou fondovou paměť systému a tento fond je ve výchozím nastavení nakonfigurován na polovinu systémové paměti.
+V Linuxu využívá ROCm sdílený pool systémové paměti, který je ve výchozím nastavení nakonfigurován na polovinu systémové paměti.
 
-Toto množství lze zvýšit změnou nastavení stránek Translation Table Manager (TTM) jádra podle následujících pokynů. AMD doporučuje nastavit minimální vyhrazenou VRAM v BIOSu (0,5 GB).
+Toto množství lze zvýšit změnou nastavení stránek kernelového Translation Table Manageru (TTM), podle následujících pokynů. AMD doporučuje v BIOSu nastavit minimální vyhrazenou VRAM (0,5 GB).
 
-* Nainstalujte nástroj pipx a přidejte cestu pro pipx nainstalované balíčky do systémové cesty vyhledávání.
+* Nainstalujte nástroj pipx a přidejte cestu k nainstalovaným wheelům pipx do systémové vyhledávací cesty.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Nainstalujte balíček amd-debug-tools z PyPI.
+* Nainstalujte wheel amd-debug-tools z PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
@@ -66,12 +72,12 @@ Toto množství lze zvýšit změnou nastavení stránek Translation Table Manag
   amd-ttm
   ```
 
-* Znovu nakonfigurujte nastavení sdílené paměti na **120 GB**:
+* Přenastavte velikost sdílené paměti na **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
 
-* Pro projevení změn restartujte systém.
+* Restartujte systém, aby se změny projevily.
 
 
 <!-- @os:end -->
@@ -84,15 +90,15 @@ Toto množství lze zvýšit změnou nastavení stránek Translation Table Manag
 
 ### Hardware
 
-Tento playbook vyžaduje čtyři jednotky Ryzen AI Halo a jeden ethernetový switch, zapojené v hvězdicové topologii, kde je každá jednotka připojena přímo ke switchi.
+Tento playbook vyžaduje čtyři jednotky Ryzen AI Halo a jeden ethernetový switch, zapojené v topologii typu hvězda, kde je každá jednotka připojena přímo ke switchi.
 
 | Komponenta | Množství | Popis |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 4 | Výpočetní uzly tvořící cluster |
-| 10Gbps ethernetový switch | 1 | Centrální switch umožňující komunikaci mezi více uzly Ryzen AI Halo (alespoň 4 porty) |
-| Ethernetový kabel | 4 | Připojuje každou jednotku Halo ke switchi (doporučen Cat 7 nebo vyšší) |
+| 10Gbps ethernetový switch | 1 | Centrální switch umožňující komunikaci více uzlů Ryzen AI Halo (minimálně 4 porty) |
+| Ethernetový kabel | 4 | Propojuje jednotlivé jednotky Halo se switchem (doporučeno Cat 7 nebo vyšší) |
 
-> **Poznámka**: Pro připojení čtyř jednotek Ryzen AI Halo jsou potřeba čtyři porty ethernetového switche. Pátý port je potřeba, pokud k modelu přistupujete ze samostatného klientského stroje místo z některé z jednotek Halo.
+> **Poznámka**: Pro připojení čtyř jednotek Ryzen AI Halo jsou zapotřebí čtyři porty ethernetového switche. Pátý port je potřeba, pokud k modelu přistupujete ze samostatného klientského stroje místo z jedné z jednotek Halo.
 
 ### Software
 <!-- @os:windows -->
@@ -102,7 +108,7 @@ Tento playbook vyžaduje čtyři jednotky Ryzen AI Halo a jeden ethernetový swi
 Nainstalujte prosím:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
-- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) se sadou **Desktop Development with C++**
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) s pracovní zátěží **Desktop Development with C++**
 - [AMD HIP SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html)
 <!-- @os:end -->
 
@@ -112,15 +118,15 @@ sudo apt install git cmake python3 python3-pip
 ```
 <!-- @os:end -->
 
-## Nastavení fyzického hardwaru
+## Fyzické nastavení hardwaru
 
 > **Poznámka**: Tento krok proveďte na všech čtyřech strojích (Stroj 1 až Stroj 4).
 
-Připojte každou jednotku Ryzen AI Halo k ethernetovému switchi pomocí kabelu Cat 7 (nebo vyššího). Tím se vytvoří 10Gbps propojení používané pro vysokorychlostní komunikaci mezi uzly.
+Připojte každou jednotku Ryzen AI Halo k ethernetovému switchi pomocí kabelu Cat 7 (nebo vyššího). Tím se vytvoří 10Gbps spoj používaný pro vysokorychlostní komunikaci mezi uzly.
 <!-- @os:linux -->
 ### 1. Zjištění síťových rozhraní
 
-Na každém stroji zjistěte název jeho síťového rozhraní a poznamenejte si ho (dále bude označováno jako `IFNAME`). Spusťte:
+Na každém stroji zjistěte název jeho síťového rozhraní a poznamenejte si jej (dále bude označován jako `IFNAME`). Spusťte:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -132,15 +138,15 @@ Tím se přímo vypíše název rozhraní, například:
 enp191s0
 ```
 
-### 2. Ověření rychlosti síťového propojení
+### 2. Ověření rychlosti síťového spoje
 
-Potvrďte, že je propojení aktivní a běží plnou rychlostí, kontrolou rychlosti vašeho rozhraní:
+Potvrďte, že je spoj aktivní a běží na plnou rychlost, zkontrolováním rychlosti vašeho rozhraní:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Poznámka**: Nahraďte `<IFNAME>` výstupním názvem rozhraní z části [1. Zjištění síťových rozhraní](#1-determine-network-interfaces)
+> **Poznámka**: Nahraďte `<IFNAME>` názvem výstupního rozhraní z kroku [1. Zjištění síťových rozhraní](#1-determine-network-interfaces)
 
 Měli byste vidět rychlost `10000Mb/s`:
 
@@ -148,20 +154,20 @@ Měli byste vidět rychlost `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Poznámka**: Pokud je rychlost nižší než `10000Mb/s` nebo se propojení nenaváže, zkontrolujte připojení kabelu a potvrďte, že je port switche nastaven na 10Gbps. Některé switche vyžadují zakázání automatického vyjednávání a ruční nastavení rychlosti propojení; podrobnosti naleznete v dokumentaci vašeho switche.
+> **Poznámka**: Pokud je rychlost nižší než `10000Mb/s` nebo se spoj nenaváže, zkontrolujte připojení kabelu a ověřte, že je port switche nastaven na 10Gbps. Některé switche vyžadují zakázání automatického vyjednávání a ruční nastavení rychlosti spoje; postupujte podle dokumentace vašeho switche.
 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-### Ověření rychlosti síťového propojení
+### Ověření rychlosti síťového spoje
 
-Na každém stroji zkontrolujte rychlost propojení vašich síťových rozhraní:
+Na každém stroji zkontrolujte rychlost spoje vašich síťových rozhraní:
 
 ```powershell
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-Vaše ethernetové rozhraní by mělo být `Up` a běžet rychlostí `10 Gbps`:
+Vaše ethernetové rozhraní by mělo být `Up` a běžet na `10 Gbps`:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,7 +175,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Poznámka**: Pokud je rychlost nižší než `10 Gbps` nebo se propojení nenaváže, zkontrolujte připojení kabelu a potvrďte, že je port switche nastaven na 10Gbps. Některé switche vyžadují zakázání automatického vyjednávání a ruční nastavení rychlosti propojení; podrobnosti naleznete v dokumentaci vašeho switche.
+> **Poznámka**: Pokud je rychlost nižší než `10 Gbps` nebo se spoj nenaváže, zkontrolujte připojení kabelu a ověřte, že je port switche nastaven na 10Gbps. Některé switche vyžadují zakázání automatického vyjednávání a ruční nastavení rychlosti spoje; postupujte podle dokumentace vašeho switche.
 
 <!-- @os:end -->
 
@@ -180,16 +186,15 @@ Ethernet  Up      10 Gbps
 K dispozici jsou dvě možnosti instalace:
 
 - [Možnost 1: Lemonade SDK (doporučeno)](#option-1-lemonade-sdk-recommended) – předkompilované binární soubory, nejrychlejší nastavení
-- [Možnost 2: Ruční sestavení ze zdrojového kódu](#option-2-manual-source-build) – sestavení ze zdrojového kódu s plnou kontrolou nad parametry sestavení
-
+- [Možnost 2: Manuální sestavení ze zdrojového kódu](#option-2-manual-source-build) – sestavení ze zdrojového kódu s plnou kontrolou nad parametry sestavení
 ### Možnost 1: Lemonade SDK (doporučeno)
 
-Lemonade SDK poskytuje noční sestavení llama.cpp s akcelerací AMD ROCm 7, cílené na GPU jako gfx1151 (Strix Halo / Ryzen AI Max+ 395) a další nedávné architektury Radeon.
+Lemonade SDK poskytuje noční sestavení llama.cpp s akcelerací AMD ROCm 7, zaměřené na GPU jako gfx1151 (Strix Halo / Ryzen AI Max+ 395) a další novější architektury Radeon.
 
 <!-- @os:windows -->
-#### Krok 1: Stažení předsestavených binárních souborů
+#### Krok 1: Stažení předem sestavených binárních souborů
 
-Přejděte na stránku s nejnovějším vydáním a stáhněte archiv odpovídající vaší platformě a cílovému GPU:
+Přejděte na stránku nejnovějšího vydání a stáhněte archiv odpovídající vaší platformě a cílovému GPU:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -222,9 +227,9 @@ Available devices:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### Krok 1: Stažení předsestavených binárních souborů
+#### Krok 1: Stažení předem sestavených binárních souborů
 
-Přejděte na stránku s nejnovějším vydáním a stáhněte archiv odpovídající vaší platformě a cílovému GPU:
+Přejděte na stránku nejnovějšího vydání a stáhněte archiv odpovídající vaší platformě a cílovému GPU:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -256,9 +261,9 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-Po přípravě llama.cpp na každém uzlu pokračujte částí [Stažení modelu](#downloading-the-model).
+Po přípravě llama.cpp na každém uzlu pokračujte na [Stažení modelu](#downloading-the-model).
 
-### Možnost 2: Ruční sestavení ze zdrojového kódu
+### Možnost 2: Ruční sestavení ze zdrojových kódů
 
 <!-- @os:windows -->
 #### Krok 1: Sestavení llama.cpp
@@ -278,12 +283,12 @@ cmake -S . -B rocm -G Ninja -DGGML_HIP=ON -DGGML_RPC=ON -DGPU_TARGETS=gfx1151 -D
 cmake --build rocm --config Release
 ```
 
-| Přepínač sestavení | Účel |
+| Příznak sestavení | Účel |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Povolí softwarový stack ROCm/HIP |
 | `-DGGML_RPC=ON` | Povolí RPC pro distribuovanou inferenci |
 | `-DGPU_TARGETS=gfx1151` | Cílí na GPU Ryzen AI Halo (Radeon 8060s) |
-| `-G Ninja` | Používá systém sestavení Ninja |
+| `-G Ninja` | Používá build systém Ninja |
 
 #### Krok 2: Ověření detekce GPU
 
@@ -303,13 +308,13 @@ Available devices:
 
 #### Krok 3: Přidání HIP do uživatelské cesty
 
-Výše uvedený krok sestavení nastavil `%HIP_PATH%\bin` pouze pro aktuální relaci. Aby byly knihovny HIP dostupné v jakémkoli terminálu (nejen v x64 Native Tools Command Prompt), přidejte tuto cestu trvale do uživatelské proměnné `PATH`:
+Výše uvedený krok sestavení nastavil `%HIP_PATH%\bin` pouze pro aktuální relaci. Aby byly knihovny HIP dostupné v jakémkoli terminálu (nejen v x64 Native Tools Command Prompt), přidejte ji trvale do uživatelské proměnné `PATH`:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-Po přípravě llama.cpp na každém uzlu pokračujte částí [Stažení modelu](#downloading-the-model).
+Po přípravě llama.cpp na každém uzlu pokračujte na [Stažení modelu](#downloading-the-model).
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -329,7 +334,7 @@ cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
-| Přepínač sestavení | Účel |
+| Příznak sestavení | Účel |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Povolí softwarový stack ROCm |
 | `-DGGML_RPC=ON` | Povolí RPC pro distribuovanou inferenci |
@@ -354,12 +359,12 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-Po přípravě llama.cpp na každém uzlu pokračujte částí [Stažení modelu](#downloading-the-model).
+Po přípravě llama.cpp na každém uzlu pokračujte na [Stažení modelu](#downloading-the-model).
 <!-- @os:end -->
 
 ## Stažení modelu
 
-Tento návod používá model [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) v kvantizaci `UD-Q2_K_XL` od [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Tato kvantizace se vejde do kombinované paměti GPU čtyř uzlů Ryzen AI Halo.
+Tento playbook používá [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) v kvantizaci `UD-Q2_K_XL` od [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Tato kvantizace se vejde do kombinované paměti GPU čtyř uzlů Ryzen AI Halo.
 
 Stáhněte soubory GGUF pomocí Hugging Face CLI:
 <!-- @os:linux -->
@@ -380,17 +385,17 @@ hf download unsloth/Kimi-K2.6-GGUF --include "UD-Q2_K_XL/*" --local-dir Kimi-K2.
 ```
 <!-- @os:end -->
 
-> **Poznámka**: Stažení modelu musí být dokončeno na stroji Machine 1 (řadič). Pracovní uzly RPC (stroje Machine 2, 3 a 4) nepotřebují místní kopii souborů modelu.
+> **Poznámka**: Stažení modelu musí být dokončeno na stroji 1 (kontroleru). Pracovní uzly RPC (stroje 2, 3 a 4) nepotřebují lokální kopii souborů modelu.
 
 ## Spuštění modelu na clusteru
 
-Engine llama.cpp RPC (Remote Procedure Call) umožňuje jediné instanci llama.cpp odsouvat vrstvy modelu na vzdálené pracovní uzly přes síť. Jeden stroj funguje jako **řadič** (Machine 1) a zajišťuje tokenizaci, plánování a orchestraci. Zbývající tři stroje (Machine 2, 3 a 4) každý spouští odlehčený **RPC server**, který zpřístupňuje svou paměť GPU a výpočetní výkon řadiči.
+Mechanismus RPC (Remote Procedure Call) v llama.cpp umožňuje jediné instanci llama.cpp odesílat vrstvy modelu vzdáleným pracovním uzlům po síti. Jeden stroj funguje jako **kontroler** (stroj 1) a stará se o tokenizaci, plánování a orchestraci. Zbývající tři stroje spouští každý odlehčený **RPC server** (stroje 2, 3 a 4), který zpřístupňuje svou paměť GPU a výpočetní výkon kontroleru.
 
-Při načítání llama.cpp rozdělí model mezi všechny čtyři uzly. Po načtení probíhá inference, jako by běžela na jediném akcelerátoru. RPC na pozadí zajišťuje přenosy tenzorů a synchronizaci.
+Při načítání llama.cpp rozdělí model napříč všemi čtyřmi uzly. Po načtení probíhá inference, jako by běžela na jediném akcelerátoru. RPC se na pozadí stará o přenosy tenzorů a synchronizaci.
 
-### Krok 1: Spuštění RPC serverů (Machine 2, 3 a 4)
+### Krok 1: Spuštění RPC serverů (stroje 2, 3 a 4)
 
-Na každém ze strojů Machine 2, 3 a 4 spusťte RPC server, aby zpřístupnil své prostředky GPU řadiči:
+Na každém ze strojů 2, 3 a 4 spusťte RPC server, aby zpřístupnil své prostředky GPU kontroleru:
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -403,17 +408,17 @@ Na každém ze strojů Machine 2, 3 a 4 spusťte RPC server, aby zpřístupnil s
 ```
 <!-- @os:end -->
 
-| Přepínač | Účel |
+| Příznak | Účel |
 |------|---------|
-| `-p` | Port, na kterém bude RPC server naslouchat |
-| `-c` | Povolí místní mezipaměť pro velké tenzory, čímž se zabrání opakovaným síťovým přenosům během načítání modelu |
-| `--host` | IP adresa, na kterou se má RPC server navázat (`0.0.0.0` pro všechna rozhraní) |
+| `-p` | Port, na kterém je RPC server vysílán |
+| `-c` | Povolí lokální mezipaměť pro velké tenzory, čímž se předejde opakovaným síťovým přenosům během načítání modelu |
+| `--host` | IP adresa, ke které je RPC server připojen (`0.0.0.0` pro všechna rozhraní) |
 
-Další možnosti naleznete v [dokumentaci k RPC v llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+Další možnosti naleznete v [dokumentaci k RPC llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
-### Krok 2: Spuštění modelu (Machine 1)
+### Krok 2: Spuštění modelu (stroj 1)
 
-Poté, co jsou RPC servery spuštěné na strojích Machine 2, 3 a 4, spusťte inferenci ze stroje Machine 1 pomocí `llama-cli` nebo `llama-server`.
+Jakmile RPC servery běží na strojích 2, 3 a 4, spusťte inferenci ze stroje 1 pomocí `llama-cli` nebo `llama-server`.
 #### llama-cli
 
 `llama-cli` poskytuje terminálové rozhraní pro přímou interakci s modelem. Je ideální pro benchmarking, ladění a nízkoúrovňové experimentování.
@@ -431,11 +436,11 @@ Poté, co jsou RPC servery spuštěné na strojích Machine 2, 3 a 4, spusťte i
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte příkaz `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Poznámka**: Tento příkaz spusťte v Terminálu (Powershell).
+> **Poznámka**: Tento příkaz spusťte v terminálu (Powershell).
 
 ```powershell
 .\llama-cli.exe `
@@ -449,17 +454,17 @@ Poté, co jsou RPC servery spuštěné na strojích Machine 2, 3 a 4, spusťte i
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte v Terminálu (Powershell) příkaz `ipconfig | findstr /C:"IPv4"`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte `ipconfig | findstr /C:"IPv4"` v terminálu (Powershell), abyste zjistili jeho lokální IP adresu.
 
 <!-- @os:end -->
 
-Po spuštění `llama-cli` zobrazí průběh načítání modelu a vstoupí do interaktivního promptu, kde si můžete s modelem přímo povídat:
+Po spuštění zobrazí `llama-cli` průběh načítání modelu a přejde do interaktivního promptu, kde si můžete s modelem přímo povídat:
 
-![llama-cli spuštěný s modelem Kimi K2.6 na čtyřech uzlech](assets/llama-cli-example.png)
+![llama-cli spouštějící Kimi K2.6 napříč čtyřmi uzly](assets/llama-cli-example.png)
 
 #### llama-server
 
-`llama-server` zpřístupňuje stejný inferenční engine prostřednictvím trvalého serverového procesu s integrovaným webovým rozhraním a HTTP API kompatibilním s OpenAI. Toto je preferované rozhraní pro déletrvající nasazení, přístup více uživatelů a integraci s externími nástroji.
+`llama-server` zpřístupňuje stejný inferenční engine prostřednictvím trvalého serverového procesu s integrovaným webovým rozhraním a HTTP API kompatibilním s OpenAI. Jde o preferované rozhraní pro déletrvající nasazení, přístup více uživatelů a integraci s externími nástroji.
 
 <!-- @os:linux -->
 ```bash
@@ -476,11 +481,11 @@ Po spuštění `llama-cli` zobrazí průběh načítání modelu a vstoupí do i
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte příkaz `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Poznámka**: Tento příkaz spusťte v Terminálu (Powershell).
+> **Poznámka**: Tento příkaz spusťte v terminálu (Powershell).
 
 ```powershell
 .\llama-server.exe `
@@ -496,40 +501,40 @@ Po spuštění `llama-cli` zobrazí průběh načítání modelu a vstoupí do i
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte v Terminálu (Powershell) příkaz `ipconfig | findstr /C:"IPv4"`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Na každém ze strojů 2, 3 a 4 spusťte `ipconfig | findstr /C:"IPv4"` v terminálu (Powershell), abyste zjistili jeho lokální IP adresu.
 <!-- @os:end -->
 
-Po spuštění otevřete v prohlížeči adresu `http://<HOST_IP>:8081`, abyste se dostali k vestavěnému webovému rozhraní. To poskytuje chatovací rozhraní v prohlížeči pro interakci s modelem:
+Po spuštění otevřete v prohlížeči adresu `http://<HOST_IP>:8081`, čímž získáte přístup k vestavěnému webovému rozhraní. To poskytuje chatovací rozhraní v prohlížeči pro interakci s modelem:
 
-![Webové rozhraní llama-server spuštěné s modelem Kimi K2.6 na čtyřech uzlech](assets/llama-server-example.png)
+![Webové rozhraní llama-server spouštějící Kimi K2.6 napříč čtyřmi uzly](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **Zjištění `<HOST_IP>`**: Na Stroji 1 spusťte příkaz `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<HOST_IP>`**: Na Stroji 1 spusťte `hostname -I | awk '{print $1}'`, abyste zjistili jeho lokální IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Zjištění `<HOST_IP>`**: Na Stroji 1 spusťte v Terminálu (Powershell) příkaz `ipconfig | findstr /C:"IPv4"`, abyste zjistili jeho lokální IP adresu.
+> **Zjištění `<HOST_IP>`**: Na Stroji 1 spusťte `ipconfig | findstr /C:"IPv4"` v terminálu (Powershell), abyste zjistili jeho lokální IP adresu.
 <!-- @os:end -->
 
-#### Referenční přehled parametrů
+#### Přehled parametrů
 
 | Příznak | Účel |
 |------|---------|
-| `-m` | Cesta k souboru modelu GGUF (použijte první segment, `00001-of-00008`) |
-| `-c` | Velikost kontextu v tokenech. Vyšší hodnoty vyžadují více paměti |
-| `-fa on` | Povolí rocWMMA Flash Attention pro zlepšený výkon na GPU AMD |
-| `-ngl 999` | Přesune všechny vrstvy modelu na GPU |
-| `-lm none` | Nastaví režim načítání modelu na `none`, čímž se vypne mapování paměti (memory-mapping) za účelem zkrácení doby načítání, pokud velikost modelu přesahuje systémovou RAM, ale vejde se do VRAM |
-| `-b` | Logická velikost dávky v tokenech. Nastavení na 4096 vyvažuje propustnost a využití paměti napříč uzly |
-| `-ub` | Fyzická (mikro) velikost dávky pro zpracování promptu. Shoda s `-b` zabraňuje zbytečné režii spojené s dělením na části |
+| `-m` | Cesta k souboru modelu GGUF (použijte první část, `00001-of-00008`) |
+| `-c` | Velikost kontextu v tokenech. Vyšší hodnoty využívají více paměti |
+| `-fa on` | Povolí rocWMMA Flash Attention pro lepší výkon na AMD GPU |
+| `-ngl 999` | Odsune všechny vrstvy modelu na GPU |
+| `-lm none` | Nastaví režim načítání modelu na `none`, čímž se vypne mapování paměti (memory-mapping), aby se zkrátila doba načítání, pokud velikost modelu přesahuje systémovou RAM, ale vejde se do VRAM |
+| `-b` | Logická velikost dávky v tokenech. Hodnota 4096 vyvažuje propustnost a využití paměti napříč uzly |
+| `-ub` | Fyzická (mikro) velikost dávky pro zpracování promptu. Shoda s `-b` eliminuje zbytečnou režii spojenou s dělením na části |
 | `--host` | IP adresa, na kterou se má `llama-server` navázat (pouze `llama-server`) |
-| `--port` | Port, na kterém se má poskytovat HTTP API (pouze `llama-server`) |
-| `--rpc` | Čárkami oddělený seznam koncových bodů RPC pracovníků (`IP:port`) |
+| `--port` | Port, na kterém bude poskytováno HTTP API (pouze `llama-server`) |
+| `--rpc` | Seznam koncových bodů RPC pracovníků oddělených čárkami (`IP:port`) |
 
-Kompletní popis použití parametrů naleznete v [dokumentaci k llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) a [dokumentaci k llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
+Úplný popis použití parametrů najdete v [dokumentaci llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) a [dokumentaci llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Další kroky
 
-- **Připojení aplikací třetích stran**: `llama-server` zpřístupňuje API kompatibilní s OpenAI. Nasměrujte jakoukoli aplikaci kompatibilní s OpenAI (například Open WebUI) na adresu `http://<HOST_IP>:8081` s libovolným zástupným API klíčem (např. `none`), abyste se připojili ke svému clusteru
-- **Prozkoumání dalších modelů**: Procházejte kvantizované modely GGUF na [Hugging Face](https://huggingface.co/models?search=gguf) a najděte modely, které se vejdou do kombinované paměti GPU vašeho clusteru
-- **Rozšíření nad rámec čtyř uzlů**: Přidejte další systémy Ryzen AI Halo jako další RPC pracovníky, abyste získali přístup k modelům přesahujícím škálu 1 bilion parametrů. Předejte další koncové body do `--rpc` jako čárkami oddělený seznam (např. `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)
+- **Připojení aplikací třetích stran**: `llama-server` zpřístupňuje API kompatibilní s OpenAI. Nasměrujte jakoukoli aplikaci kompatibilní s OpenAI (například Open WebUI) na `http://<HOST_IP>:8081` s libovolným zástupným API klíčem (např. `none`), abyste se připojili ke svému clusteru
+- **Prozkoumání dalších modelů**: Procházejte kvantizované GGUF soubory na [Hugging Face](https://huggingface.co/models?search=gguf) a najděte modely, které se vejdou do kombinované paměti GPU vašeho clusteru
+- **Rozšíření nad čtyři uzly**: Přidejte další systémy Ryzen AI Halo jako další RPC pracovníky, abyste získali přístup k modelům přesahujícím škálu 1 bilionu parametrů. Předejte další koncové body parametru `--rpc` jako seznam oddělený čárkami (např. `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)

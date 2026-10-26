@@ -1,6 +1,6 @@
 {
   "id": "amd-sync",
-  "title": "Desenvolvimento Remoto com AMD Sync",
-  "description": "Instale o AMD Sync no seu laptop e obtenha acesso remoto com um clique ao VS Code, Terminal, JupyterLab e Live Metrics no seu AMD Ryzen™ AI Halo.",
+  "title": "Desenvolvimento Remoto com Sincronização da AMD",
+  "description": "Instale o AMD Sync no seu laptop e tenha acesso remoto com um clique ao VS Code, Terminal, JupyterLab e Métricas em Tempo Real no seu AMD Ryzen™ AI Halo.",
   "auto_translated": true
 }

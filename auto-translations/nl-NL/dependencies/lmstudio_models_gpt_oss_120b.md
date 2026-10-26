@@ -6,6 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### GPT-OSS 120B downloaden in LM Studio
 
+<!-- @device:halo_box -->
+> **Opmerking:** Als dit model al beschikbaar is in LM Studio, kun je dit gedeelte overslaan. Volg anders de onderstaande stappen om het te downloaden.
+<!-- @device:end -->
+
 Om het GPT-OSS 120B-model te downloaden:
 
 1. Druk op "Ctrl" + "Shift" + "M" op je toetsenbord of klik op het tabblad "Discover" (vergrootglas-icoon) in de linkerzijbalk
@@ -17,7 +21,7 @@ Om het GPT-OSS 120B-model te downloaden:
 
 LM Studio downloadt het model automatisch en plaatst het in de juiste map.
 
-Mocht je aanvullende modellen willen downloaden, kun je ernaar zoeken in het tabblad Discover en LM Studio regelt de rest.
+Als je aanvullende modellen wilt downloaden, kun je ernaar zoeken in het tabblad Discover en LM Studio regelt de rest.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

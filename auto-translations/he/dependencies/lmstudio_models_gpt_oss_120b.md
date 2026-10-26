@@ -6,11 +6,15 @@ SPDX-License-Identifier: MIT
 
 ### הורדת GPT-OSS 120B ב-LM Studio
 
-כדי להוריד את המודל GPT-OSS 120B:
+<!-- @device:halo_box -->
+> **הערה:** אם המודל הזה כבר זמין ב-LM Studio, ניתן לדלג על חלק זה. אחרת, יש לבצע את השלבים הבאים כדי להוריד אותו.
+<!-- @device:end -->
 
-1. לחצו על "Ctrl" + "Shift" + "M" במקלדת שלכם או לחצו על לשונית "Discover" (סמל זכוכית מגדלת) בסרגל הצד השמאלי
+כדי להוריד את מודל GPT-OSS 120B:
+
+1. לחצו על "Ctrl" + "Shift" + "M" במקלדת או לחצו על לשונית "Discover" (סמל זכוכית מגדלת) בסרגל הצד השמאלי
 2. חפשו את `ggml-org/gpt-oss-120b-GGUF`
-3. בחרו `mxfp4` ולחצו על Download
+3. בחרו ב-`mxfp4` ולחצו על Download
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>

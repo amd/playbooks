@@ -18,23 +18,29 @@ SPDX-License-Identifier: MIT
 
 ## Översikt
 
-Din Ryzen™ AI Halo kan redan köra stora språkmodeller lokalt. Klustring tar detta ett steg längre genom att kombinera GPU-minnet från flera system över ett lokalt nätverk, vilket ger dig tillgång till ännu större modeller med starkare resonemangsförmåga, bättre kodgenerering och djupare flerspråkig förståelse, helt och hållet på din egen hårdvara.
+Din Ryzen™ AI Halo kan redan köra stora språkmodeller lokalt. Klustring tar detta ett steg längre genom att kombinera GPU-minnet från flera system över ett lokalt nätverk, vilket ger dig tillgång till ännu större modeller med starkare resonemang, bättre kodgenerering och djupare flerspråklig förståelse, helt och hållet på din egen hårdvara.
 
-Denna guide lär dig hur du klustrar två Ryzen AI Halo-system med llama.cpp:s RPC-motor och kör GLM 4.7, en modell med 358 miljarder parametrar, över båda maskinerna med AMD ROCm™-acceleration.
+Den här guiden lär dig hur du klustrar två Ryzen AI Halo-system med llama.cpp:s RPC-motor och kör GLM 4.7, en modell med 358 miljarder parametrar, över båda maskinerna med AMD ROCm™-acceleration.
 
 ## Vad du kommer att lära dig
 
-- Hur du utökar VRAM-allokeringen på Ryzen AI Halo-system
-- Installera llama.cpp med stöd för ROCm och RPC
+- Hur du utökar VRAM-tilldelningen på Ryzen AI Halo-system
+- Installera llama.cpp med ROCm- och RPC-stöd
 - Konfigurera en RPC-arbetare och starta distribuerad inferens över två noder
 - Köra en modell med 358 miljarder parametrar över två nätverksanslutna Ryzen AI Halo-system
 
-## Konfigurera minnesinställningarna
+## Konfigurera minnesinställningen
 
 > **Obs**: Slutför detta steg på både Maskin 1 och Maskin 2.
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-På Windows, för att köra större modeller som kräver mer minne, behöver vi använda allokeringen för AMD Variable Graphics Memory (iGPU VRAM).
+> **Köra modeller nära eller över 128 GB:** På AMD Ryzen™ AI Max 400 Series-system (Gorgon Halo) som kör Windows kräver modeller som närmar sig eller överskrider 128 GB minne ytterligare konfiguration för att köras utan fel. Följ [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) innan du läser in modellen.
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @os:windows -->
+På Windows behöver vi, för att köra större modeller som kräver mer minne, använda tilldelningen av AMD Variable Graphics Memory (iGPU VRAM).
 
 Detta kan göras genom att öppna kontrollpanelen AMD Software: Adrenalin Edition och navigera till: `Performance > Tuning > AMD Variable Graphics Memory`. Ställ in värdet till **96 GB**. Starta om systemet för att ändringarna ska träda i kraft.
 
@@ -47,7 +53,7 @@ Detta kan göras genom att öppna kontrollpanelen AMD Software: Adrenalin Editio
 <!-- @os:linux -->
 På Linux använder ROCm en delad systemminnespool, och denna pool är som standard konfigurerad till hälften av systemminnet.
 
-Denna mängd kan ökas genom att ändra kärnans Translation Table Manager (TTM)-sidinställning, enligt följande instruktioner. AMD rekommenderar att ställa in den minsta dedikerade VRAM-mängden i BIOS (0,5 GB).
+Denna mängd kan ökas genom att ändra kärnans Translation Table Manager-inställning (TTM-sidor) enligt följande instruktioner. AMD rekommenderar att du ställer in minsta dedikerade VRAM i BIOS (0,5 GB).
 
 * Installera verktyget pipx och lägg till sökvägen för pipx-installerade wheels i systemets sökväg.
 
@@ -76,23 +82,23 @@ Denna mängd kan ökas genom att ändra kärnans Translation Table Manager (TTM)
 
 <!-- @os:end -->
 <!-- @device:halo_box -->
-## Kontrollera efter programvaruuppdateringar
+## Kontrollera om det finns programuppdateringar
 
 <!-- @require:software-update -->
 <!-- @device:end -->
-## Förkrav
+## Förutsättningar
 
 ### Hårdvara
 
-Denna guide kräver två Ryzen AI Halo-enheter och en Ethernet-switch, anslutna i en stjärntopologi där varje enhet är direktansluten till switchen.
+Den här guiden kräver två Ryzen AI Halo-enheter och en Ethernet-switch, anslutna i en stjärntopologi där varje enhet är direktansluten till switchen.
 
 | Komponent | Antal | Beskrivning |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Beräkningsnoder som utgör klustret |
-| 10 Gbps Ethernet-switch | 1 | Central switch som möjliggör kommunikation mellan flera Ryzen AI Halo-noder (minst 2 portar) |
+| Ryzen AI Halo | 2 | Beräkningsnoder som bildar klustret |
+| Ethernet-switch på 10 Gbps | 1 | Central switch som möjliggör kommunikation mellan flera Ryzen AI Halo-noder (minst 2 portar) |
 | Ethernet-kabel | 2 | Ansluter varje Halo-enhet till switchen (Cat 7 eller högre rekommenderas) |
 
-> **Obs**: Två portar på Ethernet-switchen krävs för att ansluta de två Ryzen AI Halo-enheterna. En tredje port krävs om du kommer åt modellen från en separat klientmaskin istället för från en av Halo-enheterna.
+> **Obs**: Två portar på Ethernet-switchen krävs för att ansluta de två Ryzen AI Halo-enheterna. En tredje port krävs om du kommer åt modellen från en separat klientdator i stället för från en av Halo-enheterna.
 
 ### Programvara
 <!-- @os:windows -->
@@ -116,11 +122,11 @@ sudo apt install git cmake python3 python3-pip
 
 > **Obs**: Slutför detta steg på både Maskin 1 och Maskin 2.
 
-Anslut varje Ryzen AI Halo-enhet till Ethernet-switchen med en Cat 7-kabel (eller högre). Detta upprättar 10 Gbps-länken som används för höghastighetskommunikation mellan noderna.
+Anslut varje Ryzen AI Halo-enhet till Ethernet-switchen med en Cat 7-kabel (eller högre). Detta upprättar den 10 Gbps-länk som används för höghastighetskommunikation mellan noderna.
 <!-- @os:linux -->
 ### 1. Fastställ nätverksgränssnitt
 
-På varje maskin, ta reda på namnet på dess nätverksgränssnitt och skriv ner det (det kommer att kallas `IFNAME` nedan). Kör:
+Hitta namnet på varje maskins nätverksgränssnitt och anteckna det (det kommer nedan att kallas `IFNAME`). Kör:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -132,15 +138,15 @@ Detta skriver ut gränssnittsnamnet direkt, till exempel:
 enp191s0
 ```
 
-### 2. Verifiera nätverkslänkens hastigheter
+### 2. Kontrollera nätverkslänkens hastighet
 
-Bekräfta att länken är aktiv och körs med full hastighet genom att kontrollera hastigheten på ditt gränssnitt:
+Bekräfta att länken är aktiv och körs med full hastighet genom att kontrollera hastigheten för ditt gränssnitt:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Obs**: Ersätt `<IFNAME>` med utmatningens gränssnittsnamn från [1. Fastställ nätverksgränssnitt](#1-determine-network-interfaces)
+> **Obs**: Ersätt `<IFNAME>` med utgångsgränssnittsnamnet från [1. Fastställ nätverksgränssnitt](#1-determine-network-interfaces)
 
 Du bör se en hastighet på `10000Mb/s`:
 
@@ -148,20 +154,20 @@ Du bör se en hastighet på `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Obs**: Om hastigheten är lägre än `10000Mb/s` eller länken inte kommer upp, kontrollera kabelanslutningen och bekräfta att switchporten är inställd på 10 Gbps. Vissa switchar kräver att auto-förhandling inaktiveras och länkhastigheten ställs in manuellt; se din switchs dokumentation.
+> **Obs**: Om hastigheten är lägre än `10000Mb/s` eller om länken inte upprättas, kontrollera kabelanslutningen och bekräfta att switchporten är inställd på 10 Gbps. Vissa switchar kräver att auto-förhandling inaktiveras och att länkhastigheten ställs in manuellt; se switchens dokumentation.
 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-### Verifiera nätverkslänkens hastighet
+### Kontrollera nätverkslänkens hastighet
 
-På varje maskin, kontrollera länkhastigheten för dina nätverksgränssnitt:
+Kontrollera länkhastigheten för dina nätverksgränssnitt på varje maskin:
 
 ```powershell
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-Ditt Ethernet-gränssnitt bör vara `Up` och köra med `10 Gbps`:
+Ditt Ethernet-gränssnitt bör vara `Up` och köras med `10 Gbps`:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,7 +175,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Obs**: Om hastigheten är lägre än `10 Gbps` eller länken inte kommer upp, kontrollera kabelanslutningen och bekräfta att switchporten är inställd på 10 Gbps. Vissa switchar kräver att auto-förhandling inaktiveras och länkhastigheten ställs in manuellt; se din switchs dokumentation.
+> **Obs**: Om hastigheten är lägre än `10 Gbps` eller om länken inte upprättas, kontrollera kabelanslutningen och bekräfta att switchporten är inställd på 10 Gbps. Vissa switchar kräver att auto-förhandling inaktiveras och att länkhastigheten ställs in manuellt; se switchens dokumentation.
 
 <!-- @os:end -->
 
@@ -177,12 +183,11 @@ Ethernet  Up      10 Gbps
 
 > **Obs**: Slutför detta steg på både Maskin 1 och Maskin 2.
 
-Två installationsalternativ finns tillgängliga:
+Det finns två installationsalternativ:
 
-- [Alternativ 1: Lemonade SDK (Rekommenderas)](#option-1-lemonade-sdk-recommended) - förbyggda binärfiler, snabbaste installationen
-- [Alternativ 2: Manuellt källkodsbygge](#option-2-manual-source-build) - bygg från källkod med full kontroll över byggflaggor
-
-### Alternativ 1: Lemonade SDK (Rekommenderas)
+- [Alternativ 1: Lemonade SDK (rekommenderas)](#option-1-lemonade-sdk-recommended) – färdigbyggda binärfiler, snabbast att installera
+- [Alternativ 2: Manuellt källkodsbygge](#option-2-manual-source-build) – bygg från källkod med full kontroll över byggflaggor
+### Alternativ 1: Lemonade SDK (rekommenderas)
 
 Lemonade SDK tillhandahåller nattliga byggen av llama.cpp med AMD ROCm 7-acceleration, riktade mot GPU:er som gfx1151 (Strix Halo / Ryzen AI Max+ 395) och andra nyare Radeon-arkitekturer.
 
@@ -258,19 +263,19 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 <!-- @os:end -->
 När llama.cpp är förberett på varje nod, fortsätt till [Nedladdning av modellen](#downloading-the-model).
 
-### Alternativ 2: Manuellt källbygge
+### Alternativ 2: Manuell källkodsbyggnation
 
 <!-- @os:windows -->
 #### Steg 1: Bygg llama.cpp
 
-Öppna **x64 Native Tools Command Prompt** (installerad med Visual Studio Build Tools) och klona repositoriet:
+Öppna **x64 Native Tools Command Prompt** (installerad med Visual Studio Build Tools) och klona arkivet:
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Lägg till HIP till din sökväg och bygg med stöd för ROCm och RPC:
+Lägg till HIP i din sökväg och bygg med stöd för ROCm och RPC:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -280,9 +285,9 @@ cmake --build rocm --config Release
 
 | Byggflagga | Syfte |
 |-----------|---------|
-| `-DGGML_HIP=ON` | Aktiverar ROCm/HIP-programvarustacken |
+| `-DGGML_HIP=ON` | Aktiverar ROCm/HIP-mjukvarustacken |
 | `-DGGML_RPC=ON` | Aktiverar RPC för distribuerad inferens |
-| `-DGPU_TARGETS=gfx1151` | Riktar in sig på Ryzen AI Halo-GPU:n (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | Riktar sig mot Ryzen AI Halo-GPU:n (Radeon 8060s) |
 | `-G Ninja` | Använder Ninja-byggsystemet |
 
 #### Steg 2: Verifiera GPU-identifiering
@@ -303,7 +308,7 @@ Available devices:
 
 #### Steg 3: Lägg till HIP i din användarsökväg
 
-Byggsteget ovan angav `%HIP_PATH%\bin` endast för den aktuella sessionen. För att göra HIP-biblioteken tillgängliga i vilken terminal som helst (inte bara i x64 Native Tools Command Prompt), lägg till den permanent i din användares `PATH`:
+Byggsteget ovan ställde in `%HIP_PATH%\bin` endast för den aktuella sessionen. För att göra HIP-biblioteken tillgängliga i vilken terminal som helst (inte bara i x64 Native Tools Command Prompt), lägg till den permanent i din användar-`PATH`:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
@@ -315,7 +320,7 @@ När llama.cpp är förberett på varje nod, fortsätt till [Nedladdning av mode
 <!-- @os:linux -->
 #### Steg 1: Bygg llama.cpp
 
-Klona repositoriet:
+Klona arkivet:
 
 ```bash
 git clone https://github.com/ggml-org/llama.cpp
@@ -331,9 +336,9 @@ cmake --build rocm --config Release -j$(nproc)
 
 | Byggflagga | Syfte |
 |-----------|---------|
-| `-DGGML_HIP=ON` | Aktiverar ROCm-programvarustacken |
+| `-DGGML_HIP=ON` | Aktiverar ROCm-mjukvarustacken |
 | `-DGGML_RPC=ON` | Aktiverar RPC för distribuerad inferens |
-| `-DAMDGPU_TARGETS="gfx1151"` | Riktar in sig på Ryzen AI Halo-GPU:n (Radeon 8060s) |
+| `-DAMDGPU_TARGETS="gfx1151"` | Riktar sig mot Ryzen AI Halo-GPU:n (Radeon 8060s) |
 
 För fler byggalternativ, se [llama.cpp:s byggdokumentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
@@ -359,7 +364,7 @@ När llama.cpp är förberett på varje nod, fortsätt till [Nedladdning av mode
 
 ## Nedladdning av modellen
 
-Denna spelbok använder [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), en modell med 358 miljarder parametrar i kvantiseringen `Q4_K_XL` från [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). Vid denna kvantisering kräver modellen ungefär 205 GB lagringsutrymme och ryms inom det kombinerade GPU-minnet på två Ryzen AI Halo-noder.
+Denna spelbok använder [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), en modell med 358 miljarder parametrar i kvantiseringen `Q4_K_XL` från [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). Med den här kvantiseringen kräver modellen cirka 205 GB lagringsutrymme och ryms inom det sammanlagda GPU-minnet för två Ryzen AI Halo-noder.
 
 Ladda ner GGUF-filerna med Hugging Face CLI:
 <!-- @os:linux -->
@@ -380,17 +385,17 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **Obs!** Modellnedladdningen måste slutföras på Maskin 1 (styrenheten). RPC-arbetsnoderna behöver inte en lokal kopia av modellfilerna.
+> **Obs!**: Nedladdningen av modellen måste slutföras på Machine 1 (kontrollern). RPC-arbetsnoderna behöver inte en lokal kopia av modellfilerna.
 
 ## Starta modellen på klustret
 
-Motorn llama.cpp RPC (Remote Procedure Call) gör det möjligt för en enda llama.cpp-instans att avlasta modellager till fjärrarbetare över nätverket. En maskin fungerar som **styrenhet** (Maskin 1) och hanterar tokenisering, schemaläggning och orkestrering. Den andra maskinen kör en lättviktig **RPC-server** (Maskin 2) som exponerar sitt GPU-minne och sin beräkningskraft för styrenheten.
+llama.cpp RPC-motorn (Remote Procedure Call) gör det möjligt för en enda llama.cpp-instans att avlasta modellager till fjärrarbetare över nätverket. En maskin fungerar som **kontroller** (Machine 1) och hanterar tokenisering, schemaläggning och orkestrering. Den andra maskinen kör en lättviktig **RPC-server** (Machine 2) som exponerar sitt GPU-minne och sin beräkningskraft för kontrollern.
 
-Vid inläsningstillfället delar llama.cpp upp modellen mellan båda noderna. När den väl är inläst fortgår inferensen som om den kördes på en enda accelerator. RPC hanterar tensoröverföringar och synkronisering bakom kulisserna.
+Vid inläsningstillfället delar llama.cpp upp modellen mellan båda noderna. När den väl är inläst fortskrider inferensen som om den körs på en enda accelerator. RPC hanterar tensoröverföringar och synkronisering bakom kulisserna.
 
-### Steg 1: Starta RPC-servern (Maskin 2)
+### Steg 1: Starta RPC-servern (Machine 2)
 
-På Maskin 2, starta RPC-servern för att exponera dess GPU-resurser för styrenheten:
+På Machine 2, starta RPC-servern för att exponera dess GPU-resurser för kontrollern:
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -405,19 +410,18 @@ På Maskin 2, starta RPC-servern för att exponera dess GPU-resurser för styren
 
 | Flagga | Syfte |
 |------|---------|
-| `-p` | Port att sända ut RPC-servern på |
-| `-c` | Aktiverar en lokal cache för stora tensorer, vilket undviker upprepade nätverksöverföringar under modellinläsning |
+| `-p` | Port att sända RPC-servern på |
+| `-c` | Aktiverar en lokal cache för stora tensorer, vilket undviker upprepade nätverksöverföringar vid modellinläsning |
 | `--host` | IP-adress att binda RPC-servern till (`0.0.0.0` för alla gränssnitt) |
 
 För fler alternativ, se [llama.cpp:s RPC-dokumentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
-### Steg 2: Starta modellen (Maskin 1)
+### Steg 2: Starta modellen (Machine 1)
 
-Med RPC-servern igång på Maskin 2, starta inferensen från Maskin 1 med antingen `llama-cli` eller `llama-server`.
-
+Med RPC-servern igång på Machine 2, starta inferensen från Machine 1 med antingen `llama-cli` eller `llama-server`.
 #### llama-cli
 
-`llama-cli` tillhandahåller ett terminalbaserat gränssnitt för att interagera direkt med modellen. Det är idealiskt för prestandamätning, felsökning och lågnivåexperimentering.
+`llama-cli` tillhandahåller ett terminalbaserat gränssnitt för att interagera direkt med modellen. Det är idealiskt för prestandamätning, felsökning och experiment på låg nivå.
 
 <!-- @os:linux -->
 ```bash
@@ -430,11 +434,11 @@ Med RPC-servern igång på Maskin 2, starta inferensen från Maskin 1 med anting
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Hitta `<RPC_WORKER_IP>`**: På Maskin 2, kör `hostname -I | awk '{print $1}'` för att hitta dess lokala IP-adress.
+> **Hitta `<RPC_WORKER_IP>`**: Kör `hostname -I | awk '{print $1}'` på Maskin 2 för att hitta dess lokala IP-adress.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Obs!** Kör detta kommando i Terminal (Powershell).
+> **Obs**: Kör detta kommando i Terminal (Powershell).
 
 ```powershell
 .\llama-cli.exe `
@@ -446,16 +450,17 @@ Med RPC-servern igång på Maskin 2, starta inferensen från Maskin 1 med anting
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Hitta `<RPC_WORKER_IP>`**: På Maskin 2, kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) för att hitta dess lokala IP-adress.
+> **Hitta `<RPC_WORKER_IP>`**: Kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) på Maskin 2 för att hitta dess lokala IP-adress.
 
 <!-- @os:end -->
 
-När den väl körs visar `llama-cli` förloppet för modellinläsningen och öppnar en interaktiv prompt där du kan chatta direkt med modellen:
+När den väl körs visar `llama-cli` modellens inläsningsförlopp och går in i en interaktiv prompt där du kan chatta direkt med modellen:
 
 ![llama-cli som kör GLM 4.7 över två noder](assets/llama-cli-example.png)
+
 #### llama-server
 
-`llama-server` exponerar samma inferensmotor genom en persistent serverprocess med ett integrerat webbgränssnitt och ett OpenAI-kompatibelt HTTP-API. Detta är det föredragna gränssnittet för driftsättningar som körs under längre tid, åtkomst för flera användare och integration med externa verktyg.
+`llama-server` exponerar samma inferensmotor genom en ihållande serverprocess med ett integrerat webbgränssnitt och ett OpenAI-kompatibelt HTTP-API. Detta är det föredragna gränssnittet för längre driftsatta distributioner, åtkomst för flera användare och integration med externa verktyg.
 
 <!-- @os:linux -->
 ```bash
@@ -470,7 +475,7 @@ När den väl körs visar `llama-cli` förloppet för modellinläsningen och öp
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Att hitta `<RPC_WORKER_IP>`**: Kör `hostname -I | awk '{print $1}'` på Maskin 2 för att hitta dess lokala IP-adress.
+> **Hitta `<RPC_WORKER_IP>`**: Kör `hostname -I | awk '{print $1}'` på Maskin 2 för att hitta dess lokala IP-adress.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -488,38 +493,38 @@ När den väl körs visar `llama-cli` förloppet för modellinläsningen och öp
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Att hitta `<RPC_WORKER_IP>`**: Kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) på Maskin 2 för att hitta dess lokala IP-adress.
+> **Hitta `<RPC_WORKER_IP>`**: Kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) på Maskin 2 för att hitta dess lokala IP-adress.
 <!-- @os:end -->
 
-När servern har startats öppnar du `http://<HOST_IP>:8081` i din webbläsare för att komma åt det inbyggda webbgränssnittet. Detta ger ett webbläsarbaserat chattgränssnitt för att interagera med modellen:
+När servern väl har startats, öppna `http://<HOST_IP>:8081` i din webbläsare för att komma åt det inbyggda webbgränssnittet. Detta ger ett webbläsarbaserat chattgränssnitt för att interagera med modellen:
 
-![llama-server-webbgränssnitt som kör GLM 4.7 över två noder](assets/llama-server-example.png)
+![llama-server webbgränssnitt som kör GLM 4.7 över två noder](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **Att hitta `<HOST_IP>`**: Kör `hostname -I | awk '{print $1}'` på Maskin 1 för att hitta dess lokala IP-adress.
+> **Hitta `<HOST_IP>`**: Kör `hostname -I | awk '{print $1}'` på Maskin 1 för att hitta dess lokala IP-adress.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Att hitta `<HOST_IP>`**: Kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) på Maskin 1 för att hitta dess lokala IP-adress.
+> **Hitta `<HOST_IP>`**: Kör `ipconfig | findstr /C:"IPv4"` i Terminal (Powershell) på Maskin 1 för att hitta dess lokala IP-adress.
 <!-- @os:end -->
 
 #### Parameterreferens
 
 | Flagga | Syfte |
 |------|---------|
-| `-m` | Sökväg till GGUF-modellfilen (använd den första delen, `00001-of-00005`) |
+| `-m` | Sökväg till GGUF-modellfilen (använd det första segmentet, `00001-of-00005`) |
 | `-c` | Kontextstorlek i token. Större värden använder mer minne |
-| `-fa on` | Aktiverar rocWMMA Flash Attention för förbättrad prestanda på AMD-GPU:er |
-| `-ngl 999` | Avlastar alla modellager till GPU:n |
-| `-lm none` | Ställer in modellens laddningsläge till `none`, vilket inaktiverar minnesmappning för att minska laddningstider när modellstorleken överstiger system-RAM men får plats i VRAM |
+| `-fa on` | Aktiverar rocWMMA Flash Attention för förbättrad prestanda på AMD GPU:er |
+| `-ngl 999` | Flyttar alla modellager till GPU:n |
+| `-lm none` | Ställer in modellens inläsningsläge till `none`, vilket inaktiverar minnesmappning för att minska inläsningstider när modellstorleken överstiger systemets RAM men ryms i VRAM |
 | `--host` | IP att binda `llama-server` till (endast `llama-server`) |
-| `--port` | Port att köra HTTP-API:et på (endast `llama-server`) |
-| `--rpc` | Kommaseparerad lista över RPC-arbetarslutpunkter (`IP:port`) |
+| `--port` | Port att exponera HTTP-API:et på (endast `llama-server`) |
+| `--rpc` | Kommaseparerad lista med RPC-arbetarslutpunkter (`IP:port`) |
 
 För fullständig parameteranvändning, se [llama-cli-dokumentationen](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) och [llama-server-dokumentationen](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Nästa steg
 
-- **Anslut tredjepartsapplikationer**: `llama-server` exponerar ett OpenAI-kompatibelt API. Rikta valfri OpenAI-kompatibel applikation (till exempel Open WebUI) mot `http://<HOST_IP>:8081` med en godtycklig platshållar-API-nyckel (t.ex. `none`) för att ansluta till ditt kluster
-- **Utforska andra modeller**: Bläddra bland kvantiserade GGUF:er på [Hugging Face](https://huggingface.co/models?search=gguf) för att hitta modeller som ryms inom klustrets kombinerade GPU-minne
-- **Skala till fyra noder**: Lägg till två ytterligare Ryzen AI Halo-system som extra RPC-arbetare för att få åtkomst till modeller i skalan 1 biljon parametrar. Skicka ytterligare slutpunkter till `--rpc` som en kommaseparerad lista (t.ex. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Anslut tredjepartsapplikationer**: `llama-server` exponerar ett OpenAI-kompatibelt API. Peka valfri OpenAI-kompatibel applikation (till exempel Open WebUI) mot `http://<HOST_IP>:8081` med valfri platshållarnyckel (t.ex. `none`) för att ansluta till ditt kluster
+- **Utforska andra modeller**: Bläddra bland kvantiserade GGUF:er på [Hugging Face](https://huggingface.co/models?search=gguf) för att hitta modeller som ryms inom klustrets sammanlagda GPU-minne
+- **Skala till fyra noder**: Lägg till två ytterligare Ryzen AI Halo-system som extra RPC-arbetare för att få åtkomst till modeller i storleksordningen 1 biljon parametrar. Skicka ytterligare slutpunkter till `--rpc` som en kommaseparerad lista (t.ex. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

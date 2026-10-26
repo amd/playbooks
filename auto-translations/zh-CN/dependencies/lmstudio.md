@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-可以从 **AMD Ryzen™ AI Developer Center** 安装 LM Studio。前往 **Updates** 选项卡，如果尚未安装，请安装 LM Studio。
+可以从 **AMD Ryzen™ AI Developer Center** 安装 LM Studio。转到 **Updates** 选项卡，如果尚未安装 LM Studio，请将其安装。
 
-要让 LM Studio 能够识别预安装的模型，请导航到 Settings > General > Models Directory。然后将路径更改为 `C:\Users\Public\models`
+如果您的系统已预装模型，请导航到 Settings > General > Models Directory。然后将路径更改为 `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -23,7 +23,9 @@ SPDX-License-Identifier: MIT
 2. 安装。
 <!-- @device:end -->
 
-> 提示：安装完成后，请启动一次 LM Studio 以初始化 CLI（`lms`）。
+> **模型：** 如果您的系统已预装此手册所用的模型，请将 LM Studio 指向上面的预装模型目录以使用它。否则，请在继续之前从 LM Studio 的 **Discover** 选项卡（搜索图标）下载模型。
+
+> 提示：安装后，请先启动一次 LM Studio 以初始化命令行工具 (`lms`)。
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -39,15 +41,17 @@ lms --help
 3. 运行 `cd ~/Downloads`  
 4. 运行 `chmod +x LM-Studio-*.AppImage`  
 5. 运行 `./LM-Studio-*.AppImage`  
-> 提示：安装完成后，请启动一次 LM Studio 以初始化 CLI（`lms`）。
+> 提示：安装后，请先启动一次 LM Studio 以初始化命令行工具 (`lms`)。
 
 <!-- @device:halo_box -->
-要让 LM Studio 能够识别预安装的模型，请导航到 Settings > General > Models Directory。然后将路径更改为 `/var/cache/models`。
+如果您的系统已预装模型，请导航到 Settings > General > Models Directory。然后将路径更改为 `/var/cache/models`。
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **模型：** 如果您的系统已预装此手册所用的模型，请将 LM Studio 指向上面的预装模型目录以使用它。否则，请在继续之前从 LM Studio 的 **Discover** 选项卡（搜索图标）下载模型。
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

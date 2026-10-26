@@ -14,27 +14,33 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Agrupar Quatro Ryzen™ AI Halo com RPC
+# Agrupar Quatro Ryzen™ AI Halos com RPC
 
 ## Visão Geral
 
-O seu Ryzen™ AI Halo já é capaz de executar modelos de linguagem de grandes dimensões localmente. O agrupamento (clustering) leva isto ainda mais longe, combinando a memória GPU de vários sistemas através de uma rede local, dando-lhe acesso a modelos ainda maiores com um raciocínio mais forte, melhor geração de código e uma compreensão multilingue mais profunda, tudo inteiramente no seu próprio hardware.
+O seu Ryzen™ AI Halo já é capaz de executar modelos de linguagem de grande dimensão localmente. O agrupamento (clustering) leva isto ainda mais longe, combinando a memória GPU de vários sistemas através de uma rede local, dando-lhe acesso a modelos ainda maiores com raciocínio mais forte, melhor geração de código e uma compreensão multilingue mais profunda, tudo inteiramente no seu próprio hardware.
 
-Este manual ensina-lhe como agrupar quatro sistemas Ryzen AI Halo utilizando o motor RPC do llama.cpp e executar o Kimi K2.6, um modelo de grandes dimensões de mistura de especialistas (mixture-of-experts), em todas as quatro máquinas com aceleração AMD ROCm™.
+Este manual ensina-o a agrupar quatro sistemas Ryzen AI Halo utilizando o motor RPC do llama.cpp e a executar o Kimi K2.6, um grande modelo de mistura de especialistas (mixture-of-experts), em todas as quatro máquinas com aceleração AMD ROCm™.
 
 ## O Que Vai Aprender
 
 - Como estender a alocação de VRAM em sistemas Ryzen AI Halo
 - Instalar o llama.cpp com suporte para ROCm e RPC
 - Configurar workers RPC e iniciar inferência distribuída em quatro nós
-- Executar um modelo com 1 bilião de parâmetros em quatro sistemas Ryzen AI Halo ligados em rede
+- Executar um modelo com 1T de parâmetros em quatro sistemas Ryzen AI Halo em rede
 
 ## Definir a Configuração de Memória
 
 > **Nota**: Conclua este passo em todas as quatro máquinas (Máquina 1 a Máquina 4).
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-No Windows, para executar modelos maiores que requerem mais memória, é necessário utilizar a alocação de Memória Gráfica Variável da AMD (VRAM do iGPU).
+> **Executar modelos próximos ou acima de 128 GB:** Em sistemas AMD Ryzen™ AI Max 400 Series (Gorgon Halo) a executar Windows, os modelos que se aproximam ou excedem 128 GB de memória requerem configuração adicional para funcionarem sem erros. Siga as [Diretrizes do Sistema Operativo Windows para AMD Ryzen AI Max PRO 400 Series](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) antes de carregar o modelo.
+<!-- @os:end -->
+<!-- @device:end -->
+
+<!-- @os:windows -->
+No Windows, para executar modelos maiores que requerem mais memória, é necessário utilizar a alocação AMD Variable Graphics Memory (VRAM do iGPU).
 
 Isto pode ser feito abrindo o painel de controlo AMD Software: Adrenalin Edition e navegando até: `Performance > Tuning > AMD Variable Graphics Memory`. Defina o valor para **96 GB**. Reinicie o sistema para que as alterações tenham efeito.
 
@@ -61,7 +67,7 @@ Esta quantidade pode ser aumentada alterando a definição de páginas do Transl
   pipx install amd-debug-tools
   ```
 
-* Execute a ferramenta amd-ttm para consultar as definições atuais da memória partilhada.
+* Execute a ferramenta amd-ttm para consultar as definições atuais de memória partilhada.
   ```bash
   amd-ttm
   ```
@@ -89,17 +95,17 @@ Este manual requer quatro unidades Ryzen AI Halo e um switch Ethernet, ligados n
 | Componente | Quantidade | Descrição |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 4 | Nós de computação que formam o cluster |
-| Switch Ethernet de 10Gbps | 1 | Switch central que permite a comunicação entre múltiplos nós Ryzen AI Halo (pelo menos 4 portas) |
+| Switch Ethernet 10Gbps | 1 | Switch central para permitir a comunicação multi-nó entre unidades Ryzen AI Halo (pelo menos 4 portas) |
 | Cabo Ethernet | 4 | Liga cada unidade Halo ao switch (recomenda-se Cat 7 ou superior) |
 
-> **Nota**: São necessárias quatro portas de switch Ethernet para ligar as quatro unidades Ryzen AI Halo. É necessária uma quinta porta se aceder ao modelo a partir de uma máquina cliente separada, em vez de a partir de uma das unidades Halo.
+> **Nota**: São necessárias quatro portas de switch Ethernet para ligar as quatro unidades Ryzen AI Halo. É necessária uma quinta porta se aceder ao modelo a partir de uma máquina cliente separada em vez de a partir de uma das unidades Halo.
 
 ### Software
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver -->
 <!-- @device:end -->
-Instale:
+Por favor instale:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
 - [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) com a carga de trabalho **Desktop Development with C++**
@@ -116,9 +122,9 @@ sudo apt install git cmake python3 python3-pip
 
 > **Nota**: Conclua este passo em todas as quatro máquinas (Máquina 1 a Máquina 4).
 
-Ligue cada unidade Ryzen AI Halo ao switch Ethernet utilizando um cabo Cat 7 (ou superior). Isto estabelece a ligação de 10Gbps utilizada para a comunicação de alta velocidade entre os nós.
+Ligue cada unidade Ryzen AI Halo ao switch Ethernet utilizando um cabo Cat 7 (ou superior). Isto estabelece a ligação 10Gbps utilizada para comunicação de alta velocidade entre os nós.
 <!-- @os:linux -->
-### 1. Determinar as Interfaces de Rede
+### 1. Determinar Interfaces de Rede
 
 Em cada máquina, encontre o nome da sua interface de rede e anote-o (será referido abaixo como `IFNAME`). Execute:
 
@@ -126,7 +132,7 @@ Em cada máquina, encontre o nome da sua interface de rede e anote-o (será refe
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-Isto mostra diretamente o nome da interface, por exemplo:
+Isto imprime o nome da interface diretamente, por exemplo:
 
 ```bash
 enp191s0
@@ -140,7 +146,7 @@ Confirme que a ligação está ativa e a funcionar à velocidade máxima, verifi
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Nota**: Substitua `<IFNAME>` pelo nome da interface obtido em [1. Determinar as Interfaces de Rede](#1-determine-network-interfaces)
+> **Nota**: Substitua `<IFNAME>` pelo nome da interface de saída de [1. Determinar Interfaces de Rede](#1-determine-network-interfaces)
 
 Deverá ver uma velocidade de `10000Mb/s`:
 
@@ -148,7 +154,7 @@ Deverá ver uma velocidade de `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Nota**: Se a velocidade for inferior a `10000Mb/s` ou a ligação não ficar ativa, verifique a ligação do cabo e confirme que a porta do switch está definida para 10Gbps. Alguns switches requerem que a autonegociação seja desativada e a velocidade da ligação definida manualmente; consulte a documentação do seu switch.
+> **Nota**: Se a velocidade for inferior a `10000Mb/s` ou a ligação não ficar ativa, verifique a ligação do cabo e confirme que a porta do switch está definida para 10Gbps. Alguns switches requerem que a negociação automática seja desativada e a velocidade de ligação definida manualmente; consulte a documentação do seu switch.
 
 <!-- @os:end -->
 
@@ -169,7 +175,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Nota**: Se a velocidade for inferior a `10 Gbps` ou a ligação não ficar ativa, verifique a ligação do cabo e confirme que a porta do switch está definida para 10Gbps. Alguns switches requerem que a autonegociação seja desativada e a velocidade da ligação definida manualmente; consulte a documentação do seu switch.
+> **Nota**: Se a velocidade for inferior a `10 Gbps` ou a ligação não ficar ativa, verifique a ligação do cabo e confirme que a porta do switch está definida para 10Gbps. Alguns switches requerem que a negociação automática seja desativada e a velocidade de ligação definida manualmente; consulte a documentação do seu switch.
 
 <!-- @os:end -->
 
@@ -180,16 +186,15 @@ Ethernet  Up      10 Gbps
 Estão disponíveis duas opções de instalação:
 
 - [Opção 1: Lemonade SDK (Recomendado)](#option-1-lemonade-sdk-recommended) - binários pré-compilados, configuração mais rápida
-- [Opção 2: Compilação Manual a Partir do Código-Fonte](#option-2-manual-source-build) - compile a partir do código-fonte com controlo total sobre as flags de compilação
-
+- [Opção 2: Compilação Manual a partir do Código-Fonte](#option-2-manual-source-build) - compile a partir do código-fonte com controlo total sobre as flags de compilação
 ### Opção 1: Lemonade SDK (Recomendado)
 
-O Lemonade SDK disponibiliza compilações noturnas do llama.cpp com aceleração AMD ROCm 7, direcionadas a GPUs como o gfx1151 (Strix Halo / Ryzen AI Max+ 395) e outras arquiteturas Radeon recentes.
+O Lemonade SDK disponibiliza compilações noturnas (nightly builds) do llama.cpp com aceleração AMD ROCm 7, direcionadas a GPUs como a gfx1151 (Strix Halo / Ryzen AI Max+ 395) e outras arquiteturas Radeon recentes.
 
 <!-- @os:windows -->
 #### Passo 1: Transferir os Binários Pré-Compilados
 
-Navegue até à página do lançamento mais recente e transfira o arquivo correspondente à sua plataforma e alvo de GPU:
+Navegue até à página do lançamento mais recente e transfira o arquivo correspondente à sua plataforma e GPU de destino:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -203,7 +208,7 @@ Descompacte o arquivo transferido:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-Esta diretoria contém agora compilações com suporte para ROCm de `llama-cli.exe`, `llama-server.exe` e `ggml-rpc-server.exe`, pré-compiladas para o seu sistema Ryzen AI Halo.
+Este diretório contém agora compilações com suporte ROCm de `llama-cli.exe`, `llama-server.exe`, e `ggml-rpc-server.exe`, pré-compiladas para o seu sistema Ryzen AI Halo.
 
 #### Passo 3: Verificar a Deteção da GPU
 
@@ -224,7 +229,7 @@ Available devices:
 <!-- @os:linux -->
 #### Passo 1: Transferir os Binários Pré-Compilados
 
-Navegue até à página do lançamento mais recente e transfira o arquivo correspondente à sua plataforma e alvo de GPU:
+Navegue até à página do lançamento mais recente e transfira o arquivo correspondente à sua plataforma e GPU de destino:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -238,7 +243,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-Esta diretoria contém agora compilações com suporte para ROCm de `llama-cli`, `llama-server` e `rpc-server`, pré-compiladas para o seu sistema Ryzen AI Halo.
+Este diretório contém agora compilações com suporte ROCm de `llama-cli`, `llama-server`, e `rpc-server`, pré-compiladas para o seu sistema Ryzen AI Halo.
 
 #### Passo 3: Verificar a Deteção da GPU
 
@@ -256,7 +261,7 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-Com o llama.cpp preparado em cada nó, prossiga para [Transferir o Modelo](#downloading-the-model).
+Com o llama.cpp preparado em cada nó, avance para [Transferir o Modelo](#downloading-the-model).
 
 ### Opção 2: Compilação Manual a Partir do Código-Fonte
 
@@ -270,7 +275,7 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Adicione o HIP ao seu caminho e compile com suporte para ROCm e RPC:
+Adicione o HIP ao seu caminho (path) e compile com suporte para ROCm e RPC:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -282,7 +287,7 @@ cmake --build rocm --config Release
 |-----------|---------|
 | `-DGGML_HIP=ON` | Ativa a stack de software ROCm/HIP |
 | `-DGGML_RPC=ON` | Ativa o RPC para inferência distribuída |
-| `-DGPU_TARGETS=gfx1151` | Visa a GPU Ryzen AI Halo (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | Direciona para a GPU Ryzen AI Halo (Radeon 8060s) |
 | `-G Ninja` | Utiliza o sistema de compilação Ninja |
 
 #### Passo 2: Verificar a Deteção da GPU
@@ -303,13 +308,13 @@ Available devices:
 
 #### Passo 3: Adicionar o HIP ao Seu Caminho de Utilizador
 
-O passo de compilação acima definiu `%HIP_PATH%\bin` apenas para a sessão atual. Para tornar as bibliotecas HIP disponíveis em qualquer terminal (não apenas na x64 Native Tools Command Prompt), adicione-o permanentemente ao `PATH` do seu utilizador:
+O passo de compilação acima definiu `%HIP_PATH%\bin` apenas para a sessão atual. Para disponibilizar as bibliotecas HIP em qualquer terminal (não apenas na x64 Native Tools Command Prompt), adicione-o permanentemente ao seu `PATH` de utilizador:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-Com o llama.cpp preparado em cada nó, prossiga para [Transferir o Modelo](#downloading-the-model).
+Com o llama.cpp preparado em cada nó, avance para [Transferir o Modelo](#downloading-the-model).
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -333,7 +338,7 @@ cmake --build rocm --config Release -j$(nproc)
 |-----------|---------|
 | `-DGGML_HIP=ON` | Ativa a stack de software ROCm |
 | `-DGGML_RPC=ON` | Ativa o RPC para inferência distribuída |
-| `-DAMDGPU_TARGETS="gfx1151"` | Visa a GPU Ryzen AI Halo (Radeon 8060s) |
+| `-DAMDGPU_TARGETS="gfx1151"` | Direciona para a GPU Ryzen AI Halo (Radeon 8060s) |
 
 Para mais opções de compilação, consulte a [documentação de compilação do llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
@@ -354,14 +359,14 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-Com o llama.cpp preparado em cada nó, prossiga para [Transferir o Modelo](#downloading-the-model).
+Com o llama.cpp preparado em cada nó, avance para [Transferir o Modelo](#downloading-the-model).
 <!-- @os:end -->
 
 ## Transferir o Modelo
 
-Este manual utiliza o [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) na quantização `UD-Q2_K_XL` da [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Esta quantização cabe dentro da memória combinada de GPU de quatro nós Ryzen AI Halo.
+Este guia utiliza o [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) na quantização `UD-Q2_K_XL` da [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Esta quantização cabe dentro da memória GPU combinada de quatro nós Ryzen AI Halo.
 
-Transfira os ficheiros GGUF utilizando o Hugging Face CLI:
+Transfira os ficheiros GGUF utilizando o CLI do Hugging Face:
 <!-- @os:linux -->
 ```bash
 pip install huggingface-hub
@@ -380,13 +385,13 @@ hf download unsloth/Kimi-K2.6-GGUF --include "UD-Q2_K_XL/*" --local-dir Kimi-K2.
 ```
 <!-- @os:end -->
 
-> **Nota**: A transferência do modelo deve ser concluída na Máquina 1 (o controlador). Os nós de trabalho RPC (Máquinas 2, 3 e 4) não precisam de uma cópia local dos ficheiros do modelo.
+> **Nota**: A transferência do modelo deve ser concluída na Máquina 1 (o controlador). Os nós de trabalho RPC (Máquinas 2, 3 e 4) não necessitam de uma cópia local dos ficheiros do modelo.
 
 ## Iniciar o Modelo no Cluster
 
-O motor RPC (Remote Procedure Call) do llama.cpp permite que uma única instância do llama.cpp transfira camadas do modelo para trabalhadores remotos através da rede. Uma máquina atua como **controlador** (Máquina 1), tratando da tokenização, agendamento e orquestração. As outras três máquinas executam cada uma um **servidor RPC** leve (Máquinas 2, 3 e 4) que expõem a sua memória e capacidade de computação de GPU ao controlador.
+O motor RPC (Remote Procedure Call) do llama.cpp permite que uma única instância do llama.cpp distribua camadas do modelo para trabalhadores remotos através da rede. Uma máquina atua como **controlador** (Máquina 1), tratando da tokenização, do escalonamento e da orquestração. As outras três máquinas executam cada uma um **servidor RPC** leve (Máquinas 2, 3 e 4) que expõem a sua memória GPU e capacidade de computação ao controlador.
 
-No momento do carregamento, o llama.cpp fragmenta o modelo por todos os quatro nós. Uma vez carregado, a inferência prossegue como se estivesse a ser executada num único acelerador. O RPC trata das transferências de tensores e da sincronização por trás dos bastidores.
+No momento do carregamento, o llama.cpp divide o modelo (shard) entre todos os quatro nós. Após o carregamento, a inferência prossegue como se estivesse a ser executada num único acelerador. O RPC trata das transferências de tensores e da sincronização nos bastidores.
 
 ### Passo 1: Iniciar os Servidores RPC (Máquinas 2, 3 e 4)
 
@@ -405,18 +410,18 @@ Em cada uma das Máquinas 2, 3 e 4, inicie o servidor RPC para expor os seus rec
 
 | Flag | Finalidade |
 |------|---------|
-| `-p` | Porta na qual difundir o servidor RPC |
-| `-c` | Ativa uma cache local para tensores de grande dimensão, evitando transferências de rede repetidas durante o carregamento do modelo |
-| `--host` | Endereço IP ao qual associar o servidor RPC (`0.0.0.0` para todas as interfaces) |
+| `-p` | Porta para difundir o servidor RPC |
+| `-c` | Ativa uma cache local para tensores de grandes dimensões, evitando transferências de rede repetidas durante o carregamento do modelo |
+| `--host` | Endereço IP ao qual vincular o servidor RPC (`0.0.0.0` para todas as interfaces) |
 
-Para mais opções, consulte a [documentação do RPC do llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+Para mais opções, consulte a [documentação RPC do llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
 ### Passo 2: Iniciar o Modelo (Máquina 1)
 
 Com os servidores RPC em execução nas Máquinas 2, 3 e 4, inicie a inferência a partir da Máquina 1 utilizando `llama-cli` ou `llama-server`.
 #### llama-cli
 
-O `llama-cli` fornece uma interface baseada em terminal para interagir diretamente com o modelo. É ideal para benchmarking, depuração e experimentação de baixo nível.
+`llama-cli` disponibiliza uma interface baseada em terminal para interagir diretamente com o modelo. É ideal para benchmarking, depuração e experimentação de baixo nível.
 
 <!-- @os:linux -->
 ```bash
@@ -431,7 +436,7 @@ O `llama-cli` fornece uma interface baseada em terminal para interagir diretamen
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **A encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `hostname -I | awk '{print $1}'` para encontrar o seu endereço IP local.
+> **Encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `hostname -I | awk '{print $1}'` para encontrar o respetivo endereço IP local.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -449,17 +454,17 @@ O `llama-cli` fornece uma interface baseada em terminal para interagir diretamen
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **A encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o seu endereço IP local.
+> **Encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o respetivo endereço IP local.
 
 <!-- @os:end -->
 
-Depois de iniciado, o `llama-cli` apresenta o progresso de carregamento do modelo e entra numa prompt interativa onde pode conversar diretamente com o modelo:
+Após a execução, `llama-cli` mostra o progresso do carregamento do modelo e entra num prompt interativo onde pode conversar diretamente com o modelo:
 
 ![llama-cli a executar Kimi K2.6 em quatro nós](assets/llama-cli-example.png)
 
 #### llama-server
 
-O `llama-server` expõe o mesmo motor de inferência através de um processo de servidor persistente com uma interface web integrada e uma API HTTP compatível com OpenAI. Esta é a interface preferida para implementações de longa duração, acesso multiutilizador e integração com ferramentas externas.
+`llama-server` expõe o mesmo motor de inferência através de um processo de servidor persistente com uma interface Web integrada e uma API HTTP compatível com OpenAI. Esta é a interface preferida para implementações de maior duração, acesso multiutilizador e integração com ferramentas externas.
 
 <!-- @os:linux -->
 ```bash
@@ -476,7 +481,7 @@ O `llama-server` expõe o mesmo motor de inferência através de um processo de 
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **A encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `hostname -I | awk '{print $1}'` para encontrar o seu endereço IP local.
+> **Encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `hostname -I | awk '{print $1}'` para encontrar o respetivo endereço IP local.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -496,40 +501,40 @@ O `llama-server` expõe o mesmo motor de inferência através de um processo de 
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **A encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o seu endereço IP local.
+> **Encontrar `<RPC_WORKER_2_IP>`, `<RPC_WORKER_3_IP>`, `<RPC_WORKER_4_IP>`**: Em cada uma das Máquinas 2, 3 e 4, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o respetivo endereço IP local.
 <!-- @os:end -->
 
-Depois de iniciado, abra `http://<HOST_IP>:8081` no seu navegador para aceder à interface web integrada. Esta disponibiliza uma interface de chat baseada em navegador para interagir com o modelo:
+Após o arranque, abra `http://<HOST_IP>:8081` no seu navegador para aceder à interface Web incorporada. Esta disponibiliza uma interface de conversação baseada no navegador para interagir com o modelo:
 
-![Interface web do llama-server a executar Kimi K2.6 em quatro nós](assets/llama-server-example.png)
+![interface Web do llama-server a executar Kimi K2.6 em quatro nós](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **A encontrar `<HOST_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar o seu endereço IP local.
+> **Encontrar `<HOST_IP>`**: Na Máquina 1, execute `hostname -I | awk '{print $1}'` para encontrar o respetivo endereço IP local.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **A encontrar `<HOST_IP>`**: Na Máquina 1, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o seu endereço IP local.
+> **Encontrar `<HOST_IP>`**: Na Máquina 1, execute `ipconfig | findstr /C:"IPv4"` no Terminal (Powershell) para encontrar o respetivo endereço IP local.
 <!-- @os:end -->
 
 #### Referência de Parâmetros
 
-| Flag | Finalidade |
+| Opção | Finalidade |
 |------|---------|
 | `-m` | Caminho para o ficheiro de modelo GGUF (utilize o primeiro fragmento, `00001-of-00008`) |
 | `-c` | Tamanho do contexto em tokens. Valores maiores utilizam mais memória |
-| `-fa on` | Ativa o rocWMMA Flash Attention para melhorar o desempenho em GPUs AMD |
+| `-fa on` | Ativa o rocWMMA Flash Attention para melhor desempenho em GPUs AMD |
 | `-ngl 999` | Transfere todas as camadas do modelo para a GPU |
 | `-lm none` | Define o modo de carregamento do modelo como `none`, desativando o mapeamento de memória para reduzir os tempos de carregamento quando o tamanho do modelo excede a RAM do sistema mas cabe na VRAM |
-| `-b` | Tamanho lógico do lote (batch) em tokens. Definir para 4096 equilibra o débito e a utilização de memória entre nós |
-| `-ub` | Tamanho físico (micro) do lote para o processamento de prompts. Fazer corresponder ao `-b` evita sobrecarga desnecessária de fragmentação |
-| `--host` | IP ao qual associar o `llama-server` (apenas `llama-server`) |
-| `--port` | Porta na qual servir a API HTTP (apenas `llama-server`) |
-| `--rpc` | Lista separada por vírgulas dos endpoints de trabalhadores RPC (`IP:porta`) |
+| `-b` | Tamanho do lote lógico em tokens. Definir para 4096 equilibra o débito e a utilização de memória entre nós |
+| `-ub` | Tamanho do lote físico (micro) para processamento de prompts. Corresponder a `-b` evita sobrecarga de fragmentação desnecessária |
+| `--host` | IP ao qual vincular o `llama-server` (apenas `llama-server`) |
+| `--port` | Porta na qual disponibilizar a API HTTP (apenas `llama-server`) |
+| `--rpc` | Lista separada por vírgulas de endpoints de trabalhadores RPC (`IP:porta`) |
 
 Para a utilização completa dos parâmetros, consulte a [documentação do llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) e a [documentação do llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
-## Passos Seguintes
+## Próximos Passos
 
-- **Ligar aplicações de terceiros**: O `llama-server` expõe uma API compatível com OpenAI. Aponte qualquer aplicação compatível com OpenAI (como o Open WebUI) para `http://<HOST_IP>:8081` com uma chave de API de substituição (por exemplo, `none`) para ligar-se ao seu cluster
-- **Explorar outros modelos**: Navegue por GGUFs quantizados no [Hugging Face](https://huggingface.co/models?search=gguf) para encontrar modelos que caibam na memória de GPU combinada do seu cluster
-- **Expandir para além de quatro nós**: Adicione mais sistemas Ryzen AI Halo como trabalhadores RPC adicionais para aceder a modelos além da escala de 1 bilião de parâmetros. Passe endpoints adicionais para `--rpc` como uma lista separada por vírgulas (por exemplo, `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)
+- **Ligar aplicações de terceiros**: `llama-server` expõe uma API compatível com OpenAI. Aponte qualquer aplicação compatível com OpenAI (como o Open WebUI) para `http://<HOST_IP>:8081` com qualquer chave de API de preenchimento (por exemplo, `none`) para ligar ao seu cluster
+- **Explorar outros modelos**: Navegue por GGUFs quantizados no [Hugging Face](https://huggingface.co/models?search=gguf) para encontrar modelos que cabem na memória combinada de GPU do seu cluster
+- **Escalar para além de quatro nós**: Adicione mais sistemas Ryzen AI Halo como trabalhadores RPC adicionais para aceder a modelos acima da escala de 1 bilião de parâmetros. Passe endpoints adicionais para `--rpc` como uma lista separada por vírgulas (por exemplo, `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)

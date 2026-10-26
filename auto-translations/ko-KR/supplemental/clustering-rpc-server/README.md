@@ -14,29 +14,35 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# RPC를 이용한 Ryzen™ AI Halo 두 대의 클러스터링
+# RPC를 이용한 두 대의 Ryzen™ AI Halo 클러스터링
 
 ## 개요
 
-Ryzen™ AI Halo는 이미 대규모 언어 모델을 로컬에서 실행할 수 있는 성능을 갖추고 있습니다. 클러스터링은 로컬 네트워크를 통해 여러 시스템의 GPU 메모리를 결합함으로써 이를 한 단계 더 발전시켜, 더 강력한 추론 능력, 더 나은 코드 생성, 더 깊은 다국어 이해력을 갖춘 훨씬 더 큰 모델을 온전히 여러분 자신의 하드웨어에서 사용할 수 있게 해줍니다.
+Ryzen™ AI Halo는 이미 로컬에서 대규모 언어 모델을 실행할 수 있는 능력을 갖추고 있습니다. 클러스터링은 여기서 한 걸음 더 나아가 로컬 네트워크를 통해 여러 시스템의 GPU 메모리를 결합함으로써, 더욱 강력한 추론 능력, 향상된 코드 생성, 더 깊은 다국어 이해 능력을 갖춘 훨씬 더 큰 모델을 전적으로 여러분의 하드웨어만으로 사용할 수 있도록 해줍니다.
 
-이 플레이북에서는 llama.cpp의 RPC 엔진을 사용하여 두 대의 Ryzen AI Halo 시스템을 클러스터링하고, AMD ROCm™ 가속을 통해 3580억 파라미터 모델인 GLM 4.7을 두 시스템 전반에 걸쳐 실행하는 방법을 안내합니다.
+이 플레이북에서는 llama.cpp의 RPC 엔진을 사용하여 두 대의 Ryzen AI Halo 시스템을 클러스터링하고, AMD ROCm™ 가속을 활용해 358B 파라미터 모델인 GLM 4.7을 두 머신에 걸쳐 실행하는 방법을 안내합니다.
 
-## 배우게 될 내용
+## 학습 내용
 
 - Ryzen AI Halo 시스템에서 VRAM 할당을 확장하는 방법
-- ROCm 및 RPC 지원과 함께 llama.cpp 설치하기
-- RPC 워커 구성 및 두 노드 간 분산 추론 실행
-- 네트워크로 연결된 두 대의 Ryzen AI Halo 시스템에서 3580억 파라미터 모델 실행하기
+- ROCm 및 RPC 지원이 포함된 llama.cpp 설치하기
+- RPC 워커 구성 및 두 노드에 걸친 분산 추론 실행하기
+- 두 대의 네트워크로 연결된 Ryzen AI Halo 시스템에서 358B 파라미터 모델 실행하기
 
 ## 메모리 구성 설정하기
 
-> **참고**: 이 단계는 머신 1과 머신 2 모두에서 완료해야 합니다.
+> **참고**: Machine 1과 Machine 2 양쪽에서 이 단계를 완료하세요.
+
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+> **128GB에 근접하거나 이를 초과하는 모델 실행**: Windows를 실행하는 AMD Ryzen™ AI Max 400 Series(Gorgon Halo) 시스템에서는 128GB 메모리에 근접하거나 이를 초과하는 모델을 오류 없이 실행하려면 추가 구성이 필요합니다. 모델을 로드하기 전에 [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines)를 따르세요.
+<!-- @os:end -->
+<!-- @device:end -->
 
 <!-- @os:windows -->
-Windows에서 더 높은 메모리를 요구하는 더 큰 모델을 실행하려면, AMD Variable Graphics Memory(iGPU VRAM) 할당을 사용해야 합니다.
+Windows에서 더 많은 메모리가 필요한 더 큰 모델을 실행하려면 AMD Variable Graphics Memory(iGPU VRAM) 할당 기능을 사용해야 합니다.
 
-AMD Software: Adrenalin Edition 제어판을 열고 `Performance > Tuning > AMD Variable Graphics Memory` 로 이동하여 이 작업을 수행할 수 있습니다. 값을 **96 GB**로 설정하세요. 변경 사항을 적용하려면 시스템을 재부팅하세요.
+이는 AMD Software: Adrenalin Edition 제어판을 열고 `Performance > Tuning > AMD Variable Graphics Memory` 경로로 이동하여 설정할 수 있습니다. 값을 **96 GB**로 설정하세요. 변경 사항이 적용되려면 시스템을 재부팅해야 합니다.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,9 +51,9 @@ AMD Software: Adrenalin Edition 제어판을 열고 `Performance > Tuning > AMD 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linux에서 ROCm은 공유 시스템 메모리 풀을 사용하며, 이 풀은 기본적으로 시스템 메모리의 절반으로 구성됩니다.
+Linux에서 ROCm은 공유 시스템 메모리 풀을 사용하며, 이 풀은 기본적으로 시스템 메모리의 절반으로 설정되어 있습니다.
 
-이 양은 커널의 Translation Table Manager(TTM) 페이지 설정을 변경하여 늘릴 수 있으며, 다음 지침을 따르세요. AMD는 BIOS에서 최소 전용 VRAM을 설정할 것을 권장합니다(0.5 GB).
+다음 지침에 따라 커널의 Translation Table Manager(TTM) 페이지 설정을 변경하면 이 양을 늘릴 수 있습니다. AMD는 BIOS에서 최소 전용 VRAM을 0.5GB로 설정할 것을 권장합니다.
 
 * pipx 유틸리티를 설치하고 pipx로 설치된 wheel의 경로를 시스템 검색 경로에 추가합니다.
 
@@ -71,7 +77,7 @@ Linux에서 ROCm은 공유 시스템 메모리 풀을 사용하며, 이 풀은 �
   amd-ttm --set 120
   ```
 
-* 변경 사항을 적용하려면 시스템을 재부팅하세요.
+* 변경 사항이 적용되려면 시스템을 재부팅하세요.
 
 
 <!-- @os:end -->
@@ -84,15 +90,15 @@ Linux에서 ROCm은 공유 시스템 메모리 풀을 사용하며, 이 풀은 �
 
 ### 하드웨어
 
-이 플레이북에는 두 대의 Ryzen AI Halo 유닛과 한 대의 이더넷 스위치가 필요하며, 각 유닛을 스위치에 직접 연결하는 스타 토폴로지로 구성됩니다.
+이 플레이북을 진행하려면 두 대의 Ryzen AI Halo 유닛과 한 대의 이더넷 스위치가 필요하며, 각 유닛이 스위치에 직접 연결되는 스타 토폴로지 구성을 사용합니다.
 
 | 구성 요소 | 수량 | 설명 |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 2 | 클러스터를 구성하는 컴퓨팅 노드 |
-| 10Gbps 이더넷 스위치 | 1 | 다중 노드 Ryzen AI Halo 통신을 위한 중앙 스위치(최소 2개 포트) |
-| 이더넷 케이블 | 2 | 각 Halo 유닛을 스위치에 연결 (Cat 7 이상 권장) |
+| 10Gbps 이더넷 스위치 | 1 | 다중 노드 Ryzen AI Halo 통신을 지원하는 중앙 스위치(최소 2개 포트 필요) |
+| 이더넷 케이블 | 2 | 각 Halo 유닛을 스위치에 연결(Cat 7 이상 권장) |
 
-> **참고**: 두 대의 Ryzen AI Halo 유닛을 연결하려면 이더넷 스위치 포트 2개가 필요합니다. Halo 유닛 중 하나가 아니라 별도의 클라이언트 머신에서 모델에 접근하는 경우 세 번째 포트가 필요합니다.
+> **참고**: 두 대의 Ryzen AI Halo 유닛을 연결하려면 이더넷 스위치 포트가 2개 필요합니다. Halo 유닛 중 하나가 아닌 별도의 클라이언트 머신에서 모델에 액세스하려면 세 번째 포트가 필요합니다.
 
 ### 소프트웨어
 <!-- @os:windows -->
@@ -114,19 +120,19 @@ sudo apt install git cmake python3 python3-pip
 
 ## 물리적 하드웨어 설정
 
-> **참고**: 이 단계는 머신 1과 머신 2 모두에서 완료해야 합니다.
+> **참고**: Machine 1과 Machine 2 양쪽에서 이 단계를 완료하세요.
 
-Cat 7(또는 그 이상) 케이블을 사용하여 각 Ryzen AI Halo 유닛을 이더넷 스위치에 연결합니다. 이를 통해 노드 간 고속 통신에 사용되는 10Gbps 링크가 구성됩니다.
+Cat 7(또는 그 이상) 케이블을 사용하여 각 Ryzen AI Halo 유닛을 이더넷 스위치에 연결하세요. 이렇게 하면 노드 간 고속 통신에 사용되는 10Gbps 링크가 구성됩니다.
 <!-- @os:linux -->
 ### 1. 네트워크 인터페이스 확인
 
-각 머신에서 네트워크 인터페이스의 이름을 확인하고 기록해 두세요(아래에서 `IFNAME`으로 지칭됩니다). 다음을 실행하세요:
+각 머신에서 네트워크 인터페이스의 이름을 확인하고 기록해 둡니다(아래에서 `IFNAME`으로 지칭됩니다). 다음을 실행하세요:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-이렇게 하면 인터페이스 이름이 직접 출력됩니다. 예:
+이 명령은 다음과 같이 인터페이스 이름을 바로 출력합니다:
 
 ```bash
 enp191s0
@@ -134,13 +140,13 @@ enp191s0
 
 ### 2. 네트워크 링크 속도 확인
 
-인터페이스의 속도를 확인하여 링크가 활성 상태이고 최대 속도로 동작하는지 확인합니다:
+인터페이스의 속도를 확인하여 링크가 활성화되어 있고 최대 속도로 동작하는지 확인합니다:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **참고**: `<IFNAME>`을 [1. 네트워크 인터페이스 확인](#1-네트워크-인터페이스-확인)에서 확인한 출력 인터페이스 이름으로 바꾸세요.
+> **참고**: `<IFNAME>`을 [1. 네트워크 인터페이스 확인](#1-determine-network-interfaces)에서 확인한 출력 인터페이스 이름으로 바꾸세요
 
 `10000Mb/s`의 속도가 표시되어야 합니다:
 
@@ -148,7 +154,7 @@ sudo ethtool <IFNAME> | grep Speed
 	Speed: 10000Mb/s
 ```
 
-> **참고**: 속도가 `10000Mb/s`보다 낮거나 링크가 활성화되지 않는 경우, 케이블 연결을 확인하고 스위치 포트가 10Gbps로 설정되어 있는지 확인하세요. 일부 스위치는 자동 협상을 비활성화하고 링크 속도를 수동으로 설정해야 할 수 있습니다. 스위치 설명서를 참조하세요.
+> **참고**: 속도가 `10000Mb/s`보다 낮거나 링크가 활성화되지 않는 경우, 케이블 연결을 확인하고 스위치 포트가 10Gbps로 설정되어 있는지 확인하세요. 일부 스위치는 자동 협상(auto-negotiation)을 비활성화하고 링크 속도를 수동으로 설정해야 할 수 있으므로, 사용 중인 스위치의 설명서를 참고하세요.
 
 <!-- @os:end -->
 
@@ -161,7 +167,7 @@ sudo ethtool <IFNAME> | grep Speed
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-이더넷 인터페이스가 `Up` 상태이고 `10 Gbps`로 동작하고 있어야 합니다:
+이더넷 인터페이스는 `Up` 상태이며 `10 Gbps`로 동작해야 합니다:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,41 +175,40 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **참고**: 속도가 `10 Gbps`보다 낮거나 링크가 활성화되지 않는 경우, 케이블 연결을 확인하고 스위치 포트가 10Gbps로 설정되어 있는지 확인하세요. 일부 스위치는 자동 협상을 비활성화하고 링크 속도를 수동으로 설정해야 할 수 있습니다. 스위치 설명서를 참조하세요.
+> **참고**: 속도가 `10 Gbps`보다 낮거나 링크가 활성화되지 않는 경우, 케이블 연결을 확인하고 스위치 포트가 10Gbps로 설정되어 있는지 확인하세요. 일부 스위치는 자동 협상(auto-negotiation)을 비활성화하고 링크 속도를 수동으로 설정해야 할 수 있으므로, 사용 중인 스위치의 설명서를 참고하세요.
 
 <!-- @os:end -->
 
 ## llama.cpp 설치하기
 
-> **참고**: 이 단계는 머신 1과 머신 2 모두에서 완료해야 합니다.
+> **참고**: Machine 1과 Machine 2 양쪽에서 이 단계를 완료하세요.
 
 두 가지 설치 옵션을 사용할 수 있습니다:
 
-- [옵션 1: Lemonade SDK(권장)](#option-1-lemonade-sdk-recommended) - 사전 빌드된 바이너리, 가장 빠른 설정
-- [옵션 2: 수동 소스 빌드](#option-2-manual-source-build) - 빌드 플래그를 완전히 제어하며 소스에서 빌드
+- [옵션 1: Lemonade SDK(권장)](#option-1-lemonade-sdk-recommended) - 사전 빌드된 바이너리 사용, 가장 빠른 설정
+- [옵션 2: 수동 소스 빌드](#option-2-manual-source-build) - 빌드 플래그를 완전히 제어하여 소스에서 직접 빌드
+### 옵션 1: Lemonade SDK (권장)
 
-### 옵션 1: Lemonade SDK(권장)
-
-Lemonade SDK는 gfx1151(Strix Halo / Ryzen AI Max+ 395)과 같은 GPU 및 기타 최신 Radeon 아키텍처를 대상으로 하는, AMD ROCm 7 가속이 적용된 llama.cpp의 나이틀리 빌드를 제공합니다.
+Lemonade SDK는 AMD ROCm 7 가속을 지원하는 llama.cpp의 나이틀리 빌드를 제공하며, gfx1151(Strix Halo / Ryzen AI Max+ 395)과 같은 GPU 및 기타 최신 Radeon 아키텍처를 대상으로 합니다.
 
 <!-- @os:windows -->
 #### 1단계: 사전 빌드된 바이너리 다운로드
 
-최신 릴리스 페이지로 이동하여 플랫폼과 GPU 타겟에 맞는 압축 파일을 다운로드합니다:
+최신 릴리스 페이지로 이동하여 사용 중인 플랫폼 및 GPU 대상에 맞는 아카이브를 다운로드합니다:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-`llama-bxxxx-windows-rocm-gfx1151-x64.zip` 파일을 다운로드합니다(여기서 `xxxx`는 빌드 번호입니다).
+`llama-bxxxx-windows-rocm-gfx1151-x64.zip`(여기서 `xxxx`는 빌드 번호) 파일을 다운로드합니다.
 
 #### 2단계: 바이너리 압축 해제
 
-다운로드한 압축 파일의 압축을 해제합니다:
+다운로드한 아카이브의 압축을 해제합니다:
 
 ```bash
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-이제 이 디렉터리에는 Ryzen AI Halo 시스템용으로 미리 컴파일된 ROCm 지원 빌드인 `llama-cli.exe`, `llama-server.exe`, `rpc-server.exe`가 포함됩니다.
+이 디렉터리에는 이제 Ryzen AI Halo 시스템용으로 미리 컴파일된 ROCm 지원 빌드인 `llama-cli.exe`, `llama-server.exe`, `rpc-server.exe`가 포함되어 있습니다.
 
 #### 3단계: GPU 감지 확인
 
@@ -224,11 +229,11 @@ Available devices:
 <!-- @os:linux -->
 #### 1단계: 사전 빌드된 바이너리 다운로드
 
-최신 릴리스 페이지로 이동하여 플랫폼과 GPU 타겟에 맞는 압축 파일을 다운로드합니다:
+최신 릴리스 페이지로 이동하여 사용 중인 플랫폼 및 GPU 대상에 맞는 아카이브를 다운로드합니다:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-`llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` 파일을 다운로드합니다(여기서 `xxxx`는 빌드 번호입니다).
+`llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip`(여기서 `xxxx`는 빌드 번호) 파일을 다운로드합니다.
 
 #### 2단계: 바이너리 압축 해제 및 준비
 
@@ -238,7 +243,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-이제 이 디렉터리에는 Ryzen AI Halo 시스템용으로 미리 컴파일된 ROCm 지원 빌드인 `llama-cli`, `llama-server`, `rpc-server`가 포함됩니다.
+이 디렉터리에는 이제 Ryzen AI Halo 시스템용으로 미리 컴파일된 ROCm 지원 빌드인 `llama-cli`, `llama-server`, `rpc-server`가 포함되어 있습니다.
 
 #### 3단계: GPU 감지 확인
 
@@ -256,7 +261,7 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-각 노드에서 llama.cpp 준비를 마쳤다면 [모델 다운로드](#downloading-the-model)로 진행합니다.
+각 노드에서 llama.cpp 준비가 완료되면 [모델 다운로드](#downloading-the-model) 단계로 진행합니다.
 
 ### 옵션 2: 수동 소스 빌드
 
@@ -270,7 +275,7 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-경로에 HIP를 추가하고 ROCm 및 RPC 지원과 함께 빌드합니다:
+HIP를 경로에 추가하고 ROCm 및 RPC 지원과 함께 빌드합니다:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -278,11 +283,11 @@ cmake -S . -B rocm -G Ninja -DGGML_HIP=ON -DGGML_RPC=ON -DGPU_TARGETS=gfx1151 -D
 cmake --build rocm --config Release
 ```
 
-| 빌드 플래그 | 용도 |
+| 빌드 플래그 | 목적 |
 |-----------|---------|
 | `-DGGML_HIP=ON` | ROCm/HIP 소프트웨어 스택을 활성화합니다 |
 | `-DGGML_RPC=ON` | 분산 추론을 위한 RPC를 활성화합니다 |
-| `-DGPU_TARGETS=gfx1151` | Ryzen AI Halo GPU(Radeon 8060s)를 타겟으로 지정합니다 |
+| `-DGPU_TARGETS=gfx1151` | Ryzen AI Halo GPU(Radeon 8060s)를 대상으로 합니다 |
 | `-G Ninja` | Ninja 빌드 시스템을 사용합니다 |
 
 #### 2단계: GPU 감지 확인
@@ -303,13 +308,13 @@ Available devices:
 
 #### 3단계: 사용자 경로에 HIP 추가
 
-위의 빌드 단계에서는 현재 세션에 한해서만 `%HIP_PATH%\bin`을 설정했습니다. HIP 라이브러리를 (x64 Native Tools Command Prompt뿐 아니라) 어떤 터미널에서도 사용할 수 있도록 하려면 사용자 `PATH`에 영구적으로 추가하세요:
+위의 빌드 단계에서는 현재 세션에 한해서만 `%HIP_PATH%\bin`을 설정했습니다. (x64 Native Tools Command Prompt뿐만 아니라) 모든 터미널에서 HIP 라이브러리를 사용할 수 있도록 하려면 사용자 `PATH`에 영구적으로 추가하세요:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-각 노드에서 llama.cpp 준비를 마쳤다면 [모델 다운로드](#downloading-the-model)로 진행합니다.
+각 노드에서 llama.cpp 준비가 완료되면 [모델 다운로드](#downloading-the-model) 단계로 진행합니다.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -329,13 +334,13 @@ cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
-| 빌드 플래그 | 용도 |
+| 빌드 플래그 | 목적 |
 |-----------|---------|
 | `-DGGML_HIP=ON` | ROCm 소프트웨어 스택을 활성화합니다 |
 | `-DGGML_RPC=ON` | 분산 추론을 위한 RPC를 활성화합니다 |
-| `-DAMDGPU_TARGETS="gfx1151"` | Ryzen AI Halo GPU(Radeon 8060s)를 타겟으로 지정합니다 |
+| `-DAMDGPU_TARGETS="gfx1151"` | Ryzen AI Halo GPU(Radeon 8060s)를 대상으로 합니다 |
 
-더 많은 빌드 옵션은 [llama.cpp 빌드 문서](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md)를 참고하세요.
+더 많은 빌드 옵션은 [llama.cpp 빌드 문서](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md)를 참조하세요.
 
 #### 2단계: GPU 감지 확인
 
@@ -354,12 +359,12 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-각 노드에서 llama.cpp 준비를 마쳤다면 [모델 다운로드](#downloading-the-model)로 진행합니다.
+각 노드에서 llama.cpp 준비가 완료되면 [모델 다운로드](#downloading-the-model) 단계로 진행합니다.
 <!-- @os:end -->
 
 ## 모델 다운로드
 
-이 플레이북에서는 [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL)의 `Q4_K_XL` 양자화가 적용된 3580억 파라미터 모델인 [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7)을 사용합니다. 이 양자화 수준에서 모델은 약 205GB의 저장 공간을 필요로 하며, 두 개의 Ryzen AI Halo 노드의 결합된 GPU 메모리 내에 들어갑니다.
+이 플레이북에서는 [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL)의 `Q4_K_XL` 양자화 버전인 3,580억 파라미터 모델 [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7)을 사용합니다. 이 양자화 수준에서 모델은 약 205GB의 저장 공간이 필요하며, 두 대의 Ryzen AI Halo 노드의 결합된 GPU 메모리 내에 들어갑니다.
 
 Hugging Face CLI를 사용하여 GGUF 파일을 다운로드합니다:
 <!-- @os:linux -->
@@ -380,15 +385,15 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **참고**: 모델 다운로드는 머신 1(컨트롤러)에서 완료해야 합니다. RPC 워커 노드는 모델 파일의 로컬 사본을 필요로 하지 않습니다.
+> **참고**: 모델 다운로드는 반드시 머신 1(컨트롤러)에서 완료해야 합니다. RPC 워커 노드에는 모델 파일의 로컬 사본이 필요하지 않습니다.
 
 ## 클러스터에서 모델 실행하기
 
-llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인스턴스가 네트워크를 통해 원격 워커에 모델 레이어를 오프로드할 수 있습니다. 한 머신은 **컨트롤러**(머신 1) 역할을 수행하며 토큰화, 스케줄링, 오케스트레이션을 처리합니다. 다른 머신은 경량 **RPC 서버**(머신 2)를 실행하여 자신의 GPU 메모리와 연산 능력을 컨트롤러에 노출합니다.
+llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인스턴스가 네트워크를 통해 모델 레이어를 원격 워커로 오프로드할 수 있습니다. 한 머신은 **컨트롤러**(머신 1) 역할을 하며 토큰화, 스케줄링, 오케스트레이션을 처리합니다. 다른 머신은 자신의 GPU 메모리와 연산 능력을 컨트롤러에 노출하는 경량 **RPC 서버**(머신 2)를 실행합니다.
 
-로드 시점에 llama.cpp는 모델을 두 노드에 걸쳐 샤딩합니다. 로드가 완료되면 마치 단일 가속기에서 실행되는 것처럼 추론이 진행됩니다. RPC는 백그라운드에서 텐서 전송과 동기화를 처리합니다.
+로드 시점에 llama.cpp는 모델을 두 노드에 걸쳐 분할합니다. 로드가 완료되면 추론은 단일 가속기에서 실행되는 것처럼 진행됩니다. RPC는 텐서 전송과 동기화를 내부적으로 처리합니다.
 
-### 1단계: RPC 서버 시작하기(머신 2)
+### 1단계: RPC 서버 시작 (머신 2)
 
 머신 2에서 RPC 서버를 시작하여 GPU 리소스를 컨트롤러에 노출합니다:
 <!-- @os:linux -->
@@ -403,21 +408,20 @@ llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인
 ```
 <!-- @os:end -->
 
-| 플래그 | 용도 |
+| 플래그 | 목적 |
 |------|---------|
 | `-p` | RPC 서버를 브로드캐스트할 포트 |
-| `-c` | 대용량 텐서를 위한 로컬 캐시를 활성화하여 모델 로딩 중 반복적인 네트워크 전송을 방지합니다 |
-| `--host` | RPC 서버를 바인딩할 IP 주소(모든 인터페이스의 경우 `0.0.0.0`) |
+| `-c` | 대용량 텐서용 로컬 캐시를 활성화하여 모델 로드 중 반복적인 네트워크 전송을 방지합니다 |
+| `--host` | RPC 서버를 바인딩할 IP 주소(`0.0.0.0`은 모든 인터페이스를 의미합니다) |
 
-더 많은 옵션은 [llama.cpp RPC 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md)를 참고하세요.
+더 많은 옵션은 [llama.cpp RPC 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md)를 참조하세요.
 
-### 2단계: 모델 실행하기(머신 1)
+### 2단계: 모델 실행 (머신 1)
 
 머신 2에서 RPC 서버가 실행 중인 상태에서, `llama-cli` 또는 `llama-server` 중 하나를 사용하여 머신 1에서 추론을 실행합니다.
-
 #### llama-cli
 
-`llama-cli`는 모델과 직접 상호작용할 수 있는 터미널 기반 인터페이스를 제공합니다. 벤치마킹, 디버깅, 저수준 실험에 적합합니다.
+`llama-cli`는 모델과 직접 상호작용할 수 있는 터미널 기반 인터페이스를 제공합니다. 벤치마킹, 디버깅, 저수준 실험에 이상적입니다.
 
 <!-- @os:linux -->
 ```bash
@@ -430,7 +434,7 @@ llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **`<RPC_WORKER_IP>` 찾기**: 머신 2에서 `hostname -I | awk '{print $1}'`을 실행하여 로컬 IP 주소를 확인합니다.
+> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 `hostname -I | awk '{print $1}'`를 실행하여 로컬 IP 주소를 확인하세요.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -446,16 +450,17 @@ llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **`<RPC_WORKER_IP>` 찾기**: 머신 2에서 터미널(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 확인합니다.
+> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 터미널(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 확인하세요.
 
 <!-- @os:end -->
 
 실행되면 `llama-cli`는 모델 로딩 진행 상황을 표시하고 모델과 직접 대화할 수 있는 대화형 프롬프트로 진입합니다:
 
 ![두 노드에서 GLM 4.7을 실행하는 llama-cli](assets/llama-cli-example.png)
+
 #### llama-server
 
-`llama-server`는 통합 웹 UI와 OpenAI 호환 HTTP API를 갖춘 지속적인 서버 프로세스를 통해 동일한 추론 엔진을 노출합니다. 이는 장기 실행 배포, 다중 사용자 액세스, 외부 도구와의 통합에 선호되는 인터페이스입니다.
+`llama-server`는 동일한 추론 엔진을 통합 웹 UI와 OpenAI 호환 HTTP API가 포함된 영구 서버 프로세스를 통해 노출합니다. 장시간 실행되는 배포, 다중 사용자 접근, 외부 도구와의 통합에 선호되는 인터페이스입니다.
 
 <!-- @os:linux -->
 ```bash
@@ -470,11 +475,11 @@ llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 `hostname -I | awk '{print $1}'`를 실행하여 로컬 IP 주소를 찾습니다.
+> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 `hostname -I | awk '{print $1}'`를 실행하여 로컬 IP 주소를 확인하세요.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **참고**: 이 명령은 Terminal(Powershell)에서 실행하세요.
+> **참고**: 이 명령은 터미널(Powershell)에서 실행하세요.
 
 ```powershell
 .\llama-server.exe `
@@ -488,38 +493,38 @@ llama.cpp RPC(Remote Procedure Call) 엔진을 사용하면 단일 llama.cpp 인
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 Terminal(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 찾습니다.
+> **`<RPC_WORKER_IP>` 찾기**: Machine 2에서 터미널(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 확인하세요.
 <!-- @os:end -->
 
-시작되면 브라우저에서 `http://<HOST_IP>:8081`을 열어 내장된 웹 UI에 액세스합니다. 이는 모델과 상호작용하기 위한 브라우저 기반 채팅 인터페이스를 제공합니다:
+시작되면 브라우저에서 `http://<HOST_IP>:8081`을 열어 내장 웹 UI에 접근하세요. 이는 모델과 상호작용할 수 있는 브라우저 기반 채팅 인터페이스를 제공합니다:
 
 ![두 노드에서 GLM 4.7을 실행하는 llama-server 웹 UI](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **`<HOST_IP>` 찾기**: Machine 1에서 `hostname -I | awk '{print $1}'`를 실행하여 로컬 IP 주소를 찾습니다.
+> **`<HOST_IP>` 찾기**: Machine 1에서 `hostname -I | awk '{print $1}'`를 실행하여 로컬 IP 주소를 확인하세요.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **`<HOST_IP>` 찾기**: Machine 1에서 Terminal(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 찾습니다.
+> **`<HOST_IP>` 찾기**: Machine 1에서 터미널(Powershell)에서 `ipconfig | findstr /C:"IPv4"`를 실행하여 로컬 IP 주소를 확인하세요.
 <!-- @os:end -->
 
 #### 매개변수 참조
 
-| 플래그 | 목적 |
+| 플래그 | 용도 |
 |------|---------|
-| `-m` | GGUF 모델 파일의 경로 (첫 번째 샤드 `00001-of-00005` 사용) |
-| `-c` | 토큰 단위의 컨텍스트 크기. 값이 클수록 더 많은 메모리를 사용함 |
-| `-fa on` | AMD GPU에서 성능 향상을 위해 rocWMMA Flash Attention을 활성화함 |
-| `-ngl 999` | 모든 모델 레이어를 GPU로 오프로드함 |
-| `-lm none` | 모델 로드 모드를 `none`으로 설정하여 모델 크기가 시스템 RAM을 초과하지만 VRAM에 맞는 경우 로드 시간을 줄이기 위해 메모리 매핑을 비활성화함 |
-| `--host` | `llama-server`를 바인딩할 IP (`llama-server` 전용) |
-| `--port` | HTTP API를 제공할 포트 (`llama-server` 전용) |
-| `--rpc` | RPC 워커 엔드포인트(`IP:port`)의 쉼표로 구분된 목록 |
+| `-m` | GGUF 모델 파일 경로(첫 번째 샤드인 `00001-of-00005` 사용) |
+| `-c` | 토큰 단위의 컨텍스트 크기. 값이 클수록 더 많은 메모리를 사용합니다 |
+| `-fa on` | AMD GPU에서 성능 향상을 위해 rocWMMA Flash Attention을 활성화합니다 |
+| `-ngl 999` | 모든 모델 레이어를 GPU로 오프로드합니다 |
+| `-lm none` | 모델 로드 모드를 `none`으로 설정하여, 모델 크기가 시스템 RAM을 초과하지만 VRAM에는 맞는 경우 로드 시간을 줄이기 위해 메모리 매핑을 비활성화합니다 |
+| `--host` | `llama-server`를 바인딩할 IP(`llama-server` 전용) |
+| `--port` | HTTP API를 제공할 포트(`llama-server` 전용) |
+| `--rpc` | 쉼표로 구분된 RPC 워커 엔드포인트 목록(`IP:port`) |
 
-전체 매개변수 사용법은 [llama-cli 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md)와 [llama-server 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)를 참조하세요.
+전체 매개변수 사용법은 [llama-cli 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md)와 [llama-server 문서](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)를 참고하세요.
 
 ## 다음 단계
 
-- **타사 애플리케이션 연결**: `llama-server`는 OpenAI 호환 API를 노출합니다. 임의의 OpenAI 호환 애플리케이션(예: Open WebUI)을 임의의 자리 표시자 API 키(예: `none`)와 함께 `http://<HOST_IP>:8081`로 지정하여 클러스터에 연결하세요
-- **다른 모델 탐색**: [Hugging Face](https://huggingface.co/models?search=gguf)에서 양자화된 GGUF를 탐색하여 클러스터의 결합된 GPU 메모리 내에 맞는 모델을 찾으세요
-- **4개 노드로 확장**: Ryzen AI Halo 시스템 두 대를 추가 RPC 워커로 더해 1조 매개변수 규모의 모델에 액세스하세요. 추가 엔드포인트를 쉼표로 구분된 목록으로 `--rpc`에 전달하세요 (예: `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **타사 애플리케이션 연결**: `llama-server`는 OpenAI 호환 API를 노출합니다. OpenAI 호환 애플리케이션(예: Open WebUI)을 `http://<HOST_IP>:8081`로 지정하고 임의의 플레이스홀더 API 키(예: `none`)를 사용하면 클러스터에 연결할 수 있습니다
+- **다른 모델 탐색**: [Hugging Face](https://huggingface.co/models?search=gguf)에서 양자화된 GGUF를 둘러보고 클러스터의 전체 GPU 메모리에 맞는 모델을 찾아보세요
+- **4개 노드로 확장**: Ryzen AI Halo 시스템 두 대를 추가 RPC 워커로 더해 1조 매개변수 규모의 모델에 접근할 수 있습니다. `--rpc`에 추가 엔드포인트를 쉼표로 구분된 목록으로 전달하세요(예: `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

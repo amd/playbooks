@@ -18,25 +18,31 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-Vaš Ryzen™ AI Halo sistem već je sposoban da lokalno pokreće velike jezičke modele. Klasterovanje ovo dodatno unapređuje kombinovanjem GPU memorije više sistema preko lokalne mreže, pružajući vam pristup još većim modelima sa jačim rezonovanjem, boljom generacijom koda i dubljim višejezičkim razumevanjem, u potpunosti na vašem sopstvenom hardveru.
+Vaš Ryzen™ AI Halo sistem je već sposoban da pokreće velike jezičke modele lokalno. Klasterovanje ovo podiže na viši nivo kombinovanjem GPU memorije više sistema preko lokalne mreže, omogućavajući vam pristup još većim modelima sa jačim rezonovanjem, boljim generisanjem koda i dubljim razumevanjem više jezika, a sve to isključivo na sopstvenom hardveru.
 
 Ovaj vodič vas uči kako da klasterujete dva Ryzen AI Halo sistema koristeći RPC mehanizam iz llama.cpp i pokrenete GLM 4.7, model sa 358 milijardi parametara, na oba uređaja uz AMD ROCm™ akceleraciju.
 
 ## Šta ćete naučiti
 
-- Kako da proširite alokaciju VRAM memorije na Ryzen AI Halo sistemima
-- Instaliranje llama.cpp sa ROCm i RPC podrškom
-- Konfigurisanje RPC radnika i pokretanje distribuirane inferencije na dva čvora
+- Kako da proširite alokaciju VRAM-a na Ryzen AI Halo sistemima
+- Instaliranje llama.cpp sa podrškom za ROCm i RPC
+- Konfigurisanje RPC radnika (worker) i pokretanje distribuirane inferencije na dva čvora
 - Pokretanje modela sa 358 milijardi parametara na dva umrežena Ryzen AI Halo sistema
 
 ## Podešavanje konfiguracije memorije
 
-> **Napomena**: Izvršite ovaj korak na Mašini 1 i Mašini 2.
+> **Napomena**: Ovaj korak obavite i na Mašini 1 i na Mašini 2.
+
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+> **Pokretanje modela blizu ili iznad 128 GB:** Na AMD Ryzen™ AI Max 400 Series (Gorgon Halo) sistemima sa operativnim sistemom Windows, modeli koji se približavaju ili prevazilaze 128 GB memorije zahtevaju dodatnu konfiguraciju kako bi se pokrenuli bez grešaka. Pratite [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) pre učitavanja modela.
+<!-- @os:end -->
+<!-- @device:end -->
 
 <!-- @os:windows -->
-Na Windows sistemu, da bismo pokrenuli veće modele koji zahtevaju više memorije, potrebno je da koristimo alokaciju AMD Variable Graphics Memory (iGPU VRAM).
+Na operativnom sistemu Windows, da biste pokrenuli veće modele kojima je potrebno više memorije, potrebno je da koristimo alokaciju AMD Variable Graphics Memory (iGPU VRAM).
 
-Ovo se može uraditi otvaranjem kontrolne table AMD Software: Adrenalin Edition i navigacijom do: `Performance > Tuning > AMD Variable Graphics Memory`. Postavite vrednost na **96 GB**. Molimo restartujte sistem da bi izmene stupile na snagu.
+Ovo se može uraditi otvaranjem kontrolne table AMD Software: Adrenalin Edition i navigacijom do: `Performance > Tuning > AMD Variable Graphics Memory`. Postavite vrednost na **96 GB**. Molimo vas da restartujete sistem kako bi izmene stupile na snagu.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,38 +51,38 @@ Ovo se može uraditi otvaranjem kontrolne table AMD Software: Adrenalin Edition 
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Na Linux sistemu, ROCm koristi zajednički memorijski pul sistema, a ovaj pul je podrazumevano konfigurisan na polovinu memorije sistema.
+Na Linuxu, ROCm koristi zajednički pool sistemske memorije, a ovaj pool je podrazumevano podešen na polovinu sistemske memorije.
 
-Ova količina se može povećati promenom podešavanja Translation Table Manager (TTM) stranica u kernelu, pomoću sledećih uputstava. AMD preporučuje da se u BIOS-u podesi minimalna namenska VRAM memorija (0,5 GB).
+Ova količina se može povećati promenom podešavanja Translation Table Manager (TTM) stranica u kernelu, prema sledećim uputstvima. AMD preporučuje da se u BIOS-u podesi minimalna namenska VRAM memorija (0.5 GB).
 
-* Instalirajte alat pipx i dodajte putanju za pipx instalirane wheel pakete u sistemsku putanju pretrage.
+* Instalirajte pipx alatku i dodajte putanju za pipx instalirane wheel-ove u sistemsku pretragu putanja.
 
   ```bash
   sudo apt install pipx
   pipx ensurepath
   ```
 
-* Instalirajte wheel paket amd-debug-tools sa PyPI.
+* Instalirajte amd-debug-tools wheel sa PyPI.
   ```bash
   pipx install amd-debug-tools
   ```
 
-* Pokrenite alat amd-ttm da biste proverili trenutna podešavanja za deljenu memoriju.
+* Pokrenite alatku amd-ttm da proverite trenutna podešavanja za zajedničku memoriju.
   ```bash
   amd-ttm
   ```
 
-* Rekonfigurišite podešavanja deljene memorije na **120 GB**:
+* Rekonfigurišite podešavanja zajedničke memorije na **120 GB**:
   ```bash
   amd-ttm --set 120
   ```
 
-* Restartujte sistem da bi izmene stupile na snagu.
+* Restartujte sistem kako bi izmene stupile na snagu.
 
 
 <!-- @os:end -->
 <!-- @device:halo_box -->
-## Provera ažuriranja softvera
+## Proverite ažuriranja softvera
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -84,15 +90,15 @@ Ova količina se može povećati promenom podešavanja Translation Table Manager
 
 ### Hardver
 
-Ovaj vodič zahteva dva Ryzen AI Halo uređaja i jedan Ethernet svič, povezane u zvezdastu topologiju gde je svaki uređaj direktno povezan kablom sa svičem.
+Za ovaj vodič su potrebna dva Ryzen AI Halo uređaja i jedan Ethernet svič, povezani u zvezda (star) topologiji, pri čemu je svaki uređaj povezan direktno sa svičem.
 
 | Komponenta | Količina | Opis |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 2 | Kompjuterski čvorovi koji čine klaster |
+| Ryzen AI Halo | 2 | Računarski čvorovi koji čine klaster |
 | 10Gbps Ethernet svič | 1 | Centralni svič koji omogućava komunikaciju više Ryzen AI Halo čvorova (najmanje 2 porta) |
 | Ethernet kabl | 2 | Povezuje svaki Halo uređaj sa svičem (preporučuje se Cat 7 ili viši) |
 
-> **Napomena**: Potrebna su dva porta na Ethernet sviču da bi se povezala dva Ryzen AI Halo uređaja. Treći port je potreban ako modelu pristupate sa posebnog klijentskog računara umesto sa jednog od Halo uređaja.
+> **Napomena**: Potrebna su dva porta na Ethernet sviču da bi se povezala dva Ryzen AI Halo uređaja. Treći port je potreban ako pristupate modelu sa posebnog klijentskog računara umesto sa jednog od Halo uređaja.
 
 ### Softver
 <!-- @os:windows -->
@@ -114,33 +120,33 @@ sudo apt install git cmake python3 python3-pip
 
 ## Podešavanje fizičkog hardvera
 
-> **Napomena**: Izvršite ovaj korak na Mašini 1 i Mašini 2.
+> **Napomena**: Ovaj korak obavite i na Mašini 1 i na Mašini 2.
 
-Povežite svaki Ryzen AI Halo uređaj sa Ethernet svičem koristeći Cat 7 (ili viši) kabl. Ovim se uspostavlja 10Gbps veza koja se koristi za brzu komunikaciju između čvorova.
+Povežite svaki Ryzen AI Halo uređaj sa Ethernet svičem koristeći Cat 7 (ili viši) kabl. Ovim se uspostavlja 10Gbps veza koja se koristi za komunikaciju velike brzine između čvorova.
 <!-- @os:linux -->
 ### 1. Određivanje mrežnih interfejsa
 
-Na svakoj mašini pronađite naziv njenog mrežnog interfejsa i zabeležite ga (u nastavku će biti nazivan `IFNAME`). Pokrenite:
+Na svakoj mašini pronađite ime njenog mrežnog interfejsa i zapišite ga (u daljem tekstu će biti označen kao `IFNAME`). Pokrenite:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-Ovo direktno ispisuje naziv interfejsa, na primer:
+Ovo direktno ispisuje ime interfejsa, na primer:
 
 ```bash
 enp191s0
 ```
 
-### 2. Provera brzine mrežne veze
+### 2. Provera brzina mrežnih veza
 
-Potvrdite da je veza aktivna i da radi punom brzinom proveravajući brzinu svog interfejsa:
+Potvrdite da je veza aktivna i da radi punom brzinom proverom brzine vašeg interfejsa:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Napomena**: Zamenite `<IFNAME>` izlaznim nazivom interfejsa iz [1. Određivanje mrežnih interfejsa](#1-determine-network-interfaces)
+> **Napomena**: Zamenite `<IFNAME>` izlaznim imenom interfejsa iz [1. Određivanje mrežnih interfejsa](#1-determine-network-interfaces)
 
 Trebalo bi da vidite brzinu od `10000Mb/s`:
 
@@ -148,20 +154,20 @@ Trebalo bi da vidite brzinu od `10000Mb/s`:
 	Speed: 10000Mb/s
 ```
 
-> **Napomena**: Ako je brzina manja od `10000Mb/s` ili veza ne uspostavi vezu, proverite kablovsku vezu i potvrdite da je port sviča podešen na 10Gbps. Neki svičevi zahtevaju da se auto-negotiation onemogući i brzina veze ručno podesi; pogledajte dokumentaciju vašeg sviča.
+> **Napomena**: Ako je brzina niža od `10000Mb/s` ili veza ne uspostavi, proverite kablovsku vezu i potvrdite da je port na sviču podešen na 10Gbps. Nekim svičevima je potrebno da se automatsko pregovaranje (auto-negotiation) isključi i da se brzina veze podesi ručno; pogledajte dokumentaciju vašeg sviča.
 
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ### Provera brzine mrežne veze
 
-Na svakoj mašini proverite brzinu veze svojih mrežnih interfejsa:
+Na svakoj mašini proverite brzinu veze vaših mrežnih interfejsa:
 
 ```powershell
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-Vaš Ethernet interfejs treba da bude `Up` i da radi na `10 Gbps`:
+Vaš Ethernet interfejs bi trebalo da bude `Up` i da radi brzinom od `10 Gbps`:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,27 +175,26 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Napomena**: Ako je brzina manja od `10 Gbps` ili veza ne uspostavi vezu, proverite kablovsku vezu i potvrdite da je port sviča podešen na 10Gbps. Neki svičevi zahtevaju da se auto-negotiation onemogući i brzina veze ručno podesi; pogledajte dokumentaciju vašeg sviča.
+> **Napomena**: Ako je brzina niža od `10 Gbps` ili veza ne uspostavi, proverite kablovsku vezu i potvrdite da je port na sviču podešen na 10Gbps. Nekim svičevima je potrebno da se automatsko pregovaranje (auto-negotiation) isključi i da se brzina veze podesi ručno; pogledajte dokumentaciju vašeg sviča.
 
 <!-- @os:end -->
 
 ## Instaliranje llama.cpp
 
-> **Napomena**: Izvršite ovaj korak na Mašini 1 i Mašini 2.
+> **Napomena**: Ovaj korak obavite i na Mašini 1 i na Mašini 2.
 
 Dostupne su dve opcije instalacije:
 
-- [Opcija 1: Lemonade SDK (Preporučeno)](#option-1-lemonade-sdk-recommended) - unapred izgrađeni binarni fajlovi, najbrže podešavanje
-- [Opcija 2: Ručna izgradnja iz izvornog koda](#option-2-manual-source-build) - izgradnja iz izvornog koda uz potpunu kontrolu nad opcijama izgradnje
+- [Opcija 1: Lemonade SDK (Preporučeno)](#option-1-lemonade-sdk-recommended) - unapred izgrađene binarne datoteke, najbrže podešavanje
+- [Opcija 2: Ručno građenje iz izvornog koda](#option-2-manual-source-build) - građenje iz izvornog koda uz punu kontrolu nad opcijama izgradnje
+### Opcija 1: Lemonade SDK (preporučeno)
 
-### Opcija 1: Lemonade SDK (Preporučeno)
-
-Lemonade SDK pruža noćne (nightly) verzije llama.cpp sa AMD ROCm 7 akceleracijom, namenjene GPU-ovima kao što su gfx1151 (Strix Halo / Ryzen AI Max+ 395) i drugim novijim Radeon arhitekturama.
+Lemonade SDK obezbeđuje noćne (nightly) verzije llama.cpp sa AMD ROCm 7 akceleracijom, namenjene GPU-ovima kao što je gfx1151 (Strix Halo / Ryzen AI Max+ 395) i drugim novijim Radeon arhitekturama.
 
 <!-- @os:windows -->
 #### Korak 1: Preuzimanje unapred izgrađenih binarnih fajlova
 
-Idite na stranicu najnovijeg izdanja i preuzmite arhivu koja odgovara vašoj platformi i ciljnom GPU-u:
+Idite na stranicu sa najnovijim izdanjem i preuzmite arhivu koja odgovara vašoj platformi i ciljnom GPU-u:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -203,7 +208,7 @@ Raspakujte preuzetu arhivu:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-Ovaj direktorijum sada sadrži ROCm verzije `llama-cli.exe`, `llama-server.exe` i `rpc-server.exe`, unapred kompajlirane za vaš Ryzen AI Halo sistem.
+Ovaj direktorijum sada sadrži ROCm-omogućene verzije `llama-cli.exe`, `llama-server.exe` i `rpc-server.exe`, unapred kompajlirane za vaš Ryzen AI Halo sistem.
 
 #### Korak 3: Provera detekcije GPU-a
 
@@ -224,7 +229,7 @@ Available devices:
 <!-- @os:linux -->
 #### Korak 1: Preuzimanje unapred izgrađenih binarnih fajlova
 
-Idite na stranicu najnovijeg izdanja i preuzmite arhivu koja odgovara vašoj platformi i ciljnom GPU-u:
+Idite na stranicu sa najnovijim izdanjem i preuzmite arhivu koja odgovara vašoj platformi i ciljnom GPU-u:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -238,7 +243,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-Ovaj direktorijum sada sadrži ROCm verzije `llama-cli`, `llama-server` i `rpc-server`, unapred kompajlirane za vaš Ryzen AI Halo sistem.
+Ovaj direktorijum sada sadrži ROCm-omogućene verzije `llama-cli`, `llama-server` i `rpc-server`, unapred kompajlirane za vaš Ryzen AI Halo sistem.
 
 #### Korak 3: Provera detekcije GPU-a
 
@@ -258,10 +263,10 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 <!-- @os:end -->
 Kada je llama.cpp pripremljen na svakom čvoru, nastavite na [Preuzimanje modela](#downloading-the-model).
 
-### Opcija 2: Ručno kompajliranje iz izvornog koda
+### Opcija 2: Ručno građenje iz izvornog koda
 
 <!-- @os:windows -->
-#### Korak 1: Kompajliranje llama.cpp
+#### Korak 1: Građenje llama.cpp
 
 Otvorite **x64 Native Tools Command Prompt** (instaliran uz Visual Studio Build Tools) i klonirajte repozitorijum:
 
@@ -270,7 +275,7 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Dodajte HIP u vašu putanju i kompajlirajte sa podrškom za ROCm i RPC:
+Dodajte HIP u vašu putanju i izgradite sa podrškom za ROCm i RPC:
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -278,12 +283,12 @@ cmake -S . -B rocm -G Ninja -DGGML_HIP=ON -DGGML_RPC=ON -DGPU_TARGETS=gfx1151 -D
 cmake --build rocm --config Release
 ```
 
-| Zastavica (Flag) | Svrha |
+| Build oznaka | Namena |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Omogućava ROCm/HIP softverski stek |
 | `-DGGML_RPC=ON` | Omogućava RPC za distribuirano zaključivanje |
 | `-DGPU_TARGETS=gfx1151` | Ciljanje Ryzen AI Halo GPU-a (Radeon 8060s) |
-| `-G Ninja` | Koristi Ninja build sistem |
+| `-G Ninja` | Koristi Ninja sistem za build |
 
 #### Korak 2: Provera detekcije GPU-a
 
@@ -301,9 +306,9 @@ Available devices:
   ROCm0: AMD Radeon(TM) Graphics (110511 MiB, 110357 MiB free)
 ```
 
-#### Korak 3: Dodavanje HIP-a u korisničku putanju
+#### Korak 3: Trajno dodavanje HIP-a u korisničku putanju
 
-Gore navedeni korak kompajliranja postavio je `%HIP_PATH%\bin` samo za trenutnu sesiju. Da biste omogućili dostupnost HIP biblioteka u bilo kom terminalu (ne samo u x64 Native Tools Command Prompt-u), dodajte ga trajno u vašu korisničku `PATH` promenljivu:
+Prethodni korak build-a je postavio `%HIP_PATH%\bin` samo za trenutnu sesiju. Da biste učinili HIP biblioteke dostupnim u bilo kom terminalu (ne samo u x64 Native Tools Command Prompt-u), trajno ga dodajte u korisničku `PATH`:
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
@@ -313,7 +318,7 @@ Kada je llama.cpp pripremljen na svakom čvoru, nastavite na [Preuzimanje modela
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### Korak 1: Kompajliranje llama.cpp
+#### Korak 1: Građenje llama.cpp
 
 Klonirajte repozitorijum:
 
@@ -322,20 +327,20 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-Kompajlirajte sa podrškom za ROCm i RPC:
+Izgradite sa podrškom za ROCm i RPC:
 
 ```bash
 cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
 cmake --build rocm --config Release -j$(nproc)
 ```
 
-| Zastavica (Flag) | Svrha |
+| Build oznaka | Namena |
 |-----------|---------|
 | `-DGGML_HIP=ON` | Omogućava ROCm softverski stek |
 | `-DGGML_RPC=ON` | Omogućava RPC za distribuirano zaključivanje |
 | `-DAMDGPU_TARGETS="gfx1151"` | Ciljanje Ryzen AI Halo GPU-a (Radeon 8060s) |
 
-Za više opcija kompajliranja, pogledajte [dokumentaciju za kompajliranje llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+Za dodatne opcije build-a, pogledajte [dokumentaciju za build llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
 #### Korak 2: Provera detekcije GPU-a
 
@@ -359,7 +364,7 @@ Kada je llama.cpp pripremljen na svakom čvoru, nastavite na [Preuzimanje modela
 
 ## Preuzimanje modela
 
-Ovaj vodič koristi [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), model sa 358 milijardi parametara u `Q4_K_XL` kvantizaciji od [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). U ovoj kvantizaciji modelu je potrebno približno 205GB prostora za skladištenje i stane u kombinovanu GPU memoriju dva Ryzen AI Halo čvora.
+Ovaj vodič koristi [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7), model sa 358 milijardi parametara u `Q4_K_XL` kvantizaciji od [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL). Pri ovoj kvantizaciji model zahteva otprilike 205 GB prostora za skladištenje i stane u zajedničku GPU memoriju dva Ryzen AI Halo čvora.
 
 Preuzmite GGUF fajlove koristeći Hugging Face CLI:
 <!-- @os:linux -->
@@ -380,13 +385,13 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **Napomena**: Preuzimanje modela mora biti završeno na Mašini 1 (kontroleru). Radnim čvorovima (RPC worker nodes) nije potrebna lokalna kopija fajlova modela.
+> **Napomena**: Preuzimanje modela mora biti završeno na Mašini 1 (kontroleru). RPC radnim čvorovima nije potrebna lokalna kopija fajlova modela.
 
 ## Pokretanje modela na klasteru
 
-RPC (Remote Procedure Call) mehanizam u llama.cpp omogućava jednoj instanci llama.cpp da preusmeri slojeve modela na udaljene radne čvorove preko mreže. Jedna mašina deluje kao **kontroler** (Mašina 1), obavljajući tokenizaciju, raspoređivanje i orkestraciju. Druga mašina pokreće lagani **RPC server** (Mašina 2) koji izlaže svoju GPU memoriju i procesorsku snagu kontroleru.
+llama.cpp RPC (Remote Procedure Call) mehanizam omogućava da jedna instanca llama.cpp prebaci slojeve modela na udaljene radne čvorove preko mreže. Jedna mašina ima ulogu **kontrolera** (Mašina 1), zadužena za tokenizaciju, raspoređivanje i orkestraciju. Druga mašina pokreće lagani **RPC server** (Mašina 2) koji izlaže svoju GPU memoriju i procesorsku snagu kontroleru.
 
-U trenutku učitavanja, llama.cpp deli model na oba čvora. Nakon učitavanja, zaključivanje se odvija kao da radi na jednom akceleratoru. RPC u pozadini upravlja prenosom tenzora i sinhronizacijom.
+U trenutku učitavanja, llama.cpp deli model na oba čvora. Nakon učitavanja, zaključivanje se odvija kao da radi na jednom akceleratoru. RPC se u pozadini brine o prenosu tenzora i sinhronizaciji.
 
 ### Korak 1: Pokretanje RPC servera (Mašina 2)
 
@@ -403,21 +408,20 @@ Na Mašini 2, pokrenite RPC server kako biste izložili njene GPU resurse kontro
 ```
 <!-- @os:end -->
 
-| Zastavica | Svrha |
+| Oznaka | Namena |
 |------|---------|
-| `-p` | Port na kojem se emituje RPC server |
+| `-p` | Port na kome se emituje RPC server |
 | `-c` | Omogućava lokalni keš za velike tenzore, izbegavajući ponovljene prenose preko mreže tokom učitavanja modela |
-| `--host` | IP adresa na koju se povezuje RPC server (`0.0.0.0` za sve interfejse) |
+| `--host` | IP adresa na koju se vezuje RPC server (`0.0.0.0` za sve interfejse) |
 
-Za više opcija, pogledajte [dokumentaciju za llama.cpp RPC](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+Za dodatne opcije, pogledajte [dokumentaciju za llama.cpp RPC](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
 ### Korak 2: Pokretanje modela (Mašina 1)
 
-Kada je RPC server pokrenut na Mašini 2, pokrenite zaključivanje sa Mašine 1 koristeći `llama-cli` ili `llama-server`.
-
+Kada je RPC server pokrenut na Mašini 2, pokrenite zaključivanje sa Mašine 1 koristeći ili `llama-cli` ili `llama-server`.
 #### llama-cli
 
-`llama-cli` pruža interfejs zasnovan na terminalu za direktnu interakciju sa modelom. Idealan je za merenje performansi, otklanjanje grešaka i eksperimentisanje na niskom nivou.
+`llama-cli` obezbeđuje interfejs zasnovan na terminalu za direktnu interakciju sa modelom. Idealan je za benčmarking, debagovanje i eksperimentisanje na niskom nivou.
 
 <!-- @os:linux -->
 ```bash
@@ -430,7 +434,7 @@ Kada je RPC server pokrenut na Mašini 2, pokrenite zaključivanje sa Mašine 1 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `hostname -I | awk '{print $1}'` da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `hostname -I | awk '{print $1}'` da pronađete njenu lokalnu IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -446,16 +450,17 @@ Kada je RPC server pokrenut na Mašini 2, pokrenite zaključivanje sa Mašine 1 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminalu (Powershell) da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminalu (Powershell) da pronađete njenu lokalnu IP adresu.
 
 <!-- @os:end -->
 
-Kada se pokrene, `llama-cli` prikazuje napredak učitavanja modela i ulazi u interaktivni prompt gde možete direktno da razgovarate sa modelom:
+Kada se pokrene, `llama-cli` prikazuje napredak učitavanja modela i ulazi u interaktivni prompt gde možete direktno razgovarati sa modelom:
 
-![llama-cli pokreće GLM 4.7 na dva čvora](assets/llama-cli-example.png)
+![llama-cli pokreće GLM 4.7 preko dva čvora](assets/llama-cli-example.png)
+
 #### llama-server
 
-`llama-server` izlaže isti mehanizam za zaključivanje kroz trajni serverski proces sa integrisanim veb UI-jem i HTTP API-jem kompatibilnim sa OpenAI. Ovo je preporučeni interfejs za dugotrajnija raspoređivanja, pristup više korisnika i integraciju sa spoljnim alatima.
+`llama-server` izlaže isti mehanizam za zaključivanje kroz trajni serverski proces sa integrisanim veb UI-jem i HTTP API-jem kompatibilnim sa OpenAI. Ovo je preferirani interfejs za dugotrajnija raspoređivanja, višekorisnički pristup i integraciju sa spoljnim alatima.
 
 <!-- @os:linux -->
 ```bash
@@ -470,11 +475,11 @@ Kada se pokrene, `llama-cli` prikazuje napredak učitavanja modela i ulazi u int
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Pronalaženje `<RPC_WORKER_IP>`**: Na mašini 2, pokrenite `hostname -I | awk '{print $1}'` da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `hostname -I | awk '{print $1}'` da pronađete njenu lokalnu IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Napomena**: Pokrenite ovu komandu u Terminal-u (Powershell).
+> **Napomena**: Pokrenite ovu komandu u Terminalu (Powershell).
 
 ```powershell
 .\llama-server.exe `
@@ -488,19 +493,19 @@ Kada se pokrene, `llama-cli` prikazuje napredak učitavanja modela i ulazi u int
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Pronalaženje `<RPC_WORKER_IP>`**: Na mašini 2, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminal-u (Powershell) da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<RPC_WORKER_IP>`**: Na Mašini 2, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminalu (Powershell) da pronađete njenu lokalnu IP adresu.
 <!-- @os:end -->
 
-Nakon pokretanja, otvorite `http://<HOST_IP>:8081` u svom pretraživaču da biste pristupili ugrađenom veb UI-ju. Ovo pruža interfejs za ćaskanje zasnovan na pretraživaču za interakciju sa modelom:
+Kada se pokrene, otvorite `http://<HOST_IP>:8081` u svom pregledaču da pristupite ugrađenom veb UI-ju. Ovo pruža interfejs za ćaskanje zasnovan na pregledaču za interakciju sa modelom:
 
-![llama-server veb UI koji pokreće GLM 4.7 na dva čvora](assets/llama-server-example.png)
+![llama-server veb UI pokreće GLM 4.7 preko dva čvora](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **Pronalaženje `<HOST_IP>`**: Na mašini 1, pokrenite `hostname -I | awk '{print $1}'` da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<HOST_IP>`**: Na Mašini 1, pokrenite `hostname -I | awk '{print $1}'` da pronađete njenu lokalnu IP adresu.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Pronalaženje `<HOST_IP>`**: Na mašini 1, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminal-u (Powershell) da biste pronašli njenu lokalnu IP adresu.
+> **Pronalaženje `<HOST_IP>`**: Na Mašini 1, pokrenite `ipconfig | findstr /C:"IPv4"` u Terminalu (Powershell) da pronađete njenu lokalnu IP adresu.
 <!-- @os:end -->
 
 #### Referenca parametara
@@ -509,17 +514,17 @@ Nakon pokretanja, otvorite `http://<HOST_IP>:8081` u svom pretraživaču da bist
 |------|---------|
 | `-m` | Putanja do GGUF fajla modela (koristite prvi deo, `00001-of-00005`) |
 | `-c` | Veličina konteksta u tokenima. Veće vrednosti koriste više memorije |
-| `-fa on` | Omogućava rocWMMA Flash Attention za poboljšane performanse na AMD GPU-ima |
+| `-fa on` | Omogućava rocWMMA Flash Attention za poboljšane performanse na AMD GPU-ovima |
 | `-ngl 999` | Prebacuje sve slojeve modela na GPU |
-| `-lm none` | Postavlja režim učitavanja modela na `none`, onemogućavajući mapiranje memorije radi smanjenja vremena učitavanja kada veličina modela prevazilazi sistemski RAM, ali stane u VRAM |
+| `-lm none` | Postavlja režim učitavanja modela na `none`, onemogućavajući mapiranje memorije radi smanjenja vremena učitavanja kada veličina modela prevazilazi sistemski RAM, ali staje u VRAM |
 | `--host` | IP adresa na koju se vezuje `llama-server` (samo za `llama-server`) |
-| `--port` | Port na kom se servira HTTP API (samo za `llama-server`) |
-| `--rpc` | Lista RPC krajnjih tačaka radnika, odvojenih zarezom (`IP:port`) |
+| `--port` | Port na kome se servira HTTP API (samo za `llama-server`) |
+| `--rpc` | Lista RPC radnih krajnjih tačaka odvojenih zarezom (`IP:port`) |
 
 Za potpuno korišćenje parametara, pogledajte [dokumentaciju za llama-cli](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) i [dokumentaciju za llama-server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Sledeći koraci
 
-- **Povežite aplikacije trećih strana**: `llama-server` izlaže API kompatibilan sa OpenAI. Usmerite bilo koju aplikaciju kompatibilnu sa OpenAI (kao što je Open WebUI) na `http://<HOST_IP>:8081` sa bilo kojim rezervisanim API ključem (npr. `none`) da biste se povezali sa svojim klasterom
-- **Istražite druge modele**: Pregledajte kvantizovane GGUF-ove na [Hugging Face](https://huggingface.co/models?search=gguf) da biste pronašli modele koji stanu u kombinovanu GPU memoriju vašeg klastera
-- **Skalirajte na četiri čvora**: Dodajte još dva Ryzen AI Halo sistema kao dodatne RPC radnike da biste pristupili modelima na nivou od 1 triliona parametara. Prosledite dodatne krajnje tačke opciji `--rpc` kao listu odvojenu zarezom (npr. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
+- **Povežite aplikacije trećih strana**: `llama-server` izlaže API kompatibilan sa OpenAI. Usmerite bilo koju aplikaciju kompatibilnu sa OpenAI (poput Open WebUI) na `http://<HOST_IP>:8081` sa bilo kojim rezervisanim API ključem (npr. `none`) da se povežete sa svojim klasterom
+- **Istražite druge modele**: Pregledajte kvantizovane GGUF fajlove na [Hugging Face](https://huggingface.co/models?search=gguf) da pronađete modele koji staju u kombinovanu GPU memoriju vašeg klastera
+- **Skalirajte na četiri čvora**: Dodajte još dva Ryzen AI Halo sistema kao dodatne RPC radnike da biste pristupili modelima u razmeri od 1 triliona parametara. Prosledite dodatne krajnje tačke parametru `--rpc` kao listu odvojenu zarezom (npr. `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)

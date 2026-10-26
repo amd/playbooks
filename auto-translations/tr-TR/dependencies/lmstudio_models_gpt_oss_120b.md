@@ -4,7 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### LM Studio Üzerinde GPT-OSS 120B İndirme
+### GPT-OSS 120B Modelinin LM Studio'ya İndirilmesi
+
+<!-- @device:halo_box -->
+> **Not:** Bu model LM Studio'da zaten mevcutsa bu bölümü atlayabilirsiniz. Değilse, indirmek için aşağıdaki adımları izleyin.
+<!-- @device:end -->
 
 GPT-OSS 120B modelini indirmek için:
 
@@ -15,9 +19,9 @@ GPT-OSS 120B modelini indirmek için:
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio, modeli otomatik olarak indirip doğru dizine yerleştirecektir.
+LM Studio, modeli otomatik olarak indirecek ve doğru dizine yerleştirecektir.
 
-Ek modeller indirmek isterseniz, bunları Discover sekmesinde arayabilirsiniz; LM Studio gerisini halledecektir.
+Ek modeller indirmek isterseniz, bunları Discover sekmesinde arayabilirsiniz; gerisini LM Studio halledecektir.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

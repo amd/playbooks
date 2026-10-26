@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio lahko namestite iz **AMD Ryzen™ AI Developer Center**. Pojdite na zavihek **Updates** in namestite LM Studio, če še ni nameščen.
+LM Studio lahko namestite iz **AMD Ryzen™ AI Developer Center**. Pojdite na zavihek **Updates** in namestite LM Studio, če še ni prisoten.
 
-Da LM Studio omogočite ogled vnaprej nameščenih modelov, pojdite na Settings > General > Models Directory. Nato spremenite pot v `C:\Users\Public\models`
+Če ima vaš sistem vnaprej nameščene modele, pojdite na Settings > General > Models Directory. Nato spremenite pot na `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -23,6 +23,8 @@ Da LM Studio omogočite ogled vnaprej nameščenih modelov, pojdite na Settings 
 2. Namestite. 
 <!-- @device:end -->
 
+> **Modeli:** Če je imel vaš sistem vnaprej nameščen model iz tega vodnika, usmerite LM Studio na zgornjo mapo z vnaprej nameščenimi modeli, da ga uporabite. V nasprotnem primeru pred nadaljevanjem prenesite model iz zavihka **Discover** v LM Studio (ikona iskanja).
+
 > Nasvet: Po namestitvi enkrat zaženite LM Studio, da inicializirate CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
@@ -33,7 +35,7 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Opomba: Namestite lahko bodisi .deb ali AppImage. 
+> Opomba: Izbirate lahko med namestitvijo .deb ali AppImage. 
 1. Prenesite appimage od tukaj: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. zaženite `sudo apt install libfuse2`  
 3. zaženite `cd ~/Downloads`  
@@ -42,12 +44,14 @@ lms --help
 > Nasvet: Po namestitvi enkrat zaženite LM Studio, da inicializirate CLI (`lms`).
 
 <!-- @device:halo_box -->
-Da LM Studio omogočite ogled vnaprej nameščenih modelov, pojdite na Settings > General > Models Directory. Nato spremenite pot v `/var/cache/models`.
+Če ima vaš sistem vnaprej nameščene modele, pojdite na Settings > General > Models Directory. Nato spremenite pot na `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modeli:** Če je imel vaš sistem vnaprej nameščen model iz tega vodnika, usmerite LM Studio na zgornjo mapo z vnaprej nameščenimi modeli, da ga uporabite. V nasprotnem primeru pred nadaljevanjem prenesite model iz zavihka **Discover** v LM Studio (ikona iskanja).
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

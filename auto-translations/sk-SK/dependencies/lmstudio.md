@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Updates** a nainštalujte LM Studio, ak ešte nie je nainštalované.
+LM Studio je možné nainštalovať z **AMD Ryzen™ AI Developer Center**. Prejdite na kartu **Updates** a nainštalujte LM Studio, ak ešte nie je prítomný.
 
-Aby LM Studio videlo predinštalované modely, prejdite na Settings > General > Models Directory. Potom zmeňte cestu na `C:\Users\Public\models`
+Ak má váš systém predinštalované modely, prejdite do Settings > General > Models Directory. Následne zmeňte cestu na `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -19,11 +19,13 @@ Aby LM Studio videlo predinštalované modely, prejdite na Settings > General > 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-1. Stiahnite si inštalátor odtiaľto: [https://lmstudio.ai/download](https://lmstudio.ai/download)
+1. Stiahnite si inštalačný program odtiaľto: [https://lmstudio.ai/download](https://lmstudio.ai/download)
 2. Nainštalujte. 
 <!-- @device:end -->
 
-> Tip: Po inštalácii spustite LM Studio raz, aby sa inicializovalo CLI (`lms`).
+> **Modely:** Ak váš systém obsahoval predinštalovaný model z tejto príručky, nasmerujte LM Studio na vyššie uvedený adresár s predinštalovanými modelmi, aby ste ho mohli použiť. V opačnom prípade si pred pokračovaním stiahnite model z karty **Discover** v LM Studio (ikona s lupou).
+
+> Tip: Po inštalácii spustite LM Studio raz, aby ste inicializovali rozhranie príkazového riadka (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -39,15 +41,17 @@ lms --help
 3. spustite `cd ~/Downloads`  
 4. spustite `chmod +x LM-Studio-*.AppImage`  
 5. spustite `./LM-Studio-*.AppImage`  
-> Tip: Po inštalácii spustite LM Studio raz, aby sa inicializovalo CLI (`lms`).
+> Tip: Po inštalácii spustite LM Studio raz, aby ste inicializovali rozhranie príkazového riadka (`lms`).
 
 <!-- @device:halo_box -->
-Aby LM Studio videlo predinštalované modely, prejdite na Settings > General > Models Directory. Potom zmeňte cestu na `/var/cache/models`.
+Ak má váš systém predinštalované modely, prejdite do Settings > General > Models Directory. Následne zmeňte cestu na `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modely:** Ak váš systém obsahoval predinštalovaný model z tejto príručky, nasmerujte LM Studio na vyššie uvedený adresár s predinštalovanými modelmi, aby ste ho mohli použiť. V opačnom prípade si pred pokračovaním stiahnite model z karty **Discover** v LM Studio (ikona s lupou).
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

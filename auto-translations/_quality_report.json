@@ -1,182 +1,182 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
-      "mean": 92.8,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 80,
-      "mean": 91.9,
-      "min": 82,
+      "files_scored": 78,
+      "mean": 91.7,
+      "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-CA": {
-      "files_scored": 80,
-      "mean": 90.7,
+      "files_scored": 78,
+      "mean": 90.6,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.2,
-      "min": 60,
+      "files_scored": 78,
+      "mean": 92.7,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
-      "mean": 92.1,
+      "files_scored": 78,
+      "mean": 91.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.3,
       "min": 20,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.9,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
-      "mean": 92.6,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "pl-PL": {
-      "files_scored": 80,
-      "mean": 93.2,
-      "min": 78,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "pt-BR": {
-      "files_scored": 80,
-      "mean": 93.7,
-      "min": 82,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "pt-PT": {
-      "files_scored": 80,
-      "mean": 92.9,
-      "min": 82,
-      "judge_model": "Claude-Opus-4.8"
-    },
-    "ro-RO": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
+    "pl-PL": {
+      "files_scored": 78,
+      "mean": 93.1,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "pt-BR": {
+      "files_scored": 78,
+      "mean": 93.7,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "pt-PT": {
+      "files_scored": 78,
+      "mean": 92.7,
+      "min": 82,
+      "judge_model": "Claude-Opus-4.8"
+    },
+    "ro-RO": {
+      "files_scored": 78,
+      "mean": 92.4,
+      "min": 78,
+      "judge_model": "Claude-Opus-4.8"
+    },
     "ru-RU": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.9,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.6,
-      "min": 82,
+      "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 90.5,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 80,
-      "mean": 91.1,
+      "files_scored": 78,
+      "mean": 90.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 80,
-      "mean": 92.7,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.6,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -189,12 +189,6 @@
       "issues": "Contains garbled text 'للで', meta-commentary 'Wait, let me reconsider', and duplicated title lines; unprofessional output."
     },
     {
-      "locale": "he",
-      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
-      "score": 60,
-      "issues": "Title left mostly untranslated ('Clustering Two Ryzen AI Halos'); rest is accurate and fluent."
-    },
-    {
       "locale": "ja-JP",
       "file": "playbooks/supplemental/openhands-getting-started/playbook.json",
       "score": 68,
@@ -205,6 +199,12 @@
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 68,
       "issues": "Redundant English parentheticals; inconsistent 'fino prilagajanje' vs 'fino nastavite'; awkward 'LLaMA-Factory' hyphenation differs from title."
+    },
+    {
+      "locale": "fi-FI",
+      "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
+      "score": 70,
+      "issues": "Title reverses emphasis; 'määritä käyttö' awkward; grammatical case issues with 'autonomisen tekoälyagentin'."
     },
     {
       "locale": "th-TH",
@@ -222,7 +222,7 @@
       "locale": "he",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 72,
-      "issues": "Title 'AiCluster' is mistranslation/garbled; 'Clustering' not properly rendered. Rest accurate and fluent."
+      "issues": "'ריכוד' is incorrect term for clustering; should be 'אשכול'/'קיבוץ'. Otherwise accurate, brands/numbers intact."
     },
     {
       "locale": "ja-JP",
@@ -241,6 +241,12 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 72,
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
+    },
+    {
+      "locale": "cs-CZ",
+      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
+      "score": 78,
+      "issues": "Title omits 'with RPC'; 'Clustrování' awkward neologism; otherwise accurate, terms/numbers intact."
     },
     {
       "locale": "cs-CZ",
@@ -288,7 +294,7 @@
       "locale": "fr-CA",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
-      "issues": "Inconsistent: title translates 'AMD Sync' as 'synchronisation AMD' but body keeps 'AMD Sync'; 'métriques' anglicism (préfère 'mesures')."
+      "issues": "Title translates 'AMD Sync' as 'synchronisation AMD' but body keeps 'AMD Sync'—inconsistent brand term handling."
     },
     {
       "locale": "fr-CA",
@@ -342,7 +348,13 @@
       "locale": "pl-PL",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
-      "issues": "Product name 'AMD Sync' mistranslated as 'synchronizacją AMD' in title; otherwise accurate and fluent."
+      "issues": "Inconsistent 'AMD Sync' translation: title translates as 'synchronizacją AMD' but body keeps 'AMD Sync'; brand should stay intact."
+    },
+    {
+      "locale": "pt-BR",
+      "file": "playbooks/supplemental/amd-sync/playbook.json",
+      "score": 78,
+      "issues": "Title inconsistently translated 'Sincronização da AMD' vs product name 'AMD Sync'; 'Live Metrics' translated though arguably a feature name."
     },
     {
       "locale": "ro-RO",
@@ -351,16 +363,28 @@
       "issues": "'Primii' typo (should be 'Primii/Primii pași→Primii'), 'serverea' is an invented/incorrect term for 'serving'."
     },
     {
-      "locale": "sl-SI",
+      "locale": "sk-SK",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
-      "issues": "Title mistranslates 'AMD Sync' brand as 'sinhronizacijo AMD'; body correctly keeps 'AMD Sync'. Inconsistency."
+      "issues": "Title translated 'AMD Sync' as 'synchronizáciou AMD', inconsistent with body; brand name should stay intact."
+    },
+    {
+      "locale": "sl-SI",
+      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
+      "score": 78,
+      "issues": "Untranslated 'Clustering'; added 'AMD' not in source; '350B+' expanded acceptably but added 'parametrov' not explicit in source."
     },
     {
       "locale": "sl-SI",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark ™ misplaced (belongs to Unsloth/LLMs brand); inconsistent terminology 'fino prilagajanje' vs 'fino nastavljanje'."
+    },
+    {
+      "locale": "sr-Latn",
+      "file": "playbooks/supplemental/amd-sync/playbook.json",
+      "score": 78,
+      "issues": "Inconsistent 'AMD Sync' rendered as 'AMD sinhronizacijom' in title; otherwise accurate and fluent."
     },
     {
       "locale": "sr-Latn",
@@ -375,6 +399,12 @@
       "issues": "Title 'กำลังสร้าง' implies ongoing action; should be 'การสร้าง'. Slightly awkward 'ภาพที่สร้างโดย AI'."
     },
     {
+      "locale": "th-TH",
+      "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
+      "score": 78,
+      "issues": "Title left untranslated in English ('Clustering Four Ryzen AI Halos'); otherwise accurate and fluent."
+    },
+    {
       "locale": "uk-UA",
       "file": "playbooks/core/n8n-automation-gpt-oss/playbook.json",
       "score": 78,
@@ -385,6 +415,12 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark ™ misplaced (belongs to LLMs term); inconsistent terminology 'тонке'/'точне налаштування'; slightly awkward phrasing."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
+      "score": 78,
+      "issues": "Title mistranslates 'with RPC'; 'Halos' plural lost; overall adequate but title phrasing awkward."
     },
     {
       "locale": "zh-CN",
@@ -414,7 +450,7 @@
       "locale": "cs-CZ",
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 82,
-      "issues": "Title translates 'AMD Sync' as 'synchronizací AMD' inconsistently; body keeps brand correctly. Minor terminology inconsistency."
+      "issues": "Title translates 'AMD Sync' as 'synchronizací AMD' instead of keeping brand name consistent; otherwise accurate."
     },
     {
       "locale": "cs-CZ",
@@ -427,12 +463,6 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 82,
       "issues": "Inconsistent terminology: 'jader' vs 'kernely' for kernels; otherwise accurate, fluent, brands intact."
-    },
-    {
-      "locale": "cs-CZ",
-      "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
-      "score": 82,
-      "issues": "Added 'AMD' not in source; 'Clustrování' is awkward anglicism; otherwise accurate, terms/code intact."
     },
     {
       "locale": "da-DK",
@@ -532,6 +562,12 @@
     },
     {
       "locale": "hu-HU",
+      "file": "playbooks/supplemental/amd-sync/playbook.json",
+      "score": 82,
+      "issues": "Title inconsistently translates 'AMD Sync' as 'AMD szinkronizálással'; body keeps brand correctly. Otherwise accurate."
+    },
+    {
+      "locale": "hu-HU",
       "file": "playbooks/supplemental/gaia-agents/playbook.json",
       "score": 82,
       "issues": "Title mistranslates 'first agent with GAIA' as 'GAIA's first agent'; otherwise accurate and fluent."
@@ -579,12 +615,6 @@
       "issues": "Gender agreement error: 'en...utviklingssammendrag' should be 'et'; otherwise accurate and fluent."
     },
     {
-      "locale": "nb-NO",
-      "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
-      "score": 82,
-      "issues": "Added 'AMD' not in source; 'Clustering' left untranslated; 'Halo-er' awkward pluralization."
-    },
-    {
       "locale": "pt-BR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
@@ -624,19 +654,13 @@
       "locale": "ro-RO",
       "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 82,
-      "issues": "\"Clustering\" left untranslated (anglicism); \"unități\" odd for \"Halos\"; otherwise accurate, terms/code intact."
-    },
-    {
-      "locale": "sk-SK",
-      "file": "playbooks/supplemental/amd-sync/playbook.json",
-      "score": 82,
-      "issues": "Title translates 'AMD Sync' as 'synchronizáciou AMD', inconsistent with brand name kept later; otherwise accurate."
+      "issues": "'Clustering' left untranslated (awkward); 'procesoare' vs source 'devices' inconsistency with later 'dispozitive'. Otherwise accurate, terms intact."
     },
     {
       "locale": "sl-SI",
       "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
-      "issues": "Inconsistent 'Lemonade Server' rendering: translated once, kept once; minor terminology inconsistency."
+      "issues": "Title phrasing 'Lokalno zagnan' slightly awkward; gerund 'Running' better as 'Poganjanje'. Otherwise accurate, brands intact."
     },
     {
       "locale": "sr-Latn",
@@ -648,7 +672,7 @@
       "locale": "sr-Latn",
       "file": "playbooks/supplemental/openclaw-lemonade-server/playbook.json",
       "score": 82,
-      "issues": "Minor: 'OpenClaw autonomni AI agent' should be 'autonomnog AI agenta' (case agreement)."
+      "issues": "Minor: hyphenated brand suffix non-ideal; 'agent' should be accusative 'agenta' for fluency."
     },
     {
       "locale": "sr-Latn",
@@ -670,6 +694,12 @@
     },
     {
       "locale": "th-TH",
+      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
+      "score": 82,
+      "issues": "Title left 'Clustering' untranslated; added 'AMD' not in source; otherwise accurate, fluent, terms intact."
+    },
+    {
+      "locale": "th-TH",
       "file": "playbooks/supplemental/speech2speech-translation/playbook.json",
       "score": 82,
       "issues": "Title omits speech-to-speech nuance (just 'speech translation'); otherwise accurate and fluent."
@@ -679,12 +709,6 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
       "issues": "Trademark symbol misplaced; 'fine-tuned' rendering slightly awkward but meaning preserved and terms intact."
-    },
-    {
-      "locale": "tr-TR",
-      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
-      "score": 82,
-      "issues": "\"RPC server\" untranslated; \"çıkarım ayarı yapın\" awkward for 'set up inference'; slightly stiff phrasing."
     },
     {
       "locale": "tr-TR",
@@ -699,22 +723,10 @@
       "issues": "Added 'AMD' not in source; otherwise accurate and fluent."
     },
     {
-      "locale": "uk-UA",
-      "file": "playbooks/supplemental/amd-sync/playbook.json",
-      "score": 82,
-      "issues": "Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent."
-    },
-    {
       "locale": "zh-CN",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 82,
       "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
-    },
-    {
-      "locale": "zh-TW",
-      "file": "playbooks/supplemental/clustering-rpc-server/playbook.json",
-      "score": 82,
-      "issues": "Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate."
     },
     {
       "locale": "ro-RO",

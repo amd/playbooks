@@ -34,12 +34,12 @@
       "quality_issues": "Accurate, fluent, all code/URLs intact; minor style nits only."
     },
     "playbooks/dependencies/comfyui_models.md": {
-      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "source_sha256": "aca3c00aef9acd22b010f1407ebff7af8492d4407084f04d2fa09e4d5931cfa8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor: could translate 'Download' button label but consistent."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: no issues of note."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "0b567e5e986ee1c34e6d6bfdf053f73e3630540235d56c7ac8cd08b17896f7d6",
@@ -66,12 +66,12 @@
       "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: 'expected to run' softened to 'will run'."
     },
     "playbooks/dependencies/lmstudio.md": {
-      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
+      "source_sha256": "1b3bdd21937e48222d3a9b03b0d851773bd168a67c4c80a2f26ee884e714021d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, all code/URLs/tags intact; UI terms left in English which is acceptable."
+      "quality_issues": "Accurate, fluent; code/URLs/tags intact. UI terms kept in English, consistent with original style."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "a2be25b6873874f73bfefffbc434e25b81334679dbbcba2748e6e87aa1e8e758",
@@ -80,14 +80,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
       "quality_issues": "Accurate, fluent, code/URLs intact; minor 'wheel' rendered as 软件包 acceptable."
-    },
-    "playbooks/dependencies/n8n.md": {
-      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Untranslated 'n8n Documentation' link text; minor colon spacing inconsistency. Otherwise accurate."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "ad48a5e1521ba90e7afd6f3a31abe2694999e7faec6a323be62d0a3ecf094f8c",
@@ -129,14 +121,6 @@
       "quality_score": 92,
       "quality_issues": "Accurate, fluent; UI tab names left untranslated but consistent, acceptable choice."
     },
-    "playbooks/dependencies/vllm.md": {
-      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'targets' as '指向' slightly imprecise, minor nit."
-    },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
@@ -146,12 +130,12 @@
       "quality_issues": "Accurate, fluent; UI tab names kept in English (acceptable but could be localized)."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
-      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "source_sha256": "b01f1bc19aae4624d867d4e5fe847a1f228d7f083436ffac2d49bc66510d772e",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 98,
-      "quality_issues": "Accurate, fluent, code and elements intact; minor untranslated UI terms acceptable."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor: UI labels kept in English, acceptable."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
@@ -258,20 +242,20 @@
       "quality_issues": "Accurate and fluent; minor stylistic word order variation, negligible."
     },
     "playbooks/supplemental/amd-sync/README.md": {
-      "source_sha256": "e777827fbe0b543b84f58e3a9d7c7a9761fd640f37682499e9ea8ee5acc1478e",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Inconsistent formality (您/你 mix), minor style shifts; accurate and fluent, code/URLs intact."
-    },
-    "playbooks/supplemental/amd-sync/playbook.json": {
-      "source_sha256": "47606bc42545735813bef4b9e13b9ee635149ffaca933e30ebc8720a90ff1b5d",
+      "source_sha256": "aa38fa378ff4002d6f0c8ecc8e3ee8ecb3cf3593b7ada097fd369b96fdfe2f93",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
-      "quality_issues": "Accurate, fluent; brand terms intact. Minor: 'Live Metrics' as feature name arguably better capitalized."
+      "quality_issues": "Accurate, fluent, code/URLs intact. Minor inconsistency in second-person register (您/你 mixed)."
+    },
+    "playbooks/supplemental/amd-sync/playbook.json": {
+      "source_sha256": "bb0203d556ce3c34216dd589e923f03df5bc0331a57342b8d075aea7dc558b6c",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; brand terms and features preserved correctly."
     },
     "playbooks/supplemental/clustering-rccl/README.md": {
       "source_sha256": "85a37042eb3d930429c1e0c2ee36edfdc0cfb70f995f814cf6a9f47060af3763",
@@ -290,20 +274,20 @@
       "quality_issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
-      "source_sha256": "40eca53770d0d4011db1b668485ba06d457963222df9179f1ba501c32c6087fa",
+      "source_sha256": "426e00423c7b9e263c9eca2da59c66973e91ca9a6b27a766887396a403a17e5b",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Accurate, fluent, code/URLs intact. Minor: '358B' rendered as '3580 亿' vs later '358B' inconsistency; slight 'you' formality shift."
+      "quality_score": 90,
+      "quality_issues": "Accurate, intact code/URLs; minor inconsistency: mix of full-width and half-width punctuation in latter sections."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
-      "source_sha256": "7a11fc3c510b7f33187b6f7c05f06305cc55fd22ac3b145067b28a7821bd46a8",
+      "source_sha256": "d2791d4bb3f2fed9d647782156e9b2bbdb3c360cc50ae9c19d22f47d214ec356",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Comma used instead of proper Chinese pause; otherwise accurate, fluent, terms intact."
+      "quality_score": 78,
+      "quality_issues": "Title mistranslates 'with RPC'; 'Halos' plural lost; overall adequate but title phrasing awkward."
     },
     "playbooks/supplemental/cvml/README.md": {
       "source_sha256": "31c69cc98e43387d9e01f96afdae1c5a2378af9f9f0e773d4e9febc2d84e0bdb",
@@ -426,20 +410,20 @@
       "quality_issues": "Brand inconsistency: 'LLaMA Factory' vs 'LLaMA-Factory' (hyphen mismatch with source)."
     },
     "playbooks/supplemental/openclaw-lemonade-server/README.md": {
-      "source_sha256": "131a8dbe90f9ed5638e7e2a33ad5701c678f3ab1348210a2badc3b8f5bcf9346",
+      "source_sha256": "fe57c74bb95a9e39e77223a4ce7b2df8a761b8ad10b326b7c052768772089bfd",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Accurate, fluent, code/URLs intact. Minor inconsistency: 'you/your' rendered as both 您 and 你 across sections."
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; code/URLs intact. Minor inconsistency: agent rendered as both 智能体 and 代理."
     },
     "playbooks/supplemental/openclaw-lemonade-server/playbook.json": {
-      "source_sha256": "ad63f56e43c6be51b65de3beac6917a2aed27360cca004d45cbe20e24ce068d8",
+      "source_sha256": "693fcf028ce5096feb6b01c9af7c99acd5556bed3f8f6126a604b8ec0e525204",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'agent' as 代理 acceptable though 智能体 preferable."
+      "quality_score": 88,
+      "quality_issues": "Title phrasing slightly awkward ('与' placement); otherwise accurate and fluent."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
       "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
@@ -626,20 +610,20 @@
       "quality_issues": "Accurate, fluent; brands and terms intact."
     },
     "playbooks/supplemental/clustering-rpc-server-4-node/README.md": {
-      "source_sha256": "d78cef1e7ac2d7a71eb0a8e35e706ec82afcafb8f8d321aa9256b139a44522e9",
+      "source_sha256": "667314441c9f6e3d451466f0c099205df970725ca727a06a74dd2e156abe4458",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Accurate, fluent, terminology consistent; code/URLs intact. Minor: anchor links kept English while headings translated (source issue)."
+      "quality_issues": "Accurate, fluent, terminology consistent; code/URLs intact. Minor: 'playbook' rendered inconsistently (指南/手册)."
     },
     "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json": {
-      "source_sha256": "2a16327c2890bd9de25a1257a0ea82e6afa54f216828ddf4fba25642f04dbd42",
+      "source_sha256": "29bcc3855eff5040a2b401c28c3f06714b770b0fff47bd88ff0044d727e5db46",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "\"RPC server\" left partly untranslated; otherwise accurate and fluent."
+      "quality_issues": "'RPC server' left untranslated/inconsistent; 'server' could be localized; otherwise accurate and fluent."
     }
   }
 }

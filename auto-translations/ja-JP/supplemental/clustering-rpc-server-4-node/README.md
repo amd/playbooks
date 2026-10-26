@@ -14,29 +14,35 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# RPCを使用したRyzen™ AI Halo 4台のクラスタリング
+# RPCを使用した4台のRyzen™ AI Haloのクラスタリング
 
 ## 概要
 
-お使いのRyzen™ AI Haloは、すでにローカルで大規模言語モデルを実行できます。クラスタリングはこれをさらに一歩進め、複数のシステムのGPUメモリをローカルネットワーク経由で結合することで、より強力な推論能力、優れたコード生成、より深い多言語理解を備えたさらに大規模なモデルへのアクセスを、完全に自分自身のハードウェア上で実現します。
+お使いのRyzen™ AI Haloは、すでにローカルで大規模言語モデルを実行する能力を備えています。クラスタリングはこれをさらに一歩進め、複数のシステムのGPUメモリをローカルネットワーク経由で結合することで、より強力な推論能力、優れたコード生成能力、そしてより深い多言語理解能力を持つ、さらに大規模なモデルへのアクセスを可能にします。これらはすべて、完全にご自身のハードウェア上で実現されます。
 
-このプレイブックでは、llama.cppのRPCエンジンを使用してRyzen AI Halo システムを4台クラスタリングし、大規模なmixture-of-expertsモデルであるKimi K2.6を、AMD ROCm™アクセラレーションを活用して4台すべてのマシンにまたがって実行する方法を説明します。
+このプレイブックでは、llama.cppのRPCエンジンを使用して4台のRyzen AI Haloシステムをクラスタリングし、大規模なmixture-of-expertsモデルであるKimi K2.6を、AMD ROCm™アクセラレーションを活用しながら4台すべてのマシンにわたって実行する方法を解説します。
 
-## このプレイブックで学べること
+## 学習内容
 
-- Ryzen AI HaloシステムでのVRAM割り当てを拡張する方法
-- ROCmおよびRPCサポート付きでllama.cppをインストールする方法
-- RPCワーカーを設定し、4ノードにまたがる分散推論を起動する方法
-- 4台のネットワーク接続されたRyzen AI Haloシステムにまたがってパラメータ数1兆のモデルを実行する方法
+- Ryzen AI HaloシステムでのVRAM割り当ての拡張方法
+- ROCmおよびRPCサポートを備えたllama.cppのインストール
+- RPCワーカーの構成と4ノードにわたる分散推論の起動
+- 4台のネットワーク接続されたRyzen AI Haloシステムにわたる1Tパラメータモデルの実行
 
-## メモリ設定の構成
+## メモリ構成の設定
 
-> **注**: この手順は4台すべてのマシン(マシン1からマシン4)で実施してください。
+> **注**: このステップは4台すべてのマシン（Machine 1からMachine 4まで）で完了させてください。
+
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+> **128 GB前後またはそれ以上のモデルを実行する場合:** Windowsを実行しているAMD Ryzen™ AI Max 400シリーズ（Gorgon Halo）システムでは、128 GBのメモリに近い、またはそれを超えるモデルを実行する場合、エラーなく実行するために追加の構成が必要です。モデルを読み込む前に、[AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines)に従ってください。
+<!-- @os:end -->
+<!-- @device:end -->
 
 <!-- @os:windows -->
-Windowsでは、より高いメモリを必要とする大規模モデルを実行するために、AMD Variable Graphics Memory(iGPU VRAM)割り当てを使用する必要があります。
+Windowsでは、より高いメモリを必要とする大規模なモデルを実行するために、AMD Variable Graphics Memory（iGPU VRAM）の割り当てを使用する必要があります。
 
-これは、AMD Software: Adrenalin Edition コントロールパネルを開き、`パフォーマンス > チューニング > AMD Variable Graphics Memory` に移動することで設定できます。値を**96 GB**に設定してください。変更を反映させるには、システムを再起動してください。
+これは、AMD Software: Adrenalin Editionコントロールパネルを開き、`Performance > Tuning > AMD Variable Graphics Memory`に移動することで設定できます。値を**96 GB**に設定してください。変更を有効にするためにシステムを再起動してください。
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -47,7 +53,7 @@ Windowsでは、より高いメモリを必要とする大規模モデルを実�
 <!-- @os:linux -->
 Linuxでは、ROCmは共有システムメモリプールを利用しており、このプールはデフォルトでシステムメモリの半分に設定されています。
 
-この量は、以下の手順に従ってカーネルのTranslation Table Manager (TTM) ページ設定を変更することで増やすことができます。AMDでは、BIOSで最小専有VRAMを設定することを推奨しています(0.5 GB)。
+この量は、以下の手順でカーネルのTranslation Table Manager（TTM）ページ設定を変更することで増やすことができます。AMDは、BIOSで最小専用VRAMを設定することを推奨します（0.5 GB）。
 
 * pipxユーティリティをインストールし、pipxでインストールされたwheelのパスをシステムの検索パスに追加します。
 
@@ -56,7 +62,7 @@ Linuxでは、ROCmは共有システムメモリプールを利用しており�
   pipx ensurepath
   ```
 
-* PyPIからamd-debug-tools wheelをインストールします。
+* PyPIからamd-debug-toolsのwheelをインストールします。
   ```bash
   pipx install amd-debug-tools
   ```
@@ -66,12 +72,12 @@ Linuxでは、ROCmは共有システムメモリプールを利用しており�
   amd-ttm
   ```
 
-* 共有メモリ設定を**120 GB**に再構成します:
+* 共有メモリ設定を**120 GB**に再構成します。
   ```bash
   amd-ttm --set 120
   ```
 
-* 変更を反映させるには、システムを再起動してください。
+* 変更を有効にするためにシステムを再起動します。
 
 
 <!-- @os:end -->
@@ -84,15 +90,15 @@ Linuxでは、ROCmは共有システムメモリプールを利用しており�
 
 ### ハードウェア
 
-このプレイブックでは、4台のRyzen AI Haloユニットと1台のイーサネットスイッチが必要で、各ユニットをスイッチに直接接続するスター型トポロジーで構成します。
+このプレイブックには、4台のRyzen AI Haloユニットと1台のイーサネットスイッチが必要で、各ユニットがスイッチに直接接続されたスター型トポロジーで構成します。
 
 | コンポーネント | 数量 | 説明 |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 4 | クラスタを構成する計算ノード |
-| 10Gbpsイーサネットスイッチ | 1 | 複数ノードのRyzen AI Halo間の通信を可能にする中央スイッチ(少なくとも4ポート) |
-| イーサネットケーブル | 4 | 各Haloユニットをスイッチに接続する(Cat 7以上を推奨) |
+| Ryzen AI Halo | 4 | クラスターを構成する計算ノード |
+| 10Gbpsイーサネットスイッチ | 1 | 複数ノードのRyzen AI Halo間の通信を可能にする中央スイッチ（最低4ポート） |
+| イーサネットケーブル | 4 | 各Haloユニットをスイッチに接続（Cat 7以上を推奨） |
 
-> **注**: 4台のRyzen AI Haloユニットを接続するには、4つのイーサネットスイッチポートが必要です。Haloユニットの1台からではなく、別のクライアントマシンからモデルにアクセスする場合は、5番目のポートが必要です。
+> **注**: 4台のRyzen AI Haloユニットを接続するには、4つのイーサネットスイッチポートが必要です。Haloユニットの1台ではなく別のクライアントマシンからモデルにアクセスする場合は、5つ目のポートが必要です。
 
 ### ソフトウェア
 <!-- @os:windows -->
@@ -102,7 +108,7 @@ Linuxでは、ROCmは共有システムメモリプールを利用しており�
 以下をインストールしてください:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
-- **Desktop Development with C++** ワークロードを含む [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe)
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe)（**Desktop Development with C++**ワークロードを含む）
 - [AMD HIP SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html)
 <!-- @os:end -->
 
@@ -114,13 +120,13 @@ sudo apt install git cmake python3 python3-pip
 
 ## 物理ハードウェアのセットアップ
 
-> **注**: この手順は4台すべてのマシン(マシン1からマシン4)で実施してください。
+> **注**: このステップは4台すべてのマシン（Machine 1からMachine 4まで）で完了させてください。
 
-各Ryzen AI HaloユニットをCat 7(以上)ケーブルを使用してイーサネットスイッチに接続します。これにより、ノード間の高速通信に使用される10Gbpsリンクが確立されます。
+Cat 7（以上）のケーブルを使用して、各Ryzen AI Haloユニットをイーサネットスイッチに接続します。これにより、ノード間の高速通信に使用される10Gbpsリンクが確立されます。
 <!-- @os:linux -->
 ### 1. ネットワークインターフェースの特定
 
-各マシンで、ネットワークインターフェースの名前を確認し、書き留めておきます(以下では`IFNAME`として参照されます)。次を実行します:
+各マシンで、そのネットワークインターフェースの名前を特定し、書き留めておいてください（以降は`IFNAME`として参照されます）。以下を実行します:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -134,13 +140,13 @@ enp191s0
 
 ### 2. ネットワークリンク速度の確認
 
-インターフェースの速度を確認して、リンクがアクティブでありフル速度で動作していることを確認します:
+インターフェースの速度を確認し、リンクがアクティブでフルスピードで動作していることを確認します。
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **注**: `<IFNAME>` を、[1. ネットワークインターフェースの特定](#1-determine-network-interfaces) の出力インターフェース名に置き換えてください
+> **注**: `<IFNAME>`を[1. ネットワークインターフェースの特定](#1-ネットワークインターフェースの特定)の出力インターフェース名に置き換えてください
 
 `10000Mb/s`の速度が表示されるはずです:
 
@@ -148,7 +154,7 @@ sudo ethtool <IFNAME> | grep Speed
 	Speed: 10000Mb/s
 ```
 
-> **注**: 速度が`10000Mb/s`未満である場合や、リンクがアップしない場合は、ケーブル接続を確認し、スイッチポートが10Gbpsに設定されていることを確認してください。一部のスイッチでは、自動ネゴシエーションを無効にしてリンク速度を手動で設定する必要があります。詳細はスイッチのドキュメントを参照してください。
+> **注**: 速度が`10000Mb/s`より低い場合、またはリンクが確立しない場合は、ケーブル接続を確認し、スイッチポートが10Gbpsに設定されていることを確認してください。一部のスイッチでは、自動ネゴシエーションを無効にしてリンク速度を手動で設定する必要があります。お使いのスイッチのドキュメントを参照してください。
 
 <!-- @os:end -->
 
@@ -169,33 +175,32 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **注**: 速度が`10 Gbps`未満である場合や、リンクがアップしない場合は、ケーブル接続を確認し、スイッチポートが10Gbpsに設定されていることを確認してください。一部のスイッチでは、自動ネゴシエーションを無効にしてリンク速度を手動で設定する必要があります。詳細はスイッチのドキュメントを参照してください。
+> **注**: 速度が`10 Gbps`より低い場合、またはリンクが確立しない場合は、ケーブル接続を確認し、スイッチポートが10Gbpsに設定されていることを確認してください。一部のスイッチでは、自動ネゴシエーションを無効にしてリンク速度を手動で設定する必要があります。お使いのスイッチのドキュメントを参照してください。
 
 <!-- @os:end -->
 
 ## llama.cppのインストール
 
-> **注**: この手順は4台すべてのマシン(マシン1からマシン4)で実施してください。
+> **注**: このステップは4台すべてのマシン（Machine 1からMachine 4まで）で完了させてください。
 
 2つのインストールオプションが利用可能です:
 
-- [オプション1: Lemonade SDK(推奨)](#option-1-lemonade-sdk-recommended) - ビルド済みバイナリ、最速のセットアップ
-- [オプション2: 手動ソースビルド](#option-2-manual-source-build) - ビルドフラグを完全に制御しながらソースからビルド
+- [オプション1: Lemonade SDK（推奨）](#option-1-lemonade-sdk-recommended) - ビルド済みバイナリ、最速のセットアップ
+- [オプション2: 手動ソースビルド](#option-2-manual-source-build) - ビルドフラグを完全に制御したソースからのビルド
+### オプション1: Lemonade SDK（推奨）
 
-### オプション1: Lemonade SDK(推奨)
-
-Lemonade SDKは、gfx1151(Strix Halo / Ryzen AI Max+ 395)やその他の最新のRadeonアーキテクチャなどのGPUを対象とした、AMD ROCm 7アクセラレーション付きのllama.cppのナイトリービルドを提供します。
+Lemonade SDKは、AMD ROCm 7アクセラレーションを備えたllama.cppのナイトリービルドを提供しており、gfx1151（Strix Halo / Ryzen AI Max+ 395）やその他の最新のRadeonアーキテクチャをターゲットとしています。
 
 <!-- @os:windows -->
-#### ステップ1:ビルド済みバイナリのダウンロード
+#### ステップ1: ビルド済みバイナリのダウンロード
 
-最新のリリースページに移動し、お使いのプラットフォームとGPUターゲットに一致するアーカイブをダウンロードします。
+最新のリリースページに移動し、お使いのプラットフォームとGPUターゲットに合ったアーカイブをダウンロードします。
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-`llama-bxxxx-windows-rocm-gfx1151-x64.zip`(`xxxx`はビルド番号)という名前のファイルをダウンロードします。
+`llama-bxxxx-windows-rocm-gfx1151-x64.zip`という名前のファイルをダウンロードします（`xxxx`はビルド番号です）。
 
-#### ステップ2:バイナリの展開
+#### ステップ2: バイナリの展開
 
 ダウンロードしたアーカイブを解凍します。
 
@@ -203,9 +208,9 @@ Lemonade SDKは、gfx1151(Strix Halo / Ryzen AI Max+ 395)やその他の最新�
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-このディレクトリには、Ryzen AI Halo システム向けにプリコンパイルされた、ROCm対応の`llama-cli.exe`、`llama-server.exe`、`ggml-rpc-server.exe`のビルドが含まれています。
+このディレクトリには、Ryzen AI Haloシステム向けに事前コンパイルされたROCm対応のビルドである`llama-cli.exe`、`llama-server.exe`、`ggml-rpc-server.exe`が含まれています。
 
-#### ステップ3:GPU検出の確認
+#### ステップ3: GPU検出の確認
 
 ```bash
 .\llama-cli.exe --list-devices
@@ -222,15 +227,15 @@ Available devices:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### ステップ1:ビルド済みバイナリのダウンロード
+#### ステップ1: ビルド済みバイナリのダウンロード
 
-最新のリリースページに移動し、お使いのプラットフォームとGPUターゲットに一致するアーカイブをダウンロードします。
+最新のリリースページに移動し、お使いのプラットフォームとGPUターゲットに合ったアーカイブをダウンロードします。
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
-`llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip`(`xxxx`はビルド番号)という名前のファイルをダウンロードします。
+`llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip`という名前のファイルをダウンロードします（`xxxx`はビルド番号です）。
 
-#### ステップ2:バイナリの展開と準備
+#### ステップ2: バイナリの展開と準備
 
 ```bash
 unzip llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip
@@ -238,9 +243,9 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-このディレクトリには、Ryzen AI Halo システム向けにプリコンパイルされた、ROCm対応の`llama-cli`、`llama-server`、`rpc-server`のビルドが含まれています。
+このディレクトリには、Ryzen AI Haloシステム向けに事前コンパイルされたROCm対応のビルドである`llama-cli`、`llama-server`、`rpc-server`が含まれています。
 
-#### ステップ3:GPU検出の確認
+#### ステップ3: GPU検出の確認
 
 ```bash
 ./llama-cli --list-devices
@@ -256,21 +261,21 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 <!-- @os:end -->
-各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進みます。
+各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進んでください。
 
-### オプション2:手動でのソースビルド
+### オプション2: 手動でのソースビルド
 
 <!-- @os:windows -->
-#### ステップ1:llama.cppのビルド
+#### ステップ1: llama.cppのビルド
 
-**x64 Native Tools Command Prompt**(Visual Studio Build Toolsとともにインストールされます)を開き、リポジトリをクローンします。
+**x64 Native Tools Command Prompt**（Visual Studio Build Toolsと共にインストールされます）を開き、リポジトリをクローンします。
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-HIPをパスに追加し、ROCmとRPCサポートを有効にしてビルドします。
+HIPをパスに追加し、ROCmおよびRPCサポートを有効にしてビルドします。
 
 ```cmd
 set PATH=%HIP_PATH%\bin;%PATH%
@@ -280,12 +285,12 @@ cmake --build rocm --config Release
 
 | ビルドフラグ | 目的 |
 |-----------|---------|
-| `-DGGML_HIP=ON` | ROCm/HIPソフトウェアスタックを有効にします |
-| `-DGGML_RPC=ON` | 分散推論のためのRPCを有効にします |
-| `-DGPU_TARGETS=gfx1151` | Ryzen AI Halo GPU(Radeon 8060s)をターゲットにします |
-| `-G Ninja` | Ninjaビルドシステムを使用します |
+| `-DGGML_HIP=ON` | ROCm/HIPソフトウェアスタックを有効化 |
+| `-DGGML_RPC=ON` | 分散推論のためのRPCを有効化 |
+| `-DGPU_TARGETS=gfx1151` | Ryzen AI Halo GPU（Radeon 8060s）をターゲットに指定 |
+| `-G Ninja` | Ninjaビルドシステムを使用 |
 
-#### ステップ2:GPU検出の確認
+#### ステップ2: GPU検出の確認
 
 ```cmd
 cd rocm\bin
@@ -301,19 +306,19 @@ Available devices:
   ROCm0: AMD Radeon(TM) Graphics (110511 MiB, 110357 MiB free)
 ```
 
-#### ステップ3:HIPをユーザーパスに追加
+#### ステップ3: HIPをユーザーパスに追加
 
-上記のビルド手順では、`%HIP_PATH%\bin`は現在のセッションのみに設定されています。HIPライブラリを(x64 Native Tools Command Promptだけでなく)任意のターミナルで利用できるようにするには、ユーザーの`PATH`に永続的に追加します。
+上記のビルドステップでは、`%HIP_PATH%\bin`は現在のセッションのみに設定されています。HIPライブラリを（x64 Native Tools Command Promptだけでなく）任意のターミナルで利用できるようにするには、ユーザーの`PATH`に恒久的に追加します。
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
 ```
 
-各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進みます。
+各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進んでください。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### ステップ1:llama.cppのビルド
+#### ステップ1: llama.cppのビルド
 
 リポジトリをクローンします。
 
@@ -322,7 +327,7 @@ git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp
 ```
 
-ROCmとRPCサポートを有効にしてビルドします。
+ROCmおよびRPCサポートを有効にしてビルドします。
 
 ```bash
 cmake -B rocm -DGGML_HIP=ON -DGGML_RPC=ON -DAMDGPU_TARGETS="gfx1151"
@@ -331,13 +336,13 @@ cmake --build rocm --config Release -j$(nproc)
 
 | ビルドフラグ | 目的 |
 |-----------|---------|
-| `-DGGML_HIP=ON` | ROCmソフトウェアスタックを有効にします |
-| `-DGGML_RPC=ON` | 分散推論のためのRPCを有効にします |
-| `-DAMDGPU_TARGETS="gfx1151"` | Ryzen AI Halo GPU(Radeon 8060s)をターゲットにします |
+| `-DGGML_HIP=ON` | ROCmソフトウェアスタックを有効化 |
+| `-DGGML_RPC=ON` | 分散推論のためのRPCを有効化 |
+| `-DAMDGPU_TARGETS="gfx1151"` | Ryzen AI Halo GPU（Radeon 8060s）をターゲットに指定 |
 
 その他のビルドオプションについては、[llama.cppビルドドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md)を参照してください。
 
-#### ステップ2:GPU検出の確認
+#### ステップ2: GPU検出の確認
 
 ```bash
 cd rocm/bin
@@ -354,12 +359,12 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
   ROCm0: AMD Radeon Graphics (120000 MiB, 124704 MiB free)
 ```
 
-各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進みます。
+各ノードでllama.cppの準備が整ったら、[モデルのダウンロード](#downloading-the-model)に進んでください。
 <!-- @os:end -->
 
 ## モデルのダウンロード
 
-このプレイブックでは、[Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL)による`UD-Q2_K_XL`量子化バージョンの[Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6)を使用します。この量子化は、4台のRyzen AI Haloノードの合計GPUメモリ内に収まります。
+このプレイブックでは、[Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL)の`UD-Q2_K_XL`量子化による[Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6)を使用します。この量子化は、4台のRyzen AI Haloノードの合計GPUメモリ内に収まります。
 
 Hugging Face CLIを使用してGGUFファイルをダウンロードします。
 <!-- @os:linux -->
@@ -380,17 +385,17 @@ hf download unsloth/Kimi-K2.6-GGUF --include "UD-Q2_K_XL/*" --local-dir Kimi-K2.
 ```
 <!-- @os:end -->
 
-> **注**:モデルのダウンロードは、マシン1(コントローラー)で完了させる必要があります。RPCワーカーノード(マシン2、3、4)には、モデルファイルのローカルコピーは不要です。
+> **注記**: モデルのダウンロードは、マシン1（コントローラー）上で完了させる必要があります。RPCワーカーノード（マシン2、3、4）は、モデルファイルのローカルコピーを必要としません。
 
-## クラスタ上でのモデルの起動
+## クラスター上でのモデルの起動
 
-llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一のllama.cppインスタンスが、ネットワーク経由でモデルのレイヤーをリモートワーカーにオフロードできます。1台のマシンが**コントローラー**(マシン1)として動作し、トークン化、スケジューリング、オーケストレーションを処理します。残りの3台のマシン(マシン2、3、4)はそれぞれ軽量な**RPCサーバー**を実行し、自身のGPUメモリと計算能力をコントローラーに提供します。
+llama.cppのRPC（Remote Procedure Call）エンジンは、単一のllama.cppインスタンスがネットワーク経由でモデルレイヤーをリモートワーカーにオフロードできるようにします。1台のマシンが**コントローラー**（マシン1）として動作し、トークナイゼーション、スケジューリング、オーケストレーションを処理します。他の3台のマシン（マシン2、3、4）はそれぞれ軽量な**RPCサーバー**を実行し、自身のGPUメモリと計算能力をコントローラーに公開します。
 
-ロード時、llama.cppはモデルを4台すべてのノードに分割します。ロードが完了すると、あたかも単一のアクセラレータ上で実行しているかのように推論が進行します。RPCはテンソルの転送と同期をバックグラウンドで処理します。
+ロード時に、llama.cppはモデルを4つのノード全体に分割（シャーディング）します。ロードが完了すると、推論はまるで単一のアクセラレーター上で実行されているかのように進行します。RPCはテンソルの転送と同期を裏側で処理します。
 
-### ステップ1:RPCサーバーの起動(マシン2、3、4)
+### ステップ1: RPCサーバーの起動（マシン2、3、4）
 
-マシン2、3、4のそれぞれで、RPCサーバーを起動し、自身のGPUリソースをコントローラーに公開します。
+マシン2、3、4のそれぞれで、自身のGPUリソースをコントローラーに公開するためにRPCサーバーを起動します。
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -406,14 +411,14 @@ llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一の
 | フラグ | 目的 |
 |------|---------|
 | `-p` | RPCサーバーをブロードキャストするポート |
-| `-c` | 大きなテンソル用のローカルキャッシュを有効にし、モデルロード中の繰り返しのネットワーク転送を回避します |
-| `--host` | RPCサーバーをバインドするIPアドレス(すべてのインターフェースの場合は`0.0.0.0`) |
+| `-c` | 大きなテンソル用のローカルキャッシュを有効化し、モデルロード中のネットワーク転送の繰り返しを回避 |
+| `--host` | RPCサーバーをバインドするIPアドレス（すべてのインターフェースには`0.0.0.0`） |
 
 その他のオプションについては、[llama.cpp RPCドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md)を参照してください。
 
-### ステップ2:モデルの起動(マシン1)
+### ステップ2: モデルの起動（マシン1）
 
-マシン2、3、4でRPCサーバーが実行されている状態で、マシン1から`llama-cli`または`llama-server`のいずれかを使用して推論を起動します。
+マシン2、3、4でRPCサーバーが稼働している状態で、`llama-cli`または`llama-server`のいずれかを使用してマシン1から推論を起動します。
 #### llama-cli
 
 `llama-cli` は、モデルと直接対話するためのターミナルベースのインターフェースを提供します。ベンチマーク、デバッグ、低レベルの実験に最適です。
@@ -431,11 +436,11 @@ llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一の
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン2、3、4のそれぞれで `hostname -I | awk '{print $1}'` を実行し、そのローカルIPアドレスを確認します。
+> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン 2、3、4 のそれぞれで `hostname -I | awk '{print $1}'` を実行し、ローカル IP アドレスを確認します。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注**: このコマンドはターミナル（PowerShell）で実行してください。
+> **注**: このコマンドはターミナル（Powershell）で実行してください。
 
 ```powershell
 .\llama-cli.exe `
@@ -449,17 +454,17 @@ llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一の
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン2、3、4のそれぞれでターミナル（PowerShell）にて `ipconfig | findstr /C:"IPv4"` を実行し、そのローカルIPアドレスを確認します。
+> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン 2、3、4 のそれぞれでターミナル（Powershell）にて `ipconfig | findstr /C:"IPv4"` を実行し、ローカル IP アドレスを確認します。
 
 <!-- @os:end -->
 
-実行すると、`llama-cli` はモデルの読み込み進捗を表示し、モデルと直接チャットできる対話型プロンプトが起動します。
+実行すると、`llama-cli` はモデルの読み込み状況を表示し、モデルと直接チャットできるインタラクティブなプロンプトに入ります。
 
-![Kimi K2.6を4ノードで実行する llama-cli](assets/llama-cli-example.png)
+![4 つのノードで Kimi K2.6 を実行する llama-cli](assets/llama-cli-example.png)
 
 #### llama-server
 
-`llama-server` は、統合Web UIとOpenAI互換のHTTP APIを備えた永続的なサーバープロセスを通じて、同じ推論エンジンを公開します。これは、長時間稼働するデプロイメント、マルチユーザーアクセス、外部ツールとの統合に適したインターフェースです。
+`llama-server` は、統合された Web UI と OpenAI 互換の HTTP API を備えた永続的なサーバープロセスを通じて、同じ推論エンジンを公開します。これは、長時間稼働するデプロイメント、複数ユーザーによるアクセス、外部ツールとの連携に適したインターフェースです。
 
 <!-- @os:linux -->
 ```bash
@@ -476,11 +481,11 @@ llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一の
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン2、3、4のそれぞれで `hostname -I | awk '{print $1}'` を実行し、そのローカルIPアドレスを確認します。
+> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン 2、3、4 のそれぞれで `hostname -I | awk '{print $1}'` を実行し、ローカル IP アドレスを確認します。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **注**: このコマンドはターミナル（PowerShell）で実行してください。
+> **注**: このコマンドはターミナル（Powershell）で実行してください。
 
 ```powershell
 .\llama-server.exe `
@@ -496,40 +501,40 @@ llama.cppのRPC(Remote Procedure Call)エンジンを使用すると、単一の
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン2、3、4のそれぞれでターミナル（PowerShell）にて `ipconfig | findstr /C:"IPv4"` を実行し、そのローカルIPアドレスを確認します。
+> **`<RPC_WORKER_2_IP>`、`<RPC_WORKER_3_IP>`、`<RPC_WORKER_4_IP>` の確認方法**: マシン 2、3、4 のそれぞれでターミナル（Powershell）にて `ipconfig | findstr /C:"IPv4"` を実行し、ローカル IP アドレスを確認します。
 <!-- @os:end -->
 
-起動後、ブラウザで `http://<HOST_IP>:8081` を開くと、組み込みのWeb UIにアクセスできます。これにより、モデルと対話できるブラウザベースのチャットインターフェースが提供されます。
+起動後、ブラウザで `http://<HOST_IP>:8081` を開くと、組み込みの Web UI にアクセスできます。これにより、モデルと対話するためのブラウザベースのチャットインターフェースが提供されます。
 
-![Kimi K2.6を4ノードで実行する llama-server Web UI](assets/llama-server-example.png)
+![4 つのノードで Kimi K2.6 を実行する llama-server の Web UI](assets/llama-server-example.png)
 
 <!-- @os:linux -->
-> **`<HOST_IP>` の確認方法**: マシン1で `hostname -I | awk '{print $1}'` を実行し、そのローカルIPアドレスを確認します。
+> **`<HOST_IP>` の確認方法**: マシン 1 で `hostname -I | awk '{print $1}'` を実行し、ローカル IP アドレスを確認します。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **`<HOST_IP>` の確認方法**: マシン1でターミナル（PowerShell）にて `ipconfig | findstr /C:"IPv4"` を実行し、そのローカルIPアドレスを確認します。
+> **`<HOST_IP>` の確認方法**: マシン 1 でターミナル（Powershell）にて `ipconfig | findstr /C:"IPv4"` を実行し、ローカル IP アドレスを確認します。
 <!-- @os:end -->
 
 #### パラメータリファレンス
 
 | フラグ | 目的 |
 |------|---------|
-| `-m` | GGUFモデルファイルへのパス（最初のシャード `00001-of-00008` を使用） |
+| `-m` | GGUF モデルファイルへのパス（最初のシャード `00001-of-00008` を使用） |
 | `-c` | トークン単位のコンテキストサイズ。値を大きくするとメモリ使用量が増加します |
-| `-fa on` | AMD GPUでのパフォーマンス向上のためrocWMMA Flash Attentionを有効化します |
-| `-ngl 999` | すべてのモデルレイヤーをGPUにオフロードします |
-| `-lm none` | モデルの読み込みモードを `none` に設定し、メモリマッピングを無効化することで、モデルサイズがシステムRAMを超えるがVRAMには収まる場合の読み込み時間を短縮します |
-| `-b` | トークン単位の論理バッチサイズ。4096に設定すると、ノード間でスループットとメモリ使用量のバランスが取れます |
-| `-ub` | プロンプト処理用の物理（マイクロ）バッチサイズ。`-b` と一致させることで、不要なチャンク処理のオーバーヘッドを回避できます |
-| `--host` | `llama-server` をバインドするIP（`llama-server` のみ） |
-| `--port` | HTTP APIを提供するポート（`llama-server` のみ） |
-| `--rpc` | カンマ区切りのRPCワーカーエンドポイントのリスト（`IP:port`） |
+| `-fa on` | AMD GPU でのパフォーマンス向上のため、rocWMMA Flash Attention を有効化します |
+| `-ngl 999` | すべてのモデルレイヤーを GPU にオフロードします |
+| `-lm none` | モデルの読み込みモードを `none` に設定し、メモリマッピングを無効化します。これにより、モデルサイズがシステム RAM を超えても VRAM に収まる場合に読み込み時間を短縮できます |
+| `-b` | トークン単位の論理バッチサイズ。4096 に設定すると、各ノードでスループットとメモリ使用量のバランスが取れます |
+| `-ub` | プロンプト処理用の物理（マイクロ）バッチサイズ。`-b` と一致させることで、不要なチャンク分割のオーバーヘッドを回避できます |
+| `--host` | `llama-server` をバインドする IP（`llama-server` のみ） |
+| `--port` | HTTP API を提供するポート（`llama-server` のみ） |
+| `--rpc` | RPC ワーカーエンドポイント（`IP:port`）のカンマ区切りリスト |
 
-パラメータの完全な使用方法については、[llama-cliのドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) および [llama-serverのドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) を参照してください。
+完全なパラメータの使用方法については、[llama-cli のドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) および [llama-server のドキュメント](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) を参照してください。
 
 ## 次のステップ
 
-- **サードパーティアプリケーションとの接続**: `llama-server` はOpenAI互換のAPIを公開します。OpenAI互換の任意のアプリケーション（Open WebUIなど）を `http://<HOST_IP>:8081` に向け、任意のプレースホルダーAPIキー（例: `none`）を使用することで、クラスターに接続できます
-- **他のモデルを探索する**: [Hugging Face](https://huggingface.co/models?search=gguf) で量子化されたGGUFを閲覧し、クラスターの合計GPUメモリに収まるモデルを見つけてください
-- **4ノードを超えてスケールする**: 追加のRyzen AI Haloシステムを追加のRPCワーカーとして加えることで、1兆パラメータ規模を超えるモデルにアクセスできます。追加のエンドポイントは、カンマ区切りのリストとして `--rpc` に渡します（例: `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`）
+- **サードパーティアプリケーションとの接続**: `llama-server` は OpenAI 互換の API を公開します。OpenAI 互換の任意のアプリケーション（Open WebUI など）を、任意のプレースホルダー API キー（例: `none`）とともに `http://<HOST_IP>:8081` に向けることで、クラスターに接続できます
+- **他のモデルの探索**: [Hugging Face](https://huggingface.co/models?search=gguf) で量子化された GGUF を参照し、クラスターの合計 GPU メモリに収まるモデルを見つけてください
+- **4 ノードを超えるスケール**: 追加の Ryzen AI Halo システムを RPC ワーカーとして追加することで、1 兆パラメータ規模を超えるモデルにアクセスできます。追加のエンドポイントをカンマ区切りリストとして `--rpc` に渡します（例: `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`）

@@ -14,29 +14,35 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-# Neljän Ryzen™ AI Halon klusterointi RPC:llä
+# Neljän Ryzen™ AI Halo -järjestelmän klusterointi RPC:n avulla
 
 ## Yleiskatsaus
 
-Ryzen™ AI Halosi pystyy jo nyt ajamaan suuria kielimalleja paikallisesti. Klusterointi vie tämän pidemmälle yhdistämällä useiden järjestelmien GPU-muistin paikallisverkon yli, mikä antaa sinulle pääsyn vielä suurempiin malleihin, joissa on vahvempi päättelykyky, parempi koodin generointi ja syvempi monikielinen ymmärrys, kaikki täysin omalla laitteistollasi.
+Ryzen™ AI Halo -järjestelmäsi pystyy jo ajamaan suuria kielimalleja paikallisesti. Klusterointi vie tämän pidemmälle yhdistämällä useiden järjestelmien GPU-muistin paikallisverkon kautta, jolloin käytössäsi on vielä suurempia malleja, joilla on vahvempi päättelykyky, parempi koodin generointi ja syvempi monikielinen ymmärrys – täysin omalla laitteistollasi.
 
-Tämä ohjekirja opettaa, miten neljä Ryzen AI Halo -järjestelmää klusteroidaan käyttäen llama.cpp:n RPC-moottoria ja miten Kimi K2.6, suuri mixture-of-experts-malli, ajetaan kaikilla neljällä koneella AMD ROCm™ -kiihdytyksellä.
+Tämä opas opettaa, miten voit klusteroida neljä Ryzen AI Halo -järjestelmää käyttäen llama.cpp:n RPC-moottoria ja ajaa Kimi K2.6:ta, suurta mixture-of-experts-mallia, kaikilla neljällä koneella AMD ROCm™ -kiihdytyksen avulla.
 
 ## Mitä opit
 
-- Miten VRAM-muistin allokointia laajennetaan Ryzen AI Halo -järjestelmissä
+- Miten laajentaa VRAM-allokointia Ryzen AI Halo -järjestelmissä
 - llama.cpp:n asentaminen ROCm- ja RPC-tuella
-- RPC-työntekijöiden määrittäminen ja hajautetun päättelyn käynnistäminen neljällä solmulla
-- 1T-parametrisen mallin ajaminen neljällä verkotetulla Ryzen AI Halo -järjestelmällä
+- RPC-työntekijöiden määrittäminen ja hajautetun päättelyn käynnistäminen neljässä solmussa
+- 1 biljoonan parametrin mallin ajaminen neljässä verkotetussa Ryzen AI Halo -järjestelmässä
 
 ## Muistiasetuksen määrittäminen
 
 > **Huomautus**: Suorita tämä vaihe kaikilla neljällä koneella (Kone 1–Kone 4).
 
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-Windowsissa, jotta voidaan ajaa suurempia malleja, jotka vaativat enemmän muistia, meidän täytyy käyttää AMD Variable Graphics Memory (iGPU VRAM) -allokointia.
+> **Lähes 128 Gt:n tai sitä suurempien mallien ajaminen:** AMD Ryzen™ AI Max 400 -sarjan (Gorgon Halo) järjestelmissä, joissa käytetään Windowsia, mallit, jotka lähestyvät tai ylittävät 128 Gt muistia, vaativat lisämäärityksiä toimiakseen ilman virheitä. Seuraa [AMD Ryzen AI Max PRO 400 -sarjan Windows-käyttöjärjestelmän ohjeita](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) ennen mallin lataamista.
+<!-- @os:end -->
+<!-- @device:end -->
 
-Tämä voidaan tehdä avaamalla AMD Software: Adrenalin Edition -ohjauspaneeli ja siirtymällä kohtaan: `Performance > Tuning > AMD Variable Graphics Memory`. Aseta arvoksi **96 GB**. Käynnistä järjestelmä uudelleen, jotta muutokset tulevat voimaan.
+<!-- @os:windows -->
+Windowsissa, jos haluat ajaa suurempia malleja, jotka vaativat enemmän muistia, meidän tulee käyttää AMD Variable Graphics Memory (iGPU VRAM) -allokointia.
+
+Tämä voidaan tehdä avaamalla AMD Software: Adrenalin Edition -ohjauspaneeli ja siirtymällä kohtaan: `Performance > Tuning > AMD Variable Graphics Memory`. Aseta arvoksi **96 Gt**. Käynnistä järjestelmä uudelleen, jotta muutokset tulevat voimaan.
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,9 +51,9 @@ Tämä voidaan tehdä avaamalla AMD Software: Adrenalin Edition -ohjauspaneeli j
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linuxissa ROCm käyttää jaettua järjestelmämuistin allasta, ja tämä allas on oletusarvoisesti asetettu puoleen järjestelmämuistista.
+Linuxissa ROCm käyttää jaettua järjestelmämuistin poolia, ja tämä pooli on oletusarvoisesti määritetty puoleen järjestelmämuistista.
 
-Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager (TTM) -sivuasetusta seuraavien ohjeiden mukaisesti. AMD suosittelee asettamaan minimikäytetyn VRAM:n BIOSissa (0,5 Gt).
+Tätä määrää voidaan kasvattaa muuttamalla kernelin Translation Table Managerin (TTM) sivuasetusta seuraavien ohjeiden mukaisesti. AMD suosittelee asettamaan vähimmäismäärän dedikoitua VRAM-muistia BIOSissa (0,5 Gt).
 
 * Asenna pipx-työkalu ja lisää pipx:n asentamien wheel-pakettien polku järjestelmän hakupolkuun.
 
@@ -66,7 +72,7 @@ Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager
   amd-ttm
   ```
 
-* Määritä jaetun muistin asetukset uudelleen arvoon **120 GB**:
+* Määritä jaetun muistin asetukset uudelleen arvoon **120 Gt**:
   ```bash
   amd-ttm --set 120
   ```
@@ -80,29 +86,29 @@ Tätä määrää voidaan kasvattaa muuttamalla ytimen Translation Table Manager
 
 <!-- @require:software-update -->
 <!-- @device:end -->
-## Edellytykset
+## Esivaatimukset
 
 ### Laitteisto
 
-Tämä ohjekirja vaatii neljä Ryzen AI Halo -yksikköä ja yhden Ethernet-kytkimen, jotka on kytketty tähtitopologiaan siten, että kukin yksikkö on kytketty suoraan kytkimeen.
+Tämä opas edellyttää neljää Ryzen AI Halo -yksikköä ja yhtä Ethernet-kytkintä, jotka on kytketty tähtitopologiaan siten, että kukin yksikkö on kytketty suoraan kytkimeen.
 
 | Komponentti | Määrä | Kuvaus |
 |-----------|----------|-------------|
-| Ryzen AI Halo | 4 | Laskentasolmut, jotka muodostavat klusterin |
-| 10 Gbps Ethernet-kytkin | 1 | Keskuskytkin, joka mahdollistaa Ryzen AI Halojen välisen usean solmun viestinnän (vähintään 4 porttia) |
+| Ryzen AI Halo | 4 | Klusterin muodostavat laskentasolmut |
+| 10 Gbps Ethernet-kytkin | 1 | Keskuskytkin, joka mahdollistaa usean solmun Ryzen AI Halo -viestinnän (vähintään 4 porttia) |
 | Ethernet-kaapeli | 4 | Yhdistää kunkin Halo-yksikön kytkimeen (suositellaan Cat 7 tai parempaa) |
 
-> **Huomautus**: Neljän Ethernet-kytkimen portin tarvitaan neljän Ryzen AI Halo -yksikön yhdistämiseen. Viides portti tarvitaan, jos käytät mallia erillisestä asiakaskoneesta yhden Halo-yksikön sijaan.
+> **Huomautus**: Neljän Ethernet-kytkinportin yhdistäminen vaatii neljä Ryzen AI Halo -yksikköä. Viides portti tarvitaan, jos käytät mallia erillisestä asiakaskoneesta sen sijaan, että käyttäisit sitä jostakin Halo-yksiköstä.
 
 ### Ohjelmisto
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt -->
 <!-- @require:driver -->
 <!-- @device:end -->
-Asenna:
+Asenna seuraavat:
 - [Git](https://git-scm.com/downloads/win)
 - [Python](https://www.python.org/downloads/)
-- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) **Desktop Development with C++** -työkuormalla
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_community.exe) ja **Desktop Development with C++** -työkuorma
 - [AMD HIP SDK](https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html)
 <!-- @os:end -->
 
@@ -116,52 +122,52 @@ sudo apt install git cmake python3 python3-pip
 
 > **Huomautus**: Suorita tämä vaihe kaikilla neljällä koneella (Kone 1–Kone 4).
 
-Yhdistä jokainen Ryzen AI Halo -yksikkö Ethernet-kytkimeen Cat 7 (tai parempaa) -kaapelilla. Tämä muodostaa 10 Gbps -yhteyden, jota käytetään solmujen väliseen nopeaan viestintään.
+Yhdistä jokainen Ryzen AI Halo -yksikkö Ethernet-kytkimeen Cat 7 (tai parempi) -kaapelilla. Tämä muodostaa 10 Gbps -yhteyden, jota käytetään solmujen välisessä nopeassa viestinnässä.
 <!-- @os:linux -->
-### 1. Määritä verkkoliittymät
+### 1. Verkkoliitäntöjen määrittäminen
 
-Selvitä kunkin koneen verkkoliittymän nimi ja kirjaa se muistiin (siihen viitataan jäljempänä nimellä `IFNAME`). Aja:
+Selvitä kullakin koneella sen verkkoliitännän nimi ja kirjaa se muistiin (siihen viitataan jäljempänä nimellä `IFNAME`). Suorita:
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
 ```
 
-Tämä tulostaa liittymän nimen suoraan, esimerkiksi:
+Tämä tulostaa liitännän nimen suoraan, esimerkiksi:
 
 ```bash
 enp191s0
 ```
 
-### 2. Vahvista verkkoyhteyksien nopeudet
+### 2. Verkkoyhteyden nopeuksien tarkistaminen
 
-Vahvista, että yhteys on aktiivinen ja toimii täydellä nopeudella tarkistamalla liittymäsi nopeus:
+Varmista, että yhteys on aktiivinen ja toimii täydellä nopeudella tarkistamalla liitäntäsi nopeus:
 
 ```bash
 sudo ethtool <IFNAME> | grep Speed
 ```
 
-> **Huomautus**: Korvaa `<IFNAME>` lähtöliittymän nimellä kohdasta [1. Määritä verkkoliittymät](#1-determine-network-interfaces)
+> **Huomautus**: Korvaa `<IFNAME>` lähtöliitännän nimellä kohdasta [1. Verkkoliitäntöjen määrittäminen](#1-determine-network-interfaces)
 
-Nopeuden pitäisi näyttää `10000Mb/s`:
+Sinun pitäisi nähdä nopeus `10000Mb/s`:
 
 ```bash
 	Speed: 10000Mb/s
 ```
 
-> **Huomautus**: Jos nopeus on alhaisempi kuin `10000Mb/s` tai yhteyttä ei muodostu, tarkista kaapeliliitäntä ja varmista, että kytkimen portti on asetettu 10 Gbps:iin. Jotkin kytkimet vaativat automaattisen neuvottelun poistamista käytöstä ja yhteysnopeuden asettamista manuaalisesti; katso kytkimesi dokumentaatiosta lisätietoja.
+> **Huomautus**: Jos nopeus on alhaisempi kuin `10000Mb/s` tai yhteys ei muodostu, tarkista kaapeliliitäntä ja varmista, että kytkimen portti on asetettu 10 Gbps -nopeuteen. Jotkin kytkimet vaativat, että automaattinen neuvottelu poistetaan käytöstä ja yhteysnopeus asetetaan manuaalisesti; katso lisätietoja kytkimesi dokumentaatiosta.
 
 <!-- @os:end -->
 
 <!-- @os:windows -->
-### Vahvista verkkoyhteyden nopeus
+### Verkkoyhteyden nopeuden tarkistaminen
 
-Tarkista kunkin koneen verkkoliittymien yhteysnopeus:
+Tarkista kunkin koneen verkkoliitäntöjen yhteysnopeus:
 
 ```powershell
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-Ethernet-liittymäsi pitäisi olla tilassa `Up` ja toimia nopeudella `10 Gbps`:
+Ethernet-liitäntäsi pitäisi olla tilassa `Up` ja toimia nopeudella `10 Gbps`:
 
 ```powershell
 Name      Status  LinkSpeed
@@ -169,7 +175,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **Huomautus**: Jos nopeus on alhaisempi kuin `10 Gbps` tai yhteyttä ei muodostu, tarkista kaapeliliitäntä ja varmista, että kytkimen portti on asetettu 10 Gbps:iin. Jotkin kytkimet vaativat automaattisen neuvottelun poistamista käytöstä ja yhteysnopeuden asettamista manuaalisesti; katso kytkimesi dokumentaatiosta lisätietoja.
+> **Huomautus**: Jos nopeus on alhaisempi kuin `10 Gbps` tai yhteys ei muodostu, tarkista kaapeliliitäntä ja varmista, että kytkimen portti on asetettu 10 Gbps -nopeuteen. Jotkin kytkimet vaativat, että automaattinen neuvottelu poistetaan käytöstä ja yhteysnopeus asetetaan manuaalisesti; katso lisätietoja kytkimesi dokumentaatiosta.
 
 <!-- @os:end -->
 
@@ -179,23 +185,22 @@ Ethernet  Up      10 Gbps
 
 Käytettävissä on kaksi asennusvaihtoehtoa:
 
-- [Vaihtoehto 1: Lemonade SDK (suositeltu)](#option-1-lemonade-sdk-recommended) - valmiiksi käännetyt binaarit, nopein käyttöönotto
-- [Vaihtoehto 2: Manuaalinen lähdekoodista kääntäminen](#option-2-manual-source-build) - käännä lähdekoodista täydellä hallinnalla käännösasetuksiin
-
+- [Vaihtoehto 1: Lemonade SDK (suositeltu)](#option-1-lemonade-sdk-recommended) – valmiiksi käännetyt binäärit, nopein tapa
+- [Vaihtoehto 2: Manuaalinen lähdekoodista kääntäminen](#option-2-manual-source-build) – käännä lähdekoodista täydellä hallinnalla käännöslippujen suhteen
 ### Vaihtoehto 1: Lemonade SDK (suositeltu)
 
-Lemonade SDK tarjoaa öisin päivitettäviä llama.cpp-käännöksiä AMD ROCm 7 -kiihdytyksellä, kohdistaen GPU:ihin kuten gfx1151 (Strix Halo / Ryzen AI Max+ 395) ja muihin uudempiin Radeon-arkkitehtuureihin.
+Lemonade SDK tarjoaa öisin päivittyviä llama.cpp-käännöksiä AMD ROCm 7 -kiihdytyksellä, kohdistettuna GPU-malleihin kuten gfx1151 (Strix Halo / Ryzen AI Max+ 395) sekä muihin uusiin Radeon-arkkitehtuureihin.
 
 <!-- @os:windows -->
-#### Vaihe 1: Lataa valmiiksi käännetyt binaaritiedostot
+#### Vaihe 1: Lataa esikäännetyt binäärit
 
-Siirry uusimman julkaisun sivulle ja lataa arkisto, joka vastaa alustaasi ja GPU-kohdettasi:
+Siirry uusimman julkaisun sivulle ja lataa alustaasi ja GPU-kohdettasi vastaava arkisto:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
 Lataa tiedosto nimeltä `llama-bxxxx-windows-rocm-gfx1151-x64.zip` (jossa `xxxx` on käännösnumero).
 
-#### Vaihe 2: Pura binaaritiedostot
+#### Vaihe 2: Pura binäärit
 
 Pura ladattu arkisto:
 
@@ -203,9 +208,9 @@ Pura ladattu arkisto:
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-Tämä hakemisto sisältää nyt ROCm-tuetut käännökset tiedostoista `llama-cli.exe`, `llama-server.exe` ja `ggml-rpc-server.exe`, jotka on käännetty valmiiksi Ryzen AI Halo -järjestelmällesi.
+Tämä hakemisto sisältää nyt ROCm-tuetut käännökset tiedostoista `llama-cli.exe`, `llama-server.exe` ja `ggml-rpc-server.exe`, esikäännettynä Ryzen AI Halo -järjestelmällesi.
 
-#### Vaihe 3: Vahvista GPU:n tunnistus
+#### Vaihe 3: Varmista GPU:n tunnistus
 
 ```bash
 .\llama-cli.exe --list-devices
@@ -222,15 +227,15 @@ Available devices:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-#### Vaihe 1: Lataa valmiiksi käännetyt binaaritiedostot
+#### Vaihe 1: Lataa esikäännetyt binäärit
 
-Siirry uusimman julkaisun sivulle ja lataa arkisto, joka vastaa alustaasi ja GPU-kohdettasi:
+Siirry uusimman julkaisun sivulle ja lataa alustaasi ja GPU-kohdettasi vastaava arkisto:
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
 Lataa tiedosto nimeltä `llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip` (jossa `xxxx` on käännösnumero).
 
-#### Vaihe 2: Pura ja valmistele binaaritiedostot
+#### Vaihe 2: Pura ja valmistele binäärit
 
 ```bash
 unzip llama-bxxxx-ubuntu-rocm-gfx1151-x64.zip
@@ -238,9 +243,9 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-Tämä hakemisto sisältää nyt ROCm-tuetut käännökset tiedostoista `llama-cli`, `llama-server` ja `rpc-server`, jotka on käännetty valmiiksi Ryzen AI Halo -järjestelmällesi.
+Tämä hakemisto sisältää nyt ROCm-tuetut käännökset tiedostoista `llama-cli`, `llama-server` ja `rpc-server`, esikäännettynä Ryzen AI Halo -järjestelmällesi.
 
-#### Vaihe 3: Vahvista GPU:n tunnistus
+#### Vaihe 3: Varmista GPU:n tunnistus
 
 ```bash
 ./llama-cli --list-devices
@@ -258,12 +263,12 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 <!-- @os:end -->
 Kun llama.cpp on valmisteltu jokaisessa solmussa, jatka kohtaan [Mallin lataaminen](#downloading-the-model).
 
-### Vaihtoehto 2: Manuaalinen lähdekoodikäännös
+### Vaihtoehto 2: Manuaalinen lähdekoodista kääntäminen
 
 <!-- @os:windows -->
 #### Vaihe 1: Käännä llama.cpp
 
-Avaa **x64 Native Tools Command Prompt** (asennettu Visual Studio Build Toolsin mukana) ja kloonaa tietovarasto:
+Avaa **x64 Native Tools Command Prompt** (asennettu Visual Studio Build Toolsin mukana) ja kloonaa repositorio:
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
@@ -282,10 +287,10 @@ cmake --build rocm --config Release
 |-----------|---------|
 | `-DGGML_HIP=ON` | Ottaa käyttöön ROCm/HIP-ohjelmistopinon |
 | `-DGGML_RPC=ON` | Ottaa käyttöön RPC:n hajautettua päättelyä varten |
-| `-DGPU_TARGETS=gfx1151` | Kohdistaa Ryzen AI Halo GPU:hun (Radeon 8060s) |
+| `-DGPU_TARGETS=gfx1151` | Kohdistaa Ryzen AI Halo -GPU:hun (Radeon 8060s) |
 | `-G Ninja` | Käyttää Ninja-käännösjärjestelmää |
 
-#### Vaihe 2: Vahvista GPU:n tunnistus
+#### Vaihe 2: Varmista GPU:n tunnistus
 
 ```cmd
 cd rocm\bin
@@ -315,7 +320,7 @@ Kun llama.cpp on valmisteltu jokaisessa solmussa, jatka kohtaan [Mallin lataamin
 <!-- @os:linux -->
 #### Vaihe 1: Käännä llama.cpp
 
-Kloonaa tietovarasto:
+Kloonaa repositorio:
 
 ```bash
 git clone https://github.com/ggml-org/llama.cpp
@@ -333,11 +338,11 @@ cmake --build rocm --config Release -j$(nproc)
 |-----------|---------|
 | `-DGGML_HIP=ON` | Ottaa käyttöön ROCm-ohjelmistopinon |
 | `-DGGML_RPC=ON` | Ottaa käyttöön RPC:n hajautettua päättelyä varten |
-| `-DAMDGPU_TARGETS="gfx1151"` | Kohdistaa Ryzen AI Halo GPU:hun (Radeon 8060s) |
+| `-DAMDGPU_TARGETS="gfx1151"` | Kohdistaa Ryzen AI Halo -GPU:hun (Radeon 8060s) |
 
-Lisää käännösasetuksia löydät osoitteesta [llama.cpp-käännösdokumentaatio](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
+Lisää käännösvaihtoehtoja löydät [llama.cpp:n käännösdokumentaatiosta](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md).
 
-#### Vaihe 2: Vahvista GPU:n tunnistus
+#### Vaihe 2: Varmista GPU:n tunnistus
 
 ```bash
 cd rocm/bin
@@ -359,7 +364,7 @@ Kun llama.cpp on valmisteltu jokaisessa solmussa, jatka kohtaan [Mallin lataamin
 
 ## Mallin lataaminen
 
-Tämä käyttöopas käyttää mallia [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) `UD-Q2_K_XL`-kvantisoinnilla, jonka on toimittanut [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Tämä kvantisointi mahtuu neljän Ryzen AI Halo -solmun yhdistettyyn GPU-muistiin.
+Tämä opas käyttää mallia [Kimi K2.6](https://huggingface.co/moonshotai/Kimi-K2.6) `UD-Q2_K_XL`-kvantisoinnissa, jonka tarjoaa [Unsloth](https://huggingface.co/unsloth/Kimi-K2.6-GGUF/tree/main/UD-Q2_K_XL). Tämä kvantisointi mahtuu neljän Ryzen AI Halo -solmun yhdistettyyn GPU-muistiin.
 
 Lataa GGUF-tiedostot Hugging Face CLI:n avulla:
 <!-- @os:linux -->
@@ -380,17 +385,17 @@ hf download unsloth/Kimi-K2.6-GGUF --include "UD-Q2_K_XL/*" --local-dir Kimi-K2.
 ```
 <!-- @os:end -->
 
-> **Huomautus**: Mallin lataus on suoritettava koneella 1 (ohjaimella). RPC-työntekijäsolmujen (koneet 2, 3 ja 4) ei tarvitse sisältää paikallista kopiota mallitiedostoista.
+> **Huomautus**: Mallin lataaminen tulee tehdä Koneella 1 (ohjain). RPC-työntekijäsolmujen (Koneet 2, 3 ja 4) ei tarvitse sisältää paikallista kopiota mallitiedostoista.
 
 ## Mallin käynnistäminen klusterissa
 
-Llama.cpp:n RPC-moottori (Remote Procedure Call) mahdollistaa sen, että yksi llama.cpp-instanssi voi siirtää mallin kerroksia etätyöntekijöille verkon yli. Yksi kone toimii **ohjaimena** (kone 1), hoitaen tokenisoinnin, ajastuksen ja orkestroinnin. Kolme muuta konetta ajavat kukin kevyttä **RPC-palvelinta** (koneet 2, 3 ja 4), jotka altistavat GPU-muistinsa ja laskentatehonsa ohjaimelle.
+llama.cpp:n RPC (Remote Procedure Call) -moottori mahdollistaa sen, että yksi llama.cpp-instanssi voi siirtää mallin kerroksia etätyöntekijöille verkon yli. Yksi kone toimii **ohjaimena** (Kone 1) ja huolehtii tokenisoinnista, aikataulutuksesta ja orkestroinnista. Kolme muuta konetta kukin suorittavat kevyttä **RPC-palvelinta** (Koneet 2, 3 ja 4), jotka tarjoavat GPU-muistinsa ja laskentatehonsa ohjaimen käyttöön.
 
-Latausvaiheessa llama.cpp jakaa mallin kaikkien neljän solmun kesken. Kun malli on ladattu, päättely etenee kuin ajettaisiin yhdellä kiihdyttimellä. RPC hoitaa tensorien siirrot ja synkronoinnin taustalla.
+Latauksen aikana llama.cpp jakaa mallin kaikkien neljän solmun kesken. Kun malli on ladattu, päättely etenee ikään kuin se toimisi yhdellä kiihdyttimellä. RPC huolehtii tensorien siirroista ja synkronoinnista taustalla.
 
-### Vaihe 1: Käynnistä RPC-palvelimet (koneet 2, 3 ja 4)
+### Vaihe 1: Käynnistä RPC-palvelimet (Koneet 2, 3 ja 4)
 
-Käynnistä jokaisella koneista 2, 3 ja 4 RPC-palvelin, joka altistaa sen GPU-resurssit ohjaimelle:
+Käynnistä jokaisella koneista 2, 3 ja 4 RPC-palvelin, jotta sen GPU-resurssit tulevat ohjaimen käyttöön:
 <!-- @os:linux -->
 ```bash
 ./ggml-rpc-server -p 50053 -c --host 0.0.0.0
@@ -405,18 +410,18 @@ Käynnistä jokaisella koneista 2, 3 ja 4 RPC-palvelin, joka altistaa sen GPU-re
 
 | Lippu | Tarkoitus |
 |------|---------|
-| `-p` | Portti, jolla RPC-palvelin lähettää |
-| `-c` | Ottaa käyttöön paikallisen välimuistin suurille tensoreille, mikä välttää toistuvia verkkosiirtoja mallin latauksen aikana |
-| `--host` | IP-osoite, johon RPC-palvelin sidotaan (`0.0.0.0` kaikille rajapinnoille) |
+| `-p` | Portti, jossa RPC-palvelin julkaistaan |
+| `-c` | Ottaa käyttöön paikallisen välimuistin suurille tensoreille, mikä välttää toistuvat verkkosiirrot mallin latauksen aikana |
+| `--host` | IP-osoite, johon RPC-palvelin sidotaan (`0.0.0.0` kaikille liitäntöille) |
 
-Lisätietoja löydät osoitteesta [llama.cpp:n RPC-dokumentaatio](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+Lisätietoja löydät [llama.cpp:n RPC-dokumentaatiosta](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
-### Vaihe 2: Käynnistä malli (kone 1)
+### Vaihe 2: Käynnistä malli (Kone 1)
 
-Kun RPC-palvelimet ovat käynnissä koneilla 2, 3 ja 4, käynnistä päättely koneelta 1 käyttäen joko `llama-cli`- tai `llama-server`-työkalua.
+Kun RPC-palvelimet ovat käynnissä Koneilla 2, 3 ja 4, käynnistä päättely Koneelta 1 joko `llama-cli`- tai `llama-server`-komennolla.
 #### llama-cli
 
-`llama-cli` tarjoaa pääteliittymän, jonka avulla voit olla suoraan yhteydessä malliin. Se sopii erinomaisesti vertailutestaukseen, virheenkorjaukseen ja matalan tason kokeiluihin.
+`llama-cli` tarjoaa päätepohjaisen käyttöliittymän, jolla voi olla suoraan vuorovaikutuksessa mallin kanssa. Se soveltuu hyvin suorituskyvyn vertailuun, virheenjäljitykseen ja matalan tason kokeiluun.
 
 <!-- @os:linux -->
 ```bash
@@ -431,11 +436,11 @@ Kun RPC-palvelimet ovat käynnissä koneilla 2, 3 ja 4, käynnistä päättely k
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneella 2, 3 ja 4 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneista 2, 3 ja 4 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomautus**: Suorita tämä komento Terminaalissa (Powershell).
+> **Huomio**: Suorita tämä komento Terminalissa (Powershell).
 
 ```powershell
 .\llama-cli.exe `
@@ -449,17 +454,17 @@ Kun RPC-palvelimet ovat käynnissä koneilla 2, 3 ja 4, käynnistä päättely k
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneella 2, 3 ja 4 komento `ipconfig | findstr /C:"IPv4"` Terminaalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneista 2, 3 ja 4 komento `ipconfig | findstr /C:"IPv4"` Terminalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
 
 <!-- @os:end -->
 
-Kun `llama-cli` on käynnissä, se näyttää mallin latauksen edistymisen ja avaa interaktiivisen kehotteen, jossa voit keskustella suoraan mallin kanssa:
+Kun `llama-cli` on käynnissä, se näyttää mallin latauksen edistymisen ja avaa interaktiivisen kehotteen, jossa voit keskustella mallin kanssa suoraan:
 
-![llama-cli käynnissä Kimi K2.6:lla neljässä solmussa](assets/llama-cli-example.png)
+![llama-cli, joka suorittaa Kimi K2.6:ta neljän solmun verkossa](assets/llama-cli-example.png)
 
 #### llama-server
 
-`llama-server` tarjoaa saman päättelymoottorin pysyvän palvelinprosessin kautta, johon sisältyy integroitu web-käyttöliittymä sekä OpenAI-yhteensopiva HTTP-rajapinta. Tämä on suositeltu ratkaisu pidempikestoisiin käyttöönottoihin, useiden käyttäjien käyttöön sekä integrointiin ulkoisten työkalujen kanssa.
+`llama-server` tarjoaa saman päättelymoottorin pysyvän palvelinprosessin kautta, johon sisältyy integroitu verkkokäyttöliittymä ja OpenAI-yhteensopiva HTTP-rajapinta. Tämä on suositeltu käyttöliittymä pidempikestoisiin käyttöönottoihin, useamman käyttäjän pääsyyn ja integrointiin ulkoisten työkalujen kanssa.
 
 <!-- @os:linux -->
 ```bash
@@ -476,11 +481,11 @@ Kun `llama-cli` on käynnissä, se näyttää mallin latauksen edistymisen ja av
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneella 2, 3 ja 4 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneista 2, 3 ja 4 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomautus**: Suorita tämä komento Terminaalissa (Powershell).
+> **Huomio**: Suorita tämä komento Terminalissa (Powershell).
 
 ```powershell
 .\llama-server.exe `
@@ -496,19 +501,19 @@ Kun `llama-cli` on käynnissä, se näyttää mallin latauksen edistymisen ja av
   --rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053
 ```
 
-> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneella 2, 3 ja 4 komento `ipconfig | findstr /C:"IPv4"` Terminaalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<RPC_WORKER_2_IP>`-, `<RPC_WORKER_3_IP>`- ja `<RPC_WORKER_4_IP>`-osoitteiden selvittäminen**: Suorita kullakin koneista 2, 3 ja 4 komento `ipconfig | findstr /C:"IPv4"` Terminalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
 <!-- @os:end -->
 
-Kun palvelu on käynnistetty, avaa selaimessasi osoite `http://<HOST_IP>:8081` päästäksesi käsiksi sisäänrakennettuun web-käyttöliittymään. Se tarjoaa selainpohjaisen keskusteluliittymän mallin kanssa vuorovaikutukseen:
+Kun palvelin on käynnistetty, avaa selaimessasi osoite `http://<HOST_IP>:8081` käyttääksesi sisäänrakennettua verkkokäyttöliittymää. Tämä tarjoaa selainpohjaisen keskusteluliittymän mallin kanssa vuorovaikutukseen:
 
-![llama-server-web-käyttöliittymä käynnissä Kimi K2.6:lla neljässä solmussa](assets/llama-server-example.png)
+![llama-server-verkkokäyttöliittymä, joka suorittaa Kimi K2.6:ta neljän solmun verkossa](assets/llama-server-example.png)
 
 <!-- @os:linux -->
 > **`<HOST_IP>`-osoitteen selvittäminen**: Suorita koneella 1 komento `hostname -I | awk '{print $1}'` sen paikallisen IP-osoitteen selvittämiseksi.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **`<HOST_IP>`-osoitteen selvittäminen**: Suorita koneella 1 komento `ipconfig | findstr /C:"IPv4"` Terminaalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
+> **`<HOST_IP>`-osoitteen selvittäminen**: Suorita koneella 1 komento `ipconfig | findstr /C:"IPv4"` Terminalissa (Powershell) sen paikallisen IP-osoitteen selvittämiseksi.
 <!-- @os:end -->
 
 #### Parametriviite
@@ -517,19 +522,19 @@ Kun palvelu on käynnistetty, avaa selaimessasi osoite `http://<HOST_IP>:8081` p
 |------|---------|
 | `-m` | Polku GGUF-mallitiedostoon (käytä ensimmäistä osaa, `00001-of-00008`) |
 | `-c` | Kontekstin koko tokeneina. Suuremmat arvot käyttävät enemmän muistia |
-| `-fa on` | Ottaa käyttöön rocWMMA Flash Attention -toiminnon suorituskyvyn parantamiseksi AMD-näytönohjaimilla |
+| `-fa on` | Ottaa käyttöön rocWMMA Flash Attentionin, mikä parantaa suorituskykyä AMD-GPU:illa |
 | `-ngl 999` | Siirtää kaikki mallin kerrokset GPU:lle |
-| `-lm none` | Asettaa mallin lataustilaksi `none`, mikä poistaa käytöstä muistiin kuvauksen (memory-mapping) latausaikojen lyhentämiseksi silloin, kun mallin koko ylittää järjestelmän RAM-muistin mutta mahtuu VRAM-muistiin |
-| `-b` | Looginen eräkoko tokeneina. Arvo 4096 tasapainottaa suorituskyvyn ja muistinkäytön solmujen välillä |
-| `-ub` | Fyysinen (mikro)eräkoko kehotteen käsittelyä varten. Arvon täsmääminen `-b`-arvon kanssa välttää tarpeettoman pilkkomisen aiheuttaman ylikuormituksen |
+| `-lm none` | Asettaa mallin latausmoodiksi `none`, mikä poistaa muistiin kartoituksen käytöstä latausaikojen lyhentämiseksi, kun mallin koko ylittää järjestelmän RAM-muistin mutta mahtuu VRAM-muistiin |
+| `-b` | Looginen eräkoko tokeneina. Arvo 4096 tasapainottaa suorituskykyä ja muistin käyttöä solmujen välillä |
+| `-ub` | Fyysinen (mikro) eräkoko kehotteen käsittelyä varten. Saman arvon käyttäminen kuin `-b`:lle välttää tarpeettoman pilkkomisen aiheuttaman ylikuormituksen |
 | `--host` | IP-osoite, johon `llama-server` sidotaan (vain `llama-server`) |
-| `--port` | Portti, jossa HTTP-rajapintaa tarjoillaan (vain `llama-server`) |
-| `--rpc` | Pilkuin eroteltu luettelo RPC-työntekijöiden päätepisteistä (`IP:portti`) |
+| `--port` | Portti, jossa HTTP-rajapintaa tarjotaan (vain `llama-server`) |
+| `--rpc` | Pilkuin eroteltu luettelo RPC-työntekijäpäätepisteistä (`IP:portti`) |
 
-Täydelliset parametritiedot löydät [llama-cli-dokumentaatiosta](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) ja [llama-server-dokumentaatiosta](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
+Täydellisen parametrikäytön osalta, katso [llama-cli-dokumentaatio](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) ja [llama-server-dokumentaatio](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Seuraavat vaiheet
 
 - **Yhdistä kolmannen osapuolen sovelluksia**: `llama-server` tarjoaa OpenAI-yhteensopivan rajapinnan. Osoita mikä tahansa OpenAI-yhteensopiva sovellus (kuten Open WebUI) osoitteeseen `http://<HOST_IP>:8081` käyttäen mitä tahansa paikkamerkki-API-avainta (esim. `none`) yhdistääksesi klusteriisi
-- **Tutustu muihin malleihin**: Selaa kvantisoituja GGUF-tiedostoja [Hugging Facessa](https://huggingface.co/models?search=gguf) löytääksesi malleja, jotka mahtuvat klusterisi yhdistettyyn GPU-muistiin
-- **Laajenna yli neljän solmun**: Lisää muita Ryzen AI Halo -järjestelmiä ylimääräisinä RPC-työntekijöinä päästäksesi käsiksi yli biljoonan parametrin kokoisiin malleihin. Anna lisäpäätepisteet `--rpc`-parametrille pilkuin eroteltuna luettelona (esim. `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)
+- **Tutustu muihin malleihin**: Selaa kvantisoituja GGUF-tiedostoja [Hugging Facessa](https://huggingface.co/models?search=gguf) löytääksesi malleja, jotka mahtuvat klusterisi yhteenlaskettuun GPU-muistiin
+- **Skaalaa yli neljän solmun**: Lisää uusia Ryzen AI Halo -järjestelmiä lisätyöntekijöiksi (RPC worker) päästäksesi käsiksi malleihin, jotka ylittävät biljoonan parametrin skaalan. Välitä lisäpäätepisteet `--rpc`-lipulle pilkuin eroteltuna luettelona (esim. `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)
