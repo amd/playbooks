@@ -16,27 +16,29 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Bu kılavuz en az **32GB** sistem belleği gerektirir.
+> Bu playbook en az **32GB** sistem belleği gerektirir.
 <!-- @device:end -->
 
 ## Genel Bakış
 
-Kodlama ajanları, geliştiricilerin Büyük Dil Modelleri (LLM'ler) tarafından desteklenen yapay zeka ajanlarıyla iş birliği yaparak güçlendirilmesini sağlayan güçlü araçlardır. Terminal veya VS Code gibi geliştirme ortamlarına gömülebilirler ve bu da geliştiricinin iş akışına sorunsuz bir şekilde entegre olmalarını sağlar.
+Kodlama ajanları, geliştiricileri Büyük Dil Modelleri (LLM'ler) tarafından desteklenen AI ajanlarıyla iş birliği yaparak güçlendiren güçlü araçlardır. Terminal veya VS Code gibi geliştirme ortamına gömülebilir ve bu sayede bir geliştiricinin iş akışına sorunsuz bir şekilde entegre olabilirler.
 
-Bu eğitim, kodlama ajanını tamamen yerel makinenizde çalıştırmak için Cline, VS Code ve LM Studio'nun nasıl kullanılacağını göstermektedir.
+Bu eğitim, tamamen yerel makinenizde bir kodlama ajanı çalıştırmak için Cline, VS Code ve LM Studio'yu nasıl kullanacağınızı gösterir.
 
 ## Neler Öğreneceksiniz
 
-* Yazılım mühendisliği görevlerine yardımcı olmak için Cline kodlama ajanı ile VS Code'un nasıl çalıştırılacağı.
-* Kodlama ajanlarının yerel çıkarımı için Cline'ın LM Studio ile iletişim kuracak şekilde nasıl yapılandırılacağı.
-* Gerçek dünya yazılım mühendisliği görevlerini çözmek için yerel kodlama ajanlarının nasıl kullanılacağı.
+* Yazılım mühendisliği görevlerine yardımcı olmak için Cline kodlama ajanıyla VS Code'u nasıl çalıştıracağınızı.
+* Kodlama ajanlarının yerel çıkarımı için Cline'ı LM Studio ile iletişim kuracak şekilde nasıl yapılandıracağınızı.
+* Gerçek dünya yazılım mühendisliği görevlerini çözmek için yerel kodlama ajanlarının nasıl kullanılacağını.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Bellek Yapılandırmasının Ayarlanması
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Yazılım Güncellemelerini Kontrol Etme
+## Yazılım Güncellemelerini Kontrol Edin
 > **Not**: VS Code yüklü değilse, Ryzen AI Developer Center ile yükleyebilirsiniz.
 
 <!-- @require:software-update -->
@@ -48,24 +50,24 @@ Bu eğitim, kodlama ajanını tamamen yerel makinenizde çalıştırmak için Cl
 
 ## LM Studio'yu Başlatma ve Yapılandırma
 
-Kodlama ajanına güç veren LLM'yi sunmak için LM Studio'yu kullanacağız.
+Kodlama ajanını destekleyen LLM'yi sunmak için LM Studio'yu kullanacağız.
 
-- Arama çubuğuna `LM Studio` yazın ve uygulamayı başlatın. Aşağıdaki sayfa ile karşılaşacaksınız.
+- Arama çubuğuna `LM Studio` yazın ve uygulamayı başlatın. Sizi aşağıdaki sayfa karşılayacaktır.
 
 ![LM Studio Başlangıç Ekranı](assets/initial-lm-studio.png)
 
-Ardından, LLM'yi sistem üzerine yüklememiz gerekiyor. Büyük bir bağlam uzunluğuna sahip `Qwen3-Coder-30B-A3B` modelini kullanacağız. (Henüz yüklemediyseniz, kurmak için Model sekmesini kullanın).
-- LM Studio penceresinin üst kısmındaki arama çubuğuna tıklayın veya `CTRL+L` tuşlarına basın. `Manually choose model load parameters` anahtarına tıklayın ve ardından Qwen3-Coder-30B-A3B modeline tıklayın.
-- Bağlam uzunluğunu `4096`'dan `32768`'e değiştirin ve `GPU Offload` değerinin maksimumda olduğundan emin olun. Ardından `Load Model` düğmesine tıklayın.
+Ardından, LLM'yi sisteme yüklememiz gerekiyor. Büyük bir bağlam uzunluğuna sahip `Qwen3-Coder-30B-A3B` modelini kullanacağız. (Henüz yüklemediyseniz, yüklemek için Model sekmesini kullanın).
+- LM Studio penceresinin üst kısmındaki arama çubuğuna tıklayın veya `CTRL+L` tuşlarına basın. `Manually choose model load parameters` anahtarını açın ve ardından Qwen3-Coder-30B-A3B modeline tıklayın.
+- Bağlam uzunluğunu `4096`'dan `32768`'e değiştirin ve `GPU Offload`'un maksimum seviyede olduğundan emin olun. Ardından `Load Model`'e tıklayın.
 
 ![Model Seçimi](assets/model-list-zoomed.png)
 
 Ajanın büyük kod tabanlarını işleyebilmesi ve yapılan değişiklikleri hatırlayabilmesi için büyük bir bağlam uzunluğu kullanıyoruz.
 
-![Modeli Yapılandırma](assets/selecting-model-zoomed.png)
+![Modelin Yapılandırılması](assets/selecting-model-zoomed.png)
 
 Ardından, LM Studio Sunucusunu etkinleştirmemiz gerekiyor.
-- LM Studio'da sol taraftaki Developer sekmesine tıklayın veya `CTRL+2` tuşlarına basın.
+- LM Studio'da soldaki Developer sekmesine tıklayın veya `CTRL+2` tuşlarına basın.
 - Durum düğmesini kontrol edin ve `Running` olarak ayarlandığından emin olun.
 
 <!-- @os:windows -->
@@ -153,13 +155,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## VS Code'u Başlatma ve Yapılandırma
 
-VS Code'a Cline Uzantısını yükleyecek ve az önce oluşturduğumuz LM Studio sunucusuna bağlayacağız.
+VS Code'da Cline Eklentisini yükleyecek ve bunu az önce oluşturduğumuz LM Studio sunucusuna bağlayacağız.
 - Arama çubuğuna `VS Code` yazın ve uygulamayı başlatın.
 - VS Code'un sol sütunundaki `Extensions` simgesine tıklayın ve `Cline` araması yapın. Ardından `Install` düğmesine tıklayın.
 
-![Cline Uzantısını Yükleme](assets/installing-cline-vscode-extension.png)
+![Cline Eklentisinin Yüklenmesi](assets/installing-cline-vscode-extension.png)
 
-- Sol tarafta bir Cline simgesi görünmelidir. Cline'ı açmak için bu simgeye tıklayın. `How will you use Cline?` sorusunu soran bir pencere açılacaktır. LM Studio üzerinden çalışan yerel bir LLM kullanacağımız için `Bring my own API Key` seçeneğini seçin ve `Continue` düğmesine basın.
+- Solda bir Cline simgesi bulunmalıdır. Cline'ı açmak için buna tıklayın. `How will you use Cline?` diye soran bir pencere açılacaktır. LM Studio üzerinden çalışan yerel bir LLM kullanacağımız için `Bring my own API Key` seçeneğini seçin ve `Continue`'e tıklayın.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -191,22 +193,22 @@ Ardından, Cline'ı kurduğumuz LM Studio sunucusuyla iletişim kuracak şekilde
 
 ## İlk projenizi oluşturma
 
-Yerel ajanımızı bir web sitesi oluşturmak için kullanalım! VS Code'u, Cline'ın dosyaları oluşturacağı bir dizinde açın.
-- Bunu yapmak için VS Code'un sol üst kısmındaki `File -> Open Folder` seçeneğine gidin ve `Documents` gibi bir klasör seçin.
+Bir web sitesi oluşturmak için yerel ajanımızı kullanalım! VS Code'u, Cline'ın dosyaları oluşturacağı seçtiğiniz bir dizinde açın.
+- Bunu yapmak için VS Code'un sol üst köşesindeki `File -> Open Folder` yolunu izleyin ve `Documents` gibi bir klasör seçin.
 
-![VS Code Boş Klasör](assets/open-cline-test.png)
+![Boş VS Code Klasörü](assets/open-cline-test.png)
 
 Artık yerel kodlama ajanına komut vermeye hazırız.
-- Sol sütundaki Cline uzantısına tıklayın ve ajanı başlatmak için bir istem girin. Örnek olarak şu istemi kullanalım:
+- Sol sütundaki Cline eklentisine tıklayın ve ajanı başlatmak için bir komut girin. Örnek olarak, aşağıdaki komutu kullanalım:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Ajan daha sonra istem doğrultusunda dosyalar oluşturmaya başlayacaktır. Kullanıcı olarak, kodun VS Code içinde nasıl oluşturulduğunu aşağıda gösterildiği gibi izleyebilirsiniz. Cline bir dosya oluşturmak istediğinde her seferinde `Save` düğmesine tıklamanız gerekebilir.
+Ajan daha sonra komuta göre dosyalar oluşturmaya başlayacaktır. Bir kullanıcı olarak, kodun VS Code içinde oluşturulduğunu aşağıda gösterildiği gibi izleyebilirsiniz. Cline her bir dosyayı oluşturmak istediğinde `Save` düğmesine tıklamanız gerekebilir.
 
 ![Cline Kod Üretimi](assets/cline-code-generation.png)
 
-Yazılım oluşturulduktan sonra ajan işini tamamlar ve uygulamayı çalıştırabilirsiniz. Bu durumda ajan üç dosyaya yazmıştır: `index.html`, `script.js` ve `styles.css`. HTML dosyasına çift tıklayarak oluşturulan web sitesini yükleyip etkileşime geçebiliriz.
+Yazılım oluşturulduktan sonra, ajanın işi tamamlanır ve uygulamayı çalıştırabilirsiniz. Bu durumda ajan üç dosyaya yazdı: `index.html`, `script.js` ve `styles.css`. HTML dosyasına çift tıklayarak oluşturulan web sitesini yükleyip onunla etkileşime geçebiliriz.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## Sonraki Adımlar
 
 Web sitesini oluşturduktan sonra, web sitesini geliştirmek için Cline ile çalışmaya devam edebilirsiniz. İki olası geliştirme şunlardır:
 
-- **Dokümantasyon**: Ajanın web sitesini belgeleyen bir `README.md` dosyası oluşturması için ajana `Add a README` şeklinde bir istem vermek yeterlidir.
-- **Animasyon**: Web sitesine bir dizüstü bilgisayarda çalışan büyük bir dil modelini görsel olarak temsil eden bir animasyon oluşturmak için modeli `Add an animation that visually represents a large language model running on a laptop.` istemiyle yönlendirin.
+- **Dokümantasyon**: Ajana `Add a README` komutunu vermek, web sitesini belgeleyen bir `README.md` dosyası oluşturması için yeterlidir.
+- **Animasyon**: Web sitesine bir animasyon eklemek için modele `Add an animation that visually represents a large language model running on a laptop.` komutunu verin.
 
-Okuyucuyu bu kurulumu kullanarak başka uygulamalar oluşturmayı denemeye teşvik ediyoruz. Aşağıda denediğimiz bazı eğlenceli örnekler yer almaktadır:
+Okuyucuyu bu kurulumu kullanarak başka uygulamalar oluşturmayı denemeye teşvik ediyoruz. Aşağıda denediğimiz bazı eğlenceli örnekler bulunmaktadır:
 
-- **Retro Arcade Oyunları**: Başka istemler deneyin. Ajanın aşağıdaki istemle `PyGame` paketini kullanarak Python'da retro tarzı oyunlar oluşturması da eğlenceli olabilir:
+- **Retro Atari Oyunları**: Başka komutlar deneyin. Ajanın aşağıdaki komutla `PyGame` paketini kullanarak Python'da retro tarzı oyunlar oluşturması da eğlenceli olabilir:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Veri Analizi**: Kodlama ajanlarının özellikle yararlı olduğu bir alan da betik yazma ve veri analizidir. Bu, yerel modelin hisse senedi fiyatı görselleştirmesi için veri analizi yazılımı oluşturma yeteneğini sergilemek amacıyla kullanılan bir istemdir:
+- **Veri Analizi**: Kodlama ajanlarının özellikle yararlı olduğu bir alan, betik yazma ve veri analizidir. Aşağıda, yerel modelin hisse senedi fiyat görselleştirmesi için veri analizi yazılımı oluşturma yeteneğini sergileyen bir komut bulunmaktadır:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Kaynaklar
 
-Kodlama Ajanları, Cline ve iş yüklerini şu şekilde çalıştırma hakkında daha fazla bilgi edinmek için aşağıda bazı ek kaynaklar bulunmaktadır:
+Kodlama Aracıları (Coding Agents), Cline ve iş yüklerini çalıştırma hakkında daha fazla bilgi edinmek için aşağıda bazı ek kaynaklar bulunmaktadır.
 
-* AMD LM Studio ortaklığı ve entegrasyonu hakkında daha fazla bilgi: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* AMD LM Studio ortaklığı hakkında daha fazla bilgi ve entegrasyon: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
 * AMD Ryzen™ AI ve Radeon™ Grafik Kartlarında Cline'ı çalıştırmayı anlatan AMD Blog yazısı: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* AI PC'lerde yerel olarak kodlama ajanları çalıştırma hakkında Cline Blog yazısı: https://cline.bot/blog/local-models-amd
+* AI PC'lerde kodlama aracılarını yerel olarak çalıştırma hakkında Cline Blog yazısı: https://cline.bot/blog/local-models-amd

@@ -108,5 +108,15 @@
       }
     }
   },
-  "primaryModel": "Qwen3.5-397B-A17B"
+  "primaryModel": "Qwen3.5-397B-A17B",
+  "authors": [
+    {
+      "name": "Abdullah Malik",
+      "github": "abdmalik-amd",
+      "github_url": "https://github.com/abdmalik-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-10-01"
 }

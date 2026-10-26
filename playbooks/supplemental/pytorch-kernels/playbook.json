@@ -133,5 +133,21 @@
       "linux": {},
       "windows": {}
     }
-  }
+  },
+  "authors": [
+    {
+      "name": "Satya Devineni",
+      "github": "sdevinenamd",
+      "github_url": "https://github.com/sdevinenamd",
+      "type": "amd"
+    },
+    {
+      "name": "Adam Lam",
+      "github": "adamlam2-amd",
+      "github_url": "https://github.com/adamlam2-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-10-01"
 }

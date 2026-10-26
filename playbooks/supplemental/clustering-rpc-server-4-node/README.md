@@ -33,6 +33,12 @@ allocation, so this step is required here (not optional). Follow the memory
 configuration below, and set the allocation on each machine to at least
 **96 GB** (Windows: AMD Variable Graphics Memory in Adrenalin; Linux: `amd-ttm --set 120`).
 
+<!-- @device:halo_box -->
+<!-- @os:windows -->
+> **Running models near or above 128 GB:** On AMD Ryzen™ AI Max 400 Series (Gorgon Halo) systems running Windows, models that approach or exceed 128 GB of memory require additional configuration to run without errors. Follow the [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) before loading the model.
+<!-- @os:end -->
+<!-- @device:end -->
+
 <!-- @require:memory-config -->
 
 <!-- @device:halo_box -->

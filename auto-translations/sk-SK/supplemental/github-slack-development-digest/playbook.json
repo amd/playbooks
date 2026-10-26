@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "Vytvorte súhrn vývoja z GitHub do Slacku pomocou Agent Canvas",
-  "description": "Nakonfigurujte Agent Canvas, GitHub MCP, Slack MCP a naplánovanú automatizáciu OpenHands, ktorá uverejňuje súhrn od lokálneho LLM.",
+  "title": "Vytvorte prehľad vývoja z GitHub do Slack pomocou Agent Canvas",
+  "description": "Nakonfigurujte Agent Canvas, GitHub MCP, Slack MCP a naplánovanú automatizáciu OpenHands, ktorá zverejňuje digest z lokálneho LLM.",
   "auto_translated": true
 }

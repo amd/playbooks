@@ -16,42 +16,44 @@ SPDX-License-Identifier: MIT
 
 ## 概要
 
-🍋 **Lemonade** は、大規模言語モデル(LLM)、画像生成モデル、音声モデルをお使いのハードウェア上で直接実行できるオープンソースのローカル AI サーバーです。業界標準の **OpenAI API** を通じてモデルを公開するため、OpenAI で動作するアプリであれば、そのまま Lemonade でも動作します。このプレイブックを終える頃には、Lemonade を使ってお使いのマシン上でローカルにモデルを実行できるようになります。
+🍋 **Lemonade** は、大規模言語モデル(LLM)、画像生成モデル、音声モデルをお使いのハードウェア上で直接実行できる、オープンソースのローカルAIサーバーです。業界標準の **OpenAI API** を通じてモデルを公開するため、OpenAIに対応したアプリケーションであれば、すぐにLemonadeと連携させることができます。このプレイブックを終える頃には、Lemonadeを使ってお使いのマシン上でモデルをローカルで実行できるようになっています。
 
 ## このプレイブックで学べること
 
 このプレイブックを終える頃には、以下ができるようになります:
 
-* **Lemonade Server をインストール**し、正常に動作していることを確認する。
-* 単一のコマンドで**LLM をダウンロードしてチャット**する。
-* **Web UI を探索**し、ビジョン、音声認識(speech-to-text)、画像生成などのさまざまなモダリティを試す。
-* Vulkan と AMD ROCm™ ソフトウェアの間で**GPU バックエンドを切り替える**。
-* OpenAI 互換の API を使用して、ローカル LLM で動作する**Python アプリを構築する**。
+* **Lemonade Serverをインストール**し、正常に動作していることを確認する。
+* 単一のコマンドで**LLMをダウンロードしてチャット**する。
+* **Webユーザーインターフェースを探索**し、ビジョン、音声からテキストへの変換、画像生成などの異なるモダリティを試す。
+* Vulkanと AMD ROCm™ ソフトウェアの間で**GPUバックエンドを切り替える**。
+* OpenAI互換APIを使用して、ローカルLLMを利用した**Pythonアプリを構築する**。
 <!-- @device:halo_box,halo,stx,krk -->
-* AMD Ryzen™ AI ハードウェア上で、Hybrid および FLM 実行モードを使用して**AMD Neural Processing Unit(NPU)上でモデルを実行する**。
+* AMD Ryzen™ AI ハードウェア上でHybridおよびFLM実行モードを使用して、**AMD Neural Processing Unit(NPU)上でモデルを実行する**。
 <!-- @device:end -->
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## メモリ構成の設定
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## ソフトウェアの更新確認
+## ソフトウェアアップデートの確認
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## ソフトウェアの前提条件のインストール
+## ソフトウェア前提条件のインストール
 
-始める前に、以下が揃っていることを確認してください:
+始める前に、以下がそろっていることを確認してください:
 
-- **Windows 11** または対応する **Linux** ディストリビューション(Ubuntu 24.04 以降、Fedora、Debian)を実行している PC
-- ステップ 1〜7 で使用するランタイムモデル(`Gemma-4-E2B-it-GGUF`、約 3 GB)には**16 GB の RAM** を推奨します。ステップ 6 のより大きなコード生成モデル(`Qwen3.5-35B-A3B-GGUF`、約 20 GB)を使用したい場合は **32 GB 以上**を推奨します。
-- ダウンロードするモデルに応じて**約 4〜30 GB の空きディスク容量**が必要です。このガイドで最も大きいモデルは約 20 GB です。
-- **Python 3.10〜3.13**(Python アプリのセクションで使用)
+- **Windows 11** を実行しているPC、またはサポートされている**Linux**ディストリビューション(Ubuntu 24.04+、Fedora、Debian)
+- 手順1〜7で使用するランタイムモデル(`Gemma-4-E2B-it-GGUF`、約3GB)には**16GBのRAM**を推奨します。手順6のより大きなコード生成モデル(`Qwen3.5-35B-A3B-GGUF`、約20GB)を使用する場合は**32GB以上**を推奨します。
+- ダウンロードするモデルによって異なりますが、**約4〜30GBの空きディスク容量**。このガイドで最も大きなモデルは約20GBです。
+- **Python 3.10〜3.13**(Pythonアプリのセクションで使用)
 - インターネット接続(有線または無線)
 <!-- @device:halo_box,halo,stx,krk -->
-- [任意] モデルを NPU 上で実行したい場合は、[Ryzen AI ソフトウェアのインストール手順](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers)から最新のドライバーをインストールした AMD XDNA 2 NPU(Ryzen AI 300/400/Max 300 シリーズまたは Z2 Extreme)。
+- [オプション] NPU上でモデルを実行したい場合は、[Ryzen AI Softwareインストール手順](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers)から最新のドライバーをインストールした AMD XDNA 2 NPU(Ryzen AI 300/400/Max 300シリーズまたはZ2 Extreme)
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -68,9 +70,16 @@ lemonade --version
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
-```bash
+```powershell
 winget upgrade -e --id AMD.LemonadeServer
 lemonade --version
+
+# Upgrading runs the Lemonade Server installer, which stops the running server
+# to replace its files and does not start it again. Relaunch it so the local API
+# on port 13305 is available for the next steps.
+if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) {
+  Start-Process "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe"
+}
 ```
 <!-- @test:end -->
 
@@ -183,69 +192,69 @@ echo "OK: Model Gemma-4-E2B-it-GGUF responded"
 
 ---
 
-## 基本概念 — ローカル AI サーバーの仕組み
+## 基礎知識 — ローカルAIサーバーの仕組み
 
-モデルを実行する前に、*なぜ*このような構成になっているのかを理解しておく価値があります。Lemonade は**ローカルモデルサーバー**であり、AI モデルをメモリに読み込み、クラウド AI サービスと同様に HTTP 経由でアプリケーションに公開するプロセスです。
+モデルを実行する前に、なぜこのような仕組みになっているのかを理解しておくとよいでしょう。Lemonadeは**ローカルモデルサーバー**であり、AIモデルをメモリにロードして、クラウドAIサービスと同様にHTTP経由でアプリケーションに公開するプロセスです。
 
 ### なぜサーバーなのか?
 
-| メリット | ユーザーにとっての意味 |
+| メリット | あなたにとっての意味 |
 |---------|----------------------|
-| **統合の簡素化** | アプリはハードウェア固有の C++ や Python ライブラリを扱う代わりに、単一の HTTP API とやり取りするだけで済みます。 |
-| **モデルの共有** | 一度読み込んだモデルを複数のアプリで同時に利用できるため、重複したコピーが RAM を消費することがありません。 |
-| **クラウドからローカルへの移植性** | OpenAI のクラウド API 向けに書かれたコードは、URL を 1 つ変更するだけで Lemonade でも動作します。 |
-| **関心の分離** | モデル管理、ストリーミング、フォールトトレランスはサーバー側で処理されるため、開発者はアプリ自体に集中できます。 |
+| **統合の簡素化** | アプリはハードウェア固有のC++やPythonライブラリを扱う代わりに、単一のHTTP APIとやり取りします。 |
+| **モデルの共有** | 1つのロード済みモデルで複数のアプリに同時にサービスを提供でき、重複したコピーがRAMを消費することがありません。 |
+| **クラウドからローカルへの移植性** | OpenAIのクラウドAPI向けに書かれたコードは、URLを1つ変更するだけでLemonadeと連携できます。 |
+| **関心の分離** | モデル管理、ストリーミング、耐障害性はサーバー側で処理されるため、開発者は自分のアプリに集中できます。 |
 
-### OpenAI API 標準
+### OpenAI API標準
 
-Lemonade は、ChatGPT、Azure OpenAI をはじめとする多数のサービスで使用されているのと同じインターフェースである**OpenAI API** を実装しています。会話モデルはシンプルです:
+Lemonadeは**OpenAI API**を実装しています。これはChatGPT、Azure OpenAI、その他多数のサービスで使用されているのと同じインターフェースです。会話モデルはシンプルです:
 
-| ロール | 発話者 |
+| ロール | 発言者 |
 |------|---------------|
 | **system** | モデルへの指示(ペルソナ、制約、利用可能なツール) |
 | **user** | 人間(またはアプリケーション)からモデルへのメッセージ |
-| **assistant** | モデルが生成した応答 |
+| **assistant** | モデルによって生成された応答 |
 
-つまり、OpenAI をサポートするライブラリやアプリであれば、Lemonade Server が動作中に `http://localhost:13305/api/v1` を指定するだけで Lemonade と通信できます。
+これは、OpenAIをサポートするライブラリやアプリであれば、Lemonade Serverが実行中に `http://localhost:13305/api/v1` を指定するだけでLemonadeと通信できることを意味します。
 
-## メインアクティビティ — 初めてのローカル AI チャット
+## メイン活動 — 初めてのローカルAIチャット
 
-LLM をダウンロードし、お使いのマシン上で完全にローカルに AI を実行しながら会話してみましょう。
+それでは、LLMをダウンロードして会話をしてみましょう。AIはすべてお使いのマシン上でローカルに実行されます。
 
-### ステップ 1: モデルのダウンロードと実行
+### 手順1: モデルのダウンロードと実行
 
-Lemonade には厳選されたモデルライブラリが同梱されています。まずは、ビジョンサポートを含む高性能でコンパクトなモデルである **Gemma-4-E2B-it** から始めましょう。ターミナルを開いて以下を実行してください:
+Lemonadeにはキュレーションされたモデルライブラリが同梱されています。まずは、ビジョンサポートを含む優れたコンパクトなモデルである**Gemma-4-E2B-it**から始めましょう。ターミナルを開いて次を実行します:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF
 ```
 
-この 1 つのコマンドで次の 3 つが行われます:
+このコマンド1つで、次の3つのことが行われます:
 
-1. Hugging Face からモデル(約 3 GB)がまだダウンロードされていない場合、**ダウンロード**します。(時間がかかる場合があります)
-2. ポート 13305 で Lemonade Server プロセスを**起動**します。
-3. モデルとのチャットを開始できるよう **Lemonade App を開き**ます。
+1. モデル(約3GB)がまだダウンロードされていない場合、Hugging Faceから**ダウンロード**します。(時間がかかる場合があります)
+2. ポート13305でLemonade Serverプロセスを**起動**します。
+3. **Lemonade Appを開き**、モデルとのチャットを開始できるようにします。
 
 
 <!-- @os:windows -->
-Windows では、Lemonade App が自動的に起動し、すぐにチャットを開始できます。`minimal.msi` パッケージをインストールした場合、アプリは含まれていません。チャットを開始するには、Web ブラウザーを開いて `http://localhost:13305` にアクセスしてください。
+Windowsでは、Lemonade Appが自動的に起動し、すぐにチャットを開始できます。`minimal.msi` パッケージをインストールした場合、アプリは含まれていません。チャットを開始するには、Webブラウザを開いて `http://localhost:13305` にアクセスしてください。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-Linux では、ブラウザーを開いて `http://localhost:13305` にアクセスすると Web アプリにアクセスできます。
+Linuxでは、ブラウザを開いて `http://localhost:13305` にアクセスし、Webアプリにアクセスします。
 <!-- @os:end -->
 
-質問を入力してみてください:
+質問を入力してみましょう:
 
 ```
 What are three fun facts about lemons?
 ```
 
-モデルはチャットウィンドウに直接応答します。**おめでとうございます!これで大規模言語モデルをローカルで実行できています。**
+モデルはチャットウィンドウ内で直接応答します。**おめでとうございます!大規模言語モデルをローカルで実行できました。**
 
-![ログを表示した Lemonade App](../../dependencies/assets/ChatwithLogs.png)
+![ログが表示されたLemonade App](../../dependencies/assets/ChatwithLogs.png)
 
-Lemonade App の Server Logs ペインでは、各応答の後にモデルのパフォーマンスに関するテレメトリデータを確認できます。例:
+Lemonade AppのServer Logsペインでは、各応答の後にモデルのパフォーマンスに関するテレメトリデータを確認できます。例:
 
 ```
  === Telemetry ===
@@ -256,61 +265,61 @@ TPS:           95.99
 =================
 ```
 
-### ステップ2: Webインターフェースとさまざまなモダリティを試す
+### ステップ2: Web インターフェースと各種モダリティを試す
 
-Lemonadeには、以下のことができる組み込みのWebインターフェースが含まれています。
+Lemonade には、以下のことができるビルトインの Web インターフェースが含まれています:
 
-- **対話**：使い慣れたチャットウィンドウでロード済みモデルとやり取りできる
-- **モデルの閲覧**：Model Managerタブでモデルを閲覧できる
-- **新しいモデルのダウンロード**：ワンクリックでダウンロードできる
+- 使い慣れたチャットウィンドウで、ロードされたモデルと**対話する**
+- Model Manager タブで**モデルを閲覧する**
+- ワンクリックで**新しいモデルをダウンロードする**
 
-Web UIの**Model Manager**タブを使って、RecipeまたはCategoryでモデルを閲覧しながら、さまざまなモダリティを切り替えてみましょう。
+Web UI の **Model Manager** タブで、Recipe または Category ごとにモデルを閲覧しながら、さまざまなモダリティを切り替えてみましょう:
 
-1. **Vision（視覚）：** すでにロードしている`Gemma-4-E2B-it-GGUF`モデルはVisionをサポートしています。画像をチャットボックスに貼り付けて、モデルにその内容を説明させてみましょう。
-2. **画像生成：** Imageカテゴリで、Model Managerから`SDXL-Turbo`のような画像モデルをダウンロードし、Lemonade Image Generatorを使ってプロンプトを入力し、ローカルで画像を生成します。
-3. **音声：** Audioカテゴリで、`Whisper-Tiny`のような音声モデルをダウンロードします。これは音声からテキストへの変換ができます。音声の録音データを与えることで、ローカルで文字起こしができます。テキストから音声への変換については、Speechカテゴリの`kokoro-v1`などのモデルを試してみてください。
+1. **Vision:** すでにロード済みの `Gemma-4-E2B-it-GGUF` モデルは vision に対応しています。チャットボックスに画像を貼り付け、モデルにその内容を説明させてみましょう。
+2. **画像生成:** Image カテゴリで、Model Manager から `SDXL-Turbo` のような画像モデルをダウンロードし、Lemonade Image Generator を使ってプロンプトを入力し、ローカルで画像を生成してみましょう。
+3. **音声:** Audio カテゴリで、`Whisper-Tiny` のような音声モデルをダウンロードすると、音声からテキストへの変換(speech-to-text)ができます。音声の録音を提供すると、ローカルで文字起こしされます。テキストから音声への変換(text-to-speech)には、Speech カテゴリの `kokoro-v1` などのモデルを試してみてください。
 
-![Lemonadeによるマルチモダリティ](../../dependencies/assets/multi_modality.png)
+![Lemonade でのマルチモダリティ](../../dependencies/assets/multi_modality.png)
 
 ### ステップ3: 異なるバックエンドでモデルを試す
 
-Lemonade App内でモデルにカーソルを合わせると、歯車アイコンが表示されます。これをクリックすると、目的のバックエンドの選択を含む、モデルのオプションを選択できます。
+Lemonade App でモデルにカーソルを合わせると、歯車アイコンが表示されます。これをクリックすると、モデルのオプション(希望するバックエンドの選択を含む)を選択できます。
 
-デフォルトでは、LemonadeはGPUアクセラレーションにVulkanを使用します。サポートされているAMDディスクリートGPUをお持ちの場合は、ROCmに切り替えることができます。
+デフォルトでは、Lemonade は GPU アクセラレーションに Vulkan を使用します。サポートされている AMD ディスクリート GPU をお持ちの場合は、ROCm に切り替えることができます。
 
-![Lemonadeバックエンド選択](../../dependencies/assets/lemonademodeloptions.png)
+![Lemonade バックエンド選択](../../dependencies/assets/lemonademodeloptions.png)
 
-インストール済みのバックエンドを管理するには、一番左の列にあるバックエンドボタンをクリックしてください。
+インストール済みのバックエンドを管理するには、一番左の列にあるバックエンドボタンをクリックします。
 
-または、次のコマンドを使用してバックエンドを指定することもできます。
+または、次のコマンドを使ってバックエンドを指定することもできます:
 
 ```
 lemonade run Gemma-4-E2B-it-GGUF --llamacpp rocm
 ```
 
-環境変数`LEMONADE_LLAMACPP`を使って、値`vulkan`、`rocm`、`cpu`のいずれかでデフォルトのバックエンドを設定することもできます。
+環境変数 `LEMONADE_LLAMACPP` に `vulkan`、`rocm`、`cpu` のいずれかの値を設定することで、デフォルトのバックエンドを設定することもできます。
 
 ---
 
-## さらに深く — PythonでAI搭載アプリを構築する
+## さらに深く — Python で AI 搭載アプリを構築する
 
-ローカルAIサーバーの真の強みは、どんなアプリケーションでもわずか数行のコードで接続できることです。それを実証するために、小規模ながらも実用的な**学習用フラッシュカード生成アプリ**を作ってみましょう。トピックを与えるとフラッシュカードが生成され、対話的に自分自身をテストできます。
+ローカル AI サーバーの真の力は、わずか数行のコードでどんなアプリケーションからも接続できることにあります。それを証明するために、トピックを与えると、フラッシュカードを生成し、対話形式で自分自身をクイズできる、小さいながらも機能的な**学習フラッシュカードジェネレーター**を構築してみましょう。
 
 ### ステップ4: サーバーを起動する
 
-Lemonadeサーバーが実行中であることを確認してください。通常はインストール後、バックグラウンドで自動的に起動します。確認するには、以下を実行します。
+Lemonade サーバーが動作していることを確認してください。通常、インストール後にバックグラウンドで自動的に起動します。確認するには、次を実行します:
 
 ```
 lemonade status
 ```
 
-`Server is running on port 13305`のようなメッセージが表示されるはずです。
+次のようなメッセージが表示されるはずです: `Server is running on port 13305`。
 
-サーバーが実行されていない場合は、Lemonadeアプリを開いて起動してください。デフォルトのポート**13305**を使用します（トレイアイコンから確認または選択できます）。
+サーバーが起動していない場合は、Lemonade アプリを開いて起動してください。デフォルトのポート **13305** を使用します(トレイアイコンから確認または選択できます)。
 
-### ステップ5: OpenAI Pythonクライアントをインストールする
+### ステップ5: OpenAI Python Client をインストールする
 
-ターミナルでvenvを作成し、以下のコマンドを使ってOpenAI Pythonクライアントをインストールしてください。
+ターミナルで venv を作成し、次のコマンドを使って OpenAI Python Client をインストールします:
 <!-- @os:linux -->
 ```bash
 # Your specific version of Linux may have different commands
@@ -390,16 +399,16 @@ python3 -c "from openai import OpenAI; print('OK')"
 
 ### ステップ6: フラッシュカードアプリを構築する
 
-コード生成用に別のモデル`Qwen3.5-35B-A3B-GGUF`をダウンロードしましょう。これは大規模（約20GB）で高性能なモデルであり、32GB以上のRAMを搭載したシステムに最適です。利用可能なRAMがそれより少ない場合は、代わりに`Qwen3.5-9B-GGUF`（約6GB）を試してください。
+コード生成用に別のモデル `Qwen3.5-35B-A3B-GGUF` をダウンロードしましょう。これは大きく(約20 GB)高性能なモデルで、32 GB 以上の RAM を搭載したシステムに最適です。利用可能な RAM が少ない場合は、代わりに `Qwen3.5-9B-GGUF`(約6 GB)を試してください。
 
-UIからダウンロードするか、次のコマンドを実行してください。
+UI からダウンロードするか、以下を実行してください:
 ```
 lemonade run Qwen3.5-35B-A3B-GGUF
 ```
 
-以下のプロンプトをLemonade Chat UIに入力して、シンプルなFlashcardアプリのコードを生成してください。
+以下のプロンプトを Lemonade Chat UI に入力して、シンプルなフラッシュカードアプリのコードを生成します。
 
-Pythonアプリの生成にはQwen3.5-35B-A3B-GGUF（コード作成に優れた大規模モデル）を使用し、アプリ自体は実行時にGemma-4-E2B-it-GGUF（すでにダウンロード済みの小型モデル）を呼び出します。生成されたコードは、任意のファイルにコピーしてPythonで実行できます。
+Python アプリの生成には Qwen3.5-35B-A3B-GGUF(コード記述に優れた、より大きなモデル)を使用し、アプリ自体は実行時にすでにダウンロード済みの小さいモデルである Gemma-4-E2B-it-GGUF を呼び出します。生成されたコードは、お好きなファイルにコピーして Python で実行できます。
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -432,9 +441,9 @@ Structure:
    - Offers to start the quiz.
 ```
 
-> **ヒント**：綿密なプロンプト作成と、リソースと速度を最適化するための2モデル体制の採用により、標準的なエンジニアリングのベストプラクティスに従っています。
+> **ヒント**: 綿密なプロンプト作成と、リソースと速度を最適化するための2モデルシステムの利用により、標準的なエンジニアリングのプラクティスに従っています。
 
-参考として、[`flashcards.py`](assets/flashcards.py)にサンプル出力を用意しています。ぜひご自身のディレクトリにダウンロードしてください。いずれにせよ、これで実行可能なPythonファイルが手元にあるはずです。
+参考として、サンプル出力を [`flashcards.py`](assets/flashcards.py) に用意しています。ぜひご自身のディレクトリにダウンロードしてください。いずれの方法でも、これで実行可能な Python ファイルが手に入るはずです。
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -490,7 +499,7 @@ python3 lemonade_python_smoke.py
 python flashcards.py # replace with your file name
 ```
 
-**次のような表示が確認できるはずです：**
+**次のような画面が表示されるはずです:**
 
 ```
 🍋 Lemonade Flashcard Generator
@@ -524,90 +533,90 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-わずか150行程度のコードで、ローカルLLMを利用した完全に機能する学習ツールを構築できました。管理すべきAPIキーもなく、利用コストもかからず、データがマシンの外に出ることもありません。
+わずか約150行のコードで、ローカル LLM を活用した完全に機能する学習ツールを構築できました。管理すべき API キーもなく、利用コストもかからず、データが自分のマシンから外に出ることもありません。
 
-> **重要なポイント：** `client = OpenAI(base_url=...) `という行だけが、このアプリをOpenAIのクラウドではなくLemonadeに結び付けている*唯一*の要素であることに注目してください。それ以外のコードは、任意のOpenAI互換サービスに対して書くものと全く同じです。OpenAI Pythonライブラリを使ったことがあるなら、Lemonadeでアプリを構築する方法はすでにご存じのはずです。
+> **重要なポイント:** `client = OpenAI(base_url=...) ` の行だけが、このアプリを OpenAI のクラウドではなく Lemonade に結びつけている*唯一*の部分であることに注目してください。それ以外のコードは、OpenAI 互換の任意のサービスに対して書くものと同一です。OpenAI の Python ライブラリを使ったことがある方であれば、すでに Lemonade でアプリを構築する方法を知っていることになります。
 
-### これが示していること
+### これが示すもの
 
-この小さなアプリは、いくつかの実際の統合パターンを示しています。
+この小さなアプリは、いくつかの実際の統合パターンを実践しています:
 
 | パターン | 登場箇所 |
 |---------|-----------------|
-| **システムプロンプト** | `"system"`メッセージがLLMに構造化されたJSONを出力するよう指示している |
-| **構造化出力** | アプリがLLMの応答をJSONとしてパースし、フラッシュカードを構築する |
-| **ステートレスなリクエスト** | 各`generate_flashcards()`呼び出しは独立している |
-| **エラーハンドリング** | `try/except`によって、LLMの出力が有効なJSONでない場合を適切に処理する |
+| **システムプロンプト** | `"system"` メッセージが LLM に構造化された JSON を出力するよう指示します |
+| **構造化出力** | アプリは LLM の応答を JSON としてパースし、フラッシュカードを構築します |
+| **ステートレスなリクエスト** | 各 `generate_flashcards()` 呼び出しは独立しています |
+| **エラーハンドリング** | `try/except` により、LLM の出力が有効な JSON でない場合を適切に処理します |
 
-これらのパターンは、チャットボット、コードアシスタント、コンテンツ生成ツール、自動化ツールなど、あらゆるアプリケーションに応用できます。
+これらと同じパターンは、チャットボット、コードアシスタント、コンテンツジェネレーター、自動化ツールなど、あらゆるアプリケーションに応用できます。
 
 #### ボーナスチャレンジ
 
-* さらなる挑戦として、[こちら](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py)にある例を参考に、フラッシュカードをユーザーに音声で読み上げる機能を追加するようアプリを更新してみましょう。
+* さらなる挑戦として、[こちら](https://github.com/lemonade-sdk/lemonade/blob/main/examples/api_text_to_speech.py) にあるサンプルを参考に、フラッシュカードをユーザーに読み上げてもらう機能を追加するようアプリを更新してみましょう。
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## NPUでモデルを実行する(オプション)
+## NPU での実行(オプション)
 
-Ryzen AI 300/400/Max 300シリーズまたはZ2 Extremeをお使いの場合、お使いのデバイスにはAI処理専用に設計された**Neural Processing Unit (NPU)**が搭載されています。NPU上でモデルを実行することは、GPUを使用するよりも電力効率が高いため、バックグラウンドでのAIタスク、長時間のセッション、バッテリー駆動時の利用に最適です。
+Ryzen AI 300/400/Max 300 シリーズまたは Z2 Extreme をお使いの場合、お使いのデバイスには **Neural Processing Unit (NPU)** が搭載されています。これは AI ワークロード専用に設計された専用チップです。NPU でモデルを実行すると GPU を使用するよりも電力効率が高いため、バックグラウンドの AI タスク、長時間のセッション、バッテリー駆動時の使用に最適です。
 
-Lemonadeは3つのNPU実行モードをサポートしており、いずれも同じOpenAI APIの背後で透過的に扱われます。
+Lemonade は 3 つの NPU 実行モードをサポートしており、いずれも同じ OpenAI API の背後で透過的に動作します。
 
-| モード | 動作方式 | レシピ | モデル例 |
+| モード | 動作方法 | レシピ | サンプルモデル |
 |------|-------------|--------|----------------|
-| **Hybrid (NPU + iGPU)** | NPUがプロンプトを処理し、iGPUがトークンを生成 | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
-| **NPU-only** | 推論全体がNPU上で実行される | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
-| **FLM** | AMD XDNA2向けに最適化されたFastFlowLMエンジンをNPU上で使用 | FLM (`flm`) | qwen3.5-4b-FLM |
+| **Hybrid (NPU + iGPU)** | NPU がプロンプトを処理し、iGPU がトークンを生成 | OGA (`oga-hybrid`) | Qwen3-4B-Hybrid |
+| **NPU のみ** | 推論全体を NPU 上で実行 | Ryzen AI LLM (`ryzenai-llm`) | Qwen-2.5-7B-Instruct-NPU |
+| **FLM** | AMD XDNA2 向けに最適化された FastFlowLM エンジンを NPU 上で使用 | FLM (`flm`) | qwen3.5-4b-FLM |
 
 ### 要件
 
-- **AMD Ryzen AI 300/400シリーズまたはZ2シリーズ**プロセッサ
-- **FLM**モデルの場合: FLMランタイムはLemonadeアプリ内からインストールできます。または、FLMモデルを実行する際にLemonadeが自動的にFLMランタイムをインストールします。FastFlowLMの詳細については、[こちら](https://fastflowlm.com/docs/)を参照してください。
+- **AMD Ryzen AI 300/400 シリーズまたは Z2 シリーズ**プロセッサ
+- **FLM** モデルの場合:FLM ランタイムは Lemonade アプリ内からインストールできます。また、FLM モデルを実行すると Lemonade が自動的に FLM ランタイムをインストールします。FastFlowLM について詳しくは、[こちら](https://fastflowlm.com/docs/)をご覧ください。
 
 
-### ステップ8: Hybridモデルを実行する
+### ステップ 8: Hybrid モデルを実行する
 
-Hybridモデルは、速度と効率の良いバランスを実現するために、NPUとiGPUの間で処理を分担します。Lemonadeアプリで`Ryzen AI LLM`リストからモデルを選択します(例: `Qwen3-4B-Hybrid`)。または、以下のコマンドで実行します。
+Hybrid モデルは NPU と iGPU に処理を分割することで、速度と効率のバランスが取れています。Lemonade App では、`Ryzen AI LLM` リストからモデル(例:`Qwen3-4B-Hybrid`)を選択するか、以下のコマンドで実行します。
 
 ```
 lemonade run Qwen3-4B-Hybrid
 ```
 
-Lemonadeは自動的にお使いのNPUを検出し、**Ryzen AI LLM**バックエンドをインストールします。
+Lemonade はお使いの NPU を自動的に検出し、**Ryzen AI LLM** バックエンドをインストールします。
 
-> **内部で何が起きているのか?** メッセージを送信すると、NPUがプロンプト全体を並列処理します(これを「プリフィル」と呼びます)。その後、iGPUが引き継いで、1トークンずつ応答を生成します(これを「デコード」と呼びます)。このハイブリッド方式により、それぞれのチップの強みが活かされます。
+> **内部で何が起きているのか?** メッセージを送信すると、NPU がプロンプト全体を並列処理します(これを「プリフィル」と呼びます)。その後、iGPU が引き継いで応答をトークンごとに生成します(これを「デコード」と呼びます)。この Hybrid 方式は、それぞれのチップの強みを活かします。
 
-### ステップ9: FLMモデルを実行する
+### ステップ 9: FLM モデルを実行する
 
-FastFlowLM (FLM) モデルは、AMDのXDNA2 NPUアーキテクチャ向けに特別に最適化されており、そのサイズに対して非常に高速に動作します。例えば、`FastFlowLM NPU`リストから`qwen3.5-4b-FLM`を選択するか、以下のコマンドを使用します。
+FastFlowLM(FLM)モデルは AMD の XDNA2 NPU アーキテクチャに特化して最適化されており、そのサイズの割に非常に高速です。例えば、`FastFlowLM NPU` リストから `qwen3.5-4b-FLM` を選択するか、以下のコマンドを使用します。
 
 <!-- @os:windows -->
-Windowsで`FastFlowLM`を有効にするには:
+Windows で `FastFlowLM` を有効にするには:
 
-* `Backends Manager`メニューを開きます。
-* `FastFlowLM NPU`バックエンドカテゴリを見つけます。
-* `Install NPU`をクリックします。
-* インストールが完了すると、約36個のデフォルトモデルがFFLMドロップダウンメニューから利用可能になります。
+* `Backends Manager` メニューを開きます。
+* `FastFlowLM NPU` バックエンドカテゴリを見つけます。
+* Install NPU をクリックします。
+* インストールが完了すると、約 36 個のデフォルトモデルが FFLM ドロップダウンメニューから利用可能になります。
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
-`Lemonade`アプリを初めて起動した際、`FastFlowNPU`バックエンドはデフォルトでは有効になっていません。
-ローカルアプリがインストールページを開き、セットアップの手順を案内します。
+`Lemonade` アプリを初めて起動したとき、`FastFlowNPU` バックエンドはデフォルトでは有効になっていません。
+ローカルアプリはセットアップを案内するためにインストールページを開きます。
 
-Linuxで`FastFlowLM`を有効にするには:
+Linux で `FastFlowLM` を有効にするには:
 
-* `Lemonade`アプリを開きます。
-* [公式FLM](https://lemonade-server.ai/flm_npu_linux.html)ドキュメントにアクセスし、お使いのLinuxディストリビューションを選択してFLMのインストール手順に従います。
-* インストールページの指示に従ってバックポートを有効にします。
-* [tagsページ](https://github.com/FastFlowLM/FastFlowLM/tags)から最新の`v0.9.x`リリースをダウンロードします。'
+* `Lemonade` アプリを開きます。
+* [公式 FLM](https://lemonade-server.ai/flm_npu_linux.html) ドキュメントを参照し、お使いの Linux ディストリビューションを選択して FLM のインストール手順に従ってください。
+* インストールページの指示に従い、backports を有効にします。
+* [tags ページ](https://github.com/FastFlowLM/FastFlowLM/tags)から最新の `v0.9.x` リリースをダウンロードします。'
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 >[!Note]
-AMD Halo Developer Platformの場合は、必ずDebian 13を選択してください。
+AMD Halo Developer Platform の場合は、必ず Debian 13 を選択してください。
 ```
 fastflowlm_0.9.X_debian13_amd64.deb
 ```
@@ -618,20 +627,20 @@ fastflowlm_0.9.X_debian13_amd64.deb
 fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
 <!-- @device:end -->
-* ダウンロードした`.deb`パッケージをインストールします。
-* 推奨: `Lemonade App`を終了し、再度開いて変更が検出されるようにします。
-* 推奨: `Backends Manager`を開き、`Install FastFlowNPU`バックエンドをクリックします。
+* ダウンロードした `.deb` パッケージをインストールします。
+* 推奨:`Lemonade App` を終了し、再度開いて変更が検出されるようにします。
+* 推奨:`Backends Manager` を開き、`FastFlowNPU` Backend の Install をクリックします。
 <!-- @device:end -->
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,stx,krk -->
-インストールが正常に完了すると、**Lemonade Desktop App**内の**Download Manager**で`flm:npu`が完了したことを確認できます。
+インストールが成功すると、**Lemonade Desktop App** 内の **Download Manager** で `flm:npu` が完了したことを確認できます。
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />
 </p>
-その後、利用可能なFFLMモデルのいずれかを選択し、NPUバックエンドの使用を開始できます。
+その後、利用可能な FFLM モデルの中から任意のものを選択し、NPU バックエンドの使用を開始できます。
 
-特定のモデルについては、[モデルページ](https://fastflowlm.com/docs/models/qwen/)から目的のモデルをダウンロードし、ドキュメントに記載されているShellコマンドを使って検証してください。
+特定のモデルについては、[モデルページ](https://fastflowlm.com/docs/models/qwen/)から目的のモデルをダウンロードし、ドキュメントに記載されている Shell コマンドを使用して検証してください。
 ```
 flm run qwen3.5-4b-FLM
 ```
@@ -639,12 +648,12 @@ flm run qwen3.5-4b-FLM
 ```
 lemonade run qwen3.5-4b-FLM
 ```
-経由で。
-FLMモデルには、最も人気のあるアーキテクチャ(Gemma 3、Qwen 3、Llama 3、DeepSeek R1)のいくつかが含まれており、サイズは1GB未満から13GB以上まで多岐にわたります。
-Lemonadeは自動的にお使いのNPUを検出し、**FastFlowLM NPU**バックエンドをインストールします。
+
+FLM モデルには、最も人気のあるアーキテクチャ(Gemma 3、Qwen 3、Llama 3、DeepSeek R1)の一部が含まれており、サイズは 1 GB 未満から 13 GB 超まで幅広くあります。
+Lemonade はお使いの NPU を自動的に検出し、**FastFlowLM NPU** バックエンドをインストールします。
 
 <!-- @os:windows -->
-> **ヒント:** NPUのパフォーマンスを最大限に引き出すには、ターボモードを有効にします。
+> **ヒント:** NPU のパフォーマンスを最大限に引き出すには、ターボモードを有効にしてください:
 > ```
 > cd C:\Windows\System32\AMD
 > .\xrt-smi configure --pmode turbo
@@ -653,7 +662,7 @@ Lemonadeは自動的にお使いのNPUを検出し、**FastFlowLM NPU**バック
 
 ### モデルの切り替え
 
-ステップ6のフラッシュカードアプリはNPUモデルでも動作します。モデル名を変更するだけです。
+ステップ 6 のフラッシュカードアプリは NPU モデルでも動作します。モデル名を変更するだけです。
 
 ```python
 # In flashcards.py, swap the model to run on NPU instead of GPU
@@ -666,17 +675,17 @@ response = client.chat.completions.create(
 
 ## 次のステップ
 
-これで、自分のハードウェア上でローカルAIサーバーが稼働するようになりました。次に進むべき道はこちらです。
+これで、お使いのハードウェア上でローカル AI サーバーが稼働しています。次に進むべき方向は以下の通りです。
 
-1. **お気に入りのアプリと連携する**: Lemonadeは[VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk)、[Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/)、[Continue](https://lemonade-server.ai/docs/server/apps/continue/)、[n8n](https://n8n.io/integrations/lemonade-model/)、[その他多数](https://lemonade-server.ai/marketplace)とすぐに連携できます。
+1. **お気に入りのアプリと接続する**: Lemonade は [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk)、[Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/)、[Continue](https://lemonade-server.ai/docs/server/apps/continue/)、[n8n](https://n8n.io/integrations/lemonade-model/)、そして[その他多数](https://lemonade-server.ai/marketplace)とすぐに連携できます。
 
-2. **さらに多くのモデルを探す**: コーディング、推論、視覚処理などに最適化されたモデルを探すには、完全な[モデルライブラリ](https://lemonade-server.ai/docs/server/server_models/)をご覧ください。利用可能なモデルを確認するには、LemonadeアプリまたはL`lemonade list`を使用してください。
+2. **さらに多くのモデルを閲覧する**: [モデルライブラリ](https://lemonade-server.ai/docs/server/server_models/)全体を確認し、コーディング、推論、ビジョンなどに最適化されたモデルを見つけてください。Lemonade App または `lemonade list` を使用して、利用可能なモデルを確認できます。
 
-3. **ROCm GPUアクセラレーションを有効にする**: サポート対象のAMD GPUをお持ちの場合は、ROCmバックエンドに切り替えてください: `lemonade config set llamacpp.backend=rocm`。[サポートされているAMD GPU](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations)を参照してください。
+3. **ROCm GPU アクセラレーションを利用する**: サポートされている AMD GPU をお使いの場合は、ROCm バックエンドに切り替えてください:`lemonade config set llamacpp.backend=rocm`。[サポートされている AMD GPU](https://github.com/lemonade-sdk/lemonade?tab=readme-ov-file#supported-configurations)をご覧ください。
 
-4. **完全なAPI仕様を読む**: Lemonadeはチャット補完、埋め込み、音声書き起こし、画像生成、音声合成などをサポートしています。すべてのエンドポイントについては、[サーバー仕様](https://lemonade-server.ai/docs/server/server_spec/)を参照してください。
+4. **完全な API 仕様を読む**: Lemonade はチャット補完、埋め込み、音声文字起こし、画像生成、音声合成などをサポートしています。すべてのエンドポイントについては[サーバー仕様](https://lemonade-server.ai/docs/server/server_spec/)をご覧ください。
 
-5. **貢献する**: Lemonadeはオープンソースです。[コントリビューションガイド](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md)を確認し、[Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)を探してみてください。
+5. **貢献する**: Lemonade はオープンソースです。[貢献ガイド](https://github.com/lemonade-sdk/lemonade/blob/main/docs/contribute.md)を確認し、[Good First Issues](https://github.com/lemonade-sdk/lemonade/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)を探してみてください。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

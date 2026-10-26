@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
-  "title": "Prvi koraki z Ollamo",
-  "description": "Namestite Ollama in zaganjajte velike jezikovne modele lokalno – klepetajte prek terminala, namizne aplikacije ali API-ja REST.",
+  "title": "Prvi koraki z orodjem Ollama",
+  "description": "Namestite Ollama in zaganjajte LLM-je lokalno – klepetajte prek terminala, namizne aplikacije ali REST API-ja.",
   "auto_translated": true
 }

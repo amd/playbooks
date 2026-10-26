@@ -21,52 +21,54 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-Koodausagentit ovat tehokkaita työkaluja, jotka antavat kehittäjille mahdollisuuden tehdä yhteistyötä suurten kielimallien (LLM) tukemien tekoälyagenttien kanssa. Ne voidaan sisällyttää kehitysympäristöön, kuten terminaaliin tai VS Codeen, mikä mahdollistaa saumattoman integroinnin kehittäjän työnkulkuun.
+Koodausagentit ovat tehokkaita työkaluja, jotka antavat kehittäjille mahdollisuuden tehdä yhteistyötä suuriin kielimalleihin (LLM) perustuvien tekoälyagenttien kanssa. Ne voidaan upottaa kehitysympäristöön, kuten päätteeseen tai VS Codeen, mikä mahdollistaa saumattoman integroinnin kehittäjän työnkulkuun.
 
-Tässä ohjeessa näytetään, miten Cline-, VS Code- ja LM Studio -sovelluksia käytetään koodausagentin ajamiseen kokonaan omalla paikallisella koneellasi.
+Tämä opas näyttää, kuinka Clineä, VS Codea ja LM Studiota käytetään koodausagentin ajamiseen kokonaan paikallisella koneella.
 
 ## Mitä opit
 
-* Kuinka ajaa VS Codea Cline-koodausagentin kanssa auttamaan ohjelmistokehitystehtävissä.
-* Kuinka määrittää Clinen kommunikoimaan LM Studion kanssa koodausagenttien paikallista päättelyä varten.
-* Kuinka käyttää paikallisia koodausagentteja todellisten ohjelmistokehitystehtävien ratkaisemiseen. 
+* Kuinka ajaa VS Codea Cline-koodausagentin kanssa ohjelmistokehitystehtävien tukena.
+* Kuinka määrittää Cline kommunikoimaan LM Studion kanssa koodausagenttien paikallista päättelyä varten.
+* Kuinka käyttää paikallisia koodausagentteja todellisten ohjelmistokehitystehtävien ratkaisemiseen.
 
-## Muistiasetuksen määrittäminen
+<!-- @device:halo_box,halo,stx,krk -->
+## Muistiasetusten määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
-> **Huom**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
+> **Huomio**: Jos VS Code ei ole asennettuna, voit asentaa sen Ryzen AI Developer Centerin kautta.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistovaatimusten asentaminen
+## Ohjelmiston esivaatimusten asentaminen
 
 <!-- @require:lmstudio,vscode -->
 
-## Käynnistä ja määritä LM Studio
+## LM Studion käynnistäminen ja määrittäminen
 
 Käytämme LM Studiota koodausagenttia käyttävän LLM:n palvelemiseen.
 
-- Hakupalkissa hae `LM Studio` ja käynnistä sovellus. Sinua tervehtii seuraava näkymä.
+- Hae hakupalkista `LM Studio` ja käynnistä sovellus. Sinut toivotetaan tervetulleeksi seuraavalle sivulle.
 
 ![LM Studion aloitusnäyttö](assets/initial-lm-studio.png)
 
-Seuraavaksi meidän on ladattava LLM järjestelmään. Käytämme `Qwen3-Coder-30B-A3B`-mallia suurella kontekstipituudella. (Käytä Model-välilehteä sen asentamiseen, jos et ole vielä tehnyt niin).
-- Napsauta LM Studio -ikkunan yläreunassa olevaa hakupalkkia tai paina `CTRL+L`. Napsauta kytkintä `Manually choose model load parameters` ja napsauta sitten Qwen3-Coder-30B-A3B-mallia.
-- Muuta kontekstipituus arvosta `4096` arvoon `32768`, ja varmista, että `GPU Offload` on maksimissaan. Napsauta sitten `Load Model`
+Seuraavaksi meidän täytyy ladata LLM järjestelmään. Käytämme `Qwen3-Coder-30B-A3B`-mallia suurella kontekstin pituudella. (Käytä Model-välilehteä sen asentamiseen, jos et ole vielä tehnyt niin.)
+- Napsauta hakupalkkia LM Studio -ikkunan yläosassa tai paina `CTRL+L`. Napsauta kytkintä `Manually choose model load parameters` ja napsauta sitten Qwen3-Coder-30B-A3B-mallia.
+- Muuta kontekstin pituus arvosta `4096` arvoon `32768` ja varmista, että `GPU Offload` on maksimissaan. Napsauta sitten `Load Model`.
 
 ![Mallin valinta](assets/model-list-zoomed.png)
 
-Käytämme suurta kontekstipituutta, jotta agentti pystyy käsittelemään laajoja koodikantoja ja muistamaan tehdyt muutokset.
+Käytämme suurta kontekstin pituutta, jotta agentti pystyy käsittelemään suuria koodikantoja ja muistamaan tehdyt muutokset.
 
 ![Mallin määrittäminen](assets/selecting-model-zoomed.png)
 
-Seuraavaksi meidän on otettava käyttöön LM Studio -palvelin. 
-- Napsauta LM Studion vasemmassa reunassa olevaa Developer-välilehteä tai paina `CTRL+2`.
-- Tarkista tilan vaihtokytkin ja varmista, että se on asetettu tilaan `Running`.
+Seuraavaksi meidän täytyy ottaa käyttöön LM Studio Server.
+- Napsauta Developer-välilehteä tai paina `CTRL+2` LM Studiossa vasemmalla.
+- Tarkista tilan kytkin ja varmista, että se on asetettu tilaan `Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -151,15 +153,15 @@ lms chat "$ID" -p "Reply with exactly: OK"
 <!-- @test:end -->
 <!-- @os:end -->
 
-## Käynnistä ja määritä VS Code
+## VS Coden käynnistäminen ja määrittäminen
 
 Asennamme Cline-laajennuksen VS Codeen ja yhdistämme sen juuri luomaamme LM Studio -palvelimeen.
-- Hakupalkissa hae `VS Code` ja käynnistä sovellus.
-- Napsauta VS Coden vasemmassa reunassa olevaa `Extensions`-kuvaketta ja hae `Cline`. Napsauta sitten `Install`-painiketta. 
+- Hae hakupalkista `VS Code` ja käynnistä sovellus.
+- Napsauta `Extensions`-kuvaketta VS Coden vasemmassa sarakkeessa ja hae `Cline`. Napsauta sitten `Install`-painiketta.
 
 ![Cline-laajennuksen asentaminen](assets/installing-cline-vscode-extension.png)
 
-- Vasemmalla pitäisi näkyä Cline-kuvake. Napsauta sitä avataksesi Clinen. Esiin tulee ikkuna, jossa kysytään `How will you use Cline?`. Koska aiomme käyttää LM Studion kautta ajettavaa paikallista LLM:ää, valitse `Bring my own API Key` ja napsauta `Continue`. 
+- Vasemmalla pitäisi näkyä Cline-kuvake. Napsauta sitä avataksesi Clinen. Esiin tulee ikkuna, joka kysyy `How will you use Cline?` Koska aiomme käyttää paikallista LLM:ää, jota ajetaan LM Studion kautta, valitse `Bring my own API Key` ja napsauta `Continue`.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -181,32 +183,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![Tilin luominen](assets/cline-how-will-you-use-cline-zoomed.png)
 
-Seuraavaksi meidän on määritettävä Cline kommunikoimaan luomamme LM Studio -palvelimen kanssa. 
-- Aseta API-tarjoajaksi `LM Studio` ja malliksi `Qwen3-Coder-30B-A3B-GGUF`. 
+Seuraavaksi meidän täytyy määrittää Cline kommunikoimaan asettamamme LM Studio -palvelimen kanssa.
+- Aseta API Provider -arvoksi `LM Studio` ja malliksi `Qwen3-Coder-30B-A3B-GGUF`.
 
->**Vinkki**: Uudempia malleja saattaa olla saatavilla. Harkitse Qwen3.6-mallien lataamista ja niihin vaihtamista, mikäli haluat.
+>**Vinkki**: Uudempia malleja saattaa olla saatavilla. Harkitse Qwen3.6-mallien lataamista ja niihin vaihtamista halutessasi.
 
 
 ![Mallin määrittäminen](assets/cline-model-configuration-zoomed.png)
 
 ## Ensimmäisen projektin luominen
 
-Käytetään paikallista agenttiamme verkkosivuston luomiseen! Avaa VS Code haluamaasi hakemistoon, johon Cline luo tiedostot.
-- Tee tämä siirtymällä VS Coden vasemmassa yläkulmassa kohtaan `File -> Open Folder` ja valitsemalla esimerkiksi `Documents`-kansion.
+Käytetään paikallista agenttiamme verkkosivuston luomiseen! Avaa VS Code valitsemaasi hakemistoon, johon Cline luo tiedostot.
+- Tee tämä valitsemalla `File -> Open Folder` VS Coden vasemmasta yläkulmasta ja valitse kansio, kuten `Documents`.
 
-![Tyhjä kansio VS Codessa](assets/open-cline-test.png)
+![VS Coden tyhjä kansio](assets/open-cline-test.png)
 
-Nyt olemme valmiita antamaan kehotteen paikalliselle koodausagentille. 
-- Napsauta vasemmassa reunassa olevaa Cline-laajennusta ja syötä kehote agentin käynnistämiseksi. Käytetään esimerkkinä seuraavaa kehotetta:
+Nyt olemme valmiita antamaan kehotteen paikalliselle koodausagentille.
+- Napsauta Cline-laajennusta vasemmassa sarakkeessa ja kirjoita kehote agentin käynnistämiseksi. Käytetään esimerkkinä seuraavaa kehotetta:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Agentti alkaa sitten luoda tiedostoja kehotteen mukaisesti. Käyttäjänä voit seurata koodin luomista VS Codessa alla kuvatulla tavalla. Sinun saattaa olla napsautettava `Save`-painiketta joka kerta, kun Cline haluaa luoda tiedoston. 
+Agentti alkaa sitten luoda tiedostoja kehotteen mukaisesti. Käyttäjänä voit seurata koodin generointia VS Codessa alla kuvatulla tavalla. Saatat joutua napsauttamaan `Save` joka kerta, kun Cline haluaa luoda tiedoston.
 
-![Cline luo koodia](assets/cline-code-generation.png)
+![Clinen koodin generointi](assets/cline-code-generation.png)
 
-Kun ohjelmisto on luotu, agentti on valmis ja voit ajaa sovelluksen. Tässä tapauksessa agentti kirjoitti kolmeen tiedostoon: `index.html`, `script.js` ja `styles.css`. Kaksoisnapsauttamalla yksinkertaisesti HTML-tiedostoa voimme ladata luodun verkkosivuston ja käyttää sitä.
+Ohjelmiston generoinnin jälkeen agentti on valmis ja voit ajaa sovelluksen. Tässä tapauksessa agentti kirjoitti kolmeen tiedostoon: `index.html`, `script.js` ja `styles.css`. Kaksoisnapsauttamalla HTML-tiedostoa voimme ladata ja käyttää generoitua verkkosivustoa.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## Seuraavat vaiheet
 
-Verkkosivuston luomisen jälkeen voit jatkaa Clinen kanssa työskentelyä sen parantamiseksi. Kaksi mahdollista parannusta ovat:
+Verkkosivuston luomisen jälkeen voit jatkaa työskentelyä Clinen kanssa parantaaksesi sivustoa. Kaksi mahdollista parannusta ovat:
 
-- **Dokumentaatio**: Riittää, että pyydät agenttia komennolla `Add a README`, niin agentti luo `README.md`-tiedoston, joka dokumentoi verkkosivuston.
-- **Animaatio**: Pyydä mallia komennolla `Add an animation that visually represents a large language model running on a laptop.`, jotta verkkosivustolle luodaan animaatio.
+- **Dokumentaatio**: Kehotteen `Add a README` antaminen agentille riittää siihen, että agentti luo `README.md`-tiedoston, joka dokumentoi verkkosivuston.
+- **Animaatio**: Anna mallille kehote `Add an animation that visually represents a large language model running on a laptop.`, jotta sivustolle luodaan animaatio.
 
 Kannustamme lukijaa kokeilemaan muidenkin sovellusten luomista tällä asetuksella. Alla on muutamia hauskoja esimerkkejä, joita olemme kokeilleet:
 
-- **Retropelihalliklassikot**: Kokeile muita kehotteita. Agentin voi olla myös hauska luoda retrotyylisiä pelejä Pythonilla käyttäen `PyGame`-pakettia seuraavalla kehotteella:
+- **Retro-arcade-pelit**: Kokeile muita kehotteita. Agentin voi olla myös hauska luoda retrotyylisiä pelejä Pythonilla käyttäen `PyGame`-pakettia seuraavalla kehotteella:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Data-analyysi**: Yksi alue, jolla koodausagenteista on erityistä hyötyä, on skriptaus ja data-analyysi. Tämä kehote havainnollistaa paikallisen mallin kykyä generoida data-analyysiohjelmistoa osakekurssien visualisointiin:
+- **Data-analyysi**: Yksi alue, jolla koodausagentit ovat erityisen hyödyllisiä, on skriptaus ja data-analyysi. Tämä on kehote, joka esittelee paikallisen mallin kykyä luoda data-analyysiohjelmistoa osakekurssien visualisointiin:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Resurssit
 
-Alla on lisäresursseja, joiden avulla voit oppia lisää koodausagenteista, Clinesta ja työkuormien suorittamisesta 
+Alla on lisäresursseja, joiden avulla voit oppia lisää koodausagenteista, Clinesta ja työkuormien ajamisesta 
 
 * Lisätietoja AMD:n ja LM Studion kumppanuudesta ja integraatiosta: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* AMD:n blogikirjoitus, jossa käydään läpi Clinen käyttöä AMD Ryzen™ AI- ja Radeon™-näytönohjaimilla: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Clinen blogikirjoitus koodausagenttien paikallisesta käytöstä AI PC -tietokoneissa: https://cline.bot/blog/local-models-amd
+* AMD:n blogikirjoitus, jossa käydään läpi Clinen ajamista AMD Ryzen™ AI- ja Radeon™-näytönohjaimilla: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Clinen blogikirjoitus koodausagenttien ajamisesta paikallisesti tekoäly-PC:illä: https://cline.bot/blog/local-models-amd

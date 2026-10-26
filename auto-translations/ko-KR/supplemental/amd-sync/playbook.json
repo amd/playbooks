@@ -1,6 +1,6 @@
 {
   "id": "amd-sync",
-  "title": "AMD Sync를 이용한 원격 개발",
-  "description": "노트북에 AMD Sync를 설치하고 AMD Ryzen™ AI Halo에서 원클릭으로 원격 VS Code, Terminal, JupyterLab, Live Metrics를 이용해 보세요.",
+  "title": "AMD Sync를 사용한 원격 개발",
+  "description": "노트북에 AMD Sync를 설치하면 AMD Ryzen™ AI Halo에서 원클릭으로 원격 VS Code, 터미널, JupyterLab, 실시간 메트릭을 이용할 수 있습니다.",
   "auto_translated": true
 }

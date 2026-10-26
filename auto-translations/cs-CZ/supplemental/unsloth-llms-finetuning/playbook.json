@@ -1,6 +1,6 @@
 {
   "id": "unsloth-llms-finetuning",
-  "title": "Doladění LLM pomocí Unsloth",
-  "description": "Použijte Unsloth pro paměťově efektivní jemné doladění LLM™",
+  "title": "Doladění (fine-tuning) LLM pomocí Unsloth",
+  "description": "Použijte Unsloth pro paměťově efektivní jemně doladěné LLM™",
   "auto_translated": true
 }

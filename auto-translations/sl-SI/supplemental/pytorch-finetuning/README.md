@@ -16,54 +16,56 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-Ta vodnik ponuja korak-za-korakom primere za fino nastavitev velikega jezikovnega modela (LLM) s PyTorch in ROCm. Zajema več tehnik, od standardne fine nastavitve do pomnilniško učinkovitih strategij Parameter-Efficient Fine-Tuning (PEFT), tako da lahko modele preprosto prilagodite svojim potrebam.
+Ta vadnica ponuja korak za korakom primere za fino nastavljanje velikega jezikovnega modela (LLM) s PyTorch in ROCm. Zajema več tehnik, od standardnega fino nastavljanja do pomnilniško učinkovitih strategij Parameter-Efficient Fine-Tuning (PEFT), tako da lahko modele preprosto prilagodite svojim potrebam.
 
-**Uporabljeni model**: google/gemma-3-4b-it  *(glejte [Omogočanje HF avtentikacije](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), če je model zaklenjen)*  
+**Uporabljen model**: google/gemma-3-4b-it  *(glejte [Omogočanje HF avtentikacije](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), če je model zaklenjen)*  
 **Strojna oprema**: AMD Radeon™ GPU s podporo ROCm  
 **Ogrodje**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Opomba:** 
-> - Popolna fina nastavitev zahteva vsaj **64 GB sistemskega RAM-a**, od tega mora biti vsaj **32 GB na voljo za GPU** (32 GB je del 64 GB, ne dodatno k njim).
-> - Preizkusite lahko tudi druge arhitekture modelov, vključno z **GPT-OSS-20B**, tako da model v priloženih učnih skriptih zamenjate.
+> - Popolno fino nastavljanje zahteva vsaj **64 GB sistemskega RAM-a**, pri čemer mora biti vsaj **32 GB od tega na voljo GPU-ju** (32 GB je del 64 GB, ne dodatek k njim).
+> - Preizkusite lahko tudi druge arhitekture modelov, vključno z **GPT-OSS-20B**, tako da model v priloženih skriptih za učenje zamenjate.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Opomba:** Fina nastavitev z LoRA in QLoRA zahteva vsaj **32 GB sistemskega RAM-a**, od tega mora biti vsaj **16 GB na voljo za GPU** (16 GB je del 32 GB, ne dodatno k njim).
+> **Opomba:** Fino nastavljanje z LoRA in QLoRA zahteva vsaj **32 GB sistemskega RAM-a**, pri čemer mora biti vsaj **16 GB od tega na voljo GPU-ju** (16 GB je del 32 GB, ne dodatek k njim).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opomba:** Fina nastavitev z LoRA zahteva vsaj **32 GB sistemskega RAM-a**, od tega mora biti vsaj **16 GB na voljo za GPU** (16 GB je del 32 GB, ne dodatno k njim).
+> **Opomba:** Fino nastavljanje z LoRA zahteva vsaj **32 GB sistemskega RAM-a**, pri čemer mora biti vsaj **16 GB od tega na voljo GPU-ju** (16 GB je del 32 GB, ne dodatek k njim).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Opomba:** Fina nastavitev z LoRA in QLoRA zahteva grafično kartico z vsaj **16 GB namenskega pomnilnika GPU** in **32 GB sistemskega RAM-a**.
-> - V sistemu Linux učenje poteka v celoti v namenskem pomnilniku VRAM grafične kartice.
-> - Ko VRAM zmanjka, se ne preklopi na deljen pomnilnik GPU (sistemski RAM).
+> **Opomba:** Fino nastavljanje z LoRA in QLoRA zahteva grafično kartico z vsaj **16 GB namenskega pomnilnika GPU** in **32 GB sistemskega RAM-a**.
+> - V sistemu Linux učenje poteka v celoti v namenskem VRAM-u grafične kartice.
+> - Ko VRAM zmanjka, ne pride do prehoda na skupni pomnilnik GPU-ja (sistemski RAM).
 > - Kartice z manj kot 16 GB namenskega VRAM-a bodo med učenjem v sistemu Linux zmanjkale pomnilnika, tudi če ima sistem dovolj RAM-a.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opomba:** Fina nastavitev z LoRA zahteva vsaj **16 GB skupnega pomnilnika GPU** in **32 GB sistemskega RAM-a**.
-> - V sistemu Windows skupni pomnilnik GPU združuje namenski VRAM grafične kartice z deljenim pomnilnikom GPU (izposojenim iz sistemskega RAM-a).
-> - Zato lahko kartice z manj kot 16 GB namenskega VRAM-a še vedno uporabljate za ta priročnik, saj razliko nadomesti deljeni pomnilnik GPU.
+> **Opomba:** Fino nastavljanje z LoRA zahteva vsaj **16 GB skupnega pomnilnika GPU** in **32 GB sistemskega RAM-a**.
+> - V sistemu Windows skupni pomnilnik GPU združuje namenski VRAM grafične kartice s skupnim pomnilnikom GPU (izposojenim iz sistemskega RAM-a).
+> - Zato lahko kartice z manj kot 16 GB namenskega VRAM-a še vedno izvajajo ta priročnik z uporabo skupnega pomnilnika GPU za nadomestitev razlike.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Kaj se boste naučili
 
-- Kako fino nastaviti LLM z uporabo LoRA, QLoRA in polne fine nastavitve s PyTorch in ROCm
+- Kako fino nastaviti LLM z uporabo LoRA, QLoRA in popolnega fino nastavljanja s PyTorch in ROCm
 - Kako shraniti in uvesti svoj fino nastavljeni model
 - Kako spremljati učenje in odpravljati pogoste težave
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
@@ -72,13 +74,13 @@ Ta vodnik ponuja korak-za-korakom primere za fino nastavitev velikega jezikovneg
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Nameščanje predpogojev programske opreme
+## Namestitev predpogojev programske opreme
 
-#### Ustvarjanje virtualnega okolja
+#### Ustvarjanje navideznega okolja
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -90,13 +92,13 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Uporabniku dodelite dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
+**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -130,7 +132,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-#### Nameščanje osnovnih odvisnosti
+#### Namestitev osnovnih odvisnosti
 <!-- @require:pytorch -->
 
 #### Dodatne odvisnosti
@@ -138,23 +140,23 @@ finetune-venv\Scripts\activate
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Tukaj so testirani in podprti samo osnovni paketi. **bitsandbytes v sistemu Windows ni dobro podprt**, zato ga namestitev za Windows izpušča; na sistemu Windows uporabite LoRA ali polno fino nastavitev (QLoRA zahteva bitsandbytes in je namenjena sistemu Linux).
+**Windows:** Tukaj so testirani in podprti le osnovni paketi. **bitsandbytes v sistemu Windows ni dobro podprt**, zato ga namestitev za Windows izpušča; uporabite LoRA ali popolno fino nastavljanje v sistemu Windows (QLoRA zahteva bitsandbytes in je namenjen sistemu Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Omogočanje HF avtentikacije (zaklenjeni ali po meri / vnaprej nenameščeni modeli)
+#### Omogočanje HF avtentikacije (zaklenjeni ali po meri / vnaprej nenaloženi modeli)
 
-V tem primeru uporabljamo **google/gemma-3-4b-it**, ki je **zaklenjen** model. Morate sprejeti pogoje modela na Hugging Face in se nato avtenticirati, da ga bodo učni skripti lahko prenesli.
+V tem primeru uporabljamo **google/gemma-3-4b-it**, ki je **zaklenjen** model. Sprejeti morate pogoje modela na Hugging Face in se nato avtenticirati, da ga bodo skripti za učenje lahko prenesli.
 
 1. **Sprejmite licenco:** Odprite [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it), se prijavite (ali ustvarite račun) in sprejmite licenco/pogoje na strani modela (npr. »Agree and access repository«).
 2. **Namestite in se prijavite:** Namestite Hugging Face CLI, nato zaženite standardno prijavo:
@@ -265,9 +267,9 @@ sys.exit(r.returncode)
 
 ### Kaj je LoRA?
 
-**LoRA (Low-Rank Adaptation)** ohrani osnovni model zamrznjen in uči samo majhne "adapterske" matrike, ki se dodajo določenim plastem. 
+**LoRA (Low-Rank Adaptation)** ohranja osnovni model zamrznjen in uči le majhne "adapterske" matrike, ki se dodajo določenim slojem. 
 
-- **Ključna ideja**: namesto posodabljanja ogromne matrike uteži z milijoni parametrov se naučimo posodobitve z nizkim rangom (dve majhni matriki, katerih produkt ima veliko manj parametrov). To omogoča veliko zmanjšanje števila učljivih parametrov in porabe VRAM-a, hkrati pa ohranja večino kakovosti polne fine nastavitve.
+- **Ključna ideja**: namesto posodabljanja ogromne matrike uteži z milijoni parametrov naučimo posodobitev nizkega ranga (dve majhni matriki, katerih produkt ima veliko manj parametrov). To prinaša veliko zmanjšanje števila naučljivih parametrov in porabe VRAM, hkrati pa ohranja večino kakovosti popolnega fino nastavljanja.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,7 +284,7 @@ W_updated = W + B × A
 
 ### Kaj je QLoRA?
 
-**QLoRA** združuje **4-bitno kvantizacijo** z **LoRA**. Osnovni model se naloži v 4-bitni obliki (velik prihranek pomnilnika), učijo pa se samo adapterji LoRA v višji natančnosti. Tako dobite učinkovitost parametrov LoRA in bistveno nižjo porabo VRAM-a, z majhnim kompromisom v kakovosti v primerjavi s polno natančnostjo LoRA. Upoštevajte, da lahko 4-bitna kvantizacija povzroči numerično nestabilnost (skoke izgube ali vrednosti NaN), zato uporabniki pogosto raje izberejo **LoRA**, če je na voljo dovolj VRAM-a.
+**QLoRA** združuje **4-bitno kvantizacijo** z **LoRA**. Osnovni model se naloži v 4-bitni obliki (velik prihranek pomnilnika), medtem ko se učijo le adapterji LoRA v višji natančnosti. Tako dobite učinkovitost parametrov LoRA ter bistveno nižjo porabo VRAM, s kompromisom v kakovosti v primerjavi s polno natančnostjo LoRA. Upoštevajte, da lahko 4-bitna kvantizacija povzroči numerično nestabilnost (skoke izgube ali vrednosti NaN), zato se uporabniki pogosto raje odločijo za **LoRA**, če je na voljo dovolj VRAM-a.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,52 +292,52 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Opomba**: Za osnovne modele MXFP4, kot je `openai/gpt-oss-20b`, priporočamo uporabo **LoRA** (`train_lora.py`) namesto QLoRA. 4-bitna pot `bitsandbytes` v skripti QLoRA običajno dekvantizira uteži MXFP4 v BF16, zato se izvajanje obnaša kot standardna LoRA. Za nativni MXFP4 je potreben `bitsandbytes`, zgrajen iz izvorne kode, skupaj z ustreznim skladom Transformers/Triton/kernels. Glejte [dokumentacijo Transformers MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Opomba**: Za osnovne modele MXFP4, kot je `openai/gpt-oss-20b`, priporočamo uporabo **LoRA** (`train_lora.py`) namesto QLoRA. 4-bitna pot `bitsandbytes` v skripti QLoRA običajno dekvantizira uteži MXFP4 v BF16, zato se zagon obnaša kot standardni LoRA. Nativni MXFP4 potrebuje `bitsandbytes`, zgrajen iz izvorne kode, skupaj z ustreznim skladom Transformers/Triton/kernels. Glejte [dokumentacijo Transformers MXFP4](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
 ### 2. Izberite metodo
 
 | Metoda | Pomnilnik | Hitrost | Kakovost | Najprimernejše za |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (samo Linux) | 12–16 GB | Najhitrejša | 90–95 % | Nizko porabo pomnilnika |
-| **LoRA** | 24–32 GB | Hitra | 95–98 % | Uravnotežen pristop |
-| **Full** | 80 GB+ | Najpočasnejša | 100 % | Največjo kakovost |
+| **QLoRA** (samo Linux) | 12-16GB | Najhitrejša | 90-95% | Nizko porabo pomnilnika |
+| **LoRA** | 24-32GB | Hitra | 95-98% | Uravnotežen pristop |
+| **Full** | 80GB+ | Najpočasnejša | 100% | Najvišjo kakovost |
 
 ### 3. Zaženite učenje
 
 **Nabor podatkov in kaj se model nauči**  
-Skripte pretvorijo nabor podatkov v primere pogovorov. Skripta QLoRA na primer uporablja **Abirate/english_quotes**: vsak primer postane par uporabnik–asistent, na primer:
+Skripte pretvorijo nabor podatkov v primere pogovorov. Na primer, skripta QLoRA uporablja **Abirate/english_quotes**: vsak primer postane par uporabnik–asistent, na primer:
 
-- **Uporabnik:** »Give me a quote about: &lt;tag&gt;«
-- **Asistent:** »&lt;quote&gt; – &lt;author&gt;«
+- **Uporabnik:** »Daj mi citat na temo: &lt;tag&gt;«
+- **Asistent:** »&lt;citat&gt; – &lt;avtor&gt;«
 
-Fino prilagajanje nauči model, da se odziva na pozive, ki zahtevajo citate o določeni temi, in jih vrne v obliki `<quote text> - <author>`. Skripti za LoRA in polno fino prilagajanje uporabljata **databricks/databricks-dolly-15k** (splošni pari navodilo/odgovor), zato se natančna naloga razlikuje glede na skripto; ideja pa je enaka - prilagoditi model izbranemu naboru podatkov in obliki.
+Fino prilagajanje nauči model, da se odzove na pozive, ki zahtevajo citate na določeno temo, in da jih vrne v obliki `<besedilo citata> - <avtor>`. Skripti LoRA in polnega fino prilagajanja uporabljata **databricks/databricks-dolly-15k** (splošni pari navodilo/odgovor), zato se natančna naloga razlikuje glede na skripto; ideja pa je enaka - prilagoditi model izbranemu naboru podatkov in obliki.
 
-Spodaj je povzetek razpoložljivih metod učenja. Vsaka metoda povezuje do svoje skripte in vsebuje kratek opis za izbiro prave metode.
+Spodaj je povzetek razpoložljivih metod učenja. Vsaka metoda vsebuje povezavo do svoje skripte in kratek opis za izbiro pravega pristopa.
 
 | Skripta                           | Metoda            | Opis                                                                                                         | Tipičen VRAM | Priporočeno za                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Uči majhne matrike adapterjev, medtem ko je osnovni model zamrznjen. 3–5-krat hitreje; ~95–98 % polne kakovosti.                         | 24–32 GB      | Napredne uporabnike; več adapterjev; več VRAM-a    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(samo Linux)*             | **QLoRA**       | 4-bitna kvantizacija + LoRA adapterji. Najnižja poraba pomnilnika, najhitrejša, majhen kompromis pri kakovosti. Zahteva `bitsandbytes` (samo Linux).                            | 12–16 GB      | Večino uporabnikov; hitre poskuse; omejen VRAM      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Polno fino prilagajanje** | Posodobi vse parametre modela. Največja kakovost; najvišja poraba pomnilnika in računskih zmogljivosti.                                    | 40 GB+      | Največjo kakovost; raziskave; velik VRAM           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Uči majhne matrike adapterjev, medtem ko zamrzne osnovni model. 3–5-krat hitreje; ~95–98 % polne kakovosti.                         | 24–32GB      | Napredne uporabnike; več adapterjev; več VRAM-a    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(samo Linux)*             | **QLoRA**       | 4-bitna kvantizacija + adapterji LoRA. Najnižja poraba pomnilnika, najhitrejše, majhen kompromis pri kakovosti. Zahteva `bitsandbytes` (samo Linux).                            | 12–16GB      | Večino uporabnikov; hitre poskuse; omejen VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Polno fino prilagajanje** | Posodobi vse parametre modela. Najvišja kakovost; največja poraba pomnilnika in računske moči.                                    | 40GB+        | Najvišjo kakovost; raziskave; velik VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Opomba:** Polno fino prilagajanje (`train_full_finetuning.py`) lahko zahteva več kot 64 GB sistemskega pomnilnika RAM in morda ni izvedljivo na tej napravi. Namesto tega razmislite o uporabi LoRA ali QLoRA.
+> **Opomba:** Polno fino prilagajanje (`train_full_finetuning.py`) lahko zahteva več kot 64 GB sistemskega RAM-a in morda ni izvedljivo na tej napravi. Namesto tega razmislite o uporabi LoRA ali QLoRA.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Opomba:** Polno fino prilagajanje (`train_full_finetuning.py`) lahko zahteva več kot 64 GB sistemskega pomnilnika RAM in morda ni izvedljivo na tej napravi. Namesto tega razmislite o uporabi LoRA.
+> **Opomba:** Polno fino prilagajanje (`train_full_finetuning.py`) lahko zahteva več kot 64 GB sistemskega RAM-a in morda ni izvedljivo na tej napravi. Namesto tega razmislite o uporabi LoRA.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Preprosto izberite želeno `Training method`, prenesite ustrezno skripto in jo zaženite z ukazom, medtem ko ohranite aktivirano virtualno okolje: 
+Preprosto izberite želeno `Training method`, prenesite ustrezno skripto in jo zaženite z ukazom, pri čemer naj bo vaše virtualno okolje aktivirano: 
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## Uporaba vašega fino prilagojenega modela
+## Uporaba fino prilagojenega modela
 
 ### Po polnem fino prilagajanju
 
@@ -356,7 +358,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Po učenju z LoRA/QLoRA
+### Po učenju LoRA/QLoRA
 
 ```python
 from peft import AutoPeftModelForCausalLM
@@ -377,7 +379,7 @@ outputs = model.generate(**inputs, max_new_tokens=200)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-### Združite adapter LoRA z osnovnim modelom
+### Združevanje adapterja LoRA z osnovnim modelom
 
 ```python
 # Merge LoRA/QLoRA adapter weights into the base model for standalone inference
@@ -388,10 +390,10 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 
 **Opomba:**  
 - Prepričajte se, da se ime imenika modela (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) ujema z dejansko izhodno mapo iz učenja.  
-- Če ste namesto QLoRA uporabili LoRA, ustrezno zamenjajte pot.  
-- Nekateri modeli Gemma zahtevajo navedbo `trust_remote_code=True` v `from_pretrained`; dodajte, če vidite povezano opozorilo.
+- Če ste namesto QLoRA uporabili LoRA, preprosto ustrezno zamenjajte pot.  
+- Nekateri modeli Gemma zahtevajo, da v `from_pretrained` navedete `trust_remote_code=True`; dodajte, če opazite povezano opozorilo.
 
-Za več prilagojenih nastavitev (žetoni za polnjenje, naprava itd.) si oglejte skripto, ki ste jo uporabili za učenje.
+Za več prilagojenih nastavitev (žetoni za zapolnitev, naprava itd.) glejte skripto, ki ste jo uporabili za učenje.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -517,10 +521,10 @@ dataset = dataset.map(format_instruction)
 
 **Oblika nabora podatkov za lokalno datoteko JSON/JSONL:**
 
-Pri uporabi te metode se prepričajte, da so vaše datoteke JSON pravilno strukturirane, da preprečite napake pri razčlenjevanju. 
+Pri uporabi te metode se prepričajte, da so vaše datoteke JSON pravilno strukturirane, da se izognete napakam pri razčlenjevanju. 
 
 Upoštevati je treba naslednje smernice:
-* **Oblikovanje datotek:** Datoteke JSON je treba oblikovati v integriranem razvojnem okolju (IDE), da zagotovite pravilno strukturo in skladnjo.
+* **Oblikovanje datoteke:** Datoteke JSON naj bodo oblikovane v integriranem razvojnem okolju (IDE), da se zagotovi pravilna struktura in skladnja.
 * **Zahtevani ključi:** Datoteka JSON po meri mora vsebovati ključa `instruction` in `response`. Ta ključa sta bistvena za pravilno delovanje metode.
 ```json
 [
@@ -534,15 +538,15 @@ Upoštevati je treba naslednje smernice:
   }
 ]
 ```
-**Oblika nabora podatkov za nabor podatkov iz Hugging Face Hub**
+**Oblika nabora podatkov za nabor podatkov Hugging Face Hub**
 
 Pri uporabi naborov podatkov iz Hugging Face se prepričajte, da so vaši nabori podatkov pravilno strukturirani, da omogočite nemoteno integracijo. 
 
 Upoštevati je treba naslednje smernice:
 * **Par navodilo-odgovor:** Osredotočite se na nabore podatkov, ki vsebujejo par `instruction-response`. Ta struktura je bistvena za predvideno delovanje.
-* **Spreminjanje ključev po meri:** Če vaš nabor podatkov ne ustreza strukturi `instruction-response`, imate možnost prilagoditi funkcijo `format_instruction()`. To vam omogoča, da po potrebi uporabite določene ključe.
+* **Prilagoditev ključev po meri:** Če vaš nabor podatkov ne ustreza strukturi `instruction-response`, imate možnost prilagoditi funkcijo `format_instruction()`. To vam omogoča upoštevanje določenih ključev po potrebi.
 
-Primer prilagoditve: Kadar je treba prilagoditi izhod nabora podatkov, lahko spremenite razdelek za odgovor znotraj funkcije format_instruction(), da ustreza vašim potrebam.
+Primer prilagoditve: V primerih, ko je treba prilagoditi izhod nabora podatkov, lahko spremenite razdelek z odgovorom znotraj funkcije format_instruction(), da ustreza vašim zahtevam.
 ```python
 def format_instruction(example):
     return {
@@ -554,7 +558,7 @@ def format_instruction(example):
 ```
 **Oblika nabora podatkov za datoteko CSV**
 
-Da bi skripta lahko uporabila obliko datoteke CSV, morate zagotoviti, da datoteka CSV vsebuje stolpca z imenoma `instruction` in `response`. 
+Da bo skripta lahko uporabljala obliko datoteke CSV, se morate prepričati, da datoteka CSV vsebuje stolpca z imenoma `instruction` in `response`. 
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -563,7 +567,7 @@ instruction,response
 
 ### Prilagoditev parametrov učenja
 
-Uredite skripto za učenje in spremenite spremenljivke, da ustrezajo vašim ciljem: **stopnja učenja** (`LR`), **epohe** (`EPOCHS`), **velikost paketa** (`BATCH_SIZE`), **akumulacija gradientov** (`GRAD_ACCUM_STEPS`) in za LoRA/QLoRA **rang** (`LORA_R`). Za hitrejše zagone uporabite manj epoh in višjo stopnjo učenja (LR); za boljšo kakovost uporabite več epoh in nižjo LR. Zmanjšajte velikost paketa ali dolžino zaporedja, če naletite na napake zaradi pomanjkanja pomnilnika.
+Uredite skripto za učenje in spremenite spremenljivke glede na svoje cilje: **stopnja učenja** (`LR`), **epohe** (`EPOCHS`), **velikost serije** (`BATCH_SIZE`), **kopičenje gradientov** (`GRAD_ACCUM_STEPS`) in za LoRA/QLoRA **rang** (`LORA_R`). Za hitrejše zagone uporabite manj epoh in višjo stopnjo učenja (LR); za boljšo kakovost uporabite več epoh in nižjo LR. Zmanjšajte velikost serije ali dolžino zaporedja, če naletite na napake zaradi pomanjkanja pomnilnika.
 ### Nasveti za optimizacijo pomnilnika
 
 Če naletite na napake zaradi pomanjkanja pomnilnika:
@@ -574,17 +578,17 @@ BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
-**2. Skrajšajte dolžino zaporedja:**
+**2. Zmanjšajte dolžino zaporedja:**
 ```python
 max_seq_length=256  # Instead of 512
 ```
 
-**3. Uporabite agresivnejšo kvantizacijo:**
+**3. Uporabite bolj agresivno kvantizacijo:**
 ```
 Full → LoRA → QLoRA
 ```
 
-**4. Omogočite gradient checkpointing (samo pri celotnem fine-tuningu):**
+**4. Omogočite Gradient Checkpointing (samo za polno fino nastavljanje):**
 ```python
 model.gradient_checkpointing_enable()
 ```
@@ -605,18 +609,18 @@ rocm-smi --showmeminfo vram
 
 ### (Neobvezno) Sledenje eksperimentom z Weights & Biases
 
-Za beleženje zagonov in meritev v [Weights & Biases](https://wandb.ai):
+Za beleženje zagonov in metrik v [Weights & Biases](https://wandb.ai):
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-V skripti za učenje nastavite `report_to="wandb"` in po želji `run_name="your-experiment-name"` v konfiguraciji trenerja. Če ne želite uporabljati Wandb, pustite `report_to` na privzeti vrednosti ali jo nastavite na `"none"`.
+V skripti za učenje nastavite `report_to="wandb"` in po želji `run_name="your-experiment-name"` v konfiguraciji trenerja. Če ne želite uporabljati Wandb, pustite `report_to` na privzeti vrednosti ali ga nastavite na `"none"`.
 
 ### Pogoste težave
 
-#### Zmanjkalo pomnilnika (OOM)
+#### Pomanjkanje pomnilnika (OOM)
 
 **Rešitev:** Zmanjšajte velikost serije in/ali uporabite QLoRA
 ```python
@@ -627,7 +631,7 @@ GRAD_ACCUM_STEPS = 16
 
 #### Izguba se ne zmanjšuje
 
-**Rešitev:** Prilagodite hitrost učenja
+**Rešitev:** Prilagodite stopnjo učenja
 ```python
 LR = 1e-4  # Try lower
 # or
@@ -642,14 +646,14 @@ BATCH_SIZE = 8
 ```
 ## Naslednji koraki
 
-Ko uspešno zaključite fine-tuning, razmislite o naslednjih korakih, da iz svojega modela izvlečete še več:
+Ko ste uspešno zaključili fino nastavljanje, upoštevajte naslednje korake, da iz svojega modela izvlečete še več:
 
-1. **Ovrednotite** temeljito na ločenih testnih podatkih, da izmerite posplošljivost in se izognete prekomernemu prileganju (overfitting).
+1. **Ovrednotite** temeljito na ločenih testnih podatkih, da izmerite sposobnost posploševanja in se izognete prekomernemu prilagajanju.
 2. **Eksperimentirajte** s preizkušanjem različnih vrednosti hiperparametrov za boljše razmerje med natančnostjo, hitrostjo in porabo pomnilnika.
-3. **Sledite** vsem svojim eksperimentom (in ustreznim meritvam) z Weights & Biases za ponovljivo raziskovalno delo.
-4. **Preizkusite** učenje na svojih lastnih podatkovnih zbirkah, da model prilagodite specifično svojemu primeru uporabe.
-5. **Uvedite** svoj fine-tuniran model za hitro sklepanje z uporabo učinkovitih ogrodij, kot je vLLM, na združljivi strojni opremi.
-6. **Raziščite** napredne tehnike, vključno z inženiringom pozivov (prompt engineering), mešano natančnostjo in daljšimi dolžinami zaporedij.
+3. **Sledite** vsem svojim eksperimentom (in pripadajočim metrikam) z Weights & Biases za ponovljivo raziskovanje.
+4. **Poskusite** učenje na svojih lastnih naborih podatkov, da model prilagodite specifično svojemu primeru uporabe.
+5. **Uvedite** svoj fino nastavljeni model za hitro sklepanje z uporabo učinkovitih ogrodij, kot je vLLM, na združljivi strojni opremi.
+6. **Raziščite** napredne tehnike, vključno z oblikovanjem pozivov (prompt engineering), mešano natančnostjo in daljšimi dolžinami zaporedij.
 7. **Naučite** več adapterjev LoRA za različne naloge ali domene in jih po potrebi zamenjujte.
 
 ---

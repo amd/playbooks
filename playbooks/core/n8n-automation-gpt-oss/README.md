@@ -20,6 +20,10 @@ n8n is a workflow automation platform that lets you connect apps and services us
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that pulls the latest business headlines from a news RSS feed and uses a local LLM running on your system to generate an investor-focused summary.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the **Launching Lemonade** section, check whether the model is already available in Lemonade — if it is, you can load it directly; if not, download it there first.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 - How to install and launch n8n
@@ -52,19 +56,26 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -185,12 +196,14 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Installing n8n
 <!-- @os:windows -->
@@ -204,15 +217,6 @@ npm install -g n8n
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 n8n --version
 ```
 <!-- @test:end -->
@@ -284,19 +288,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -310,6 +309,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -325,16 +326,16 @@ n8n starts a local web server. Press `'o'` or Open your browser to `http://local
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it might stop the server.
 
-## Launching Lemonade
+## Launching Models with Lemonade
 
 Lemonade is the local server that will run a model and connect to n8n. 
 
 <!-- @os:linux -->
-Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. You can browse models, backends, and load the pre-installed models from here.
+Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can add models, backends, and load the pre-installed models.
+Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 >**Tip**: Once running, the Lemonade GUI is also accessible at http://localhost:13305

@@ -1,6 +1,6 @@
 {
   "id": "ollama-getting-started",
-  "title": "Aloittaminen Ollaman kanssa",
-  "description": "Asenna Ollama ja suorita LLM-malleja paikallisesti — keskustele päätteestä, työpöytäsovelluksesta tai REST-rajapinnasta.",
+  "title": "Aloitus Ollaman kanssa",
+  "description": "Asenna Ollama ja suorita LLM-malleja paikallisesti — keskustele terminaalista, työpöytäsovelluksesta tai REST-rajapinnasta käsin.",
   "auto_translated": true
 }

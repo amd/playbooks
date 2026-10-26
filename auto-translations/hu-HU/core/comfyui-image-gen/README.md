@@ -16,20 +16,22 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-A ComfyUI egy hatékony, csomópont-alapú felület a Stable Diffusion és más diffúziós modellek számára. A hagyományos, egyszerű promptmezőt tartalmazó szöveg-kép felületekkel ellentétben a ComfyUI a teljes képgenerálási folyamatot vizuális gráfként jeleníti meg, így pontos irányítást biztosít a folyamat minden lépése felett, a szövegkódolástól kezdve a látens tér manipulálásán át egészen a végső dekódolásig.
+A ComfyUI egy nagy teljesítményű, csomópont-alapú (node-based) felület Stable Diffusion és más diffúziós modellek használatához. A hagyományos, egyszerű promptmezőt tartalmazó szöveg-kép átalakító felületekkel ellentétben a ComfyUI a teljes képgenerálási folyamatot vizuális gráfként jeleníti meg, így pontosan szabályozhatod a folyamat minden lépését, a szövegkódolástól a látens tér manipulálásán át a végső dekódolásig.
 
-Ez az útmutató megtanítja, hogyan használja a ComfyUI-t a Z Image Turbo modellel a GPU-ján, hogy kiváló minőségű, mesterséges intelligencia által generált képeket hozzon létre.
+Ez az útmutató bemutatja, hogyan használhatod a ComfyUI-t a Z Image Turbo modellel a GPU-don, hogy kiváló minőségű, mesterséges intelligencia által generált képeket készíts.
 
-## Amit meg fog tanulni
+## Mit fogsz megtanulni
 
-- Hogyan indítsa el a ComfyUI-t, és hogyan töltse be a Z-Image Turbo sablont
-- A diffúziós pipeline komponenseinek megértése
-- Képek generálása és a generálási paraméterek finomhangolása
-- Munkafolyamatok mentése és megosztása
+- Hogyan indítsd el a ComfyUI-t, és hogyan töltsd be a Z-Image Turbo sablont
+- A diffúziós folyamat összetevőinek megértését
+- Képek generálását és a generálási paraméterek finomhangolását
+- A munkafolyamatok mentését és megosztását
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## A memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
@@ -37,7 +39,7 @@ Ez az útmutató megtanítja, hogyan használja a ComfyUI-t a Z Image Turbo mode
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## A szoftveres előfeltételek telepítése
+## Szoftveres előfeltételek telepítése
 
 <!-- @os:windows -->
 <!-- @require:driver,comfyui -->
@@ -46,7 +48,7 @@ Ez az útmutató megtanítja, hogyan használja a ComfyUI-t a Z Image Turbo mode
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (a változtatás érvényesítéséhez jelentkezzen ki, majd vissza):
+**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (a változás érvénybe lépéséhez jelentkezzen ki, majd be újra):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -288,17 +290,17 @@ echo "OK: ComfyUI server is reachable!"
 <!-- @os:end -->
 
 
-## A ComfyUI elindítása
+## A ComfyUI indítása
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-A ComfyUI Windows alatt történő elindításához kattintson az Asztalon található ComfyUI Desktop Launcherre. Kövesse a lépéseket a helyi verzió AMD-vel történő telepítéséhez.
+A ComfyUI Windows alatti indításához kattints az asztalon található ComfyUI Desktop Launcherre. Kövesd a lépéseket a helyi verzió AMD-vel történő telepítéséhez.
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Ezután kattintson az alkalmazás felső-középső részén található ComfyUI gombra. Ez megnyit egy beállítások fület. Nyissa meg a Storage fület, és győződjön meg róla, hogy az elérési utak a következőképpen vannak beállítva az előre telepített modellek eléréséhez.
+Ezután kattints a ComfyUI gombra az alkalmazás felső, középső részén. Ez megnyit egy beállítások fület. Nyisd meg a Storage fület, és győződj meg róla, hogy az elérési utak az alábbiak szerint vannak beállítva, hogy hozzáférj az előre telepített modellekhez.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
@@ -310,8 +312,8 @@ Ezután kattintson az alkalmazás felső-középső részén található ComfyUI
 <!-- @os:linux -->
 Az AMD Ryzen™ AI Halo rendszeren a ComfyUI egy előre elkészített konténerben fut, amely nem igényel további Python-beállítást.
 
-A ComfyUI Linux alatt történő elindításához kattintson a tálcán található ComfyUI parancsikonra. Ennek magától meg kell nyílnia egy böngészőablakban.
->**Tipp**: A ComfyUI és a modelljei a `~/.local/share/ComfyUI/models` helyen vannak tárolva. Itt tud manuálisan hozzáadni munkafolyamatokat vagy új modelleket.
+A ComfyUI Linux alatti indításához kattints a ComfyUI parancsikonra a tálcán. Ennek önmagától meg kell nyílnia egy böngészőablakban.
+>**Tipp**: A ComfyUI és a modelljei a `~/.local/share/ComfyUI/models` helyen vannak tárolva. Itt adhatsz manuálisan munkafolyamatokat vagy új modelleket a rendszerhez.
 
 
 <!-- @os:end -->
@@ -319,38 +321,38 @@ A ComfyUI Linux alatt történő elindításához kattintson a tálcán találha
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-A ComfyUI Windows alatt történő elindításához egyszerűen kattintson az Asztalon található ComfyUI parancsikonra.
+A ComfyUI Windows alatti indításához egyszerűen kattints az asztalon található ComfyUI parancsikonra.
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-A ComfyUI elindításához:
+A ComfyUI indításához:
 
-1. Győződjön meg róla, hogy a ComfyUI könyvtárán belül tartózkodik. 
-2. Futtassa a `python3 main.py --use-pytorch-cross-attention` parancsot
+1. Győződj meg róla, hogy a ComfyUI könyvtárában vagy. 
+2. Futtasd a `python3 main.py --use-pytorch-cross-attention` parancsot.
 
-A ComfyUI elindít egy helyi webszervert. Nyissa meg a böngészőjében a `http://127.0.0.1:8188` címet a felület eléréséhez.
+A ComfyUI elindít egy helyi webszervert. Nyisd meg a böngésződben a `http://127.0.0.1:8188` címet a felület eléréséhez.
 
-> **Tipp**: A ComfyUI használata közben hagyja nyitva a terminálablakot. Bezárása leállítja a szervert.
+> **Tipp**: Tartsd nyitva a terminálablakot a ComfyUI használata közben. Ha bezárod, a szerver leáll.
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 ## A Z-Image Turbo sablon megkeresése
 
-Mielőtt képeket generálna, be kell töltenie a Z-Image Turbo sablont. Íme, hogyan találja meg:
+Mielőtt képeket generálnál, be kell töltened a Z-Image Turbo sablont. Íme, hogyan találhatod meg:
 
-1. **Nézze meg a képernyő bal szélét**—itt egy függőleges eszköztár fut fentről lefelé az alkalmazás legbaloldalibb részén.
+1. **Nézd meg a képernyő bal szélét** – az alkalmazás legbaloldalibb részén egy függőleges eszköztár fut végig fentről lefelé.
 
-2. **Keresse meg a mappa ikont**—ebben a bal oldali eszköztárban keressen egy mappára hasonlító ikont. Ha rámutat, a felirata "Templates" lesz.
+2. **Keresd meg a mappa ikont** – a bal oldali eszköztárban keress egy mappára hasonlító ikont. Ha fölé viszed az egeret, „Templates” feliratot fogsz látni.
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
 </p>
 
-3. **Kattintson a mappa ikonra**—ez megnyitja a Templates panelt.
+3. **Kattints a mappa ikonra** – ez megnyitja a Templates panelt.
 
-4. **Keressen rá a "Z-Image Turbo" kifejezésre**—használja a keresősávot, vagy görgessen végig az elérhető sablonokon, hogy megtalálja a Z-Image Turbo Text To Image munkafolyamatot, majd kattintson a betöltéséhez.
+4. **Keresd meg a „Z-Image Turbo” elemet** – használd a keresősávot, vagy görgess végig a rendelkezésre álló sablonok között, hogy megtaláld a Z-Image Turbo Text To Image munkafolyamatot, majd kattints rá a betöltéséhez.
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -360,48 +362,49 @@ Mielőtt képeket generálna, be kell töltenie a Z-Image Turbo sablont. Íme, h
 
 <!-- @require:comfyui-models -->
 
-## A felület megértése
+## A felület megismerése
 
-Amikor a Z-Image Turbo sablon betöltődik, egy vászont fog látni 2 fő csomóponttal. Az első csomópont neve 'Text to Image (Z-Image-Turbo)', a második pedig a kép megtekintésére szolgál.
+Amikor a Z-Image Turbo sablon betöltődik, egy vászont fogsz látni két fő csomóponttal. Az első csomópont neve „Text to Image (Z-Image-Turbo)”, a második csomópont pedig a kép megtekintésére szolgál.
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-A Z-Image csomóponton kattintson a jobb felső gombra a csomópont kibontásához és az almappa (subgraph) megtekintéséhez.
+A Z-Image csomóponton kattints a jobb felső gombra a csomópont kibontásához, hogy megtekinthesd az alcsomópontokat (subgraph).
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
 </p>
 
-### A pipeline komponensei
+### A folyamat összetevői
 
-A Z-Image Turbo munkafolyamat négy kulcsfontosságú modellkomponenst használ, amelyek együtt működnek:
+A Z-Image Turbo munkafolyamat négy kulcsfontosságú modellösszetevőt használ, amelyek együtt működnek:
 
-| Komponens | Szerep |
+| Összetevő | Szerep |
 |-----------|------|
-| **Text Encoder** (Qwen 3 4B) | Az Ön szöveges promptját olyan beágyazásokká (embeddings) alakítja, amelyeket a diffúziós modell megért |
-| **Diffusion Model** (Z-Image Turbo) | A központi neurális hálózat, amely iteratívan zajtalanítja a látens reprezentációkat, képekké alakítva azokat |
-| **VAE** (Variational Autoencoder) | Képeket kódol a látens térbe és onnan vissza (a végső látenseket pixelekké dekódolja) |
-| **LoRA** (opcionális) | Könnyűsúlyú adapterek, amelyek a stílust vagy a témát módosítják az alapmodell újratanítása nélkül |
+| **Szövegkódoló** (Qwen 3 4B) | A szöveges promptodat olyan beágyazásokká (embeddings) alakítja, amelyeket a diffúziós modell megért |
+| **Diffúziós modell** (Z-Image Turbo) | A központi neurális hálózat, amely iteratívan zajtalanítja a látens reprezentációkat képekké |
+| **VAE** (Variational Autoencoder) | Képeket kódol a látens térbe, illetve dekódol onnan vissza (a végső látenseket pixelekké alakítja) |
+| **LoRA** (opcionális) | Könnyűsúlyú adapterek, amelyek az alapmodell újratanítása nélkül módosítják a stílust vagy a témát |
 
-A munkafolyamat minden csomópontja ezen komponensek egyikének felel meg. Az adatok balról jobbra áramlanak: szöveg → beágyazások → irányított zajtalanítás → látensek → végső kép.
+A munkafolyamat minden csomópontja ezen összetevők egyikének felel meg. Az adatok balról jobbra áramlanak: szöveg → beágyazások → irányított zajtalanítás → látensek → végső kép.
+
 ## Az első kép generálása
 
-A Z-Image Turbo modell már be van töltve. Egy kép generálásához:
+A Z-Image Turbo modell már be van töltve. Kép generálásához:
 
-1. **Add meg a promptot** a fő Z-Image node-ban. Legyél leíró jellegű. Íme egy példa:
+1. **Írd be a promptot** a fő Z-Image csomópontba. Legyél leíró jellegű. Íme egy példa:
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **(Opcionális)**: Erősítsd meg vagy módosítsd a többi specifikus beállítást az almunkalapon (subgraph) belül.
-3. **Kattints a kék "Run Workflow" gombra** a jobb sarokban (vagy nyomd meg a `Ctrl+Enter` billentyűkombinációt)
-4. Figyeld meg, ahogy a node-ok kiemelődnek az egyes lépések végrehajtása közben
+2. **(Opcionális)**: Erősítsd meg vagy módosítsd az alcsomópont egyéb specifikus beállításait.
+3. **Kattints a kék „Run Workflow” gombra** a jobb sarokban (vagy nyomd meg a `Ctrl+Enter` billentyűkombinációt).
+4. Figyeld meg, ahogy a csomópontok kiemelődnek az egyes lépések végrehajtása közben.
 
-A teljes munkafolyamat végrehajtásának 30 másodpercen belül be kell fejeződnie. A generált kép a **Save Image** node-ban jelenik meg, és az `output/` mappába kerül mentésre.
+A teljes munkafolyamat végrehajtásának 30 másodpercnél kevesebb ideig kell tartania. A generált kép a **Save Image** csomópontban jelenik meg, és az `output/` mappába kerül mentésre.
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -462,6 +465,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 '@ | & $py -
  if ($LASTEXITCODE -ne 0) { throw "Workflow submit/generation failed" }
@@ -540,6 +544,7 @@ for _ in range(600):
  time.sleep(1)
 
 print("No outputs after waiting.")
+print("history status:", json.dumps(entry.get("status", {})))  # surfaces the ComfyUI node/execution error
 sys.exit(1)
 PY
 ```
@@ -574,63 +579,62 @@ ls -1t ComfyUI/output/*.png | head -n 5
 
 
 ## A generálási paraméterek beállítása
-
 ### KSampler beállítások
 
-A KSampler node vezérli a diffúziós folyamat lényegi részét:
+A KSampler node vezérli a diffúziós folyamat magját:
 
-| Paraméter | Mit vezérel | Ajánlott Z-Image Turbo esetén |
+| Paraméter | Mit vezérel | Ajánlott érték Z-Image Turbo esetén |
 |-----------|------------------|-------------------------------|
 | **steps** | A zajmentesítési iterációk száma | 4–10 (a turbo modellek kevesebb lépésre vannak desztillálva) |
-| **cfg** | Classifier-free guidance skála—mennyire szorosan kövesse a promptot | 1.0–2.0 (a turbo modellek nagyon alacsony guidance-t használnak) |
+| **cfg** | Classifier-free guidance skála – mennyire kövesse szorosan a promptot | 1.0–2.0 (a turbo modellek nagyon alacsony guidance-t használnak) |
 | **sampler_name** | Zajmentesítési algoritmus | `euler` és `res_multistep` jól működik turbo modelleknél |
 | **scheduler** | Zajütemezési görbe | `normal` vagy `simple` |
-| **seed** | Véletlenszám-mag a reprodukálhatósághoz | Állíts be fix értékeket egy kompozíció iterálásához |
+| **seed** | Véletlenszám-mag a reprodukálhatósághoz | Állíts be fix értékeket egy kompozíció finomításához |
 
-### Kép mérete
+### Képméret
 
-A kimeneti méretek módosításához keresd meg az **Empty Latent Image** node-ot, és módosítsd a **width** és **height** értékeket. A méreteket az optimális minőség érdekében tartsd 1024 pixel vagy az alatti értéken a leghosszabb oldalon.
+A kimeneti méretek módosításához keresd meg az **Empty Latent Image** node-ot, és módosítsd a **width** és **height** értékeket. A legjobb minőség érdekében tartsd a hosszabb oldalt 1024 pixel alatt vagy annál.
 
 ### ModelSamplingAuraFlow
 
-A **ModelSamplingAuraFlow** node egy speciális mintavételezési módosító, amely beállítja, hogy a diffúziós folyamat hogyan kezeli a zajütemezést. Ezt a node-ot a modell kimenetéhez csatlakoztatva láthatod a Z-Image Turbo munkafolyamatban.
+A **ModelSamplingAuraFlow** node egy speciális mintavételi módosító, amely befolyásolja, hogy a diffúziós folyamat hogyan kezeli a zajütemezést. Ez a node a Z-Image Turbo munkafolyamatban a modell kimenetéhez van csatlakoztatva.
 
 | Paraméter | Mit vezérel | Ajánlott értékek |
 |-----------|------------------|-------------------|
-| **shift** | Beállítja a zajütemezés időzítését—magasabb értékek a részletek finomítását későbbi lépésekbe tolják | 1.0–4.0 (alapértelmezett: 3.0) |
+| **shift** | A zajütemezés időzítését állítja – magasabb értékek a részletfinomítás nagyobb részét a későbbi lépésekre tolják | 1.0–4.0 (alapértelmezett: 3.0) |
 
-Mikor érdemes módosítani a **shift** értéket:
+Mikor érdemes a **shift** értékét módosítani:
 
 - **Alacsonyabb értékek (1.0–2.0)**: Gyorsabb konvergencia, jó egyszerű kompozíciókhoz
-- **Magasabb értékek (3.0–4.0)**: Fokozatosabb finomítás, javíthatja az apró részleteket összetettebb jeleneteknél
+- **Magasabb értékek (3.0–4.0)**: Fokozatosabb finomítás, javíthatja az apró részleteket komplex jeleneteknél
 
-Az AuraFlow mintavételezési módszer kifejezetten flow-matching modellekhez, például a Z-Image Turbo-hoz lett tervezve, biztosítva a megfelelő zajeloszlást a generálási folyamat során.
+Az AuraFlow mintavételi módszer kifejezetten flow-matching modellekhez, például a Z-Image Turbo-hoz készült, biztosítva a megfelelő zajeloszlást a generálási folyamat során.
 
-## Munka a munkafolyamatokkal
+## Munkafolyamatokkal való munka
 
 ### Munkafolyamatok mentése
 
-Kattints a **Save** gombra a menüben a munkafolyamat JSON fájlként történő exportálásához. Ez a következőket rögzíti:
+Kattints a **Save** gombra a menüben, hogy JSON fájlként exportáld a munkafolyamatot. Ez a következőket rögzíti:
 
-- Az összes node-ot és paramétereiket
+- Az összes node-ot és azok paramétereit
 - A node-ok közötti összes kapcsolatot
-- Az aktuális prompt szövegét
+- Az aktuális prompt szöveget
 
 ### Munkafolyamatok betöltése
 
-Húzz egy munkafolyamat JSON fájlt a vászonra, vagy használd a **Load** menüpontot. Az alapértelmezetten megjelenő Z-Image Turbo munkafolyamat egy mentett munkafolyamat fájlból van betöltve.
+Húzz egy munkafolyamat JSON fájlt a vászonra, vagy használd a **Load** opciót a menüben. Az alapértelmezetten megjelenő Z-Image Turbo munkafolyamat egy mentett munkafolyamat-fájlból töltődik be.
 
 ### Munkafolyamatok megosztása
 
-A munkafolyamatok önmagukban is teljesek—oszd meg a JSON fájlt kollégáiddal, és ők is pontosan reprodukálhatják a beállításaidat. Ez teszi a ComfyUI-t kiválóan alkalmassá a közös kísérletezésre.
+A munkafolyamatok önmagukban is teljesek – oszd meg a JSON fájlt kollégáiddal, és ők pontosan reprodukálhatják a beállításaidat. Ez teszi a ComfyUI-t kiválóvá a közös kísérletezéshez.
 
 ## Következő lépések
 
 - **Fedezd fel a LoRA node-okat**: Alkalmazz stílus- vagy témaadaptereket újratanítás nélkül
-- **Adj hozzá negatív promptokat**: Csatlakoztass egy második CLIP Text Encode node-ot a KSampler **negative** kondicionálási bemenetéhez, hogy elirányítsd a modellt a nem kívánt jellemzőktől, például az elmosódástól, műtermékektől vagy vízjelektől
-- **Építs egyedi munkafolyamatokat**: Kapcsolj össze több generálást, adj hozzá felskálázást, vagy hozz létre kép variációkat
-- **Böngéssz közösségi munkafolyamatokat**: A [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) sok kész, azonnal használható munkafolyamatot tartalmaz
+- **Adj hozzá negatív promptokat**: Csatlakoztass egy második CLIP Text Encode node-ot a KSampler **negative** kondicionálási bemenetéhez, hogy elterelje a modellt a nem kívánt jellemzőktől, például elmosódástól, artefaktoktól vagy vízjelektől
+- **Építs egyedi munkafolyamatokat**: Láncolj össze több generálást, adj hozzá felskálázást, vagy hozz létre kép variációkat
+- **Böngéssz közösségi munkafolyamatokat**: A [ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) sok készen használható munkafolyamatot tartalmaz
 
-A ComfyUI ereje a kísérletezésben rejlik: kapcsold össze a node-okat másképp, állítsd be a paramétereket, és figyeld meg, hogyan hat minden változtatás a kimenetre. Ez a gyakorlati felfedezés fejleszti az érzéket ahhoz, hogyan működnek a diffúziós modellek.
+A ComfyUI ereje a kísérletezésben rejlik: csatlakoztasd a node-okat másképp, állítsd a paramétereket, és figyeld meg, hogyan hat minden változtatás a kimenetre. Ez a gyakorlati felfedezés segít megérteni, hogyan működnek a diffúziós modellek.
 
 További információért nézd meg a [ComfyUI dokumentációt](https://docs.comfy.org/).

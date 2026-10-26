@@ -8,34 +8,36 @@ SPDX-License-Identifier: MIT
 > **Traduction automatique.** Cette page a été traduite automatiquement de l'anglais et n'a pas été révisée par un humain. Elle peut contenir des erreurs, et certaines instructions, commandes, options de téléchargement, disponibilités de produits ou autres contenus peuvent varier selon la langue ou la région. En cas d'incompatibilité ou de divergence, la version originale anglaise du playbook fait foi.
 <!-- auto-translated-disclaimer:end -->
 
-# Exécuter OpenClaw avec Lemonade Server comme dorsale
+# Exécuter OpenClaw avec Lemonade Server comme backend
 
 ## Aperçu
 
-[**OpenClaw**](https://openclaw.ai/) est un agent d'IA autonome capable d'écrire et d'exécuter du code, de gérer des fichiers et d'accomplir des tâches complexes à étapes multiples en votre nom. Contrairement à un assistant de clavardage qui se contente de répondre à des questions, OpenClaw effectue de véritables actions sur votre système, ce qui signifie qu'il a besoin d'une dorsale d'IA rapide et performante, capable de suivre le rythme d'une boucle d'agent exigeante.
+[**OpenClaw**](https://openclaw.ai/) est un agent IA autonome capable d'écrire et d'exécuter du code, de gérer des fichiers et de mener à bien des tâches complexes en plusieurs étapes en votre nom. Contrairement à un assistant de clavardage qui se contente de répondre à des questions, OpenClaw effectue de véritables actions sur votre système, ce qui signifie qu'il a besoin d'un backend IA rapide et performant, capable de suivre le rythme d'une boucle d'agent exigeante.
 
-[**Lemonade Server**](https://lemonade-server.ai/) est cette dorsale. Il s'agit d'un serveur d'inférence local à code source ouvert qui exécute des modèles d'IA générative directement sur votre matériel et les expose par l'intermédiaire de l'API standard de l'industrie OpenAI.
+[**Lemonade Server**](https://lemonade-server.ai/) est ce backend. Il s'agit d'un serveur d'inférence locale à code source ouvert qui exécute des modèles d'IA générative directement sur votre matériel et les expose via l'API standard de l'industrie OpenAI.
 
-Ensemble, ils forment une pile d'agent d'IA entièrement locale : Lemonade gère l'inférence des modèles, et OpenClaw fournit la boucle d'agent qui transforme les sorties du modèle en actions réelles.
+Ensemble, ils forment une pile d'agent IA entièrement locale : Lemonade prend en charge l'inférence des modèles, tandis qu'OpenClaw fournit la boucle d'agent qui transforme les sorties du modèle en actions concrètes.
 
-> **Avant de continuer :** OpenClaw est un agent d'IA hautement autonome. Donner à un agent d'IA l'accès à votre système peut entraîner des résultats imprévisibles ou non désirés. Ne poursuivez que si vous comprenez les risques et êtes à l'aise avec l'idée qu'un logiciel autonome agisse en votre nom.
+> **Avant de continuer :** OpenClaw est un agent IA hautement autonome. Donner à un agent IA l'accès à votre système peut entraîner des résultats imprévisibles ou non désirés. Ne poursuivez que si vous comprenez les risques et êtes à l'aise avec l'idée qu'un logiciel autonome agisse en votre nom.
 
 ---
 
 ## Ce que vous apprendrez
 
-À la fin de ce guide, vous serez en mesure de :
+À la fin de ce guide pratique, vous serez en mesure de :
 
 - Découvrir **Lemonade Server**
-- **Installer OpenClaw** et **le configurer pour utiliser Lemonade Server** comme dorsale d'IA.
+- **Installer OpenClaw** et **le configurer pour utiliser Lemonade Server** comme backend d'IA.
 - **Démarrer la passerelle OpenClaw** et confirmer que votre agent est prêt à travailler.
-- **Connecter un canal de communication** (Discord ou Telegram) pour pouvoir clavarder avec votre agent depuis n'importe quel appareil.
+- **Connecter un canal de communication** (Discord ou Telegram) afin de pouvoir clavarder avec votre agent depuis n'importe quel appareil.
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Configuration de la mémoire
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Vérifier les mises à jour logicielles
@@ -48,15 +50,15 @@ Ensemble, ils forment une pile d'agent d'IA entièrement locale : Lemonade gère
 <!-- @os:linux -->
 - Un PC exécutant **Ubuntu 24.04+** ou une distribution Linux compatible basée sur Debian avec `apt-get`
 - Au moins **12 Go de RAM** (64 Go+ recommandés pour les modèles plus volumineux)
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (Facultatif, pour l'isolation d'OpenClaw)
-- **Environ 10 à 30 Go d'espace disque libre** pour les poids du modèle
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/linux/ubuntu/) (facultatif, pour l'isolement (sandboxing) d'OpenClaw)
+- **~10 à 30 Go d'espace disque libre** pour les poids du modèle
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - Un PC exécutant **Windows 10/11**
 - Au moins **12 Go de RAM** (64 Go+ recommandés pour les modèles plus volumineux)
-- **Environ 10 à 30 Go d'espace disque libre** pour les poids du modèle
-- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Facultatif, pour l'isolation d'OpenClaw)
+- **~10 à 30 Go d'espace disque libre** pour les poids du modèle
+- [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (facultatif, pour l'isolement (sandboxing) d'OpenClaw)
 <!-- @os:end -->
 
 <!-- @require:lemonade -->
@@ -71,16 +73,17 @@ lemonade --version
 
 ---
 
-## Récupérer et charger le modèle recommandé
+## Télécharger et charger le modèle recommandé
 
-Le modèle recommandé pour ce guide est **Qwen3.6-35B-A3B-GGUF** de Unsloth, un solide modèle MoE avec une fenêtre de contexte de 263k jetons, bien adapté aux charges de travail des agents. Ce modèle utilise la quantification UD-Q4_K_XL. Récupérez-le maintenant :
+Le modèle recommandé pour ce guide pratique est **Qwen3.6-35B-A3B-GGUF** d'Unsloth, un modèle MoE performant doté d'une fenêtre contextuelle de 263 000 jetons, particulièrement bien adapté aux charges de travail des agents. Ce modèle utilise la quantification UD-Q4_K_XL. Téléchargez-le maintenant :
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Chargez-le ensuite avec une grande fenêtre de contexte et enregistrez ce paramètre pour les prochaines exécutions :
+Chargez-le ensuite avec une grande fenêtre contextuelle et enregistrez ce paramètre pour les exécutions futures :
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -88,7 +91,7 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end --> 
 
-Le modèle a une longueur de contexte par défaut de 262 144 jetons. Si vous rencontrez des erreurs de mémoire insuffisante (OOM), envisagez de réduire la fenêtre de contexte. Cependant, comme Qwen3.6 tire parti d'un contexte étendu pour les tâches complexes, nous recommandons de maintenir une longueur de contexte d'au moins 128 000 jetons afin de préserver les capacités de raisonnement.
+Le modèle a une longueur de contexte par défaut de 262 144 jetons. Si vous rencontrez des erreurs de dépassement de mémoire (OOM), envisagez de réduire la fenêtre contextuelle. Toutefois, comme Qwen3.6 exploite un contexte étendu pour les tâches complexes, nous vous recommandons de conserver une longueur de contexte d'au moins 128 K jetons afin de préserver les capacités de raisonnement.
 
 > **Astuce : désactiver le raisonnement pour des réponses d'agent plus rapides :** Qwen3.6-35B-A3B fonctionne en mode raisonnement par défaut, ce qui ajoute de la latence avant chaque réponse. Pour les boucles d'agent, cette surcharge s'accumule rapidement. Le dépôt [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) fournit une configuration prête à l'emploi qui désactive le raisonnement. Pour l'utiliser, téléchargez le fichier et importez-le :
 >
@@ -268,9 +271,9 @@ wsl --shutdown
 wsl
 ```
 
-### Faire le pont entre Lemonade sous Windows et WSL
+### Établir un pont entre Lemonade sous Windows et WSL
 
-WSL2 s'exécute dans un réseau virtuel. Lemonade sous Windows se lie à `127.0.0.1`, que WSL ne peut pas atteindre directement. Un proxy de port Windows achemine le trafic depuis l'adresse IP de la passerelle WSL vers l'hôte local Windows.
+WSL2 fonctionne dans un réseau virtuel. Lemonade sous Windows se lie à `127.0.0.1`, que WSL ne peut pas atteindre directement. Un proxy de port Windows redirige le trafic de l'adresse IP de la passerelle WSL vers l'hôte local (localhost) Windows.
 
 **Trouvez l'adresse IP de votre passerelle WSL** (à exécuter dans WSL) :
 
@@ -283,9 +286,9 @@ ip route show default | awk '{print $3}' | head -1
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
-> Remarque : Si vous rencontrez une erreur `netsh: command not found`, essayez d'utiliser le nom d'exécutable explicite `netsh.exe` à la place.
+> Remarque : si vous rencontrez une erreur `netsh: command not found`, essayez d'utiliser le nom explicite de l'exécutable à la place, soit `netsh.exe`
 
-**Ajoutez une règle de pare-feu** (dans la même invite PowerShell élevée) :
+**Ajoutez une règle de pare-feu** (dans la même fenêtre PowerShell élevée) :
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -320,10 +323,10 @@ Si vous avez déjà chargé le modèle Qwen3.6-35B-A3B-GGUF à l'étape précéd
 
 La règle `netsh portproxy` survit aux redémarrages, mais l'adresse IP de la passerelle WSL peut changer après un `wsl --shutdown` ou un redémarrage. Lorsque cela se produit, le proxy continue de pointer vers l'ancienne adresse IP et Lemonade devient inaccessible depuis WSL. Si cela se produit, utilisez l'une des options ci-dessous.
 
-**Option 1 (recommandée) — Réparer le pont automatiquement.** Pour éviter d'avoir à le faire manuellement à chaque fois, utilisez une tâche planifiée qui vérifie le pont à chaque démarrage et à chaque connexion, et qui le reconstruit uniquement lorsque l'adresse IP de la passerelle a changé. Consultez le [guide de réparation automatique du pont WSL de Lemonade](assets/RepairLemonadeWslBridge.md).
+**Option 1 (recommandée) — Réparer le pont automatiquement.** Pour éviter de devoir le faire manuellement à chaque fois, utilisez une tâche planifiée qui vérifie le pont à chaque démarrage et à chaque connexion, et le reconstruit uniquement lorsque l'adresse IP de la passerelle a changé. Consultez le [guide de réparation automatique du pont WSL Lemonade](assets/RepairLemonadeWslBridge.md).
 
 
-**Option 2 — Réparer le pont manuellement.** Commencez par obtenir l'adresse IP actuelle de la passerelle WSL en exécutant ceci dans WSL :
+**Option 2 — Réparer le pont manuellement.** D'abord, obtenez l'adresse IP actuelle de la passerelle WSL en exécutant ceci dans WSL :
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
@@ -331,7 +334,7 @@ ip route show default | awk '{print $3}' | head -1
 
 Copiez cette valeur; vous l'utiliserez à la place de `<new-WSL-Gateway-IP>` ci-dessous.
 
-Ensuite, dans un **PowerShell élevé** (Exécuter en tant qu'administrateur), listez les règles existantes, supprimez uniquement la règle Lemonade périmée et ajoutez-en une nouvelle avec l'adresse IP actuelle :
+Ensuite, dans une **fenêtre PowerShell élevée** (Exécuter en tant qu'administrateur), listez les règles existantes, supprimez uniquement la règle Lemonade obsolète, et ajoutez-en une nouvelle avec l'adresse IP actuelle :
 
 ```powershell
 netsh interface portproxy show all
@@ -339,13 +342,13 @@ netsh interface portproxy delete v4tov4 listenaddress=<old-WSL-Gateway-IP> liste
 netsh interface portproxy add v4tov4 listenaddress=<new-WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-Dans la sortie de `show all`, la règle Lemonade périmée est l'entrée dont l'adresse de connexion est `127.0.0.1` sur le port `13305`; son adresse d'écoute correspond à votre `<old-WSL-Gateway-IP>`. La suppression basée sur cette adresse ne retire que cette règle et laisse intactes toutes les autres règles port-proxy présentes sur votre machine.
+Dans la sortie de `show all`, la règle Lemonade obsolète est l'entrée dont l'adresse de connexion est `127.0.0.1` sur le port `13305`; son adresse d'écoute est votre `<old-WSL-Gateway-IP>`. Supprimer par cette adresse ne retire que cette règle et laisse intactes les autres règles de proxy de port sur votre machine.
 
-La règle de pare-feu que vous avez ajoutée durant la configuration est liée au port `13305` (et non à l'adresse IP); elle continue donc de fonctionner et n'a pas besoin d'être recréée.
+La règle de pare-feu que vous avez ajoutée durant la configuration est liée au port `13305` (et non à l'adresse IP), donc elle continue de fonctionner et n'a pas besoin d'être recréée.
 
-> **Recommandation :** Pour éviter les problèmes de passerelle, nous recommandons fortement la configuration de shell suivante :
+> **Recommandation :** Pour éviter les problèmes de passerelle, nous suggérons fortement la configuration d'interpréteur de commandes suivante :
 > - Les **commandes Windows** doivent être exécutées dans **PowerShell**
-> - Les **commandes de la distribution WSL** doivent être exécutées dans une **invite de commandes** (exécutée en tant qu'**administrateur**)
+> - Les **commandes de la distribution WSL** doivent être exécutées dans un **invite de commandes** (exécuté en tant qu'**administrateur**)
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -411,7 +414,7 @@ finally {
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
 ```
 
-L'indicateur `--no-onboard` permet d'ignorer l'assistant de configuration interactif; vous configurerez le backend du modèle manuellement à l'étape suivante, ce qui vous donne un contrôle précis sur le modèle et le serveur utilisés.
+Le drapeau `--no-onboard` saute l'assistant de configuration interactif; vous configurerez le backend du modèle manuellement à l'étape suivante, ce qui vous donne un contrôle précis sur le modèle et le serveur utilisés.
 
 Ouvrez un nouveau terminal et confirmez l'installation :
 
@@ -523,7 +526,7 @@ openclaw onboard \
 
 Cette commande écrit la configuration d'OpenClaw dans `~/.openclaw/openclaw.json`.
 
-> **Dimensionnement de la fenêtre de contexte d'OpenClaw :** La compaction d'OpenClaw se déclenche lorsque `contextTokens > contextWindow − reserveTokens`. La valeur par défaut de `reserveTokensFloor` est de 20 000 jetons, un plancher qui remplace `reserveTokens` lorsque celui-ci est plus bas, de sorte que tout modèle dont le contexte est inférieur à environ 37 k déclenchera une boucle de compaction infinie. Définissez une réserve basse et désactivez le plancher une fois dans votre configuration, et cela s'appliquera à tous les modèles, sans réglage particulier par modèle :
+> **Dimensionnement de la fenêtre de contexte d'OpenClaw :** La compaction d'OpenClaw se déclenche lorsque `contextTokens > contextWindow − reserveTokens`. La valeur par défaut de `reserveTokensFloor` est de 20 000 jetons, un plancher qui remplace `reserveTokens` lorsque celui-ci est plus bas, de sorte que tout contexte de modèle inférieur à environ 37k déclenchera une boucle de compaction infinie. Définissez une réserve basse et désactivez le plancher une seule fois dans votre configuration, et cela s'appliquera à chaque modèle, sans réglage individuel nécessaire :
 >
 > ```json
 > "compaction": {
@@ -532,13 +535,13 @@ Cette commande écrit la configuration d'OpenClaw dans `~/.openclaw/openclaw.jso
 > }
 > ```
 >
-> `reserveTokensFloor` est un *plancher* (une garde minimale), et non la réserve elle-même; définir seulement le plancher n'a aucun effet. `reserveTokensFloor: 0` désactive la garde afin que la valeur plus basse de `reserveTokens` soit acceptée.
+> `reserveTokensFloor` est un *plancher* (garde-fou minimal), et non la réserve elle-même; définir uniquement le plancher n'a aucun effet. `reserveTokensFloor: 0` désactive le garde-fou afin que la valeur plus basse de `reserveTokens` soit acceptée.
 >
-> **Quand appliquer ceci :** Utilisez cette configuration si la fenêtre de contexte effective de votre modèle est inférieure à environ 37 k, soit parce que le modèle est petit (p. ex. 8 k, 16 k, 32 k), soit parce que vous l'avez intentionnellement limitée à une valeur inférieure (p. ex. en chargeant un modèle de 128 k mais en définissant le contexte à 16 k dans Lemonade). Sans cela, OpenClaw entre dans une boucle de compaction infinie au démarrage.
+> **Quand appliquer ceci :** Utilisez cette configuration si la fenêtre de contexte effective de votre modèle est inférieure à environ 37k, soit parce que le modèle est petit (p. ex. 8k, 16k, 32k), soit parce que vous l'avez intentionnellement plafonnée à une valeur plus basse (p. ex. charger un modèle de 128k mais définir le contexte à 16k dans Lemonade). Sans cela, OpenClaw entre dans une boucle de compaction infinie au démarrage.
 >
-> **Modèles à grand contexte utilisés à pleine capacité :** Vous pouvez ignorer complètement ce réglage. Les valeurs par défaut fonctionnent bien; la compaction se déclenchera bien avant que la fenêtre ne se remplisse, et le modèle disposera d'amplement d'espace pour générer de longues réponses. Si vous l'appliquez tout de même, sachez que `reserveTokens: 4096` limite la longueur des réponses à environ 4 k jetons, ce qui peut tronquer la génération de longs fichiers ou de plans détaillés.
+> **Modèles à grande fenêtre de contexte utilisés à pleine capacité :** Vous pouvez ignorer complètement cette étape. Les valeurs par défaut fonctionnent bien; la compaction se déclenchera bien avant que la fenêtre ne se remplisse et le modèle disposera d'amplement d'espace pour générer de longues réponses. Si vous appliquez tout de même ce paramètre, sachez que `reserveTokens: 4096` limite la longueur des réponses à environ 4k jetons, ce qui peut tronquer la génération de longs fichiers ou de plans détaillés.
 >
-> **Où ajouter ceci :** Placez le bloc `compaction` à l'intérieur de `agents.defaults` dans votre fichier `openclaw.json` (généralement situé à `~/.openclaw/openclaw.json`) :
+> **Où ajouter ceci :** Placez le bloc `compaction` à l'intérieur de `agents.defaults` dans votre fichier `openclaw.json` (habituellement à `~/.openclaw/openclaw.json`) :
 >
 > ```json
 > {
@@ -558,11 +561,11 @@ Cette commande écrit la configuration d'OpenClaw dans `~/.openclaw/openclaw.jso
 > ```
 >
 > Le reste de votre configuration (passerelle, canaux, modèles, etc.) demeure inchangé; seule la clé `compaction` doit être ajoutée.
-### (Recommandé) Activer la mise en bac à sable Docker
+### (Recommandé) Activer le bac à sable Docker
 
-OpenClaw peut acheminer toutes les opérations de fichiers et de code de l'agent par l'intermédiaire d'un conteneur Docker isolé plutôt que de les exécuter directement sur votre hôte. Cela limite le rayon d'action de toute action non intentionnelle au bac à sable, laissant votre système de fichiers et votre réseau hôte intacts.
+OpenClaw peut acheminer toutes les opérations de fichiers et de code de l'agent par l'intermédiaire d'un conteneur Docker isolé plutôt que de les exécuter directement sur votre hôte. Cela limite la portée de tout impact d'une action non intentionnelle au bac à sable, laissant le système de fichiers et le réseau de votre hôte intacts.
 
-Créez l'image du bac à sable une seule fois (Docker doit être installé) :
+Générez l'image du bac à sable une seule fois (Docker doit être installé) :
 
 ```bash
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -622,6 +625,11 @@ trap cleanup EXIT
 export DOCKER_CONFIG="$docker_config"
 printf '{ "auths": {} }\n' > "$DOCKER_CONFIG/config.json"
 
+# Docker Desktop injects its WSL cli-tools a few seconds after the distro boots.
+for i in $(seq 1 30); do
+  docker version >/dev/null 2>&1 && break
+  sleep 2
+done
 docker version
 
 docker build -t openclaw-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -662,7 +670,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Exécutez ceci pour ajouter la clé `sandbox` dans le bloc `agents.defaults` existant du fichier `~/.openclaw/openclaw.json` :
+Exécutez ceci pour ajouter la clé `sandbox` à l'intérieur du bloc `agents.defaults` existant dans `~/.openclaw/openclaw.json` :
 
 ```bash
 cat > sandbox.patch.json5 <<JSON5
@@ -681,7 +689,7 @@ JSON5
 openclaw config patch --file ./sandbox.patch.json5
 ```
 
-Par défaut, les conteneurs du bac à sable **n'ont pas accès au réseau**. Consultez la [référence sur la mise en bac à sable](https://docs.openclaw.ai/gateway/sandboxing) pour les montages liés (bind mounts) et les substitutions réseau.
+Par défaut, les conteneurs de bac à sable **n'ont aucun accès réseau**. Consultez la [référence sur le bac à sable](https://docs.openclaw.ai/gateway/sandboxing) pour les montages liés et les substitutions réseau.
 
 > #### Dépannage : autorisation Docker refusée
 > 
@@ -705,7 +713,7 @@ Par défaut, les conteneurs du bac à sable **n'ont pas accès au réseau**. Con
 > 
 > Ensuite, **redémarrez** votre système.
 > 
-> **Correction temporaire rapide** (réinitialisée au redémarrage) :
+> **Correction temporaire rapide** (réinitialisée après le redémarrage) :
 > ```bash
 > sudo chmod 666 /var/run/docker.sock
 > ```
@@ -933,11 +941,11 @@ finally {
 <!-- @os:linux -->
 ## (Recommandé) Intégration d'OpenClaw avec les services Firecrawl
 
-[Firecrawl](https://docs.firecrawl.dev/introduction) fournit un service auto-hébergé de crawl Web et d'extraction de contenu qui peut contourner ces difficultés et libérer tout le potentiel de l'automatisation OpenClaw. 
+[Firecrawl](https://docs.firecrawl.dev/introduction) fournit un service d'exploration Web et d'extraction de contenu autohébergé qui peut contourner ces difficultés et libérer tout le potentiel de l'automatisation d'OpenClaw. 
 
-Dans cette configuration, OpenClaw fonctionne comme un ensemble de conteneurs Docker gérés avec Podman. Pour simplifier la gestion du cycle de vie et le démarrage automatique, nous enregistrons Firecrawl comme service `systemd` au niveau utilisateur qui orchestre la pile Podman Compose sous-jacente. Cela permet à OpenClaw de démarrer la passerelle (gateway), de l'arrêter et de vérifier le service Firecrawl à l'aide des commandes standards `systemctl --user` plutôt que d'interagir directement avec les conteneurs. 
+Dans cette configuration, OpenClaw s'exécute comme un ensemble de conteneurs Docker gérés avec Podman. Pour simplifier la gestion du cycle de vie et le démarrage automatique, nous enregistrons Firecrawl comme service `systemd` de niveau utilisateur qui orchestre la pile Podman Compose sous-jacente. Cela permet à OpenClaw de démarrer la passerelle, de l'arrêter et de vérifier le service Firecrawl à l'aide des commandes standard `systemctl --user`, plutôt que d'interagir directement avec les conteneurs. 
 
-Pour simplifier les choses, nous avons décomposé l'ensemble du processus en quatre étapes :
+Pour simplifier les choses, nous avons divisé l'ensemble du processus en quatre étapes :
 
 ---
 
@@ -989,7 +997,7 @@ ExecStop=/usr/bin/podman compose -f openclaw-compose.yaml down
 [Install]
 WantedBy=default.target
 ```
-À ce stade, le service a été défini mais pas encore enregistré auprès de `systemd`. 
+À ce stade, le service a été défini, mais pas encore enregistré auprès de `systemd`. 
 Assurez-vous que le nom du fichier correspond exactement à celui que vous avez créé ci-dessus, puis exécutez :
 ```bash
 systemctl --user daemon-reload
@@ -999,17 +1007,17 @@ Si l'opération réussit, vous devriez voir la sortie suivante :
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-Le répertoire `default.target.wants/` contient des liens symboliques vers les services configurés pour démarrer automatiquement.
+ `default.target.wants/` contient des liens symboliques vers les services configurés pour démarrer automatiquement.
 
 ### 2. Configurer Firecrawl
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) est idéal pour ceux qui ont besoin d'un contrôle complet sur leurs environnements de scraping et de traitement des données, mais implique un effort supplémentaire de maintenance et de configuration en contrepartie.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) est idéal pour ceux qui ont besoin d'un contrôle complet sur leur environnement d'extraction et de traitement de données, mais comporte en contrepartie des efforts supplémentaires de maintenance et de configuration.
 
 Commencez par cloner le dépôt :
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Créez `.env` dans le répertoire racine `/firecrawl` : 
+Créez un fichier `.env` dans le répertoire `/firecrawl` : 
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1026,9 +1034,9 @@ podman pull ghcr.io/openclaw/openclaw:latest
 ```
 Une fois cela fait, téléchargez le fichier Compose d'OpenClaw [openclaw-compose.yaml](assets/openclaw-compose.yaml) et placez-le dans le répertoire racine `/firecrawl` :
 
-> Cette convention est requise pour que `systemd` puisse localiser et démarrer correctement le service, comme indiqué dans `WorkingDirectory=${HOME}/firecrawl`.
+> Cette convention est requise pour que `systemd` puisse localiser et démarrer correctement le service, tel que spécifié dans `WorkingDirectory=${HOME}/firecrawl`.
 
-> Vous pouvez toujours élargir la pile en ajoutant des services Firecrawl supplémentaires au besoin. La liste complète des services disponibles se trouve dans le fichier officiel [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> Vous pouvez toujours élargir la pile en ajoutant d'autres services Firecrawl au besoin. La liste complète des services disponibles se trouve dans le fichier officiel [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
 ### 4. Lancer le service OpenClaw par l'intermédiaire de Firecrawl 
 
@@ -1036,7 +1044,7 @@ Avant de céder le contrôle à `systemd`, validez que tout fonctionne correctem
 ```bash
 podman compose -f openclaw-compose.yaml up -d
 ```
-Si tout est configuré correctement, vous devriez voir le conteneur OpenClaw démarrer, et la sortie de votre ligne de commande devrait ressembler à ceci :
+Si tout est configuré correctement, vous devriez voir le conteneur OpenClaw démarrer et la sortie de votre ligne de commande devrait ressembler à ceci :
 <p align="center">
   <img src="assets/openclaw_health_verification.png" width="500" height="400" />
 </p>
@@ -1045,8 +1053,8 @@ Une fois la vérification effectuée, arrêtez la pile avant de continuer :
 ```bash
 podman compose -f openclaw-compose.yaml down
 ```
-Avant de démarrer le service, vous devez vous assurer que la propriété et les permissions appropriées sont définies sur le répertoire `firecrawl` et son fichier `.env`. 
-Ceci est essentiel pour que le service puisse écrire vos identifiants au démarrage.
+Avant de démarrer le service, vous devez vous assurer que le propriétaire et les autorisations appropriés sont définis pour le répertoire `firecrawl` et son fichier `.env`. 
+Cela est essentiel pour que le service puisse écrire vos identifiants au démarrage.
 ```bash
 sudo chown ${USER}:${USER} ~/firecrawl/.env
 chmod 644 ~/firecrawl/.env
@@ -1060,9 +1068,9 @@ systemctl --user start firecrawl.service
   <img src="assets/OpenClawWebUI-PodmanLaunch.png" width="500" height="500" />
 </p>
 
-### Obtenir votre `OPENCLAW_GATEWAY_TOKEN`
+### Obtention de votre `OPENCLAW_GATEWAY_TOKEN`
 
-Une fois le service en cours d'exécution, vous remarquerez qu'un nouveau répertoire `.openclaw` a été créé dans votre dossier personnel (~/.openclaw). Ce répertoire est verrouillé par défaut, vous devrez donc le déverrouiller pour récupérer votre jeton de passerelle.
+Une fois le service en cours d'exécution, vous remarquerez qu'un nouveau répertoire `.openclaw` a été créé dans votre dossier personnel (~/.openclaw). Ce répertoire est verrouillé par défaut; vous devrez donc le déverrouiller pour récupérer votre jeton de passerelle.
 
 1. Accordez l'accès au répertoire :
 ```bash
@@ -1074,7 +1082,7 @@ grep '"token"' ~/.openclaw/openclaw.json
 ```
 Repérez la valeur `OPENCLAW_GATEWAY_TOKEN` dans la sortie.
 
-3. Ouvrez le tableau de bord de la passerelle dans votre navigateur à l'adresse http://127.0.0.1:18789. Collez votre jeton lorsqu'on vous demande de vous authentifier.
+3. Ouvrez le tableau de bord de la passerelle dans votre navigateur à l'adresse http://127.0.0.1:18789. Collez votre jeton lorsque vous y êtes invité pour vous authentifier.
 
 Pour arrêter le service, exécutez :
 ```bash
@@ -1215,25 +1223,25 @@ finally {
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Pour ouvrir le tableau de bord, exécutez ceci dans un deuxième terminal pendant que la passerelle est toujours en cours d'exécution :
+Pour ouvrir le tableau de bord, exécutez ceci dans un second terminal pendant que la passerelle est toujours en cours d'exécution :
 
 ```bash
 openclaw dashboard
 ```
 
-Comme la passerelle se lie à l'interface locale (loopback), le tableau de bord s'authentifie automatiquement lorsqu'il est ouvert depuis la même machine; aucune saisie de jeton ni approbation d'appareil n'est nécessaire pour un accès local. Vous devriez voir le tableau de bord OpenClaw avec votre modèle Lemonade répertorié comme moteur de fond actif.
+Comme la passerelle se lie à la boucle locale (loopback), le tableau de bord s'authentifie automatiquement lorsqu'il est ouvert depuis la même machine; aucune saisie de jeton ni approbation d'appareil n'est requise pour l'accès local. Vous devriez voir le tableau de bord d'OpenClaw avec votre modèle Lemonade répertorié comme moteur d'arrière-plan actif.
 
-> Si vous avez activé le bac à sable, vous pouvez le vérifier en demandant à l'agent d'exécuter `run hostname` depuis le tableau de bord. Si vous voyez un court identifiant de conteneur au lieu du nom d'hôte de votre machine, le bac à sable fonctionne.
+> Si vous avez activé le bac à sable (sandboxing), vous pouvez le vérifier en demandant à l'agent d'exécuter `run hostname` depuis le tableau de bord. Si vous voyez un court identifiant de conteneur au lieu du nom d'hôte de votre machine, le bac à sable fonctionne.
 
-**Félicitations, vous avez construit une pile d'agents d'IA entièrement locale à partir de zéro.**
+**Félicitations, vous avez construit de A à Z une pile d'agent IA entièrement locale.**
 
-> **Besoin du jeton de la passerelle?** Exécutez `openclaw dashboard --no-open` pour afficher l'URL du tableau de bord avec le jeton intégré (cela tente aussi de le copier dans votre presse-papiers). Autrement, le jeton se trouve à `gateway.auth.token` dans `~/.openclaw/openclaw.json`.
+> **Besoin du jeton de la passerelle?** Exécutez `openclaw dashboard --no-open` pour afficher l'URL du tableau de bord avec le jeton intégré (la commande tente aussi de le copier dans votre presse-papiers). Autrement, le jeton se trouve à `gateway.auth.token` dans `~/.openclaw/openclaw.json`.
 
 **Accéder au tableau de bord depuis un autre appareil (via un tunnel SSH)**
 
-Si OpenClaw s'exécute sur une machine distante, vous pouvez accéder à son tableau de bord depuis votre machine locale par un tunnel SSH. Le tunnel redirige le port de la passerelle (`18789`) afin que votre navigateur local puisse communiquer avec la passerelle distante par `127.0.0.1`.
+Si OpenClaw s'exécute sur une machine distante, vous pouvez atteindre son tableau de bord depuis votre machine locale au moyen d'un tunnel SSH. Le tunnel redirige le port de la passerelle (`18789`) afin que votre navigateur local puisse communiquer avec la passerelle distante via `127.0.0.1`.
 
-1. Depuis votre **machine locale**, connectez-vous une première fois à la machine distante et acceptez l'invite d'empreinte pour ajouter l'hôte à vos hôtes connus :
+1. Depuis votre **machine locale**, connectez-vous une fois à la machine distante et acceptez l'invite d'empreinte afin que l'hôte soit ajouté à vos hôtes connus :
 
    ```bash
    ssh user@<host-ip>
@@ -1245,9 +1253,9 @@ Si OpenClaw s'exécute sur une machine distante, vous pouvez accéder à son tab
    ssh -N -L 18789:127.0.0.1:18789 user@<host-ip>
    ```
 
-   > **Remarque :** Après avoir saisi votre mot de passe, le terminal n'affiche aucune sortie et semble figé. C'est normal : l'option `-N` indique à SSH de ne pas exécuter de commande distante, il se contente donc de maintenir le tunnel ouvert. Laissez ce terminal en cours d'exécution.
+   > **Remarque :** Après avoir saisi votre mot de passe, le terminal n'affiche aucune sortie et semble figé. C'est normal : l'option `-N` indique à SSH de ne pas exécuter de commande distante, il maintient donc simplement le tunnel ouvert. Laissez ce terminal en cours d'exécution.
 
-3. Sur votre **machine locale**, ouvrez un navigateur et accédez à `http://127.0.0.1:18789`.
+3. Sur votre **machine locale**, ouvrez un navigateur et allez à `http://127.0.0.1:18789`.
 
 4. Sur la **machine distante**, affichez le jeton de la passerelle et collez-le dans le navigateur pour vous connecter :
 
@@ -1255,9 +1263,9 @@ Si OpenClaw s'exécute sur une machine distante, vous pouvez accéder à son tab
    openclaw dashboard --no-open
    ```
 
-   Cela affiche l'URL du tableau de bord avec le jeton intégré; copiez le jeton pour vous connecter. (Le jeton est aussi stocké à `gateway.auth.token` dans `~/.openclaw/openclaw.json`.)
+   Ceci affiche l'URL du tableau de bord avec le jeton intégré; copiez le jeton pour vous connecter. (Le jeton est également stocké à `gateway.auth.token` dans `~/.openclaw/openclaw.json`.)
 
-> **Approuver un appareil distant :** Lorsque vous ouvrez le tableau de bord depuis une autre machine ou un téléphone, le navigateur peut afficher un identifiant de demande. Sur la **machine distante**, listez les demandes en attente :
+> **Approuver un appareil distant :** Lorsque vous ouvrez le tableau de bord depuis une autre machine ou un téléphone, le navigateur peut afficher un identifiant de demande. Sur la **machine distante**, dressez la liste des demandes en attente :
 > ```bash
 > openclaw devices list
 > ```
@@ -1265,7 +1273,7 @@ Si OpenClaw s'exécute sur une machine distante, vous pouvez accéder à son tab
 > ```bash
 > openclaw devices approve <requestId>
 > ```
-> Cela n'est nécessaire que pour les appareils distants ou secondaires; l'accès local depuis la même machine s'authentifie automatiquement. Consultez la documentation sur l'[accès distant](https://docs.openclaw.ai/gateway/remote) pour plus de détails.
+> Cela n'est nécessaire que pour les appareils distants ou secondaires; l'accès en boucle locale depuis la même machine s'authentifie automatiquement. Consultez la documentation sur l'[accès distant](https://docs.openclaw.ai/gateway/remote) pour plus de détails.
 
 <p align="center">
   <img src="assets/openclaw_dashboard.png" width="500" height="300" />
@@ -1275,24 +1283,24 @@ Si OpenClaw s'exécute sur une machine distante, vous pouvez accéder à son tab
 
 ## Facultatif : connecter un canal de communication
 
-Une fois la passerelle en cours d'exécution, vous pouvez accéder à votre agent local depuis n'importe quel appareil. Choisissez l'option qui convient à votre configuration. OpenClaw prend en charge [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) et d'autres canaux; consultez la liste complète sur [docs.openclaw.ai](https://docs.openclaw.ai).
+Une fois la passerelle en cours d'exécution, vous pouvez rejoindre votre agent local depuis n'importe quel appareil. Choisissez l'option qui convient à votre configuration. OpenClaw prend en charge [Discord](https://docs.openclaw.ai/channels/discord), [Telegram](https://docs.openclaw.ai/channels/telegram) et d'autres canaux; consultez la liste complète sur [docs.openclaw.ai](https://docs.openclaw.ai).
 
 ---
 
 ### Option A : Discord
 
-Discord nécessite un serveur sur lequel **vous disposez de droits d'administrateur** pour ajouter un bot. Si vous partagez des serveurs sans en posséder un, utilisez l'option B (Telegram) à la place.
+Discord nécessite un serveur pour lequel **vous disposez d'un accès administrateur** afin d'y ajouter un bot. Si vous partagez des serveurs sans en posséder un, utilisez plutôt l'option B (Telegram).
 
 #### Créer un compte et un serveur Discord
 
-Si vous n'avez pas de compte Discord, inscrivez-vous sur [discord.com](https://discord.com). Vous avez aussi besoin d'un serveur dont vous êtes administrateur; créez-en un en cliquant sur l'icône **+** dans la barre latérale de Discord et en sélectionnant **Créer mon propre serveur**. Un serveur privé convient parfaitement.
+Si vous n'avez pas de compte Discord, inscrivez-vous sur [discord.com](https://discord.com). Vous avez aussi besoin d'un serveur dont vous êtes administrateur; créez-en un en cliquant sur l'icône **+** dans la barre latérale de Discord, puis en sélectionnant **Créer mon propre serveur**. Un serveur privé convient parfaitement.
 
 #### Créer une application et un bot Discord
 
-1. Rendez-vous dans le [portail des développeurs Discord](https://discord.com/developers/applications) et cliquez sur **New Application**. Donnez-lui un nom (p. ex. « openclaw-bot »).
+1. Rendez-vous sur le [portail des développeurs Discord](https://discord.com/developers/applications) et cliquez sur **New Application**. Donnez-lui un nom (p. ex. « openclaw-bot »).
 2. Dans la barre latérale, cliquez sur **Bot**. Définissez un nom d'utilisateur pour le bot.
-3. Toujours sur la page Bot, faites défiler jusqu'à **Privileged Gateway Intents** et activez :
-   - **Message Content Intent** (requis)
+3. Toujours sur la page Bot, descendez jusqu'à **Privileged Gateway Intents** et activez :
+   - **Message Content Intent** (obligatoire)
    - **Server Members Intent** (recommandé)
 4. Remontez et cliquez sur **Reset Token** pour générer votre jeton de bot. Copiez-le.
 
@@ -1303,11 +1311,11 @@ Si vous n'avez pas de compte Discord, inscrivez-vous sur [discord.com](https://d
 3. Sous **Bot Permissions**, activez : View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
 4. Copiez l'URL générée, collez-la dans votre navigateur, sélectionnez votre serveur et confirmez. Le bot devrait maintenant apparaître dans la liste des membres de votre serveur.
 
-#### Récupérer vos identifiants
+#### Recueillir vos identifiants
 
-Activez le mode développeur dans Discord (**Paramètres utilisateur/ Avancés/ Mode développeur**), puis :
+Activez le mode développeur dans Discord (**Paramètres utilisateur/ Avancé/ Mode développeur**), puis :
 - Clic droit sur l'icône de votre serveur : **Copier l'ID du serveur**
-- Clic droit sur votre propre avatar : **Copier l'ID d'utilisateur**
+- Clic droit sur votre propre avatar : **Copier l'ID utilisateur**
 
 #### Autoriser les messages privés des membres du serveur
 
@@ -1315,7 +1323,7 @@ Clic droit sur l'icône de votre serveur/ **Paramètres de confidentialité**/ a
 
 #### Configurer OpenClaw pour Discord
 
-Stockez votre jeton de bot dans une variable d'environnement, puis créez un seul fichier de correctif qui active Discord, référence le jeton et met votre serveur sur liste blanche. Remplacez `<server_id>` et `<user_id>` par les identifiants récupérés ci-dessus.
+Stockez votre jeton de bot dans une variable d'environnement, puis créez un seul fichier de correctif (patch) qui active Discord, référence le jeton et met votre serveur sur liste blanche. Remplacez `<server_id>` et `<user_id>` par les identifiants recueillis ci-dessus.
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -1341,18 +1349,18 @@ JSON5
 openclaw config patch --file ./discord.patch.json5
 ```
 
-> **Ne comptez pas sur l'agent pour configurer cela.** Lorsque le bac à sable est activé, l'agent ne peut pas écrire dans `~/.openclaw/openclaw.json` depuis l'intérieur du bac à sable; utilisez plutôt les commandes CLI ci-dessus sur l'hôte.
+> **Ne comptez pas sur l'agent pour effectuer cette configuration.** Lorsque le bac à sable est activé, l'agent ne peut pas écrire dans `~/.openclaw/openclaw.json` depuis l'intérieur du bac à sable; utilisez plutôt les commandes CLI ci-dessus directement sur l'hôte.
 
-Redémarrez la passerelle afin qu'elle prenne en compte la nouvelle configuration de canal :
+Redémarrez la passerelle afin qu'elle prenne en compte la nouvelle configuration du canal :
 
 ```bash
 openclaw gateway run --bind loopback --port 18789
 ```
 
-Vous devriez voir `logged in to discord as <bot-name>` dans la sortie de la passerelle en quelques secondes.
+Vous devriez voir `logged in to discord as <bot-name>` dans la sortie de la passerelle en l'espace de quelques secondes.
 #### Jumelez votre compte Discord
 
-Envoyez un message privé au bot sur Discord. Il répondra avec un code de jumelage court.
+Envoyez un message privé au bot dans Discord. Il répondra avec un court code de jumelage.
 
 <p align="center">
   <img width="400" height="400" src="assets/discord_pair_code.png" />
@@ -1365,7 +1373,7 @@ openclaw pairing approve discord <CODE>
 
 > Les codes de jumelage expirent après une heure.
 
-Vous pouvez maintenant discuter avec votre agent directement depuis Discord et confier des tâches à votre matériel local.
+Vous pouvez maintenant discuter avec votre agent directement depuis Discord et déléguer des tâches à votre matériel local.
 
 <p align="center">
   <img width="350" height="300" alt="image" src="assets/discord_bot.png" />
@@ -1380,7 +1388,7 @@ Telegram est plus simple que Discord pour la plupart des utilisateurs; il ne né
 #### Créer un bot Telegram
 
 1. Ouvrez Telegram et envoyez un message à **@BotFather**.
-2. Envoyez `/newbot` et suivez les instructions. Conservez le jeton du bot qu'il vous donne.
+2. Envoyez `/newbot` et suivez les instructions. Enregistrez le jeton du bot qu'il vous fournit.
 
 #### Configurer OpenClaw pour Telegram
 
@@ -1404,14 +1412,14 @@ Ajoutez la configuration du canal à `~/.openclaw/openclaw.json` (ou modifiez-la
 }
 ```
 
-Redémarrez la passerelle, puis envoyez n'importe quel message à votre bot sur Telegram. Approuvez le jumelage :
+Redémarrez la passerelle, puis envoyez un message quelconque à votre bot dans Telegram. Approuvez le jumelage :
 
 ```bash
 openclaw pairing list telegram
 openclaw pairing approve telegram <CODE>
 ```
 
-Les codes de jumelage expirent après une heure. Vous pouvez maintenant discuter avec votre agent via message privé Telegram.
+Les codes de jumelage expirent après une heure. Vous pouvez maintenant discuter avec votre agent par message privé Telegram.
 
 ---
 
@@ -1419,11 +1427,11 @@ Les codes de jumelage expirent après une heure. Vous pouvez maintenant discuter
 
 Maintenant que votre agent peut recevoir des commandes depuis votre téléphone et agir sur votre machine locale, voici trois pistes qui valent la peine d'être explorées :
 
-1. **Résumeur de marché boursier** : Programmez OpenClaw pour récupérer des données à partir d'API financières à intervalle fixe, résumer les mouvements de la journée avec votre modèle local, et transmettre un résumé à votre téléphone chaque matin via le canal de votre choix.
+1. **Résumé du marché boursier** : Planifiez OpenClaw pour récupérer des données à partir d'API financières à intervalle fixe, résumer les mouvements de la journée avec votre modèle local, et envoyer un résumé à votre téléphone chaque matin via le canal de votre choix.
 
-2. **Surveillance du réglage fin** : Lancez une tâche d'entraînement à distance via Telegram ou Discord, puis demandez à l'agent de suivre le journal d'entraînement et de rapporter périodiquement les valeurs de perte, l'utilisation du GPU et l'utilisation du disque à votre téléphone. Si l'exécution se bloque ou si la VRAM connaît un pic, vous le saurez immédiatement sans avoir besoin d'être devant la machine.
+2. **Surveillance de l'affinage** : Lancez à distance une tâche d'entraînement via Telegram ou Discord, puis demandez à l'agent de surveiller le journal d'entraînement et de rapporter périodiquement les valeurs de perte, l'utilisation du GPU et l'espace disque utilisé à votre téléphone. Si l'exécution bloque ou si la VRAM connaît un pic, vous en êtes informé immédiatement sans avoir à être devant la machine.
 
-3. **IOT avec un VLM local** : Pointez une caméra vers votre porte d'entrée, exécutez un modèle de vision sur Lemonade, et demandez à OpenClaw d'analyser les images à la demande ou sur déclenchement. Demandez « des colis sont-ils arrivés aujourd'hui? » depuis votre téléphone et obtenez une réponse directe de votre propre matériel.
+3. **IdO avec un VLM local** : Pointez une caméra vers votre porte d'entrée, exécutez un modèle de vision sur Lemonade, et laissez OpenClaw analyser les images à la demande ou selon un déclencheur. Demandez « des colis sont-ils arrivés aujourd'hui? » depuis votre téléphone et obtenez une réponse claire provenant de votre propre matériel.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

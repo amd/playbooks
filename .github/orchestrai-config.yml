@@ -8,24 +8,22 @@
 # OrchestrAI workflow needs to know about the test fleet lives here, so the
 # workflow YAML and the .github/scripts/orchestrai_*.py helpers stay generic.
 #
-# Secrets (OrchestrAI pipeline credentials) are NOT here — they come from repo secrets
-# ORCHESTRAI_PIPELINE_USER / ORCHESTRAI_PIPELINE_TOKEN. Only non-secret coordinates live in this file.
-
-# ---------------------------------------------------------------------------
-# OrchestrAI pipeline entry point
-# ---------------------------------------------------------------------------
-# NOTE: this repo is public, so the internal OrchestrAI pipeline coordinates are NOT
-# committed here. Set them as repo variables (Settings -> Variables):
-#   ORCHESTRAI_PIPELINE_URL   e.g. https://<your-pipeline-host>
-#   ORCHESTRAI_PIPELINE_JOB   e.g. <your-pipeline-job>
-# The pipeline URL must be a variable, not a secret: the build URL derived from
-# it is passed between jobs as a job output, and GitHub redacts secret values
-# from job outputs, which would blank the build_urls handed to the test jobs.
-# The values below are only fallbacks for local runs; the workflow passes the
-# repo variables through and they take precedence.
-pipeline:
-  url: ""
-  job: ""
+# Secrets are NOT here. Runs start through the OrchestrAI Control Plane CI API
+# with the job's GitHub OIDC token (orchestrai_trigger.py); the Test jobs read
+# each run's pipeline build with ORCHESTRAI_PIPELINE_USER/TOKEN (repo secrets).
+#
+# Control Plane repo variables:
+#   ORCHESTRAI_V2_CI_API_URL      CI API base URL (ends in /api/ci/v1)
+#   ORCHESTRAI_V2_OIDC_AUDIENCE   audience its CI access rule trusts
+#   ORCHESTRAI_V2_PORTAL_URL      base of the OrchestrAI run links
+#   ORCHESTRAI_V2_WORKSPACE       workspace slug
+#   ORCHESTRAI_V2_RP_CREDENTIAL   workspace credential for ReportPortal export
+#   ORCHESTRAI_V2_RP_PROJECT      ReportPortal project
+#   ORCHESTRAI_REPORTING          reportportal (default) | api, for runs without inputs
+#   ORCHESTRAI_V2_LINUX_IMAGE / ORCHESTRAI_V2_WINDOWS_IMAGE   optional exact images
+# The workspace's CI access rules must trust amd/playbooks with
+# test-playbooks-orchestrai.yml (workflow_dispatch, schedule) and
+# orchestrai-pr-command.yml (issue_comment) at refs/heads/main.
 
 # The playbook repo the pipeline clones on the test machine.
 playbook_repo: "https://github.com/amd/playbooks"
@@ -88,10 +86,13 @@ device_families:
 # Scheduling policy
 # ---------------------------------------------------------------------------
 
-# Extra broker tags that apply to EVERY device a playbook runs on. Empty for now:
-# the model playbooks that need 128 GB only need it for their big Halo run, which
-# is expressed per-device in device_extra_tags below.
-extra_tags: {}
+# Extra broker tags that apply to EVERY device a playbook runs on. The model
+# playbooks that need 128 GB only for their big Halo run express it per-device
+# in device_extra_tags below. deepseek-v4-flash-ds4 runs only on Halo and always
+# needs 128 GB: its ~80 GB model plus a 126k context needs the 110 GB GPU memory
+# pool its README asks for (see extra_install_scripts).
+extra_tags:
+  deepseek-v4-flash-ds4: ["ram_128gb"]
 
 # Device-specific overrides for playbooks whose hardware requirement differs by
 # SKU. The playbooks below pick a device-appropriate model in their README
@@ -140,11 +141,25 @@ device_extra_tags:
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+  # Fixed Qwen3.6-35B-A3B-GGUF needs more than 32 GB hosts expose; krk is mixed
+  # (16/32/64 GB), so pin krk runs to its 64 GB hosts.
+  github-slack-development-digest:
+    krk: ["ram_64gb"]
+  openhands-getting-started:
+    krk: ["ram_64gb"]
 
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
   ram_128gb: ["halo", "halo_box"]
+  ram_64gb: ["krk"]
+
+# Extra tags that only add capacity: a machine with them can run everything the
+# untagged device can. When a run has both linux/halo and linux/halo+ram_128gb,
+# the untagged playbooks join the ram_128gb batch, so the device takes one
+# machine instead of two (they run one after another on it). Remove a tag here
+# to keep its batches separate.
+superset_tags: ["ram_64gb", "ram_128gb"]
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
@@ -161,8 +176,9 @@ extra_devices: {}
 # not on every machine on the platform. NOTE: install_scripts are batch-level, so
 # any OTHER playbook co-scheduled in the same batch (e.g. same device + extra
 # tags) also runs these scripts. Keep them idempotent and side-effect-safe.
-# Each entry: {script, reboot_after, platforms?}. "platforms" is an optional
-# filter; omit it to apply on all platforms. Paths resolve in ucicd-provisioning.
+# Each entry: {script, reboot_after, platforms?, devices?}. "platforms" and
+# "devices" are optional filters; omit them to apply everywhere. Paths resolve
+# in ucicd-provisioning.
 extra_install_scripts:
   # CVML validates inference on the Ryzen AI NPU. Install the matched XRT and
   # amdxdna package before the test phase; the driver needs a reboot to become
@@ -182,6 +198,15 @@ extra_install_scripts:
       reboot_after: true
       platforms: ["windows"]
 
+  # OpenHands runs the published Linux Agent Canvas image on Windows. Enable
+  # WSL2 and reboot before dependency setup. The test-library dependency then
+  # installs Docker Desktop per-user (no second reboot), starts it under the
+  # actor account and health-gates the Linux engine.
+  openhands-getting-started:
+    - script: "InstallationScripts/gfx/windows-wsl.ps1"
+      reboot_after: true
+      platforms: ["windows"]
+
   # hermes-lemonade-server runs Hermes and Podman inside Ubuntu on WSL. Enable
   # the WSL core/features and reboot before app.wsl installs the distro during
   # dependency setup. Windows-only.
@@ -189,6 +214,30 @@ extra_install_scripts:
     - script: "InstallationScripts/gfx/windows-wsl.ps1"
       reboot_after: true
       platforms: ["windows"]
+
+  # Single-GPU isolation for the ML playbooks on discrete Radeon hosts calls
+  # TheRock's hipInfo.exe by absolute path (ucicd-test-library #4492). The
+  # controller requires ORCHESTRAI_WINDOWS_THEROCK_URL for these batches and
+  # sends THEROCK_PUBLISH_ENV=0, so TheRock is installed without touching the
+  # machine env/PATH and nothing leaks into co-scheduled playbooks.
+  llama-factory-finetuning:
+    - &windows_therock_hipinfo
+      script: "InstallationScripts/gfx/windows-therock-tarball.ps1"
+      reboot_after: false
+      platforms: ["windows"]
+      devices: ["rx7900xt", "rx9070xt", "r9700"]
+  pytorch-finetuning:      [*windows_therock_hipinfo]
+  pytorch-rocm-llms:       [*windows_therock_hipinfo]
+  unsloth-llms-finetuning: [*windows_therock_hipinfo]
+
+  # deepseek-v4-flash-ds4 requires the GPU shared-memory pool raised to 110 GB
+  # (its README's `amd-ttm --set 110`). With the default of half of memory the
+  # ds4 server runs out of GPU memory while loading the model. The pool size
+  # applies at boot, so it is set here, before the reboot, not in a dependency.
+  deepseek-v4-flash-ds4:
+    - script: "InstallationScripts/gfx/linux-ttm-pool.sh"
+      reboot_after: true
+      platforms: ["linux"]
 
 # Devices to skip entirely (e.g. temporarily offline hardware).
 # krk was listed here only because there was no Kraken hardware in the farm.
@@ -230,6 +279,11 @@ skip_playbook_devices:
   unsloth-llms-finetuning:  ["stx"]
   hermes-lemonade-server:  ["stx", "krk"]
   openclaw-lemonade-server: ["stx", "krk"]
+  # These Agent Canvas playbooks use the same fixed Qwen3.6-35B-A3B-GGUF.
+  # Current STX hosts expose 29 GB RAM: Lemonade's 23.2 GB eligibility ceiling is
+  # below the model's 23.3 GB requirement. Re-enable on eligible STX hardware.
+  github-slack-development-digest: ["stx"]
+  openhands-getting-started:       ["stx"]
   # LM Studio's survey exposed 10.71 GiB to Vulkan on Windows STX for an
   # 18.63 GB model; Windows failed with "unable to allocate Vulkan0 buffer".
   # Linux aborted at 91% while amdgpu reported insufficient submission memory.
@@ -241,19 +295,17 @@ skip_playbook_devices:
 # Per-run pipeline settings
 # ---------------------------------------------------------------------------
 run_settings:
-  max_duration: 240            # minutes, whole batch
+  # minutes, whole batch. superset_tags folds a device's untagged playbooks into
+  # its 64/128 GB batch (~20 in a row on Halo), so this is as high as the Test
+  # jobs' 330-minute build wait allows while keeping 30 min for the build to
+  # wind down. Raising it means raising that wait, which must stay under
+  # GitHub's 360-minute job timeout.
+  max_duration: 300
   max_test_case_duration: 90   # minutes, single playbook
-  # Minutes to wait for the broker to supply machines before the build gives
-  # up. Sent to the pipeline as its ACQUIRE_TIMEOUT build parameter (before
-  # that, this value was ignored and every run waited the pipeline's 40-minute
-  # default). The wait counts against the build's overall time limit, so a
-  # longer wait leaves less time for the batch's playbooks.
-  acquire_timeout: 60
-  # Resubmit a batch whose build timed out waiting for machines before anything
-  # ran, up to this many times (0 disables, max 3). Each attempt waits the
-  # pipeline's full acquire timeout and re-enters the broker queue. Details in
-  # .github/orchestrai/acquire_retry.py.
-  acquire_retries: 3
+  # Minutes the Control Plane queues a batch for machines (including quota
+  # waits) before dropping it as NOT_RUN. Not counted in max_duration.
+  # Detect & Trigger waits this + 30 min for the builds.
+  acquire_timeout: 360
   # Machines to acquire per hardware group. 1 = all same-HW playbooks share one
   # machine and run sequentially (saves scarce hardware). Overridable per run via
   # the machines_per_hw_group workflow_dispatch input.
@@ -301,21 +353,36 @@ provisioning:
       - script: "InstallationScripts/gfx/linux.sh"
         reboot_after: true
 
-  # NOTE: no TheRock step here. windows-therock-tarball.ps1 requires a TheRock
-  # *Windows* tarball via THEROCK_URL, but the only TheRock variable
-  # (ORCHESTRAI_THEROCK_URL) is the Linux multiarch tarball, so the step could
-  # never be satisfied -- it failed with "THEROCK_URL is required" on every
-  # Windows batch. Nothing on Windows consumes the resulting ROCm userspace
-  # (C:\TheRock\build): Windows gets its GPU runtime from the AMD driver
-  # (windows.ps1) and PyTorch from the ROCm wheel index. Re-add this only
-  # alongside a real Windows tarball URL.
   windows_install_scripts:
     - script: "InstallationScripts/gfx/windows.ps1"
       reboot_after: true
 
-  # Windows AMD GPU driver source (UNC path) copied onto the machine.
-  # The UNC path is internal — set it as a repo variable, not in this public file:
-  #   ORCHESTRAI_WINDOWS_DRIVER_SOURCE   e.g. \\<host>\<share>\...\ATI
+  # TheRock Windows multi-arch dist tarball, used only so hipInfo.exe exists for
+  # single-GPU isolation of the ML playbooks (see extra_install_scripts). Kept
+  # separate from therock_url above, which is the Linux tarball. Repo variable:
+  #   ORCHESTRAI_WINDOWS_THEROCK_URL
+  #     e.g. https://<host>/tarball-multi-arch/therock-dist-windows-multiarch-<ver>.tar.gz
+  # Required for batches that schedule TheRock; the run fails before acquiring
+  # hardware if it is unset.
+  windows_therock_url: ""
+
+  # Use the approved released Adrenalin installer by default, avoiding the
+  # internal build-share copy. ORCHESTRAI_WINDOWS_DRIVER (or the manual run
+  # input) can explicitly select internal for a comparison run.
   windows_driver:
+    use: public
+    # Only required for an explicitly selected internal-driver run.
+    # ORCHESTRAI_WINDOWS_DRIVER_SOURCE supplies the UNC path at runtime.
     source: ""
     copy: "direct"
+
+  # Pin the approved, hardware-compatible installer in the repo variable
+  # ORCHESTRAI_WINDOWS_DRIVER_URL. Do not commit an internal mirror URL here.
+  # The provisioning script verifies the AMD Authenticode signature, extracts
+  # locally, and delegates installation to windows.ps1; no SMB copy is needed.
+  # Requires windows-public-url.ps1 on the configured provisioning ref.
+  windows_public_driver:
+    url: ""
+    install_scripts:
+      - script: "InstallationScripts/gfx/windows-public-url.ps1"
+        reboot_after: true

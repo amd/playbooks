@@ -16,18 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## Pregled
 
-LM Studio je zmogljiv grafični vmesnik za [llama.cpp](https://github.com/ggml-org/llama.cpp) in ponuja tudi [končno točko, skladno z OpenAI](https://lmstudio.ai/docs/developer/openai-compat) za lokalno strežbo modelov. LM Studio ponuja preprost, a zmogljiv vmesnik za enostavno prenašanje in uvajanje modelov. LM Studio za uporabnike AMD ponuja tako Vulkan kot AMD ROCm™ programske zaledne sisteme (imenovane runtime).
+LM Studio je zmogljiv grafični vmesnik za [llama.cpp](https://github.com/ggml-org/llama.cpp), ki poleg tega ponuja tudi [končno točko, skladno z OpenAI](https://lmstudio.ai/docs/developer/openai-compat), za lokalno strežbo modelov. LM Studio ponuja preprost, a zmogljiv vmesnik za enostavno prenašanje in uvajanje modelov. LM Studio za uporabnike AMD ponuja tako Vulkan kot AMD ROCm™ programska zaledja (imenovana izvajalna okolja).
 
 
 ## Kaj se boste naučili
 - Kako konfigurirati in uporabljati LM Studio za izkoriščanje lokalne strojne opreme
-- Testiranje in upravljanje jezikovnih modelov (LLM) v popolnoma brezpovezavnem okolju
-- Strežba modelov prek API-ja, združljivega z OpenAI, za pogon prilagojenih delovnih tokov in aplikacij
+- Testiranje in upravljanje LLM-jev v popolnoma nepovezanem okolju
+- Streženje modelov prek API-ja, združljivega z OpenAI, za podporo delovnim tokovom in aplikacijam po meri
 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
@@ -43,7 +45,7 @@ LM Studio je zmogljiv grafični vmesnik za [llama.cpp](https://github.com/ggml-o
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev potrebne programske opreme
+## Nameščanje predpogojev za programsko opremo
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -51,7 +53,7 @@ LM Studio je zmogljiv grafični vmesnik za [llama.cpp](https://github.com/ggml-o
 
 <!-- @require:lmstudio -->
 
-## Prenos modelov
+## Prenašanje modelov
 
 <!-- @var:id=lms_model device=halo,halo_box value="gpt-oss-120b" -->
 <!-- @var:id=lms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="qwen3.5-9b" -->
@@ -66,16 +68,16 @@ LM Studio je zmogljiv grafični vmesnik za [llama.cpp](https://github.com/ggml-o
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## Klepetanje z jezikovnim modelom
-Naučite se, kako začeti klepetati z jezikovnim modelom (LLM) kakovosti ChatGPT popolnoma lokalno.  
+## Klepetanje z LLM
+Naučite se, kako začeti klepetati z LLM-jem v razredu ChatGPT popolnoma lokalno.  
 
 1. Odprite LMStudio. 
-2. Pritisnite `Ctrl + L`, da odprete nalagalnik modela, izberite `Manually choose model load parameters` in kliknite na `${model_name}`
+2. Pritisnite `Ctrl + L`, da odprete nalagalnik modelov, izberite `Manually choose model load parameters` in kliknite na `${model_name}`
 3. Prepričajte se, da je označeno "show advanced settings".  
-4. Po želji spremenite `Context Length`. Večja dolžina konteksta pomeni več pomnilnika modela, vendar tudi večjo porabo sistemskega pomnilnika. Priporočena vrednost za ta priročnik je 4096.
-5. Prepričajte se, da je `GPU Offload` nastavljen na maksimum in da je `Flash Attention` vklopljen (kvantizacije predpomnilnika lahko ostanejo izklopljene)
-6. Označite `Remember settings` in kliknite `Load Model`.
-7. Če niste v oknu za klepet, pritisnite `Ctrl + 1` ali kliknite na gumb 👾 v zgornjem levem kotu zaslona.
+4. Spremenite `Context Length` po želji. Večja dolžina konteksta pomeni več pomnilnika modela, vendar tudi večjo porabo sistemskega pomnilnika. Za ta priročnik je priporočena vrednost 4096.
+5. Prepričajte se, da je `GPU Offload` nastavljen na najvišjo vrednost in da je `Flash Attention` vklopljen (Cache Quantizations lahko ostane izklopljen)
+6. Označite `Remember settings` in kliknite na `Load Model`.
+7. Če niste v oknu klepeta, pritisnite `Ctrl + 1` ali kliknite gumb 👾 v zgornjem levem kotu zaslona.
 8. Pošljite sporočilo in začnite komunicirati z modelom!
 
 <!-- @os:windows -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Nasvet**: Dolžina konteksta se nanaša na pomnilnik modela. Flash attention izboljša hitrost obdelave in hkrati zmanjša porabo pomnilnika. GPU Offload prenese izračune na grafično kartico za hitrejše odzive.
+> **Nasvet**: Dolžina konteksta se nanaša na spomin modela. Flash attention izboljša hitrost obdelave in hkrati zmanjša porabo pomnilnika. GPU Offload prenese izračune na grafično kartico za hitrejše odzive.
 
-## Strežba jezikovnih modelov prek končne točke, združljive z OpenAI
+## Streženje LLM-jev prek končne točke, združljive z OpenAI
 
-LM Studio ponuja tudi končno točko, skladno z OpenAI, v obliki strežnika LM Studio Server. To je bilo že prikazano v agentnem delovnem toku kodiranja s Cline [tukaj](../playbooks/vscode-qwen3-coder). Drug pogost primer uporabe je povezovanje strežnika LM Studio Server s katero koli spletno aplikacijo (React, Node.js, Python) s pošiljanjem standardnih zahtev HTTP na sklepalno končno točko.
+LM Studio ponuja tudi končno točko, skladno z OpenAI, v obliki strežnika LM Studio Server. To je bilo že prikazano v agentnem delovnem toku za programiranje s Cline [tukaj](../playbooks/vscode-qwen3-coder). Drug pogost primer uporabe je povezovanje strežnika LM Studio Server s katero koli spletno aplikacijo (React, Node.js, Python) s pošiljanjem standardnih zahtevkov HTTP na sklepalno končno točko.
 
 Za nastavitev strežnika LM Studio Server uporabite naslednja navodila:
 
-1. Na levi strani kliknite na zavihek `Developer` (ikona ukazne vrstice) ali pritisnite `Ctrl + 2` in nato kliknite na `Server Settings`.  
-2. (Neobvezno): Če želite streči model prek svojega lokalnega omrežja (LAN), označite `Serve on Local Network`. Če ga želite uporabljati s spletno stranjo ali za obsežno klicanje znotraj VS Code, označite `Enable CORS`. 
-3. V zgornjem levem kotu se prepričajte, da strežnik teče, tako da kliknete na preklopni gumb pred `Status`.
-4. Zdaj bo tekla končna točka, skladna z OpenAI. Naslov je običajno http://127.0.0.1:1234  
-5. Če model še ni naložen, ga lahko naložite s klikom na `Load Model` in sledenjem prej omenjenim korakom. 
+1. Na levi strani kliknite na zavihek `Developer` (ikona ukazne vrstice) ali `Ctrl + 2` in nato kliknite na `Server Settings`.  
+2. (Neobvezno): Če želite streči model prek vašega lokalnega omrežja (LAN), označite `Serve on Local Network`. Če ga želite uporabljati s spletno stranjo ali za obsežno klicanje znotraj VS Code, označite `Enable CORS`. 
+3. V zgornjem levem kotu se prepričajte, da strežnik deluje, tako da kliknete preklopni gumb pred `Status`.
+4. Sedaj bo delovala končna točka, skladna z OpenAI. Naslov je običajno na http://127.0.0.1:1234  
+5. Če model še ni naložen, ga lahko naložite s klikom na `Load Model` in sledite predhodno omenjenim korakom. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -186,7 +188,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Ta model bo zdaj dostopen prek končne točke strežnika LM Studio Server in bo podpiral končne točke OpenAI, vključno z:
+Ta model bo sedaj dostopen prek končne točke LM Studio Server in bo podpiral končne točke OpenAI, vključno z:
 
 | Končna točka | Metoda | Dokumentacija |
 |------------|----------|----------|
@@ -195,14 +197,14 @@ Ta model bo zdaj dostopen prek končne točke strežnika LM Studio Server in bo 
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Primer: Preverjanje povezave z vašo končno točko
-Ko smo pravkar ustvarili končno točko, združljivo z OpenAI, si poglejmo, kako to integrirati v razvojno okolje za Python (na primer VSCode) in uporabiti vaš sistem kot lokalnega ponudnika API.
+#### Primer: Preverjanje dosegljivosti vaše končne točke
+Ko smo pravkar ustvarili OpenAI Compatible končno točko, si oglejmo, kako to integrirati v razvojno okolje za Python (na primer VSCode) in uporabiti svoj sistem kot lokalnega ponudnika API.
 
 1. Ustvarite virtualno okolje za Python:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    V Linuxu odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
+    V Linuxu odprite terminal v mapi po svoji izbiri in sledite ukazom za ustvarjanje venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -212,13 +214,13 @@ Ko smo pravkar ustvarili končno točko, združljivo z OpenAI, si poglejmo, kako
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se morate odjaviti in ponovno prijaviti):
+**Dodelite svojemu uporabniku dostop do naprav GPU** (za uveljavitev se odjavite in ponovno prijavite):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    V Linuxu odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
+    V Linuxu odprite terminal v mapi po svoji izbiri in sledite ukazom za ustvarjanje venv.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -230,26 +232,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    V Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
+    V Windows odprite terminal v mapi po svoji izbiri in sledite ukazom za ustvarjanje venv.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti svoj izvedbeni pravilnik PowerShell (Execution Policy) (npr.
-    > nastaviti ga na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze PowerShell.
+    > **Nasvet**: Uporabniki Windows bodo morda morali spremeniti svoj PowerShell Execution Policy (npr.
+    > ga nastaviti na RemoteSigned ali Unrestricted), preden bodo lahko zagnali nekatere ukaze Powershell.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    V Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje virtualnega okolja (venv).
+    V Windows odprite terminal v mapi po svoji izbiri in sledite ukazom za ustvarjanje venv.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Nasvet**: Uporabniki sistema Windows bodo morda morali spremeniti svoj izvedbeni pravilnik PowerShell (Execution Policy) (npr.
-    > nastaviti ga na RemoteSigned ali Unrestricted), preden zaženejo nekatere ukaze PowerShell.
+    > **Nasvet**: Uporabniki Windows bodo morda morali spremeniti svoj PowerShell Execution Policy (npr.
+    > ga nastaviti na RemoteSigned ali Unrestricted), preden bodo lahko zagnali nekatere ukaze Powershell.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -259,7 +261,7 @@ sudo usermod -aG render,video $LOGNAME
     pip install openai
     ```
 
-3. Zaženite naslednji skript, da preverite povezavo s končno točko, ki smo jo pravkar ustvarili.
+3. Zaženite naslednji skript za preverjanje dosegljivosti končne točke, ki smo jo pravkar ustvarili.
     ```python
     from openai import OpenAI
 
@@ -362,15 +364,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Neobvezno): Preklapljanje med izvajalnimi okolji (Runtimes)
+#### (Neobvezno): Preklapljanje med izvajalnimi okolji
 
-1. Na tipkovnici pritisnite `Ctrl + Shift + R`. Lahko pa tudi kliknete na zavihek `Discover` (ikona povečevalnega stekla) na levi strani in nato v pojavnem oknu kliknete `Runtime`.
+1. Pritisnite `Ctrl + Shift + R` na tipkovnici. Druga možnost je, da kliknete zavihek `Discover` (ikona povečevalnega stekla) na levi strani in nato v pojavnem oknu kliknete `Runtime`.
 2. Nato bi morali videti `Runtime Selections`, kjer lahko z spustnim menijem spremenite izvajalno okolje.
 
 
 ## Naslednji koraki
 
-- **Integracija po meri**: Integrirajte lastne skripte ali aplikacije Python z uporabo lokalnega API-ja, združljivega z OpenAI.
+- **Integracija po meri**: Integrirajte lastne Python skripte ali aplikacije z uporabo lokalnega API-ja, združljivega z OpenAI.
 - **Napredni vmesniki**: Povežite zmogljive vmesnike, kot je Open WebUI, s svojim strežnikom za zgodovino klepetov in upravljanje osebnosti.
 
 Za več dokumentacije obiščite: https://lmstudio.ai/docs/developer

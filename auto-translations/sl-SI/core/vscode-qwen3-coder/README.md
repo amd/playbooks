@@ -16,57 +16,59 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Ta priročnik zahteva vsaj **32 GB** sistemskega pomnilnika.
+> Ta vodnik zahteva vsaj **32 GB** sistemskega pomnilnika.
 <!-- @device:end -->
 
 ## Pregled
 
-Kodirni agenti so zmogljiva orodja, ki razvijalcem omogočajo sodelovanje z AI agenti, ki jih poganjajo veliki jezikovni modeli (LLM). Vgradimo jih lahko v razvojno okolje, na primer v terminal ali VS Code, kar omogoča neopazno vključitev v razvijalčev delovni proces.
+Kodirni agenti so zmogljiva orodja, ki razvijalcem omogočajo sodelovanje z AI agenti, podprtimi z velikimi jezikovnimi modeli (LLM). Vgraditi jih je mogoče v razvojno okolje, na primer v terminal ali VS Code, kar omogoča nemoteno vključitev v razvijalčev delovni proces.
 
-Ta vadnica prikazuje, kako uporabiti Cline, VS Code in LM Studio za zagon kodirnega agenta v celoti na vašem lokalnem računalniku.
+Ta vadnica prikazuje, kako z orodji Cline, VS Code in LM Studio zaženete kodirnega agenta v celoti na lokalnem računalniku.
 
 ## Kaj se boste naučili
 
-* Kako zagnati VS Code s kodirnim agentom Cline za pomoč pri opravilih programskega inženiringa.
+* Kako zagnati VS Code s kodirnim agentom Cline za pomoč pri nalogah programskega inženirstva.
 * Kako konfigurirati Cline za komunikacijo z LM Studio za lokalno sklepanje kodirnih agentov.
-* Kako uporabiti lokalne kodirne agente za reševanje resničnih problemov programskega inženiringa. 
+* Kako uporabiti lokalne kodirne agente za reševanje resničnih nalog programskega inženirstva. 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavitev konfiguracije pomnilnika
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Preverjanje posodobitev programske opreme
-> **Opomba**: Če VS Code ni nameščen, ga lahko namestite prek Ryzen AI Developer Center.
+> **Opomba**: Če VS Code ni nameščen, ga lahko namestite z Ryzen AI Developer Center.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Namestitev potrebne programske opreme
+## Namestitev zahtev programske opreme
 
 <!-- @require:lmstudio,vscode -->
 
 ## Zagon in konfiguracija LM Studio
 
-Za strežbo LLM, ki poganja kodirnega agenta, bomo uporabili LM Studio.
+LM Studio bomo uporabili za strežbo LLM, ki poganja kodirnega agenta.
 
 - V iskalno vrstico vnesite `LM Studio` in zaženite aplikacijo. Prikazala se vam bo naslednja stran.
 
 ![Začetni zaslon LM Studio](assets/initial-lm-studio.png)
 
-Nato moramo v sistem naložiti LLM. Uporabili bomo model `Qwen3-Coder-30B-A3B` z veliko dolžino konteksta. (Če ga še niste namestili, ga namestite prek zavihka Model).
-- Kliknite na iskalno vrstico na vrhu okna LM Studio ali pritisnite `CTRL+L`. Kliknite stikalo `Manually choose model load parameters` in nato kliknite na model Qwen3-Coder-30B-A3B.
-- Spremenite dolžino konteksta iz `4096` na `32768` in poskrbite, da je `GPU Offload` nastavljen na maksimum. Nato kliknite `Load Model`
+Nato moramo naložiti LLM v sistem. Uporabili bomo model `Qwen3-Coder-30B-A3B` z veliko dolžino konteksta. (Če ga še niste namestili, ga namestite prek zavihka Model).
+- Kliknite iskalno vrstico na vrhu okna LM Studio ali pritisnite `CTRL+L`. Kliknite stikalo `Manually choose model load parameters` in nato kliknite model Qwen3-Coder-30B-A3B.
+- Spremenite dolžino konteksta iz `4096` na `32768` in preverite, da je `GPU Offload` nastavljen na maksimum. Nato kliknite `Load Model`
 
 ![Izbira modela](assets/model-list-zoomed.png)
 
-Uporabljamo veliko dolžino konteksta, da lahko agent obdela velike kodne baze in si zapomni izvedene spremembe.
+Veliko dolžino konteksta uporabljamo, da lahko agent obdela velike kodne baze in si zapomni izvedene spremembe.
 
 ![Konfiguracija modela](assets/selecting-model-zoomed.png)
 
 Nato moramo omogočiti strežnik LM Studio. 
 - Kliknite zavihek Developer ali pritisnite `CTRL+2` v LM Studio na levi strani.
-- Preverite preklopno stikalo statusa in se prepričajte, da je nastavljeno na `Running`.
+- Preverite preklopnik statusa in se prepričajte, da je nastavljen na `Running`.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -155,11 +157,11 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 Namestili bomo razširitev Cline v VS Code in jo povezali s strežnikom LM Studio, ki smo ga pravkar ustvarili.
 - V iskalno vrstico vnesite `VS Code` in zaženite aplikacijo.
-- Kliknite na ikono `Extensions` na levem stolpcu VS Code in poiščite `Cline`. Nato kliknite gumb `Install`. 
+- Kliknite ikono `Extensions` na levem stolpcu VS Code in poiščite `Cline`. Nato kliknite gumb `Install`. 
 
 ![Namestitev razširitve Cline](assets/installing-cline-vscode-extension.png)
 
-- Na levi strani bi morala biti prikazana ikona Cline. Kliknite nanjo, da odprete Cline. Prikazalo se bo okno z vprašanjem `How will you use Cline?` Ker bomo uporabljali lokalni LLM, ki teče prek LM Studio, izberite `Bring my own API Key` in kliknite `Continue`. 
+- Na levi strani bi se morala pojaviti ikona Cline. Kliknite nanjo, da odprete Cline. Pojavilo se bo okno z vprašanjem `How will you use Cline?` Ker bomo uporabljali lokalni LLM, ki teče prek LM Studio, izberite `Bring my own API Key` in kliknite `Continue`. 
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -191,22 +193,22 @@ Nato moramo konfigurirati Cline za komunikacijo s strežnikom LM Studio, ki smo 
 
 ## Ustvarjanje vašega prvega projekta
 
-Uporabimo našega lokalnega agenta za ustvarjanje spletne strani! Odprite VS Code v mapi po vaši izbiri, kjer bo Cline ustvaril datoteke.
-- To storite tako, da na vrhu levo v VS Code izberete `File -> Open Folder` in izberete mapo, na primer `Documents`.
+Uporabimo našega lokalnega agenta za ustvarjanje spletnega mesta! Odprite VS Code v mapi po vaši izbiri, kjer bo Cline ustvaril datoteke.
+- To storite tako, da v zgornjem levem kotu VS Code izberete `File -> Open Folder` in izberete mapo, na primer `Documents`.
 
-![Prazna mapa v VS Code](assets/open-cline-test.png)
+![Prazna mapa VS Code](assets/open-cline-test.png)
 
-Zdaj smo pripravljeni za poziv lokalnega kodirnega agenta. 
-- Kliknite na razširitev Cline na levem stolpcu in vnesite poziv za zagon agenta. Kot primer uporabimo naslednji poziv:
+Zdaj smo pripravljeni podati poziv lokalnemu kodirnemu agentu. 
+- Kliknite razširitev Cline na levem stolpcu in vnesite poziv za začetek dela agenta. Kot primer uporabimo naslednji poziv:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Agent bo nato začel ustvarjati datoteke v skladu s pozivom. Kot uporabnik lahko v VS Code opazujete, kako se koda generira, kot je prikazano spodaj. Vsakič, ko želi Cline ustvariti datoteko, boste morda morali klikniti `Save`. 
+Agent bo nato začel ustvarjati datoteke v skladu s pozivom. Kot uporabnik lahko spremljate ustvarjanje kode v VS Code, kot je prikazano spodaj. Vsakič, ko želi Cline ustvariti datoteko, boste morda morali klikniti `Save`. 
 
 ![Generiranje kode s Cline](assets/cline-code-generation.png)
 
-Po generiranju programske opreme je agent končal in aplikacijo lahko zaženete. V tem primeru je agent zapisal tri datoteke: `index.html`, `script.js` in `styles.css`. Z dvoklikom na HTML datoteko lahko naložimo in uporabljamo generirano spletno stran.
+Po ustvarjanju programske opreme je agent zaključil delo in lahko zaženete aplikacijo. V tem primeru je agent zapisal v tri datoteke: `index.html`, `script.js` in `styles.css`. Z enostavnim dvoklikom na HTML datoteko lahko naložimo in vzajemno delujemo z ustvarjenim spletnim mestom.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## Naslednji koraki
 
-Po ustvarjanju spletnega mesta lahko z orodjem Cline nadaljujete z izboljševanjem spletnega mesta. Dve možni izboljšavi sta:
+Po ustvarjanju spletnega mesta lahko nadaljujete delo s Cline za izboljšanje spletnega mesta. Dve možni izboljšavi sta:
 
-- **Dokumentacija**: Če agenta pozovete z `Add a README`, to zadostuje, da agent ustvari datoteko `README.md`, ki dokumentira spletno mesto.
-- **Animacija**: Model pozovite z `Add an animation that visually represents a large language model running on a laptop.`, da ustvarite animacijo za spletno mesto.
+- **Dokumentacija**: Poziv agentu z `Add a README` je vse, kar je potrebno, da agent ustvari datoteko `README.md`, ki dokumentira spletno mesto.
+- **Animacija**: Pozovite model z `Add an animation that visually represents a large language model running on a laptop.`, da spletnemu mestu dodate animacijo.
 
-Bralca spodbujamo, naj poskusi ustvariti tudi druge aplikacije s to nastavitvijo. Spodaj je nekaj zabavnih primerov, ki smo jih preizkusili:
+Bralca spodbujamo, naj s to nastavitvijo poskusi ustvariti tudi druge aplikacije. Spodaj so nekateri zanimivi primeri, ki smo jih preizkusili:
 
-- **Retro arkadne igre**: Preizkusite tudi druge pozive. Agentu je lahko tudi zabavno ustvarjati igre v retro slogu v jeziku Python s paketom `PyGame` z naslednjim pozivom:
+- **Retro arkadne igre**: Preizkusite tudi druge pozive. Agentu je lahko tudi zabavno ustvariti retro igre v Pythonu z uporabo paketa `PyGame` z naslednjim pozivom:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Analiza podatkov**: Eno od področij, kjer so kodirni agenti še posebej uporabni, je pisanje skriptov in analiza podatkov. Ta poziv prikazuje zmožnost lokalnega modela za ustvarjanje programske opreme za analizo podatkov za vizualizacijo cen delnic:
+- **Analiza podatkov**: Eno od področij, kjer so kodirni agenti še posebej uporabni, je pisanje skriptov in analiza podatkov. To je poziv za prikaz sposobnosti lokalnega modela za ustvarjanje programske opreme za analizo podatkov za vizualizacijo cen delnic:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Viri
 
-Spodaj je nekaj dodatnih virov za več informacij o kodirnih agentih, orodju Cline in izvajanju delovnih obremenitev na 
+Spodaj je nekaj dodatnih virov za nadaljnje spoznavanje agentov za kodiranje, orodja Cline in izvajanje delovnih obremenitev na
 
 * Več informacij o partnerstvu in integraciji AMD z LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* Objava na spletnem dnevniku AMD z vodičem po izvajanju Cline na grafičnih karticah AMD Ryzen™ AI in Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Objava na spletnem dnevniku Cline o izvajanju kodirnih agentov lokalno na računalnikih AI PC: https://cline.bot/blog/local-models-amd
+* Blog AMD z vodenim prikazom izvajanja Cline na grafičnih karticah AMD Ryzen™ AI in Radeon™: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Blog Cline o lokalnem izvajanju agentov za kodiranje na AI PC-jih: https://cline.bot/blog/local-models-amd

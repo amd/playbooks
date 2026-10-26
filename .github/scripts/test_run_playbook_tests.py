@@ -74,5 +74,19 @@ class SetupResolutionTest(unittest.TestCase):
         self.assertEqual(tests[0].setup, "source venv/bin/activate")
 
 
+class TimeoutOutputTest(unittest.TestCase):
+    def test_a_timed_out_test_keeps_what_it_printed(self):
+        test = rpt.TestBlock(id="hangs", timeout=1, code="echo waiting for the lock\nsleep 5")
+        with tempfile.TemporaryDirectory() as d:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                result = rpt.run_test(test, Path(d), Path(d))
+            saved = (Path(d) / "hangs_stdout.txt").read_text(encoding="utf-8")
+        self.assertEqual((result.success, result.error_message), (False, "Test timed out after 1 seconds"))
+        self.assertIn("waiting for the lock", result.stdout)
+        self.assertIn("waiting for the lock", saved)
+        self.assertIn("waiting for the lock", buf.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()

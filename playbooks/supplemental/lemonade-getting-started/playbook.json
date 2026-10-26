@@ -129,5 +129,15 @@
   ],
   "coverImage": "../../dependencies/assets/multi_modality.png",
   "recommendedSystemMemory": 8,
-  "primaryModel": "Gemma-4-E2B-it"
+  "primaryModel": "Gemma-4-E2B-it",
+  "authors": [
+    {
+      "name": "Victoria Godsoe",
+      "github": "vgodsoe",
+      "github_url": "https://github.com/vgodsoe",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-03",
+  "updated_date": "2026-10-01"
 }

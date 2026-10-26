@@ -8,65 +8,67 @@ SPDX-License-Identifier: MIT
 > **Strojový překlad.** Tato stránka byla automaticky přeložena z angličtiny a nebyla zkontrolována člověkem. Může obsahovat chyby a určité pokyny, příkazy, soubory ke stažení, dostupnost produktů nebo jiný obsah se může lišit podle jazyka nebo regionu. V případě jakéhokoli nesouladu nebo rozporu je rozhodující původní anglická verze playbooku.
 <!-- auto-translated-disclaimer:end -->
 
-# Spuštění agenta Hermes lokálně pomocí Lemonade Server
+Running Hermes Agent Locally with Lemonade Server
 
 ## Přehled
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) je samovylepšující se AI agent vytvořený společností Nous Research. Má vestavěnou učební smyčku, vytváří dovednosti na základě zkušeností, buduje trvalou paměť o tom, kdo jste, napříč jednotlivými relacemi, a může vaším jménem spouštět naplánované automatizace. Na rozdíl od jednoduchého chatovacího asistenta Hermes provádí skutečné akce: spouští příkazy shellu, zapisuje soubory, prochází web a deleguje paralelní pracovní postupy na podřízené agenty.
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) je samostatně se zdokonalující AI agent od Nous Research. Má vestavěnou učební smyčku, vytváří dovednosti na základě zkušeností, buduje si trvalou paměť o tom, kdo jste, napříč relacemi a může vaším jménem spouštět naplánované automatizace. Na rozdíl od jednoduchého chatovacího asistenta Hermes provádí skutečné akce: spouští shellové příkazy, zapisuje soubory, prochází web a deleguje paralelní pracovní postupy na subagenty.
 
-[**Lemonade Server**](https://lemonade-server.ai/) je lokální inferenční backend, který jej pohání. Jedná se o open-source server, který spouští modely GenAI přímo na vašem hardwaru AMD a zpřístupňuje je prostřednictvím standardního OpenAI API.
+[**Lemonade Server**](https://lemonade-server.ai/) je lokální inferenční backend, který jej pohání. Jedná se o open-source server, který spouští modely GenAI přímo na vašem hardwaru AMD a zpřístupňuje je prostřednictvím standardního API OpenAI.
 
-Společně tvoří kompletně lokální zásobník AI agenta: Lemonade zajišťuje inferenci modelu na vaší GPU a Hermes poskytuje smyčku agenta, paměť, dovednosti a bránu pro zasílání zpráv.
+Společně tvoří plně lokální stack pro AI agenty: Lemonade se stará o inferenci modelů na vaší GPU a Hermes poskytuje smyčku agenta, paměť, dovednosti a bránu pro komunikaci.
 
-> **Než budete pokračovat:** Hermes Agent je vysoce autonomní AI agent. Poskytnutí přístupu k vašemu systému jakémukoli AI agentovi může vést k nepředvídatelným nebo nezamýšleným výsledkům. Pokračujte pouze tehdy, pokud rozumíte rizikům a jste v pořádku s tím, že autonomní software bude jednat vaším jménem.
+> **Než budete pokračovat:** Hermes Agent je vysoce autonomní AI agent. Poskytnutí přístupu k vašemu systému jakémukoli AI agentovi může vést k nepředvídatelným nebo nezamýšleným výsledkům. Pokračujte pouze tehdy, pokud rozumíte rizikům a jste smíření s tím, že za vás bude jednat autonomní software.
 
 ---
 
 ## Co se naučíte
 
-Na konci této příručky budete schopni:
+Na konci tohoto průvodce budete schopni:
 
-- **Nainstalovat Hermes Agent** a nastavit jej tak, aby jako AI backend používal **Lemonade Server**.
+- **Nainstalovat Hermes Agent** a nastavit jej tak, aby jako svůj AI backend používal **Lemonade Server**.
 - **(Doporučeno) Povolit sandboxing pomocí Docker/Podman** k izolaci akcí agenta od hostitelského systému.
 - **Spustit bránu Hermes** a ověřit, že je váš agent připraven.
-- **Připojit komunikační kanál** (Discord nebo Telegram), abyste mohli se svým agentem komunikovat z libovolného zařízení.
+- **Připojit komunikační kanál** (Discord nebo Telegram), abyste se svým agentem mohli komunikovat z libovolného zařízení.
 
 ---
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavení konfigurace paměti
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Zkontrolujte aktualizace softwaru
+## Kontrola aktualizací softwaru
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Instalace softwarových předpokladů
+## Instalace požadovaného softwaru
 
 <!-- @os:linux -->
 - PC se systémem **Ubuntu 24.04+** nebo kompatibilní distribucí Linuxu založenou na Debianu s `apt-get`
-- Alespoň **12 GB paměti RAM** (u větších modelů se doporučuje 64 GB+)
-- **Přibližně 10–30 GB volného místa na disku** pro váhy modelu
-- [Podman](https://podman.io/docs/installation) (volitelné, pro sandboxing agenta Hermes)
+- Nejméně **12 GB RAM** (doporučeno 64 GB+ pro větší modely)
+- **~10–30 GB volného místa na disku** pro váhy modelu
+- [Podman](https://podman.io/docs/installation) (volitelné, pro sandboxing Hermes Agent)
   ```bash 
-  sudo apt-get install -y podman`
+  sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 - PC se systémem **Windows 10/11**
-- Alespoň **12 GB paměti RAM** (u větších modelů se doporučuje 64 GB+)
-- **Přibližně 10–30 GB volného místa na disku** pro váhy modelu
-- Podman (volitelné, pro sandboxing agenta Hermes). Nainstalujte jej uvnitř WSL:
+- Nejméně **12 GB RAM** (doporučeno 64 GB+ pro větší modely)
+- **~10–30 GB volného místa na disku** pro váhy modelu
+- Podman (volitelné, pro sandboxing Hermes Agent). Nainstalujte uvnitř WSL:
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman je na Halo Box předinstalován a není třeba jej nastavovat
+> Podman je předinstalován na Halo Box a není potřeba žádné nastavení
 <!-- @device:end -->
 
 <!-- @require:lemonade -->
@@ -83,7 +85,7 @@ lemonade --version
 
 ## Stažení a načtení doporučeného modelu
 
-Doporučeným modelem pro tuto příručku je **Qwen3.6-35B-A3B-GGUF** od Unsloth, výkonný model MoE s kontextovým oknem o velikosti 263 tisíc tokenů, který se dobře hodí pro agentní úlohy. Tento model používá kvantizaci UD-Q4_K_XL. Stáhněte jej nyní:
+Doporučeným modelem pro tento průvodce je **Qwen3.6-35B-A3B-GGUF** od Unsloth, výkonný model MoE s kontextovým oknem o velikosti 263 tisíc tokenů, který je vhodný pro pracovní zátěže agentů. Tento model používá kvantizaci UD-Q4_K_XL. Stáhněte jej nyní:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
@@ -91,6 +93,7 @@ lemonade pull Qwen3.6-35B-A3B-GGUF
 
 Poté jej načtěte s velkým kontextovým oknem a toto nastavení uložte pro budoucí spuštění:
 
+<!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
 ```bash
 lemonade unload
@@ -98,9 +101,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-Model má výchozí délku kontextu 262 144 tokenů. Pokud narazíte na chyby způsobené nedostatkem paměti (OOM), zvažte zmenšení kontextového okna.
+Model má výchozí délku kontextu 262 144 tokenů. Pokud narazíte na chyby nedostatku paměti (OOM), zvažte zmenšení kontextového okna.
 
-> **Tip: Vypněte přemýšlení pro rychlejší odpovědi agenta:** Qwen3.6-35B-A3B ve výchozím nastavení běží v režimu přemýšlení, což před každou odpovědí přidává latenci. U smyček agenta se tato režie rychle sčítá. Repozitář [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) poskytuje předpřipravenou konfiguraci, která přemýšlení vypíná. Chcete-li ji použít, stáhněte soubor a naimportujte jej:
+> **Tip: Vypněte přemýšlení pro rychlejší odpovědi agenta:** Qwen3.6-35B-A3B ve výchozím nastavení běží v režimu přemýšlení, což před každou odpovědí přidává latenci. U smyček agentů se tato režie rychle kumuluje. Repozitář [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) poskytuje hotovou konfiguraci, která přemýšlení vypíná. Chcete-li ji použít, stáhněte soubor a importujte jej:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -243,7 +246,7 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## Nastavení WSL
 
-Agenta Hermes spouštíme uvnitř WSL a připojujeme jej k Lemonade, který běží nativně na Windows. Tím získáte prostředí linuxového shellu pro Hermes, přičemž GPU akcelerace Lemonade zůstává na straně Windows.
+Hermes Agent spouštíme uvnitř WSL a připojujeme jej k Lemonade běžícímu nativně na Windows. Tím získáte prostředí shellu Linuxu pro Hermes a zároveň si zachováte hardwarovou akceleraci GPU pro Lemonade na straně Windows.
 
 ### Instalace WSL a Ubuntu
 
@@ -261,7 +264,7 @@ wsl --install -d Ubuntu-24.04
 
 ### Povolení systemd ve WSL
 
-Spusťte toto v terminálu Ubuntu:
+Spusťte toto uvnitř terminálu Ubuntu:
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -279,7 +282,7 @@ wsl
 
 ### Přemostění Lemonade z Windows do WSL
 
-WSL2 běží ve virtuální síti. Lemonade na Windows je navázán na `127.0.0.1`, což WSL nemůže přímo dosáhnout. Port proxy ve Windows přeposílá provoz z brány IP adresy WSL na Windows localhost.
+WSL2 běží ve virtuální síti. Lemonade na Windows se váže na `127.0.0.1`, ke kterému se WSL nemůže přímo dostat. Port proxy Windows přeposílá provoz z brány IP WSL na localhost systému Windows.
 
 **Zjistěte IP adresu brány WSL** (spusťte uvnitř WSL):
 
@@ -293,7 +296,7 @@ ip route show default | awk '{print $3}' | head -1
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Přidejte pravidlo brány firewall** (stejný zvýšený PowerShell):
+**Přidejte pravidlo brány firewall** (stejný PowerShell se zvýšenými oprávněními):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
@@ -324,7 +327,7 @@ Pokud jste v předchozím kroku již načetli model Qwen3.6-35B-A3B-GGUF, měli 
 }
 ```
 
-> Pravidlo `netsh portproxy` přežije restart, ale IP adresa brány WSL se může po příkazu `wsl --shutdown` změnit. Pokud se Lemonade po restartu z WSL stane nedostupným, zjistěte aktuální IP adresu brány a aktualizujte proxy touto novou IP adresou.
+> Pravidlo `netsh portproxy` přetrvá i po restartu, ale IP adresa brány WSL se může po `wsl --shutdown` změnit. Pokud se Lemonade po restartu stane z WSL nedostupným, zjistěte aktuální IP adresu brány a aktualizujte proxy touto novou IP adresou.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -380,17 +383,17 @@ finally {
 ---
 <!-- @os:end -->
 
-## Instalace agenta Hermes
+## Instalace Hermes Agent
 
 <!-- @os:windows -->
-> Příkazy v této části spouštějte ve svém **terminálu WSL**, pokud není uvedeno jinak.
+> Příkazy v této části spouštějte uvnitř svého **terminálu WSL**, pokud není uvedeno jinak.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-Příznak `--skip-setup` přeskočí interaktivního průvodce nastavením, takže backend modelu můžete nakonfigurovat ručně v dalším kroku.
+Příznak `--skip-setup` přeskočí interaktivního průvodce nastavením, abyste mohli backend modelu nakonfigurovat ručně v dalším kroku.
 
 Znovu načtěte svůj shell:
 
@@ -398,23 +401,23 @@ Znovu načtěte svůj shell:
 source ~/.bashrc
 ```
 
-Potvrďte instalaci:
+Ověřte instalaci:
 
 ```bash
 hermes --version
 ```
 
-Spusťte samodiagnostiku a zkontrolujte všechny závislosti:
+Spusťte automatickou diagnostiku pro kontrolu všech závislostí:
 
 ```bash
 hermes doctor
 ```
 
-> **Tip:** Pokud se po instalaci zobrazí `command not found`, přidejte Hermes do proměnné PATH:
+> **Tip:** Pokud se po instalaci zobrazí `command not found`, přidejte Hermes do své proměnné PATH:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> Aby toto nastavení bylo trvalé, přidejte výše uvedený řádek do souboru `~/.bashrc` nebo `~/.zshrc`.
+> Aby bylo toto nastavení trvalé, přidejte výše uvedený řádek do souboru `~/.bashrc` nebo `~/.zshrc`.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -468,12 +471,12 @@ finally {
 ---
 ## Konfigurace Hermes pro použití Lemonade
 
-Hermes ukládá konfiguraci modelu v `~/.hermes/config.yaml`. Můžete buď použít interaktivní výběr `hermes model`, nebo zapsat konfiguraci přímo.
+Hermes ukládá konfiguraci modelu do souboru `~/.hermes/config.yaml`. Můžete buď použít interaktivní výběr `hermes model`, nebo konfiguraci zapsat přímo.
 
 ### Možnost 1: Interaktivní výběr
 
 <!-- @os:windows -->
-> Následující příkaz spusťte ve **WSL terminálu**.
+> Následující příkaz spusťte uvnitř **WSL terminálu**.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -495,15 +498,15 @@ Po zobrazení výzvy:
 2. **API base URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL:** použijte IP adresu brány WSL: spusťte `ip route show default | awk '{print $3}' | head -1` uvnitř WSL, abyste ji získali, a poté zadejte `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL:** použijte IP adresu WSL gateway: spusťte uvnitř WSL `ip route show default | awk '{print $3}' | head -1`, čímž ji získáte, poté zadejte `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key:** `lemonade`
 4. **API compatibility mode:** `1` (Auto-detect)
 5. **Select model:** ze seznamu vyberte `Qwen3.6-35B-A3B-GGUF`
 6. **Context length in tokens:** `262144`
-7. **Display name:** `local-lemonade` (nebo libovolný název dle vaší volby)
+7. **Display name:** `local-lemonade` (nebo libovolný jiný název)
 
-`hermes model` uloží jak aktivní výběr modelu, tak pojmenovanou položku `custom_providers`, která uchovává délku kontextu spolu s endpointem. Výsledek v `~/.hermes/config.yaml` vypadá takto:
+`hermes model` uloží jak aktivní výběr modelu, tak pojmenovanou položku `custom_providers`, která spolu s endpointem ukládá i délku kontextu. Výsledek v souboru `~/.hermes/config.yaml` vypadá takto:
 
 ```yaml
 model:
@@ -521,7 +524,7 @@ custom_providers:
         context_length: 262144
 ```
 
-### Možnost 2: Zapsání konfigurace přímo
+### Možnost 2: Přímý zápis konfigurace
 
 <!-- @os:linux -->
 
@@ -583,7 +586,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-Ve WSL terminálu zjistěte IP adresu hostitelského systému Windows a zapište konfiguraci:
+Uvnitř WSL terminálu získejte IP adresu hostitele Windows a zapište konfiguraci:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -678,9 +681,9 @@ finally {
 
 ## (Doporučeno) Povolení sandboxingu pomocí Podman
 
-Hermes Agent dokáže směrovat veškeré operace agenta se shellem a soubory přes izolovaný kontejner místo jejich přímého spouštění na vašem hostiteli. Tím se dopad jakékoli nezamýšlené akce omezí pouze na sandbox, zatímco souborový systém a síť vašeho hostitele zůstanou nedotčeny.
+Agent Hermes může směrovat všechny operace se shellem a soubory přes izolovaný kontejner místo jejich přímého spouštění na hostitelském systému. Tím se dopad jakékoli neúmyslné akce omezí pouze na sandbox, zatímco souborový systém a síť vašeho hostitele zůstanou nedotčeny.
 
-Sestavte odlehčený sandboxový image:
+Vytvořte lehký sandboxový image:
 
 <!-- @os:linux -->
 ```bash
@@ -723,13 +726,13 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Přejděte do WSL terminálu:
+Vstupte do svého WSL terminálu:
 
 ```powershell
 wsl -d Ubuntu-24.04
 ```
 
-Poté sestavte odlehčený sandboxový image:
+Poté vytvořte lehký sandboxový image:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -792,7 +795,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Poté nakonfigurujte Hermes tak, aby jako kontejnerový runtime používal Podman, a nastavte backend terminálu:
+Poté nakonfigurujte Hermes, aby jako kontejnerový runtime používal Podman, a nastavte backend terminálu:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -804,8 +807,8 @@ terminal:
 EOF
 ```
 
-> Hodnota `terminal.backend` zůstává `docker`.
-> `HERMES_DOCKER_BINARY` je to, co říká Hermes, aby jako runtime použil místo toho Podman.
+> `terminal.backend` zůstává `docker`.
+> `HERMES_DOCKER_BINARY` je to, co Hermes informuje, aby jako runtime použil místo toho Podman.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -902,24 +905,24 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Hermes nyní spustí trvalý sandboxový kontejner a bude přes něj směrovat veškerá volání nástrojů `terminal` a souborových nástrojů. Kontejner sdílí životní cyklus procesu Hermes, je opakovaně používán pro všechna volání nástrojů a je zničen při ukončení Hermes.
+Hermes nyní spustí trvalý sandboxový kontejner a bude přes něj směrovat všechna volání nástrojů `terminal` a nástrojů pro práci se soubory. Kontejner sdílí životní cyklus s procesem Hermes, je znovu používán pro všechna volání nástrojů a je zničen při ukončení Hermes.
 
-> **Ověření funkčnosti sandboxu:** Spusťte Hermes (`hermes`) a požádejte ho, aby spustil `run hostname` – měli byste vidět krátké ID kontejneru namísto hostname vašeho počítače. Můžete jej také požádat o spuštění `rm -rf <path-to-a-dummy-file/folder>`: Hermes potvrdí smazání, ale složka zůstane na vašem hostiteli zachována. Příkaz byl spuštěn uvnitř izolovaného `$HOME` kontejneru, nikoli vašeho.
+> **Ověření funkčnosti sandboxu:** Spusťte Hermes (`hermes`) a požádejte ho, aby spustil `run hostname` – měli byste vidět krátké ID kontejneru místo hostname vašeho počítače. Můžete ho také požádat o `rm -rf <path-to-a-dummy-file/folder>`: Hermes smazání potvrdí, ale složka zůstane na vašem hostiteli nedotčena. Příkaz se totiž spustil uvnitř izolovaného `$HOME` kontejneru, nikoliv vašeho.
 
-> **Potřebujete silnější izolaci?** Hermes také poskytuje oficiální Docker image (`nousresearch/hermes-agent`), který spouští celý proces agenta uvnitř kontejneru – gateway, nástroje a vše ostatní. Podrobnosti o nastavení najdete v [dokumentaci Hermes Docker](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
+> **Potřebujete silnější izolaci?** Hermes také poskytuje oficiální Docker image (`nousresearch/hermes-agent`), který spouští celý proces agenta uvnitř kontejneru – bránu, nástroje, vše. Podrobnosti o nastavení najdete v [dokumentaci Hermes Docker](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
 
 ---
 
 <!-- @os:linux -->
 ## (Doporučeno) Integrace Hermes se službami Firecrawl
 
-Hermes umí procházet a extrahovat obsah z webových stránek pomocí svých vestavěných webových nástrojů. Mnoho moderních webových stránek však používá systémy pro detekci botů, které blokují jednoduché HTTP požadavky a místo skutečného obsahu vrací výzvy k ověření (challenge stránky). V důsledku toho nemusí být Hermes schopen z těchto stránek spolehlivě extrahovat informace.
+Hermes dokáže procházet weby a extrahovat z nich obsah pomocí svých vestavěných webových nástrojů. Mnoho moderních webů však používá systémy detekce robotů, které blokují jednoduché HTTP požadavky a místo skutečného obsahu vrací výzvy typu „challenge“. V důsledku toho nemusí být Hermes schopen z těchto stránek spolehlivě extrahovat informace.
 
-Aby bylo možné toto omezení překonat, poskytuje [Firecrawl](https://docs.firecrawl.dev/introduction) samostatně hostovanou službu pro procházení webu a extrakci obsahu, která dokáže tyto výzvy obejít a odemknout plný potenciál automatizace pomocí Hermes.
+Aby bylo možné toto omezení překonat, poskytuje [Firecrawl](https://docs.firecrawl.dev/introduction) samostatně hostovanou službu pro procházení webu a extrakci obsahu, která tyto výzvy dokáže obejít a odemknout plný potenciál automatizace v Hermes.
 
-V tomto nastavení běží Firecrawl jako sada Docker kontejnerů spravovaných pomocí Podman. Pro zjednodušení správy životního cyklu a automatického spouštění registrujeme Firecrawl jako uživatelskou službu `systemd`, která orchestruje podkladový zásobník Podman Compose. To umožňuje Hermes spouštět, zastavovat a ověřovat službu Firecrawl pomocí standardních příkazů `systemctl --user` namísto přímé interakce s kontejnery.
+V tomto nastavení běží Firecrawl jako sada Docker kontejnerů spravovaných pomocí Podman. Abychom zjednodušili správu životního cyklu a automatické spouštění, registrujeme Firecrawl jako uživatelskou `systemd` službu, která orchestruje podkladový zásobník Podman Compose. Díky tomu může Hermes spouštět, zastavovat a ověřovat službu Firecrawl pomocí standardních příkazů `systemctl --user` namísto přímé interakce s kontejnery.
 
-Pro jednoduchost jsme celý proces rozdělili do čtyř kroků:
+Aby vše zůstalo přehledné, rozdělili jsme celý postup do čtyř kroků:
 
 ---
 
@@ -957,7 +960,7 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-V tuto chvíli je služba definována, ale ještě není zaregistrována v `systemd`.
+V tuto chvíli je služba definována, ale ještě není registrována v `systemd`.
 Ujistěte se, že název souboru přesně odpovídá tomu, který jste vytvořili výše, a poté spusťte:
 ```bash
 systemctl --user daemon-reload
@@ -971,7 +974,7 @@ Pokud vše proběhne úspěšně, měli byste vidět následující výstup:
 
 ### 2. Konfigurace Firecrawl pro vaši službu
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) je ideální pro ty, kteří potřebují mít plnou kontrolu nad svým prostředím pro scraping a zpracování dat, což však přináší kompromis v podobě dodatečné údržby a konfigurace.
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) je ideální pro ty, kteří potřebují plnou kontrolu nad svým prostředím pro scraping a zpracování dat, ovšem za cenu dodatečných nároků na údržbu a konfiguraci.
 
 Začněte naklonováním repozitáře:
 ```bash
@@ -1005,39 +1008,39 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> Nastavte `BULL_AUTH_KEY` na silné tajemství, zejména u jakéhokoli nasazení dostupného z nedůvěryhodných sítí.
+> Nastavte `BULL_AUTH_KEY` na silný tajný klíč, zejména při nasazení dostupném z nedůvěryhodných sítí.
 ### 3. Nasazení Hermes přes Compose
 
-Než budete pokračovat, ujistěte se, že jste stáhli nejnovější Docker image pro Hermes:
+Než budete pokračovat, ujistěte se, že jste stáhli nejnovější Docker image Hermes:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Jakmile to bude hotovo, stáhněte si Compose soubor pro Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) a umístěte ho do kořenového adresáře `/firecrawl`:
+Jakmile to bude hotové, stáhněte soubor Compose pro Hermes [hermes-compose.yaml](assets/hermes-compose.yaml) a umístěte jej do kořenového adresáře `/firecrawl`:
 
-> Tato konvence je nutná, aby `systemd` mohl najít a spustit službu správně podle specifikace `WorkingDirectory=${HOME}/firecrawl`.
+> Tato konvence je nutná, aby `systemd` mohl službu najít a spustit správně podle nastavení `WorkingDirectory=${HOME}/firecrawl`.
 
-> Zásobník můžete kdykoli rozšířit přidáním dalších Firecrawl služeb podle potřeby. Úplný seznam dostupných služeb najdete v oficiálním souboru [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
+> Zásobník můžete kdykoli rozšířit přidáním dalších služeb Firecrawl podle potřeby. Úplný seznam dostupných služeb naleznete v oficiálním souboru [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml).
 
-### 4. Spuštění služby Hermes prostřednictvím Firecrawl 
+### 4. Spuštění služby Hermes přes Firecrawl 
 
-Než předáte kontrolu nástroji `systemd`, ověřte, že vše funguje správně, a to spuštěním zásobníku ručně:
+Než předáte kontrolu nástroji `systemd`, ověřte, že vše funguje správně, spuštěním zásobníku ručně:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Pokud je vše správně nakonfigurováno, měli byste vidět, že se kontejner Hermes spustí, a výstup příkazové řádky by měl vypadat podobně takto:
+Pokud je vše správně nakonfigurováno, měli byste vidět, jak kontejner Hermes naběhne, a výstup příkazové řádky by měl vypadat podobně takto:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Jakmile vše ověříte, před pokračováním zásobník opět ukončete:
+Jakmile ověříte, že vše funguje, před pokračováním zásobník opět vypněte:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-Nyní, když je vše ověřeno, spusťte službu prostřednictvím `systemd`:
+Nyní, když je vše ověřeno, spusťte službu přes `systemd`:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Rozhraní API Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) je přístupné zevnitř interaktivního kontejneru a webový dashboard je dostupný na stejném hostiteli a portu na adrese http://127.0.0.1:9119.
+[API Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) je dostupné z interaktivního kontejneru a webový panel je dostupný na stejném hostiteli a portu na adrese http://127.0.0.1:9119.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1051,7 +1054,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-Spusťte interaktivní relaci CLI přímo: 
+Spusťte interaktivní CLI relaci přímo: 
 
 ```bash
 hermes
@@ -1208,15 +1211,15 @@ finally {
 
 **Gratulujeme, sestavili jste plně lokální zásobník AI agenta.**
 
-### Webový dashboard
+### Webový panel
 
-Hermes obsahuje uživatelské rozhraní založené na prohlížeči pro správu konfigurace, klíčů API, modelů, relací, paměti a naplánovaných úloh (cron jobs). Otevřete druhý terminál, zatímco běží brána nebo CLI, a spusťte ho pomocí:
+Hermes obsahuje webové rozhraní pro správu konfigurace, API klíčů, modelů, relací, paměti a naplánovaných úloh. Otevřete druhý terminál, zatímco brána nebo CLI běží, a spusťte jej pomocí:
 
 ```bash
 hermes dashboard
 ```
 
-Tím se spustí lokální server a v prohlížeči se otevře `http://127.0.0.1:9119`. Úplný přehled funkcí najdete v [dokumentaci k dashboardu](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard).
+Tím se spustí lokální server a v prohlížeči se otevře adresa `http://127.0.0.1:9119`. Úplný přehled funkcí naleznete v [dokumentaci k panelu](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard).
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1225,37 +1228,37 @@ Tím se spustí lokální server a v prohlížeči se otevře `http://127.0.0.1:
 
 ## Volitelné: Připojení komunikačního kanálu
 
-Jakmile brána běží, můžete se ke svému lokálnímu agentovi dostat z jakéhokoli zařízení. Hermes podporuje [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) a další
+Jakmile brána běží, můžete se ke svému lokálnímu agentovi připojit z jakéhokoli zařízení. Hermes podporuje [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) a další
 
 ---
 
 ### Discord
 
-Discord vyžaduje server, na kterém **máte přístup správce**, abyste mohli přidat bota. Pokud sdílíte servery, ale žádný nevlastníte, použijte místo toho Telegram.
+Discord vyžaduje server, na kterém **máte administrátorský přístup** pro přidání bota. Pokud sdílíte servery, ale žádný nevlastníte, použijte místo toho Telegram.
 
 #### Vytvoření aplikace a bota v Discordu
 
-1. Přejděte na [Discord Developer Portal](https://discord.com/developers/applications) a klikněte na **New Application**. Zadejte název (např. „hermes-bot").
+1. Přejděte na [Discord Developer Portal](https://discord.com/developers/applications) a klikněte na **New Application**. Zadejte název (např. „hermes-bot“).
 2. V postranním panelu klikněte na **Bot**. Nastavte uživatelské jméno bota.
 3. Na stránce Bot přejděte dolů na **Privileged Gateway Intents** a povolte:
    - **Message Content Intent** (vyžadováno)
    - **Server Members Intent** (doporučeno)
-4. Přejděte zpět nahoru a klikněte na **Reset Token**, čímž vygenerujete token svého bota. Zkopírujte ho.
+4. Přejděte zpět nahoru a klikněte na **Reset Token** pro vygenerování tokenu bota. Zkopírujte ho.
 
-#### Přidání bota na váš server
+#### Přidání bota na server
 
 1. V postranním panelu klikněte na **OAuth2 / URL Generator**.
-2. V části **Scopes** povolte `bot` a `applications.commands`.
-3. V části **Bot Permissions** povolte: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
-4. Zkopírujte vygenerovanou adresu URL, vložte ji do prohlížeče, vyberte svůj server a potvrďte.
+2. V sekci **Scopes** povolte `bot` a `applications.commands`.
+3. V sekci **Bot Permissions** povolte: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
+4. Zkopírujte vygenerovanou URL adresu, vložte ji do prohlížeče, vyberte svůj server a potvrďte.
 
 #### Získání ID a povolení soukromých zpráv
 
-Povolte v Discordu Developer Mode (**User Settings / Advanced / Developer Mode**), poté:
-- Klikněte pravým tlačítkem na ikonu svého serveru: **Copy Server ID**
-- Klikněte pravým tlačítkem na svůj vlastní avatar: **Copy User ID**
+Povolte v Discordu vývojářský režim (**User Settings / Advanced / Developer Mode**), poté:
+- Klikněte pravým tlačítkem na ikonu vašeho serveru: **Copy Server ID**
+- Klikněte pravým tlačítkem na svůj avatar: **Copy User ID**
 
-Klikněte pravým tlačítkem na ikonu svého serveru / **Privacy Settings** / zapněte **Direct Messages**. To je nutné pro krok párování.
+Klikněte pravým tlačítkem na ikonu serveru / **Privacy Settings** / zapněte **Direct Messages**. To je nutné pro krok párování.
 
 #### Konfigurace Hermes pro Discord
 
@@ -1273,7 +1276,7 @@ Poté spusťte bránu:
 hermes gateway
 ```
 
-Bot by se měl v Discordu objevit online během několika sekund. Pošlete mu zprávu, buď formou přímé zprávy (DM), nebo v kanálu, který vidí.
+Bot by se měl v Discordu online objevit během několika sekund. Pošlete mu zprávu, ať už jako DM, nebo v kanálu, který vidí.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1286,7 +1289,7 @@ Bot by se měl v Discordu objevit online během několika sekund. Pošlete mu zp
 
 #### Vytvoření bota v Telegramu
 
-1. Otevřete Telegram a napište zprávu uživateli **@BotFather**.
+1. Otevřete Telegram a napište zprávu **@BotFather**.
 2. Odešlete `/newbot` a postupujte podle pokynů. Uložte si token bota, který obdržíte.
 
 #### Konfigurace Hermes pro Telegram
@@ -1298,7 +1301,7 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Neznáte své ID uživatele v Telegramu?** Napište zprávu uživateli [@userinfobot](https://t.me/userinfobot) v Telegramu, odpoví vám vaším číselným ID.
+> **Neznáte své ID uživatele Telegramu?** Napište zprávu botovi [@userinfobot](https://t.me/userinfobot) v Telegramu, odpoví vaším číselným ID.
 
 Poté spusťte bránu:
 
@@ -1306,7 +1309,7 @@ Poté spusťte bránu:
 hermes gateway
 ```
 
-Pro otestování pošlete svému botovi jakoukoli zprávu v Telegramu. Nyní můžete se svým agentem komunikovat prostřednictvím přímých zpráv v Telegramu. Úplný návod k nastavení najdete v [kompletním průvodci nastavením Telegramu](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) pro režim webhooků a pokročilé možnosti.
+Pro otestování pošlete svému botovi jakoukoli zprávu v Telegramu. Nyní si můžete se svým agentem povídat prostřednictvím soukromé zprávy v Telegramu. Podrobnosti o režimu webhook a pokročilých možnostech najdete v [úplném průvodci nastavením Telegramu](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram).
 
 ---
 
@@ -1314,8 +1317,8 @@ Pro otestování pošlete svému botovi jakoukoli zprávu v Telegramu. Nyní mů
 
 Nyní, když váš agent dokáže přijímat příkazy z vašeho telefonu a jednat na vašem lokálním počítači, zde jsou tři směry, které stojí za prozkoumání:
 
-1. **Automatický výzkumný přehled**: Naplánujte, aby Hermes každé ráno prohledával web na téma, které vás zajímá, shrnul zjištění pomocí vašeho lokálního modelu a odeslal přehled do vašeho telefonu přes Telegram nebo Discord, to vše běží na vašem vlastním hardwaru bez nákladů na cloud.
+1. **Automatizovaný výzkumný souhrn**: Naplánujte, aby Hermes každé ráno prohledával web na témata, která vás zajímají, shrnul zjištění pomocí vašeho lokálního modelu a odeslal souhrn do vašeho telefonu přes Telegram nebo Discord, to vše běžící na vašem vlastním hardwaru bez nákladů na cloud.
 
-2. **Kontrola kódu na vyžádání**: Nasměrujte Hermes na repozitář GitHub, požádejte ho, aby zkontroloval otevřené pull requesty, a nechte ho publikovat komentáře nebo shrnutí zpět do vašeho chatu. Díky backendu terminálu Docker probíhají všechny operace git uvnitř sandboxu, takže váš hostitel zůstane čistý.
+2. **Kontrola kódu na vyžádání**: Nasměrujte Hermes na repozitář GitHub, požádejte jej o kontrolu otevřených pull requestů a nechte jej odeslat komentáře nebo souhrn zpět do vašeho chatu. Díky backendu terminálu v Dockeru probíhají všechny operace s gitem uvnitř sandboxu, takže hostitelský systém zůstává čistý.
 
-3. **Asistent pro lokální soubory**: Poskytněte Hermes přístup k pracovnímu adresáři a požádejte ho, aby na vyžádání z vašeho telefonu organizoval, přejmenovával, shrnoval nebo transformoval soubory. Protože backend terminálu Docker omezuje všechny zápisy na pracovní prostor sandboxu, náhodné destruktivní operace jsou tak izolovány.
+3. **Lokální souborový asistent**: Poskytněte Hermes přístup k pracovnímu adresáři a požádejte jej, aby na vyžádání z vašeho telefonu organizoval, přejmenovával, shrnoval nebo transformoval soubory. Protože backend terminálu v Dockeru omezuje všechny zápisy na pracovní prostor sandboxu, jsou náhodné destruktivní operace omezeny.

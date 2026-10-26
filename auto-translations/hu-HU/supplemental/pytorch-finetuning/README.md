@@ -16,42 +16,42 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Ez az útmutató lépésről lépésre bemutatja egy nagy nyelvi modell (LLM) finomhangolását PyTorch és ROCm használatával. Számos technikát ismertet, a hagyományos finomhangolástól kezdve a memóriahatékony, paraméterhatékony finomhangolási (PEFT) stratégiákig, hogy könnyedén hozzáigazíthassa a modelleket saját igényeihez.
+Ez az útmutató lépésről lépésre bemutat példákat egy nagy nyelvi modell (LLM) finomhangolására PyTorch és ROCm segítségével. Számos technikát ismertet, a szabványos finomhangolástól kezdve a memóriahatékony Parameter-Efficient Fine-Tuning (PEFT) stratégiákig, így könnyedén adaptálhatja a modelleket az igényeinek megfelelően.
 
-**Használt modell**: google/gemma-3-4b-it  *(lásd: [HF hitelesítés engedélyezése](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), ha zárolt modellről van szó)*  
-**Hardver**: AMD Radeon™ GPU ROCm-támogatással  
+**Használt modell**: google/gemma-3-4b-it  *(lásd: [HF hitelesítés engedélyezése](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models), ha zárolt)*  
+**Hardver**: AMD Radeon™ GPU ROCm támogatással  
 **Keretrendszer**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
 <!-- @device:halo,halo_box -->
 > **Megjegyzés:** 
-> - A teljes finomhangoláshoz legalább **64 GB rendszer-RAM** szükséges, amelyből legalább **32 GB álljon rendelkezésre a GPU számára** (a 32 GB a 64 GB részét képezi, nem pedig azon felül szükséges).
-> - Más modellarchitektúrákat is kipróbálhat, beleértve a **GPT-OSS-20B**-t is, ha a mellékelt tanítási szkriptekben lecseréli a modellt.
+> - A teljes finomhangolás legalább **64 GB rendszermemóriát (RAM)** igényel, ebből legalább **32 GB-nak elérhetőnek kell lennie a GPU számára** (a 32 GB a 64 GB része, nem pedig azon felül szükséges).
+> - Más modellarchitektúrákat is kipróbálhat, például a **GPT-OSS-20B**-t, ha a modellt lecseréli a mellékelt betanítási szkriptekben.
 <!-- @device:end -->
 
 
 <!-- @device:stx,krk -->
 <!-- @os:linux -->
-> **Megjegyzés:** A LoRA és QLoRA finomhangoláshoz legalább **32 GB rendszer-RAM** szükséges, amelyből legalább **16 GB álljon rendelkezésre a GPU számára** (a 16 GB a 32 GB részét képezi, nem pedig azon felül szükséges).
+> **Megjegyzés:** A LoRA és a QLoRA finomhangolás legalább **32 GB rendszermemóriát (RAM)** igényel, ebből legalább **16 GB-nak elérhetőnek kell lennie a GPU számára** (a 16 GB a 32 GB része, nem pedig azon felül szükséges).
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés:** A LoRA finomhangoláshoz legalább **32 GB rendszer-RAM** szükséges, amelyből legalább **16 GB álljon rendelkezésre a GPU számára** (a 16 GB a 32 GB részét képezi, nem pedig azon felül szükséges).
+> **Megjegyzés:** A LoRA finomhangolás legalább **32 GB rendszermemóriát (RAM)** igényel, ebből legalább **16 GB-nak elérhetőnek kell lennie a GPU számára** (a 16 GB a 32 GB része, nem pedig azon felül szükséges).
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Megjegyzés:** A LoRA és QLoRA finomhangoláshoz legalább **16 GB dedikált GPU-memóriával** rendelkező videokártya és **32 GB rendszer-RAM** szükséges.
-> - Linux alatt a tanítás teljes egészében a videokártya dedikált VRAM-jában fut.
-> - Nem tér vissza a megosztott GPU-memóriára (rendszer-RAM), ha a VRAM elfogy.
-> - A 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák Linux alatt kifogynak a memóriából a tanítás során, még akkor is, ha a rendszerben bőven van RAM.
+> **Megjegyzés:** A LoRA és a QLoRA finomhangolás legalább **16 GB dedikált GPU-memóriával** rendelkező grafikus kártyát és **32 GB rendszermemóriát (RAM)** igényel.
+> - Linux rendszeren a betanítás teljes egészében a grafikus kártya dedikált VRAM-jában fut.
+> - Nem tér vissza megosztott GPU-memóriára (rendszer RAM-ra), ha a VRAM elfogy.
+> - A 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák Linux rendszeren a betanítás közben kifogynak a memóriából, még akkor is, ha a rendszerben bőven van RAM.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés:** A LoRA finomhangoláshoz legalább **16 GB teljes GPU-memória** és **32 GB rendszer-RAM** szükséges.
-> - Windows alatt a teljes GPU-memória a videokártya dedikált VRAM-ját és a megosztott GPU-memóriát (amelyet a rendszer-RAM-ból kölcsönöz) kombinálja.
-> - Ezért a 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is képesek futtatni ezt a playbookot, mivel a különbséget megosztott GPU-memóriával pótolják.
+> **Megjegyzés:** A LoRA finomhangolás legalább **16 GB teljes GPU-memóriát** és **32 GB rendszermemóriát (RAM)** igényel.
+> - Windows rendszeren a teljes GPU-memória a grafikus kártya dedikált VRAM-ját és a megosztott GPU-memóriát (a rendszer RAM-jából kölcsönzött memóriát) kombinálja.
+> - Ezért a 16 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is képesek futtatni ezt a lépésenkénti útmutatót a megosztott GPU-memória felhasználásával a különbség pótlására.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -59,26 +59,28 @@ Ez az útmutató lépésről lépésre bemutatja egy nagy nyelvi modell (LLM) fi
 
 - Hogyan finomhangoljon egy LLM-et LoRA, QLoRA és teljes finomhangolás segítségével PyTorch és ROCm használatával
 - Hogyan mentse el és telepítse a finomhangolt modellt
-- Hogyan kövesse nyomon a tanítást és hárítsa el a gyakori problémákat
+- Hogyan kövesse figyelemmel a betanítást, és hogyan hárítson el gyakori problémákat
 
-## A Memóriakonfiguráció Beállítása
+<!-- @device:halo_box,halo,stx,krk -->
+## A memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Szoftverfrissítések Ellenőrzése
+## Szoftverfrissítések ellenőrzése
 > **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheti a Ryzen AI Developer Center segítségével.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Szoftveres Előfeltételek Telepítése
+## Szoftver-előfeltételek telepítése
 
-#### Virtuális Környezet Létrehozása
+#### Virtuális környezet létrehozása
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update 
 sudo apt install -y python3-venv 
@@ -90,13 +92,13 @@ source finetune-venv/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (a hatás érvényesítéséhez jelentkezzen ki, majd be):
+**Adjon hozzáférést a felhasználójának a GPU-eszközökhöz** (a változás érvénybe lépéséhez jelentkezzen ki, majd be újra):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -110,7 +112,7 @@ source finetune-venv/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv --system-site-packages
 finetune-venv\Scripts\activate
@@ -120,7 +122,7 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
 finetune-venv\Scripts\activate
@@ -130,34 +132,34 @@ finetune-venv\Scripts\activate
 <!-- @device:end -->
 <!-- @os:end -->
 
-#### Alapvető Függőségek Telepítése
+#### Alapvető függőségek telepítése
 <!-- @require:pytorch -->
 
-#### További Függőségek
+#### További függőségek
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandbytes "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-**Windows:** Itt csak az alapcsomagokat teszteltük és támogatjuk. **A bitsandbytes nem támogatott megfelelően Windows alatt**, ezért a Windows-telepítés kihagyja azt; Windows alatt használjon LoRA-t vagy teljes finomhangolást (a QLoRA-hoz bitsandbytes szükséges, és Linuxra van szánva).
+**Windows:** Itt kizárólag a fő csomagok vannak tesztelve és támogatva. **A bitsandbytes nem támogatott jól Windows alatt**, ezért a Windows-os telepítés kihagyja azt; Windows rendszeren használjon LoRA-t vagy teljes finomhangolást (a QLoRA-hoz szükséges a bitsandbytes, és Linuxra szánták).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### HF hitelesítés engedélyezése (zárolt vagy egyéni / nem előre telepített modellek)
+#### HF hitelesítés engedélyezése (zárolt vagy egyéni / előre nem telepített modellek)
 
-Ebben a példában a **google/gemma-3-4b-it** modellt használjuk, amely egy **zárolt** modell. El kell fogadnia a modell feltételeit a Hugging Face-en, majd hitelesítenie kell magát, hogy a tanítási szkriptek le tudják tölteni.
+Ebben a példában a **google/gemma-3-4b-it** modellt használjuk, amely **zárolt (gated)** modell. Az itt elérhető modell feltételeit el kell fogadnia a Hugging Face-en, majd hitelesítenie kell magát, hogy a betanítási szkriptek le tudják tölteni.
 
-1. **Fogadja el a licencet:** Nyissa meg a [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) oldalt, jelentkezzen be (vagy hozzon létre egy fiókot), majd fogadja el a licencet/feltételeket a modell oldalán (pl. „Agree and access repository”).
-2. **Telepítés és bejelentkezés:** Telepítse a Hugging Face CLI-t, majd futtassa a szokásos bejelentkezést:
+1. **Fogadja el a licencet:** Nyissa meg a [https://huggingface.co/google/gemma-3-4b-it](https://huggingface.co/google/gemma-3-4b-it) oldalt, jelentkezzen be (vagy hozzon létre fiókot), majd fogadja el a licencet/feltételeket a modell oldalán (pl. „Agree and access repository”).
+2. **Telepítés és bejelentkezés:** Telepítse a Hugging Face parancssori felületét, majd futtassa a szokásos bejelentkezést:
 
 ```bash
 pip install huggingface_hub
@@ -261,13 +263,13 @@ sys.exit(r.returncode)
 <!-- @device:end -->
 ---
 
-## A Technikák Megismerése
+## A technikák megértése
 
 ### Mi az a LoRA?
 
 A **LoRA (Low-Rank Adaptation)** befagyasztva tartja az alapmodellt, és csak kis „adapter” mátrixokat tanít, amelyeket bizonyos rétegekhez adnak hozzá. 
 
-- **A kulcsötlet**: ahelyett, hogy egy hatalmas, több millió paraméterből álló súlymátrixot frissítenénk, egy alacsony rangú frissítést tanulunk meg (két kis mátrix, amelyek szorzata sokkal kevesebb paraméterből áll). Ez jelentős csökkenést eredményez a tanítható paraméterek számában és a VRAM-felhasználásban, miközben megőrzi a teljes finomhangolás minőségének nagy részét.
+- **A kulcsgondolat**: ahelyett, hogy egy hatalmas, több millió paraméterből álló súlymátrixot frissítenénk, egy alacsony rangú frissítést tanulunk meg (két kis mátrix, amelyek szorzata sokkal kevesebb paraméterből áll). Ez jelentősen csökkenti a tanítható paraméterek számát és a VRAM-igényt, miközben megőrzi a teljes finomhangolás minőségének nagy részét.
 
 ```python
 # Instead of updating full weight matrix W (16M params):
@@ -282,7 +284,7 @@ W_updated = W + B × A
 
 ### Mi az a QLoRA?
 
-A **QLoRA** a **4-bites kvantálást** ötvözi a **LoRA**-val. Az alapmodell 4-bites formában töltődik be (jelentős memóriamegtakarítás), és csak a LoRA-adapterek tanulnak nagyobb pontossággal. Így megkapja a LoRA paraméterhatékonyságát, valamint jóval alacsonyabb VRAM-igényt, kis minőségromlás árán a teljes pontosságú LoRA-hoz képest. Vegye figyelembe, hogy a 4-bites kvantálás numerikus instabilitásokat (veszteségkiugrásokat vagy NaN-okat) okozhat, ezért a felhasználók gyakran a **LoRA**-t preferálhatják, ha elegendő VRAM áll rendelkezésre.
+A **QLoRA** a **4 bites kvantálást** ötvözi a **LoRA**-val. Az alapmodell 4 bites formában töltődik be (jelentős memóriamegtakarítás), és csak a LoRA adapterek kerülnek betanításra magasabb pontossággal. Így megkapja a LoRA paraméterhatékonyságát, emellett sokkal alacsonyabb VRAM-igényt, kis minőségi kompromisszum árán a teljes pontosságú LoRA-hoz képest. Vegye figyelembe, hogy a 4 bites kvantálás numerikus instabilitást okozhat (veszteségcsúcsok vagy NaN-értékek), ezért a felhasználók gyakran inkább a **LoRA**-t preferálhatják, ha elegendő VRAM áll rendelkezésre.
 
 ```python
 Base Model (4-bit):  10GB  ← Frozen, quantized
@@ -290,46 +292,46 @@ LoRA Adapters (BF16): 2GB  ← Trainable, full precision
 Total: 12GB (vs 40GB full precision)
 ```
 
-> **Megjegyzés**: Az olyan MXFP4 alapmodellekhez, mint az `openai/gpt-oss-20b`, a **LoRA** (`train_lora.py`) használatát javasoljuk a QLoRA helyett. A QLoRA szkript `bitsandbytes` 4-bites útvonala jellemzően BF16-ra dekvantálja az MXFP4 súlyokat, így a futtatás úgy viselkedik, mint egy standard LoRA. A natív MXFP4-hez forrásból épített `bitsandbytes`-ra, valamint egy hozzá illeszkedő Transformers/Triton/kernels rendszerre van szükség. Lásd a [Transformers MXFP4 dokumentációját](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
+> **Megjegyzés**: Az olyan MXFP4 alapmodellekhez, mint az `openai/gpt-oss-20b`, a QLoRA helyett a **LoRA** (`train_lora.py`) használatát javasoljuk. A QLoRA szkript `bitsandbytes` 4 bites útvonala jellemzően BF16 formátumra dekvantálja az MXFP4 súlyokat, így a futtatás a szabványos LoRA-hoz hasonlóan viselkedik. A natív MXFP4-hez forrásból épített `bitsandbytes`-ra, valamint egy megfelelő Transformers/Triton/kernels-készletre van szükség. Lásd a [Transformers MXFP4 dokumentációt](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4).
 
 ---
-### 2. Válassza ki a módszert
+### 2. Válassza ki a módszerét
 
-| Módszer | Memória | Sebesség | Minőség | Legjobban ajánlott |
+| Módszer | Memória | Sebesség | Minőség | Legjobb választás |
 |--------|--------|-------|---------|----------|
-| **QLoRA** (csak Linuxon) | 12-16GB | Leggyorsabb | 90-95% | Alacsony memóriahasználat |
+| **QLoRA** (csak Linux) | 12-16GB | Leggyorsabb | 90-95% | Alacsony memóriahasználat |
 | **LoRA** | 24-32GB | Gyors | 95-98% | Kiegyensúlyozott megközelítés |
 | **Full** | 80GB+ | Leglassabb | 100% | Maximális minőség |
 
-### 3. Tanítás futtatása
+### 3. Futtassa a tanítást
 
-**Adathalmaz és amit a modell megtanul**  
-A szkriptek chat-példákká alakítják az adathalmazt. Például a QLoRA szkript az **Abirate/english_quotes** adathalmazt használja: minden példa egy felhasználó–asszisztens párrá alakul, például:
+**Az adathalmaz és amit a modell megtanul**  
+A szkriptek az adathalmazt csevegési példákká alakítják. Például a QLoRA szkript az **Abirate/english_quotes** adathalmazt használja: minden példa egy felhasználó–asszisztens párrá válik, például:
 
 - **Felhasználó:** „Adj egy idézetet erről: &lt;tag&gt;”
 - **Asszisztens:** „&lt;idézet&gt; – &lt;szerző&gt;”
 
-A finomhangolás megtanítja a modellt arra, hogy válaszoljon az adott témával kapcsolatos idézetet kérő promptokra, és `<idézet szövege> - <szerző>` formátumban adja vissza őket. A LoRA és a teljes finomhangolási szkriptek a **databricks/databricks-dolly-15k** adathalmazt használják (általános utasítás/válasz párok), így a pontos feladat szkriptenként eltérő; az alapelv azonban ugyanaz - a modell adaptálása a kiválasztott adathalmazhoz és formátumhoz.
+A finomhangolás megtanítja a modellt arra, hogy válaszoljon egy témára vonatkozó idézetet kérő promptokra, és az idézetet a `<idézet szövege> - <szerző>` formátumban adja vissza. A LoRA és a teljes finomhangolási szkriptek a **databricks/databricks-dolly-15k** adathalmazt használják (általános instrukció/válasz párok), így a pontos feladat szkriptenként eltér; az elgondolás azonban ugyanaz - a modell adaptálása a választott adathalmazhoz és formátumhoz.
 
-Az alábbiakban a rendelkezésre álló tanítási módszerek összefoglalása látható. Minden módszer a saját szkriptjéhez kapcsolódik, és rövid leírást ad a megfelelő megközelítés kiválasztásához.
+Az alábbiakban összefoglaljuk az elérhető tanítási módszereket. Minden módszer hivatkozik a saját szkriptjére, és rövid leírást tartalmaz a megfelelő megközelítés kiválasztásához.
 
-| Szkript                           | Módszer            | Leírás                                                                                                         | Jellemző VRAM | Ajánlott                                 |
+| Szkript                           | Módszer            | Leírás                                                                                                         | Tipikus VRAM | Ajánlott ehhez                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
-| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Kis adaptermátrixokat tanít, miközben az alapmodellt lefagyasztja. 3–5x gyorsabb; ~95–98%-os teljes minőség.                         | 24–32GB      | Haladó felhasználók; több adapter; több VRAM esetén    |
-| [`train_qlora.py`](assets/train_qlora.py)  *(csak Linuxon)*             | **QLoRA**       | 4 bites kvantálás + LoRA adapterek. Legalacsonyabb memóriahasználat, leggyorsabb, kismértékű minőségromlás mellett. `bitsandbytes` szükséges (csak Linuxon).                            | 12–16GB      | Legtöbb felhasználó számára; gyors kísérletekhez; korlátozott VRAM esetén      |
-| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Teljes finomhangolás** | Az összes modellparamétert frissíti. Maximális minőség; a legnagyobb memória- és számítási igény.                                    | 40GB+        | Maximális minőség; kutatás; nagy VRAM esetén           |
+| [`train_lora.py`](assets/train_lora.py)                 | **LoRA**          | Kis adaptermátrixokat tanít, miközben az alapmodellt lefagyasztja. 3–5x gyorsabb; ~95–98%-os teljes minőség.                         | 24–32GB      | Haladó felhasználók; több adapter; több VRAM    |
+| [`train_qlora.py`](assets/train_qlora.py)  *(csak Linux)*             | **QLoRA**       | 4 bites kvantálás + LoRA adapterek. Legalacsonyabb memóriahasználat, leggyorsabb, kis minőségromlással jár. A `bitsandbytes` szükséges hozzá (csak Linux).                            | 12–16GB      | A legtöbb felhasználó számára; gyors kísérletek; korlátozott VRAM      |
+| [`train_full_finetuning.py`](assets/train_full_finetuning.py) | **Teljes finomhangolás** | Az összes modellparamétert frissíti. Maximális minőség; legmagasabb memória- és számítási igény.                                    | 40GB+      | Maximális minőség; kutatás; nagy VRAM           |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:linux -->
-> **Megjegyzés:** A teljes finomhangolás (`train_full_finetuning.py`) 64GB-nál több rendszer RAM-ot igényelhet, és lehet, hogy ezen az eszközön nem megvalósítható. Fontolja meg helyette a LoRA vagy QLoRA használatát.
+> **Megjegyzés:** A teljes finomhangolás (`train_full_finetuning.py`) 64GB-nál több rendszer RAM-ot igényelhet, és lehet, hogy ezen az eszközön nem kivitelezhető. Fontolja meg inkább a LoRA vagy QLoRA használatát.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés:** A teljes finomhangolás (`train_full_finetuning.py`) 64GB-nál több rendszer RAM-ot igényelhet, és lehet, hogy ezen az eszközön nem megvalósítható. Fontolja meg helyette a LoRA használatát.
+> **Megjegyzés:** A teljes finomhangolás (`train_full_finetuning.py`) 64GB-nál több rendszer RAM-ot igényelhet, és lehet, hogy ezen az eszközön nem kivitelezhető. Fontolja meg inkább a LoRA használatát.
 <!-- @os:end -->
 <!-- @device:end -->
 
-Egyszerűen válassza ki a kívánt `Training method` (tanítási módszer) beállítást, töltse le a hozzá tartozó szkriptet, és futtassa a következő paranccsal, miközben a virtuális környezet aktív marad: 
+Egyszerűen válassza ki a kívánt `Training method` (tanítási módszer) opciót, töltse le a megfelelő szkriptet, majd futtassa a parancsot úgy, hogy a virtuális környezete aktiválva marad:
 
 ```python
 python3 train_<method_name>.py.
@@ -387,11 +389,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Megjegyzés:**  
-- Győződjön meg róla, hogy a modell könyvtárának neve (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) megegyezik a tanítás során ténylegesen létrejött kimeneti mappával.  
+- Győződjön meg róla, hogy a modellkönyvtár neve (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) megegyezik a tanítás során létrejött tényleges kimeneti mappával.  
 - Ha QLoRA helyett LoRA-t használt, egyszerűen cserélje ki az elérési utat ennek megfelelően.  
-- Egyes Gemma modellek megkövetelik a `trust_remote_code=True` megadását a `from_pretrained` függvényben; adja hozzá, ha ezzel kapcsolatos figyelmeztetést lát.
+- Egyes Gemma modellek megkövetelik a `trust_remote_code=True` megadását a `from_pretrained` függvényben; adja hozzá, ha erre vonatkozó figyelmeztetést lát.
 
-További egyedi beállításokért (padding tokenek, eszköz, stb.) tekintse meg a tanításhoz használt szkriptet.
+Egyéb egyedi beállításokért (padding tokenek, eszköz stb.) tekintse meg a tanításhoz használt szkriptet.
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -467,16 +469,18 @@ required = [
     "config.json",
     "tokenizer_config.json",
     "tokenizer.json",
-    "model.safetensors.index.json",
 ]
 missing = [f for f in required if not os.path.exists(os.path.join(out_dir, f))]
 if missing:
     print(f"FAIL: Missing required files: {missing}")
     sys.exit(1)
 
+# Weights may be saved as a single model.safetensors or, when the model
+# exceeds max_shard_size, as model-*.safetensors shards plus an index.
+single = os.path.exists(os.path.join(out_dir, "model.safetensors"))
 shards = glob.glob(os.path.join(out_dir, "model-*.safetensors"))
-if not shards:
-    print("FAIL: No sharded model safetensors files found")
+if not single and not shards:
+    print("FAIL: No model safetensors weights found")
     sys.exit(1)
 
 print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
@@ -489,7 +493,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ### Saját adathalmaz használata
 
-Minden szkript ugyanazt az adathalmaz-formátumot használja. Cserélje le a betöltési részt:
+Minden szkript ugyanazt az adathalmaz-formátumot használja. Cserélje ki a betöltési részt:
 
 ```python
 from datasets import load_dataset
@@ -515,13 +519,13 @@ def format_instruction(example):
 dataset = dataset.map(format_instruction)
 ```
 
-**Adathalmaz-formátum helyi JSON/JSONL fájlhoz:**
+**Adathalmaz formátuma helyi JSON/JSONL fájl esetén:**
 
-Ennek a módszernek a használatakor győződjön meg róla, hogy a JSON fájlok megfelelően vannak felépítve, hogy elkerülje az elemzési hibákat. 
+Ennek a módszernek a használatakor győződjön meg róla, hogy a JSON fájljai megfelelően strukturáltak, hogy elkerülje a feldolgozási hibákat.
 
-Az alábbi irányelveket kell betartani:
+Az alábbi irányelveket be kell tartani:
 * **Fájlformázás:** A JSON fájlokat egy integrált fejlesztői környezetben (IDE) kell formázni a megfelelő szerkezet és szintaxis biztosítása érdekében.
-* **Kötelező kulcsok:** Az egyedi JSON fájlnak tartalmaznia kell az `instruction` és `response` kulcsokat. Ezek a kulcsok elengedhetetlenek ahhoz, hogy a módszer megfelelően működjön.
+* **Kötelező kulcsok:** Az egyedi JSON fájlnak tartalmaznia kell az `instruction` és `response` kulcsokat. Ezek a kulcsok elengedhetetlenek a módszer megfelelő működéséhez.
 ```json
 [
   {
@@ -534,15 +538,15 @@ Az alábbi irányelveket kell betartani:
   }
 ]
 ```
-**Adathalmaz-formátum Hugging Face Hub adathalmazhoz**
+**Adathalmaz formátuma Hugging Face Hub adathalmaz esetén**
 
-A Hugging Face adathalmazainak használatakor győződjön meg róla, hogy az adathalmazok megfelelően vannak felépítve a zökkenőmentes integráció érdekében. 
+A Hugging Face adathalmazainak használatakor győződjön meg róla, hogy azok megfelelően strukturáltak a zökkenőmentes integráció érdekében.
 
 Az alábbi irányelveket kell követni:
-* **Utasítás-válasz pár:** Olyan adathalmazokra összpontosítson, amelyek `instruction-response` párokat tartalmaznak. Ez a szerkezet elengedhetetlen a kívánt funkció eléréséhez.
-* **Egyedi kulcsmódosítás:** Ha az adathalmaz nem felel meg az `instruction-response` szerkezetnek, lehetősége van módosítani a `format_instruction()` függvényt. Ez lehetővé teszi, hogy az igényeinek megfelelő egyedi kulcsokat alkalmazzon.
+* **Instrukció-válasz pár:** Olyan adathalmazokra összpontosítson, amelyek tartalmaznak egy `instruction-response` párt. Ez a szerkezet elengedhetetlen a tervezett funkció működéséhez.
+* **Egyedi kulcsmódosítás:** Ha az Ön adathalmaza nem felel meg az `instruction-response` szerkezetnek, lehetősége van módosítani a `format_instruction()` függvényt. Ez lehetővé teszi, hogy az adott igényeknek megfelelő kulcsokat alkalmazza.
 
-Példa a módosításra: Ha az adathalmaz kimenetét szükséges módosítani, a format_instruction() függvényen belüli válasz szakaszt módosíthatja az igényeinek megfelelően.
+Példa a módosításra: Ha az adathalmaz kimenetét módosítani kell, akkor a format_instruction() függvényen belül a válasz részt módosíthatja az Ön igényeinek megfelelően.
 ```python
 def format_instruction(example):
     return {
@@ -552,9 +556,9 @@ def format_instruction(example):
         ]
     }
 ```
-**Adathalmaz-formátum CSV fájlhoz**
+**Adathalmaz formátuma CSV fájl esetén**
 
-Ahhoz, hogy a szkript CSV fájlformátumot használjon, biztosítania kell, hogy a CSV fájl `instruction` és `response` nevű oszlopokat tartalmazzon. 
+Ahhoz, hogy a szkript CSV fájlformátummal működjön, biztosítania kell, hogy a CSV fájl `instruction` és `response` nevű oszlopokat tartalmazzon.
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -563,18 +567,18 @@ instruction,response
 
 ### Tanítási paraméterek beállítása
 
-Szerkessze a tanítási szkriptet, és módosítsa a változókat a céljainak megfelelően: **tanulási ráta** (`LR`), **epochok száma** (`EPOCHS`), **batch méret** (`BATCH_SIZE`), **gradiens akkumuláció** (`GRAD_ACCUM_STEPS`), valamint LoRA/QLoRA esetén a **rank** (`LORA_R`). Gyorsabb futtatáshoz használjon kevesebb epochot és magasabb tanulási rátát (LR); jobb minőséghez használjon több epochot és alacsonyabb LR-t. Csökkentse a batch méretét vagy a szekvenciahosszt, ha memóriahiány (out-of-memory) hibába ütközik.
+Szerkessze a tanítási szkriptet, és módosítsa a változókat a céljainak megfelelően: **tanulási ráta** (`LR`), **epochok száma** (`EPOCHS`), **köteg (batch) méret** (`BATCH_SIZE`), **gradiens akkumuláció** (`GRAD_ACCUM_STEPS`), valamint LoRA/QLoRA esetén a **rang** (`LORA_R`). Gyorsabb futtatáshoz használjon kevesebb epochot és magasabb tanulási rátát (LR); jobb minőséghez használjon több epochot és alacsonyabb LR-t. Csökkentse a köteg méretét vagy a szekvenciahosszt, ha memóriahiba lép fel.
 ### Memóriaoptimalizálási tippek
 
-Ha memóriahiba-hibaüzeneteket tapasztal:
+Ha memóriahiány (out-of-memory) hibákba ütközik:
 
-**1. Csökkentse a Batch Size-t:**
+**1. Csökkentse a köteg (batch) méretét:**
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
-**2. Csökkentse a szekvencia hosszát:**
+**2. Csökkentse a szekvenciahosszt:**
 ```python
 max_seq_length=256  # Instead of 512
 ```
@@ -584,16 +588,16 @@ max_seq_length=256  # Instead of 512
 Full → LoRA → QLoRA
 ```
 
-**4. Engedélyezze a Gradient Checkpointing funkciót (csak teljes finomhangolás esetén):**
+**4. Engedélyezze a gradiens ellenőrzőpontok (gradient checkpointing) használatát (csak teljes finomhangolás esetén):**
 ```python
 model.gradient_checkpointing_enable()
 ```
 
 ---
 
-## Monitorozás és hibakeresés
+## Megfigyelés és hibakeresés
 
-### GPU-memória megfigyelése
+### GPU-memória figyelése
 
 ```bash
 # Check ROCm GPU status
@@ -605,20 +609,20 @@ rocm-smi --showmeminfo vram
 
 ### (Opcionális) Kísérletek nyomon követése a Weights & Biases segítségével
 
-Futtatások és metrikák naplózásához a [Weights & Biases](https://wandb.ai) szolgáltatásban:
+A futtatások és metrikák [Weights & Biases](https://wandb.ai) szolgáltatásba történő naplózásához:
 
 ```bash
 pip install wandb
 wandb login
 ```
 
-A tanítási szkriptben állítsa be a `report_to="wandb"` értéket, és opcionálisan a `run_name="your-experiment-name"` értéket a trainer konfigurációjában. Ha nem szeretné használni a Wandb-t, hagyja a `report_to` értékét az alapértelmezetten, vagy állítsa `"none"` értékre.
+A tanítási szkriptben állítsa be a `report_to="wandb"` értéket, és opcionálisan a `run_name="your-experiment-name"` értéket a trainer konfigurációjában. Ha nem szeretné használni a Wandb-et, hagyja a `report_to` alapértelmezett értékét, vagy állítsa `"none"` értékre.
 
 ### Gyakori problémák
 
 #### Memóriahiány (OOM)
 
-**Megoldás:** Csökkentse a batch size-t és/vagy használjon QLoRA-t
+**Megoldás:** Csökkentse a köteg méretét és/vagy használjon QLoRA-t
 ```python
 BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 16
@@ -627,7 +631,7 @@ GRAD_ACCUM_STEPS = 16
 
 #### A veszteség nem csökken
 
-**Megoldás:** Állítsa be a tanulási rátát
+**Megoldás:** Módosítsa a tanulási rátát
 ```python
 LR = 1e-4  # Try lower
 # or
@@ -636,20 +640,20 @@ LR = 5e-4  # Try higher
 
 #### Lassú tanítás
 
-**Megoldás:** Növelje a batch size-t, ha a memória engedi
+**Megoldás:** Növelje a köteg méretét, ha a memória engedi
 ```python
 BATCH_SIZE = 8
 ```
 ## Következő lépések
 
-Miután sikeresen elvégezte a finomhangolást, fontolja meg a következő lépéseket, hogy a legtöbbet hozza ki a modelljéből:
+A sikeres finomhangolás után az alábbi következő lépéseket érdemes megfontolni, hogy a modelljéből még többet hozzon ki:
 
-1. **Értékelje ki** alaposan a modellt egy elkülönített tesztadathalmazon, hogy megmérje az általánosítási képességét, és elkerülje a túltanulást.
-2. **Kísérletezzen** különböző hiperparaméter-értékekkel a jobb pontosság, sebesség és memóriahasználat közötti kompromisszum érdekében.
+1. **Értékelje** alaposan a modellt tartalék tesztadatokon az általánosítás mérése és a túltanulás elkerülése érdekében.
+2. **Kísérletezzen** különböző hiperparaméter-értékekkel a jobb pontosság, sebesség és memóriahasználat közötti kompromisszum elérése érdekében.
 3. **Kövesse nyomon** az összes kísérletét (és a hozzájuk tartozó metrikákat) a Weights & Biases segítségével a reprodukálható kutatás érdekében.
-4. **Próbálja ki** a tanítást saját, egyedi adathalmazokon, hogy a modellt kifejezetten az Ön felhasználási esetéhez igazítsa.
-5. **Vezesse be** a finomhangolt modelljét a gyors következtetéshez, hatékony háttérrendszerek, például a vLLM segítségével, kompatibilis hardveren.
-6. **Fedezzen fel** olyan haladó technikákat, mint a prompt engineering, a vegyes pontosság (mixed precision) és a hosszabb szekvenciahosszok.
-7. **Tanítson** több LoRA adaptert különböző feladatokhoz vagy területekhez, és cserélje őket igény szerint.
+4. **Próbálja ki** a tanítást saját, egyedi adatkészleteken, hogy a modellt kifejezetten az Ön használati esetéhez igazítsa.
+5. **Vegye üzembe** a finomhangolt modelljét gyors következtetéshez, hatékony háttérrendszerek, például a vLLM segítségével, kompatibilis hardveren.
+6. **Fedezzen fel** olyan haladó technikákat, mint a prompt engineering, a vegyes pontosság (mixed precision) és a hosszabb szekvenciahosszak.
+7. **Tanítson** több LoRA adaptert különböző feladatokhoz vagy témakörökhöz, és cserélje őket igény szerint.
 
 ---
