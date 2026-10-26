@@ -282,12 +282,12 @@
       "quality_issues": "Minor: 'διακόπτης' for switch is ambiguous (switch vs button); 'στο Μηχάνημα' grammatically should be 'στο Μηχάνημα 1'. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
-      "source_sha256": "e55853ecbe0d357ac4550eb56b9c3bec4cc5c7ea6ea0fcc981ee71ec2cb6392d",
+      "source_sha256": "3a84c5ac1b78ee7d27a99e502d7e2178b89d82e04747141b9c268452f1ceafe0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "\"Ομαδοποίηση\" slightly weak for clustering; otherwise accurate, fluent, terms/brands intact."
+      "quality_issues": "Inconsistent 'συστοιχία'/'συστάδα' for clustering; otherwise accurate, fluent, terms and brands intact."
     },
     "playbooks/supplemental/clustering-rpc-server/playbook.json": {
       "source_sha256": "7a11fc3c510b7f33187b6f7c05f06305cc55fd22ac3b145067b28a7821bd46a8",
@@ -546,12 +546,12 @@
       "quality_issues": "Inconsistent section titles (Παρουσίαση/Πρακτική Εφαρμογή/Πρακτική Άσκηση) for same 'Walkthrough'; otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
-      "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",
+      "source_sha256": "1c162779b293628f3be365e681cf60d54e3590c509b3503576ee6fa9d94df917",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor: 'Τα αυτοματισμοί' gender mismatch; 'ημερήσια σύνοψη standup' awkward. Code, URLs, brands intact; otherwise fluent and accurate."
+      "quality_issues": "Gender mismatch 'ημερήσια σύνοψη/το σύνοψη' (σύνοψη is feminine); inconsistent 'digest' translation; otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/github-slack-development-digest/platform.md": {
       "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
@@ -562,28 +562,28 @@
       "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/github-slack-development-digest/playbook.json": {
-      "source_sha256": "d2ff6ac44cef585a1a6560b96ab98a921cc1163e326bd89a607aa95610739ed6",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "\"Development Digest\" left untranslated; slight inconsistency (digest vs σύνοψη), otherwise accurate and fluent."
-    },
-    "playbooks/supplemental/hermes-lemonade-server/README.md": {
-      "source_sha256": "b6f8a16d96872f88fd63899f80b8835ac47e2958ae65debeb5865828b5a57883",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Fluent, accurate, code/URLs intact. Minor: 'the Web Dashboard' rendered masculine ('ο Web Dashboard'); 'context window/length' translated inconsistently."
-    },
-    "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
-      "source_sha256": "2acd207ea87f2406f1a2cb6eab280828860d7d7ee97d2dd4b6f510638822d4ee",
+      "source_sha256": "f64fe0c9d4c29996bcd982a51b6e3783cfd3b82d4292a3e02a44524e4135cf82",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Accurate, fluent; minor inconsistency mixing 'AI' and 'τεχνητής νοημοσύνης'; brand terms intact."
+      "quality_issues": "Minor inconsistency: 'Αναφορά' vs 'σύνοψη' for digest; otherwise accurate and fluent."
+    },
+    "playbooks/supplemental/hermes-lemonade-server/README.md": {
+      "source_sha256": "d22037db17e71ff287fb098c73587815a3287616649df169481b0d30f5985104",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 94,
+      "quality_issues": "Minor gender agreement error: 'ένα πλήρως τοπικό στοίβα' should be 'μία'. Otherwise fluent, accurate, code/URLs intact."
+    },
+    "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
+      "source_sha256": "b336a8a4e6fb5b829b66f1a3da3edcc827e01de23c416fd7abf003aaec88c482",
+      "prompt_version": "2",
+      "model": "Claude-Sonnet-5",
+      "judge_model": "Claude-Opus-4.8",
+      "quality_score": 90,
+      "quality_issues": "Accurate and fluent; minor inconsistency with 'backend AI' vs 'AI backend' word order."
     },
     "playbooks/supplemental/openhands-getting-started/README.md": {
       "source_sha256": "92eb485ae459e0eab1d6b1565e3eb002f8f8ad8448e85c922c731b5cf202387a",

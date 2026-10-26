@@ -274,12 +274,12 @@
       "quality_issues": "Excellent fluent translation; code, URLs, brands intact. Minor: 'clavardage' fine, UI terms left in English (intentional). No significant errors."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
-      "source_sha256": "e55853ecbe0d357ac4550eb56b9c3bec4cc5c7ea6ea0fcc981ee71ec2cb6392d",
+      "source_sha256": "3a84c5ac1b78ee7d27a99e502d7e2178b89d82e04747141b9c268452f1ceafe0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Anglicism 'cluster' retained (grappe preferred in OQLF); otherwise accurate, fluent, terms intact"
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent, OQLF-compliant 'grappe'/'multinœud'; brands intact. Minor: 'appareils' acceptable for devices."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "40eca53770d0d4011db1b668485ba06d457963222df9179f1ba501c32c6087fa",
@@ -354,12 +354,12 @@
       "quality_issues": "\"le GAIA SDK\" awkward; OQLF prefers \"trousse SDK\"; \"conseiller matériel\" slightly ambiguous but acceptable."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
-      "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",
+      "source_sha256": "1c162779b293628f3be365e681cf60d54e3590c509b3503576ee6fa9d94df917",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Inconsistent 'livre de jeu' vs 'guide pratique' for playbook; otherwise accurate, fluent, code/URLs intact, good OQLF terminology."
+      "quality_issues": "Inconsistent 'playbook'/'guide pratique' rendering; 'condensateur' is wrong for condenser; otherwise fluent, accurate, code intact."
     },
     "playbooks/supplemental/github-slack-development-digest/platform.md": {
       "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
@@ -370,28 +370,28 @@
       "quality_issues": "Accurate, fluent, code/URLs intact. 'canaux' slightly loose for Slack channels; minor terminology preference."
     },
     "playbooks/supplemental/github-slack-development-digest/playbook.json": {
-      "source_sha256": "d2ff6ac44cef585a1a6560b96ab98a921cc1163e326bd89a607aa95610739ed6",
+      "source_sha256": "f64fe0c9d4c29996bcd982a51b6e3783cfd3b82d4292a3e02a44524e4135cf82",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "'digest' translated inconsistently (synthèse/résumé); 'quotidienne' adds unsupported 'daily'; otherwise accurate, fluent, terms intact"
+      "quality_score": 78,
+      "quality_issues": "'GitHub-to-Slack' left untranslated (should be 'de GitHub vers Slack'); 'résumé LLM local' slightly awkward."
     },
     "playbooks/supplemental/hermes-lemonade-server/README.md": {
-      "source_sha256": "b6f8a16d96872f88fd63899f80b8835ac47e2958ae65debeb5865828b5a57883",
+      "source_sha256": "d22037db17e71ff287fb098c73587815a3287616649df169481b0d30f5985104",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 95,
-      "quality_issues": "Excellent fr-CA translation; code blocks, URLs, brands intact. Minor: 'construit une pile' slightly literal, 'appairage' acceptable but 'jumelage' preferred."
+      "quality_issues": "Excellent fr-CA; code/URLs/numbers intact. Minor: 'backend de terminal' then 'moteur de terminal' inconsistency; 'construit une pile' slightly literal."
     },
     "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
-      "source_sha256": "2acd207ea87f2406f1a2cb6eab280828860d7d7ee97d2dd4b6f510638822d4ee",
+      "source_sha256": "b336a8a4e6fb5b829b66f1a3da3edcc827e01de23c416fd7abf003aaec88c482",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Redundant 'Hermes Agent' after 'agent d'IA'; 'en local' acceptable but slightly informal. Otherwise accurate."
+      "quality_issues": "Redundant 'Hermes Agent' after 'agent autonome'; 'en local' acceptable but 'localement' preferred; otherwise accurate."
     },
     "playbooks/supplemental/lemonade-getting-started/platform.md": {
       "source_sha256": "091ccd8efa90e078a5d740aac0e40d742ad91f5898d0de9e1574d62e6778ec17",

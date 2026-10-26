@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
   "title": "Kahden Ryzen™ AI Halo -laitteen klusterointi RCCL:llä",
-  "description": "Määritä usean solmun klusteri käyttäen kahta Ryzen™ AI Halo -laitetta ja RCCL:ää hajautettuja työkuormia varten",
+  "description": "Määritä monen solmun klusteri käyttämällä kahta Ryzen™ AI Halo -laitetta RCCL:n kanssa hajautettuja työkuormia varten",
   "auto_translated": true
 }

@@ -17,44 +17,44 @@ SPDX-License-Identifier: MIT
 
 ## Přehled
 
-Vývojáři tráví hodně času malými opakujícími se úkoly: kontrolou označených pull requestů, odpovídáním na komentáře na GitHub, tříděním nových issues, přeměnou vláken ve Slacku na standup poznámky nebo následné kroky po incidentech a sledováním signálů o vydáních nebo výzkumu.
-Každý z těchto cyklů je známý, přesto vyžaduje úsudek: shromáždit správný kontext, rozhodnout, co je důležité, a zveřejnit jasnou aktualizaci tam, kde tým už pracuje.
+Vývojáři tráví spoustu času malými opakujícími se smyčkami: kontrolou označených pull requestů, odpovídáním na komentáře na GitHubu, tříděním nových issues, přeměnou vláken ve Slacku na poznámky ze standupu nebo následné kroky po incidentu a sledováním signálů o vydáních nebo výzkumu.
+Každá smyčka je známá, přesto vyžaduje úsudek: shromáždit správný kontext, rozhodnout, co je důležité, a zveřejnit jasnou aktualizaci tam, kde tým již pracuje.
 
-[Automatizace OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) mění tyto opakující se úkoly na naplánované nebo událostmi spouštěné konverzace agenta: běhy, kdy AI softwarový agent může číst kontext, volat nástroje a vytvářet aktualizaci.
-Sdílené šablony automatizací v katalogu rozšíření OpenHands sledují tento vzor pro kontrolu pull requestů na GitHub, monitorování repozitářů, třídění issues v Linear, retrospektivy incidentů, standup souhrny ve Slacku a výzkumné přehledy: automatizace se probudí, pomocí nakonfigurovaných integrací, jako je GitHub nebo Slack, načte kontext, uvažuje nad tímto kontextem pomocí velkého jazykového modelu (LLM) a zapíše výsledek zpět.
+[Automatizace OpenHands](https://docs.openhands.dev/openhands/usage/automations/overview) proměňují tyto smyčky v naplánované nebo událostmi spouštěné konverzace agenta: běhy, ve kterých AI softwarový agent může číst kontext, volat nástroje a vytvářet aktualizaci.
+Sdílené šablony automatizací v katalogu rozšíření OpenHands následují tento vzor pro kontrolu pull requestů na GitHubu, sledování repozitářů, třídění issues v Linear, retrospektivy incidentů, souhrny standupů ve Slacku a výzkumné přehledy: automatizace se probudí, pomocí nakonfigurovaných integrací, jako je GitHub nebo Slack, získá kontext, nad tímto kontextem uvažuje pomocí velkého jazykového modelu (LLM) a zapíše výsledek zpět.
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) je lokální řídicí rovina pro vytváření a testování těchto automatizací.
-V této příručce spouští OpenHands Agent Server, backendový proces, který provádí konverzace agenta, a propojuje agenta s externími službami, jako je GitHub a Slack.
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) je lokální řídicí rovina (control plane) pro vytváření a testování těchto automatizací.
+V tomto průvodci spouští OpenHands Agent Server, backendový proces, který provádí konverzace agenta, a propojuje agenta s externími službami, jako je GitHub a Slack.
 
-Aby pracovní postup zůstal na vašem systému AMD, agent komunikuje s lokálním modelem obsluhovaným serverem Lemonade Server.
-Lemonade zpřístupňuje tento model prostřednictvím API kompatibilního s OpenAI, takže jej Agent Canvas může konfigurovat jako vzdálený endpoint ve stylu OpenAI, zatímco model, prompt a kontext pracovního postupu zůstávají lokální.
+Aby pracovní postup zůstal na vašem systému AMD, komunikuje agent s lokálním modelem obsluhovaným serverem Lemonade Server.
+Lemonade zpřístupňuje tento model prostřednictvím API kompatibilního s OpenAI, takže Agent Canvas ho může nakonfigurovat jako vzdálený koncový bod ve stylu OpenAI, zatímco model, prompt i kontext pracovního postupu zůstávají lokální.
 
-V této příručce vytvoříte jednu konkrétní automatizaci: naplánovaný souhrn vývoje z GitHub do Slacku.
-Používá GitHub ke kontrole nedávné aktivity v repozitáři, Slack ke zveřejnění souhrnu, volání API Agent Canvas ke konfiguraci a testování automatizace a Lemonade ke spouštění LLM lokálně.
+V tomto průvodci vytvoříte jednu konkrétní automatizaci: naplánovaný vývojový souhrn z GitHubu do Slacku.
+Používá GitHub ke kontrole nedávné aktivity v repozitáři, Slack k publikování souhrnu, volání API Agent Canvas ke konfiguraci a testování automatizace a Lemonade ke spuštění LLM lokálně.
 
-![Diagram architektury zobrazující GitHub MCP, automatizaci OpenHands, Lemonade Server a Slack MCP](assets/00-architecture-overview.png)
+![Diagram architektury znázorňující GitHub MCP, automatizaci OpenHands, server Lemonade Server a Slack MCP](assets/00-architecture-overview.png)
 
 ## Co se naučíte
 
 - Jak spustit Lemonade Server a ověřit, že lokální model odpovídá na chatové požadavky
 - Jak spustit Agent Canvas a nasměrovat jeho Agent Server na lokální LLM
-- Jak nainstalovat servery GitHub a Slack Model Context Protocol (MCP) prostřednictvím API Agent Server
-- Jak vytvořit a spustit naplánovanou automatizaci OpenHands, která zveřejní souhrn vývoje ve Slacku
-- Jak řešit nejčastější selhání lokálního modelu a automatizace
+- Jak nainstalovat servery GitHub a Slack Model Context Protocol (MCP) prostřednictvím API serveru Agent Server
+- Jak vytvořit a spustit naplánovanou automatizaci OpenHands, která zveřejní vývojový souhrn ve Slacku
+- Jak řešit nejčastější problémy s lokálním modelem a automatizací
 
 ## Základní pojmy
 
-| Pojem | Co to je | Kde v této příručce zapadá |
+| Pojem | Co to je | Kde zapadá do tohoto průvodce |
 | --- | --- | --- |
-| Lemonade Server | Platforma pro lokální obsluhu LLM postavená pro hardware AMD, která zpřístupňuje API kompatibilní s OpenAI. Vaše data neopustí váš počítač. | Spouští model, který pohání agenta. |
-| OpenHands Agent Server | Backendový proces, který provádí konverzace agenta OpenHands. | Hostí agenta, jeho profil LLM a jeho servery MCP. |
+| Lemonade Server | Lokální platforma pro obsluhu LLM postavená pro hardware AMD, která zpřístupňuje API kompatibilní s OpenAI. Vaše data nikdy neopustí váš počítač. | Spouští model, který pohání agenta. |
+| OpenHands Agent Server | Backendový proces, který provádí konverzace agenta OpenHands. | Hostuje agenta, jeho profil LLM a jeho servery MCP. |
 | Agent Canvas | Lokální řídicí rovina pro OpenHands, která spouští Agent Server a uživatelské rozhraní pro kontrolu běhů agenta. | Spouští backendy a poskytuje API, které voláte. |
-| Server MCP | Server Model Context Protocol, který poskytuje agentovi nástroje pro externí službu, jako je GitHub nebo Slack. | Umožňuje agentovi číst z GitHub a zapisovat do Slacku. |
-| Automatizace OpenHands | Naplánovaná nebo událostmi spouštěná konverzace agenta, která načte kontext, uvažuje nad ním a někam zapíše výsledek. | Souhrn z GitHub do Slacku, který zde vytváříte. |
+| Server MCP | Server Model Context Protocol, který dává agentovi nástroje pro externí službu, jako je GitHub nebo Slack. | Umožňuje agentovi číst z GitHubu a zapisovat do Slacku. |
+| Automatizace OpenHands | Naplánovaná nebo událostmi spouštěná konverze agenta, která získá kontext, uvažuje nad ním a někam zapíše výsledek. | Souhrn z GitHubu do Slacku, který zde vytváříte. |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Pracovní postupy s kódovacím agentem těží z většího modelu a kontextového okna.
+> Pracovní postupy kódovacího agenta těží z většího modelu a většího kontextového okna.
 > Použijte alespoň 32 GB systémové paměti a pro větší modely GGUF upřednostněte 64 GB nebo více.
 <!-- @device:end -->
 
@@ -70,36 +70,42 @@ Používá GitHub ke kontrole nedávné aktivity v repozitáři, Slack ke zveře
 
 ## Předpoklady
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:linux -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:uv,agent-canvas,lemonade-models-qwen3-6-35b-a3b,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
 <!-- @require:lemonade -->
+<!-- On Windows the Agent Canvas stack runs from the Docker image (which bundles
+     Node.js, uv and agent-canvas); host npm is only used by CI to resolve the MCP packages. -->
+<!-- @prereq:docker,nodejs,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
 Budete potřebovat:
 
-- Server Lemonade Server nainstalovaný podle standardního [instalačního průvodce Lemonade](https://lemonade-server.ai/docs/guide/install/).
+- Server Lemonade Server nainstalovaný podle standardního [průvodce instalací Lemonade](https://lemonade-server.ai/docs/guide/install/).
 
 <!-- @os:linux -->
-- Node.js 22.12 nebo novější a `npm`, používané k instalaci publikovaného CLI Agent Canvas a ke spouštění serverů MCP pomocí `npx`.
-- `uv`, správce balíčků Pythonu, který Agent Canvas používá k sestavení prostředí Agent Server. Pokud ještě není nainstalovaný, nainstalujte jej podle [instalačního průvodce uv](https://docs.astral.sh/uv/getting-started/installation/).
-- Nedávný publikovaný balíček `@openhands/agent-canvas` se schématem řízeným nastavením agenta, `LLMSummarizingCondenserSettings.max_tokens` a podporou `custom_tokenizer` pro LLM.
-- Balíček Pythonu `transformers` dostupný v prostředí Agent Server. Je vyžadován pro počítání tokenů podle chatové šablony, pokud je nastaven `custom_tokenizer`.
+- Node.js 22.12 nebo novější a `npm`, které slouží k instalaci publikovaného CLI Agent Canvas a ke spouštění serverů MCP pomocí `npx`.
+- `uv`, správce balíčků Pythonu, který Agent Canvas používá k vytvoření prostředí Agent Serveru. Pokud ještě není nainstalován, nainstalujte ho podle [průvodce instalací uv](https://docs.astral.sh/uv/getting-started/installation/).
+- Aktuální publikovaný balíček `@openhands/agent-canvas` se schématem řízeným nastavením agenta, podporou `LLMSummarizingCondenserSettings.max_tokens` a podporou `custom_tokenizer` pro LLM.
+- Balíček Pythonu `transformers` dostupný v prostředí Agent Serveru. Je vyžadován pro počítání tokenů šablony chatu, pokud je nastaveno `custom_tokenizer`.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/), nainstalovaný a spuštěný. Ve Windows běží stack Agent Canvas z publikovaného obrazu Docker, který zahrnuje Node.js, `uv`, `transformers` a balíček `@openhands/agent-canvas`, takže je není nutné instalovat na hostitele.
+- [Docker Desktop pro Windows](https://docs.docker.com/desktop/setup/install/windows-install/), nainstalovaný a spuštěný. Ve Windows běží sada Agent Canvas z publikovaného image Dockeru, který obsahuje Node.js, `uv`, `transformers` a balíček `@openhands/agent-canvas`, takže tyto komponenty na hostiteli instalovat nemusíte.
 <!-- @os:end -->
 
-- Token GitHub s právem čtení pro repozitář, který chcete shrnout.
-- Bot token Slack (`xoxb-...`) s právem `chat:write` a čtení kanálu.
-- ID týmu Slack (`T...`).
-- ID kanálu Slack (`C...`), kam se má souhrn zveřejnit.
+- Token GitHubu s přístupem pro čtení k repozitáři, který chcete shrnout.
+- Token bota Slacku (`xoxb-...`) s oprávněním `chat:write` a přístupem pro čtení kanálu.
+- ID týmu Slacku (`T...`).
+- ID kanálu Slacku (`C...`), kam má být souhrn zveřejněn.
 
-Než automatizaci otestujete, pozvěte aplikaci Slack do cílového kanálu.
-## Proměnné použité v tomto playbooku
+Před testováním automatizace pozvěte aplikaci Slack do cílového kanálu.
+## Proměnné použité v této příručce
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -117,10 +123,10 @@ $env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
 ```
 <!-- @os:end -->
 
-Tyto dvě proměnné se používají v ověřovacích příkazech níže.
-Model, tokenizer a další nastavení LLM se v pozdějších krocích zadávají přímo v uživatelském rozhraní Agent Canvas, takže jejich doslovné hodnoty jsou uvedeny přímo tam, kde je potřebujete.
+Tyto dvě proměnné jsou použity ověřovacími příkazy níže.
+Model, tokenizer a další nastavení LLM se v dalších krocích zadávají přímo do uživatelského rozhraní Agent Canvas, proto jsou jejich doslovné hodnoty uvedeny přímo tam, kde je potřebujete.
 
-Následující hodnoty se v pozdějších krocích zadávají do uživatelského rozhraní Agent Canvas.
+Následující hodnoty se v dalších krocích zadávají do uživatelského rozhraní Agent Canvas.
 Nastavte je zde, abyste je mohli zkopírovat:
 
 <!-- @os:linux -->
@@ -140,7 +146,7 @@ $env:DIGEST_TIMEZONE = "America/New_York"
 <!-- @os:end -->
 
 Pro `GITHUB_REPO_FILTER` použijte explicitní hodnotu `owner/repo`.
-Široké zástupné znaky pro celou organizaci mohou vracet příliš mnoho kontextu MCP pro lokální modely.
+Široké zástupné symboly organizace mohou vracet příliš mnoho MCP kontextu pro lokální modely.
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -148,9 +154,9 @@ lemonade --version
 ```
 <!-- @test:end -->
 
-## 1. Spusťte Lemonade Server
+## 1. Spuštění serveru Lemonade
 
-Spusťte model z rozhraní Lemonade CLI:
+Spusťte model z Lemonade CLI:
 
 <!-- @os:linux -->
 ```bash
@@ -168,19 +174,19 @@ lemonade run "$env:LEMONADE_MODEL"
 ```
 <!-- @os:end -->
 
-> **Zvolte model, který odpovídá vašemu hardwaru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je pro tento pracovní postup silný model, ale vyžaduje velkou paměťovou kapacitu.
-> Pokud má vaše zařízení omezenou paměť nebo VRAM GPU, vyberte menší model GGUF z knihovny modelů Lemonade a použijte toto ID modelu (a odpovídající tokenizer) v celém tomto playbooku.
+> **Vyberte model, který odpovídá vašemu hardwaru.** `Qwen3.6-35B-A3B-GGUF` (~20 GB) je pro tento pracovní postup silný model, ale vyžaduje velký paměťový fond.
+> Pokud má vaše zařízení omezenou paměť nebo GPU VRAM, vyberte menší GGUF model z knihovny modelů Lemonade a používejte toto ID modelu (spolu s odpovídajícím tokenizerem) v celé této příručce.
 
-> **Poznámka:** První `lemonade run` model stáhne, pokud ještě není přítomen, což může chvíli trvat v závislosti na velikosti modelu a rychlosti vašeho připojení.
+> **Poznámka:** První spuštění `lemonade run` model stáhne, pokud ještě není stažený, což může chvíli trvat v závislosti na velikosti modelu a rychlosti vašeho připojení.
 
-Lemonade zpřístupňuje rozhraní API kompatibilní s OpenAI na adrese:
+Lemonade zpřístupňuje API kompatibilní s OpenAI na adrese:
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-Volitelně: pokud Agent Canvas nebo automatizační runner neběží na stejném počítači, zpřístupněte koncový bod Lemonade prostřednictvím zabezpečeného tunelu a jako základní URL adresu LLM použijte adresu HTTPS.
-[ngrok](https://ngrok.com/) zpřístupňuje lokální port na internetu prostřednictvím zabezpečené adresy URL HTTPS; vyžaduje bezplatný účet ngrok a `YOUR_NGROK_DOMAIN.ngrok-free.dev` nahradíte vlastní rezervovanou doménou:
+Volitelné: pokud Agent Canvas nebo spouštěč automatizace neběží na stejném počítači, zpřístupněte koncový bod Lemonade pomocí zabezpečeného tunelu a jako základní adresu URL pro LLM použijte HTTPS adresu URL:
+[ngrok](https://ngrok.com/) zpřístupní lokální port internetu prostřednictvím zabezpečené HTTPS adresy URL; vyžaduje bezplatný účet ngrok a `YOUR_NGROK_DOMAIN.ngrok-free.dev` nahradíte svou vlastní rezervovanou doménou:
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -190,7 +196,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 ## 2. Ověření lokálního modelu
 
-Ověřte, že Lemonade dokáže obsluhovat vybraný model:
+Potvrďte, že Lemonade dokáže obsluhovat vybraný model:
 
 <!-- @os:linux -->
 ```bash
@@ -231,7 +237,7 @@ curl.exe -sS "$env:LEMONADE_BASE_URL/chat/completions" -H "Content-Type: applica
 ```
 <!-- @os:end -->
 
-Pokud se vrátí pole `choices`, je Lemonade připraven pro Agent Canvas.
+Pokud se vrátí pole `choices`, Lemonade je připraven pro Agent Canvas.
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -351,7 +357,7 @@ npm -v
 <!-- @test:end -->
 <!-- @os:end -->
 
-## 3. Spusťte Agent Canvas
+## 3. Spuštění Agent Canvas
 
 <!-- @os:linux -->
 Nainstalujte publikovaný balíček Agent Canvas a spusťte celý stack:
@@ -361,32 +367,32 @@ npm install -g @openhands/agent-canvas
 agent-canvas
 ```
 
-Pokud globální instalace npm selže s chybou oprávnění, podívejte se na položku o řešení problémů s oprávněními npm níže.
+Pokud se globální instalace npm nezdaří s chybou oprávnění, podívejte se na položku o řešení potíží s oprávněními npm níže.
 
-Ve výchozím nastavení se Agent Canvas spustí na adrese `http://localhost:8000`.
+Agent Canvas se ve výchozím nastavení spustí na adrese `http://localhost:8000`.
 Otevřete tuto adresu URL ve svém prohlížeči.
-Port není nijak zvláštní – pokud je port 8000 již používán, zadejte jakýkoli volný port pomocí `--port` (nebo `-p`).
-Výchozí lokální backend by se měl na domovské obrazovce zobrazovat jako funkční (healthy).
+Na portu nezáleží – pokud je 8000 již obsazen, předejte libovolný volný port pomocí `--port` (nebo `-p`).
+Výchozí lokální backend by se měl na domovské obrazovce zobrazit jako funkční (healthy).
 
-> **Poznámka:** První spuštění sestavuje Python prostředí Agent Serveru spravované nástrojem `uv`, takže může trvat několik minut, než backend nahlásí stav healthy.
+> **Poznámka:** Při prvním spuštění se sestavuje prostředí Pythonu spravované pomocí `uv` pro Agent Server, takže může trvat několik minut, než backend ohlásí stav healthy.
 
-Příkaz `agent-canvas` spouští agent server, automatizační backend a webový frontend společně.
-K lokálnímu spuštění OpenHands potřebujete pouze tento jediný příkaz.
-Zbytek tohoto playbooku vše nastavuje prostřednictvím uživatelského rozhraní Agent Canvas ve vašem prohlížeči.
+Příkaz `agent-canvas` spouští společně agent server, backend pro automatizaci a webový frontend.
+K lokálnímu spuštění OpenHands potřebujete pouze tento jeden příkaz.
+Zbytek této příručky konfiguruje vše prostřednictvím uživatelského rozhraní Agent Canvas ve vašem prohlížeči.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Na Windows spusťte publikovaný obraz kontejneru Agent Canvas pomocí Docker Desktop.
-Obraz obsahuje Agent Server, automatizační backend a webový frontend, takže na hostitelský systém nemusíte instalovat Node.js, `uv` ani CLI.
+Ve Windows spusťte publikovaný image kontejneru Agent Canvas pomocí Docker Desktop.
+Image obsahuje agent server, backend pro automatizaci a webový frontend, takže na hostitelský systém nemusíte instalovat Node.js, `uv` ani CLI.
 
-Nejprve vytvořte konfigurační a pracovní složky, které kontejner připojí:
+Nejprve vytvořte složky pro konfiguraci a pracovní prostor, které se do kontejneru připojují (mount):
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-Stáhněte publikovaný obraz (přibližně 6 GB; je veřejný, takže není potřeba žádné přihlášení):
+Stáhněte publikovaný image (přibližně 6 GB; je veřejný, takže není potřeba žádné přihlášení):
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
@@ -403,12 +409,12 @@ docker run -it --rm `
 ```
 
 Otevřete `http://localhost:8000/canvas` ve svém prohlížeči.
-Pokud je port 8000 již používán, namapujte jiný hostitelský port, například `-p 8080:8000`, a místo toho otevřete `http://localhost:8080/canvas`.
+Pokud je port 8000 již obsazen, namapujte jiný hostitelský port, například `-p 8080:8000`, a místo toho otevřete `http://localhost:8080/canvas`.
 
-> **Poznámka:** První spuštění sestavuje prostředí Agent Serveru uvnitř kontejneru, takže může trvat několik minut, než backend nahlásí stav healthy.
+> **Poznámka:** Při prvním spuštění se sestavuje prostředí Agent Serveru uvnitř kontejneru, takže může trvat několik minut, než backend ohlásí stav healthy.
 
-Připojení `.openhands` uchovává váš profil LLM, servery MCP a automatizace i po restartu kontejneru.
-Zbytek tohoto playbooku vše nastavuje prostřednictvím uživatelského rozhraní Agent Canvas ve vašem prohlížeči na adrese `http://localhost:8000/canvas`.
+Připojení (mount) `.openhands` uchovává váš profil LLM, servery MCP a automatizace napříč restartováními kontejneru.
+Zbytek této příručky konfiguruje vše prostřednictvím uživatelského rozhraní Agent Canvas ve vašem prohlížeči na adrese `http://localhost:8000/canvas`.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -540,35 +546,35 @@ finally {
 <!-- @os:end -->
 ## 4. Konfigurace lokálního LLM v uživatelském rozhraní
 
-Při prvním spuštění se v Agent Canvas otevře průvodce úvodním nastavením.
+Při prvním spuštění se v Agent Canvas otevře uvítací průvodce (onboarding).
 V tomto průvodci proveďte následující:
 
-1. Ponechte **OpenHands** vybraný jako agent a klikněte na **Next**.
-2. V části **Set up your LLM** vyberte **Advanced**.
+1. Ponechte **OpenHands** vybraný jako agenta a klikněte na **Next**.
+2. Na obrazovce **Set up your LLM** zvolte **Advanced**.
 3. Ponechte **Authentication** nastavené na **API key**.
 4. Nastavte **Custom Model** na `openai/Qwen3.6-35B-A3B-GGUF`.
 5. Nastavte **Base URL** na `http://127.0.0.1:13305/api/v1`.
-6. U pole **API Key** zadejte libovolnou neprázdnou zástupnou hodnotu, například `lemonade-local`. Lemonade nevyžaduje skutečný klíč, ale klient OpenHands potřebuje nějakou hodnotu k odeslání.
+6. Do pole **API Key** zadejte libovolnou neprázdnou zástupnou hodnotu, například `lemonade-local`. Lemonade skutečný klíč nevyžaduje, ale klient OpenHands potřebuje nějakou hodnotu k odeslání.
 
 <!-- @os:windows -->
-> **Windows (Docker):** Agent Server běží uvnitř kontejneru, takže pole **Base URL** nastavte na `http://host.docker.internal:13305/api/v1` místo `http://127.0.0.1:13305/api/v1`.
-> Zevnitř kontejneru je `127.0.0.1` samotný kontejner; `host.docker.internal` se dostane k Lemonade běžícímu na hostitelském systému Windows a Docker Desktop tento hostname poskytuje automaticky.
+> **Windows (Docker):** Agent Server běží uvnitř kontejneru, takže nastavte **Base URL** na `http://host.docker.internal:13305/api/v1` namísto `http://127.0.0.1:13305/api/v1`.
+> Zevnitř kontejneru je `127.0.0.1` samotný kontejner; `host.docker.internal` se dostane k Lemonade běžícímu na hostitelském systému Windows a toto hostitelské jméno poskytuje automaticky Docker Desktop.
 <!-- @os:end -->
 
 Pole pro připojení by měla vypadat takto.
-Pole s API klíčem je v uživatelském rozhraní maskováno.
+Pole API key je v uživatelském rozhraní maskováno.
 
-![Nastavení Agent Canvas first-use LLM Advanced s modelem Lemonade a lokální základní URL](assets/01-llm-advanced-settings.png)
+![Nastavení Agent Canvas první použití LLM Advanced s modelem Lemonade a lokální základní URL adresou](assets/01-llm-advanced-settings.png)
 
-Poté vyberte **All** a nastavte doplňující pole pro lokální model:
+Poté vyberte **All** a nastavte dodatečná pole lokálního modelu:
 
 1. Přejděte na **Custom Tokenizer** a nastavte jej na `Qwen/Qwen3.6-35B-A3B`.
 2. Přejděte na **LiteLLM Extra Body** a nastavte jej na `{"enable_thinking": true}`.
 3. Klikněte na **Next**.
 
-![Karta Agent Canvas first-use LLM All s vlastním tokenizérem Qwen](assets/02-llm-all-tokenizer-settings.png)
+![Agent Canvas první použití karta LLM All s vlastním tokenizérem Qwen](assets/02-llm-all-tokenizer-settings.png)
 
-![Karta Agent Canvas first-use LLM All s nakonfigurovaným LiteLLM extra body](assets/03-llm-all-extra-body-settings.png)
+![Agent Canvas první použití karta LLM All s nakonfigurovaným LiteLLM extra body](assets/03-llm-all-extra-body-settings.png)
 
 Nastavení LLM by mělo zobrazovat:
 
@@ -579,24 +585,24 @@ Nastavení LLM by mělo zobrazovat:
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
 | LiteLLM extra body | `{"enable_thinking": true}` |
 
-Předpona `openai/` říká LiteLLM, aby vůči koncovému bodu Lemonade používal formátování požadavků kompatibilní s OpenAI.
-Vlastní tokenizér je původní tokenizér Hugging Face pro model GGUF; umožňuje OpenHands počítat tokeny stejné šablony chatu, jaké vidí server lokálního modelu.
-Aktuální první formulář pro nastavení LLM nezobrazuje nastavení condenseru.
+Předpona `openai/` sděluje LiteLLM, aby vůči koncovému bodu Lemonade používal formátování požadavků kompatibilní s OpenAI.
+Vlastní tokenizér je původní tokenizér Hugging Face pro model GGUF; umožňuje OpenHands počítat stejné tokeny šablony chatu, jaké vidí lokální server modelu.
+Aktuální formulář LLM pro první použití nezobrazuje nastavení condenseru.
 Pokud vaše sestavení Agent Canvas později zpřístupní nastavení condenseru v **Settings > LLM**, použijte `llm_summarizing` a nastavte maximální počet tokenů pod velikost kontextového okna Lemonade, například `56000`.
 
 ## 5. Instalace MCP serverů pro GitHub a Slack
 
 V uživatelském rozhraní Agent Canvas otevřete **Customize** (nebo **Settings > MCP**) a přidejte MCP servery, které agentovi poskytnou nástroje pro GitHub a Slack.
-Hodnoty tokenů se odesílají pouze na váš lokální Agent Server a jsou ukládány jako šifrovaná nastavení.
+Hodnoty tokenů jsou odesílány pouze na váš lokální Agent Server a ukládají se jako šifrovaná nastavení.
 
 <!-- @os:windows -->
-> **Windows (Docker):** níže uvedené příkazy MCP serveru `npx` běží uvnitř kontejneru, který již obsahuje Node.js, takže se na hostitelský systém nic navíc neinstaluje.
-> Protože je `.openhands` připojen jako svazek, MCP servery a jejich tokeny přetrvávají i po restartu kontejneru.
+> **Windows (Docker):** níže uvedené příkazy MCP serveru `npx` běží uvnitř kontejneru, který již obsahuje Node.js, takže se na hostitelském systému nic dalšího neinstaluje.
+> Vzhledem k tomu, že je `.openhands` připojen jako svazek, MCP servery a jejich tokeny zůstávají zachovány i po restartu kontejneru.
 <!-- @os:end -->
 
 ### MCP server pro GitHub
 
-Přidejte nový MCP server s těmito nastaveními:
+Přidejte nový MCP server s následujícím nastavením:
 
 | Pole | Hodnota |
 | --- | --- |
@@ -605,11 +611,11 @@ Přidejte nový MCP server s těmito nastaveními:
 | Args | `-y @modelcontextprotocol/server-github` |
 | Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = váš token GitHub |
 
-Použijte token GitHub s přístupem pro čtení k repozitáři, který chcete shrnout.
+Použijte token GitHub s právem čtení k repozitáři, pro který chcete generovat souhrn.
 
 ### MCP server pro Slack
 
-Přidejte druhý MCP server s těmito nastaveními:
+Přidejte druhý MCP server s následujícím nastavením:
 
 | Pole | Hodnota |
 | --- | --- |
@@ -618,14 +624,14 @@ Přidejte druhý MCP server s těmito nastaveními:
 | Args | `-y @modelcontextprotocol/server-slack` |
 | Env | `SLACK_BOT_TOKEN` = `xoxb-...` |
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
-| Env | `SLACK_CHANNEL_IDS` = ID vašeho kanálu pro souhrn |
+| Env | `SLACK_CHANNEL_IDS` = ID vašeho kanálu pro souhrny |
 
-Nastavte `SLACK_CHANNEL_IDS` na ID kanálu pro souhrn (stejná hodnota jako `SLACK_DIGEST_CHANNEL`), aby agent nemusel procházet všechny kanály Slack.
+Nastavte `SLACK_CHANNEL_IDS` na ID kanálu pro souhrny (stejná hodnota jako `SLACK_DIGEST_CHANNEL`), aby agent nemusel procházet všechny kanály Slacku.
 
-Po přidání obou serverů použijte u každého z nich tlačítko **Test** a ověřte, že se připojí a nabízí nástroje.
+Po přidání obou serverů použijte u každého z nich tlačítko **Test**, abyste ověřili, že se připojí a oznámí nástroje.
 Server GitHub by měl vypsat nástroje GitHub a server Slack by měl vypsat nástroje Slack.
 
-![Stránka MCP v Agent Canvas s nainstalovanými servery GitHub a Slack](assets/04-mcp-servers-installed.png)
+![Stránka Agent Canvas MCP s nainstalovanými servery GitHub a Slack](assets/04-mcp-servers-installed.png)
 
 <!-- @test:id=mcp-packages-resolve timeout=300 hidden=True -->
 ```bash
@@ -642,7 +648,7 @@ V uživatelském rozhraní Agent Canvas otevřete stránku **Automations** a vyt
 
 1. Zvolte **Create automation** a vyberte typ **Prompt preset**.
 2. Nastavte **Name** na `GitHub Development Digest to Slack`.
-3. Nastavte **Prompt** na následující text, přičemž zástupné hodnoty repozitáře a kanálu nahraďte svými hodnotami:
+3. Nastavte **Prompt** na následující text, přičemž nahraďte zástupné symboly repozitáře a kanálu vašimi hodnotami:
 
    ```text
    Use the GitHub MCP server for exactly one repository: your-org/your-repo.
@@ -659,38 +665,38 @@ V uživatelském rozhraní Agent Canvas otevřete stránku **Automations** a vyt
    environment variables, or unrelated Slack messages.
    ```
 
-4. Nastavte **Trigger** na **Cron** s plánem `0 9 * * 1-5` (9:00 v pracovní dny) a nastavte **Timezone** na vaše časové pásmo, například `America/New_York`.
+4. Nastavte **Trigger** na **Cron** s rozvrhem `0 9 * * 1-5` (9:00 ve všední dny) a nastavte **Timezone** na vaše časové pásmo, například `America/New_York`.
 5. Nastavte **Timeout** na `900` sekund.
 6. Uložte automatizaci.
 
-Na stránce s detailem automatizace se zobrazí nová automatizace se svým cron triggerem a vygenerovaným vstupním bodem typu prompt preset.
+Stránka s podrobnostmi automatizace zobrazuje nově vytvořenou automatizaci s jejím spouštěčem typu cron a vygenerovaným vstupním bodem předvolby promptu.
 
-![Detail automatizace v Agent Canvas po vytvoření](assets/05-automation-created.png)
+![Podrobnosti o automatizaci Agent Canvas po vytvoření](assets/05-automation-created.png)
 ## 7. Otestujte automatizaci
 
 Na stránce podrobností automatizace v uživatelském rozhraní Agent Canvas:
 
-1. Klikněte na tlačítko **Run now** (nebo **Dispatch**) a okamžitě jednorázově spusťte automatizaci.
+1. Klikněte na **Run now** (nebo **Dispatch**), čímž automatizaci okamžitě jednou spustíte.
 2. Sledujte seznam běhů na stejné stránce. Nejnovější běh by měl přejít do stavu `COMPLETED`.
-3. Otevřete cílový kanál Slack. Měl by obsahovat vygenerovaný souhrn.
+3. Otevřete svůj cílový Slack kanál. Měl by obsahovat vygenerovaný souhrn.
 
-Není nutné čekat, až se spustí naplánovaný cron úkol – tlačítko **Run now** spustí běh na vyžádání, takže si můžete ověřit, že prompt, připojení MCP i publikování na Slack fungují ještě předtím, než se spolehnete na plán.
+Nemusíte čekat, až se spustí plán podle cronu — **Run now** spustí běh na vyžádání, takže si můžete předem ověřit, že prompt, MCP připojení i odesílání na Slack fungují, než se spolehnete na plánovač.
 
-![Automatizace v Agent Canvas byla úspěšně dokončena](assets/06-automation-run-completed.png)
+![Automatizace Agent Canvas byla úspěšně spuštěna](assets/06-automation-run-completed.png)
 
-![Kanál Slack zobrazující vygenerovaný souhrn OpenHands](assets/07-slackbot-message.png)
+![Slack kanál zobrazující vygenerovaný souhrn OpenHands](assets/07-slackbot-message.png)
 
 ## Řešení problémů
 
 <!-- @os:windows -->
-- **Port 8000 v Dockeru je již používán:** namapujte jiný port hostitele, například `docker run ... -p 8080:8000 ...`, a otevřete `http://localhost:8080/canvas`.
-- **Příkaz `docker pull` selže s chybou přihlašovacích údajů** (například „A specified logon session does not exist“): spusťte pull z interaktivní relace Windows nebo image předem stáhněte. Image je veřejný, takže `docker login` není potřeba.
-- **Uživatelské rozhraní se načte, ale backend je nefunkční:** při prvním spuštění se uvnitř kontejneru sestavuje prostředí Agent Server. Počkejte minutu, obnovte stránku a poté zkontrolujte průběh pomocí `docker logs <container>`.
-- **Agent Canvas se z kontejneru nemůže připojit k Lemonade:** nastavte **Base URL** pro LLM na `http://host.docker.internal:13305/api/v1` (nikoli `127.0.0.1`) a ověřte, že Lemonade běží na hostitelském systému Windows.
+- **Port 8000 v Dockeru je již používán:** namapujte jiný hostitelský port, například `docker run ... -p 8080:8000 ...`, a otevřete `http://localhost:8080/canvas`.
+- **`docker pull` selže s chybou přihlašovacích údajů** (například „A specified logon session does not exist“): spusťte stahování z interaktivní relace systému Windows nebo si obraz stáhněte předem. Obraz je veřejný, takže `docker login` není potřeba.
+- **Rozhraní se načte, ale backend není v pořádku:** první spuštění sestavuje prostředí Agent Server uvnitř kontejneru. Počkejte minutu a obnovte stránku, poté zkontrolujte průběh pomocí `docker logs <container>`.
+- **Agent Canvas se z kontejneru nemůže připojit k Lemonade:** nastavte **Base URL** modelu LLM na `http://host.docker.internal:13305/api/v1` (nikoli `127.0.0.1`) a ověřte, že Lemonade běží na hostitelském systému Windows.
 <!-- @os:end -->
 
-- **Lemonade neběží:** restartujte jej příkazem `lemonade run "${LEMONADE_MODEL}"` z kroku 1 a poté znovu spusťte kontrolu stavu.
-- **Příkaz `npm install -g` selže s chybou oprávnění:** v Linuxu nebo WSL nastavte globální adresář npm vlastněný uživatelem, přidejte jej do spouštěcího souboru shellu a poté znovu nainstalujte Agent Canvas:
+- **Lemonade neběží:** restartujte jej pomocí příkazu `lemonade run "${LEMONADE_MODEL}"` z kroku 1 a poté znovu spusťte kontrolu stavu.
+- **`npm install -g` selže s chybou oprávnění:** v Linuxu nebo WSL nastavte globální adresář npm vlastněný uživatelem, přidejte jej do startovacího souboru shellu a poté znovu nainstalujte Agent Canvas:
 
   ```bash
   mkdir -p ~/.npm-global
@@ -700,25 +706,25 @@ Není nutné čekat, až se spustí naplánovaný cron úkol – tlačítko **Ru
   npm install -g @openhands/agent-canvas
   ```
 
-Pokud používáte `zsh`, přidejte stejný řádek `export PATH=...` do `~/.zshrc` místo `~/.bashrc`.
-- **Agent Canvas odmítne nastavení LLM po zadání `custom_tokenizer`:** nainstalujte `transformers` do Python prostředí Agent Server, v případě potřeby restartujte Agent Canvas a zkuste nastavení LLM uložit znovu. OpenHands vyžaduje Transformers k načtení šablony chatu tokenizeru, pokud je nastaveno `custom_tokenizer`.
-- **Agent Canvas se nemůže připojit k Lemonade:** ověřte pomocí `curl -fsS "${LEMONADE_BASE_URL}/health"` a potvrďte, že základní URL zadaná ve formuláři LLM při prvním použití nebo v **Settings > LLM** odpovídá běžícímu lokálnímu koncovému bodu nebo tunelu HTTPS.
+Pokud používáte `zsh`, přidejte stejný řádek `export PATH=...` místo do `~/.bashrc` do souboru `~/.zshrc`.
+- **Agent Canvas odmítne nastavení LLM po zadání `custom_tokenizer`:** nainstalujte `transformers` do Python prostředí Agent Server, v případě potřeby restartujte Agent Canvas a zkuste nastavení LLM uložit znovu. OpenHands vyžaduje Transformers k načtení šablony chatu tokenizéru, pokud je nastaveno `custom_tokenizer`.
+- **Agent Canvas se nemůže připojit k Lemonade:** ověřte `curl -fsS "${LEMONADE_BASE_URL}/health"` a zkontrolujte, zda základní URL zadaná ve formuláři LLM při prvním použití nebo v **Settings > LLM** odpovídá běžícímu místnímu koncovému bodu nebo HTTPS tunelu.
 - **Nastavení LLM se neuložilo:** ujistěte se, že jste po zadání hodnot klikli na **Next**. Znovu otevřete **Settings > LLM** a ověřte, že se hodnoty uložily.
-- **GitHub MCP nevidí soukromé repozitáře:** ověřte, že GitHub token má oprávnění ke čtení cílového repozitáře a že tlačítko **Test** u MCP v sekci **Customize** hlásí dostupné nástroje GitHub.
-- **Slack umí číst kanály, ale nemůže do nich publikovat:** pozvěte aplikaci Slack do cílového kanálu a ověřte, že bot má oprávnění `chat:write`.
-- **Automatizace zobrazuje příliš mnoho kanálů Slack:** použijte ID kanálu Slack a nastavte `SLACK_CHANNEL_IDS` na serveru Slack MCP v sekci **Customize**.
-- **Běh automatizace selže nebo překročí kontext:** ověřte, že Lemonade byl spuštěn s `ctx_size=65536`, že LLM OpenHands má nastaveno `custom_tokenizer`, a použijte konkrétní repozitář s výsledky GitHubu omezenými na 3 až 5 položek. Pokud vaše sestavení Agent Canvas obsahuje nastavení condenseru, nastavte maximální počet tokenů condenseru pod hodnotu kontextového okna Lemonade.
+- **GitHub MCP nevidí soukromé repozitáře:** ověřte, že token GitHub má oprávnění ke čtení cílového repozitáře a že tlačítko **Test** u MCP v sekci **Customize** hlásí dostupné nástroje GitHub.
+- **Slack dokáže číst kanály, ale nemůže do nich zveřejňovat příspěvky:** pozvěte aplikaci Slack do cílového kanálu a ověřte, že bot má oprávnění `chat:write`.
+- **Automatizace vypisuje příliš mnoho Slack kanálů:** použijte ID Slack kanálu a nastavte `SLACK_CHANNEL_IDS` na serveru Slack MCP v sekci **Customize**.
+- **Běh automatizace selže nebo překročí kontext:** ověřte, že Lemonade byl spuštěn s `ctx_size=65536`, že má OpenHands LLM nastaveno `custom_tokenizer`, a použijte explicitní repozitář s výsledky GitHub omezenými na 3 až 5 položek. Pokud vaše sestavení Agent Canvas nabízí nastavení kondenzéru, nastavte maximální počet tokenů kondenzéru pod velikost kontextového okna Lemonade.
 
 ## Další kroky
 
-- Přidejte týdenní souhrn zaměřený pouze na vydání (release).
-- Přidejte automatizaci spouštěnou událostmi GitHubu pro rychlejší upozornění na PR nebo push.
-- Přesměrujte stejný souhrn do Notion, Linear nebo jiného nástroje podporovaného přes MCP.
+- Přidejte týdenní souhrn pouze pro vydání (release).
+- Přidejte automatizaci spouštěnou událostmi GitHub pro rychlejší upozornění na PR nebo push.
+- Směrujte stejný souhrn do Notion, Linear nebo jiného nástroje podporovaného MCP.
 
 ## Zdroje
 
 - [AMD AI Playbooks](https://developer.amd.com/playbooks/)
-- [Dokumentace serveru Lemonade](https://lemonade-server.ai/docs)
+- [Dokumentace Lemonade Server](https://lemonade-server.ai/docs)
 - [Repozitář rozšíření OpenHands](https://github.com/OpenHands/extensions)
 - [Servery Model Context Protocol](https://github.com/modelcontextprotocol/servers)
 - [Balíček Slack MCP](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)

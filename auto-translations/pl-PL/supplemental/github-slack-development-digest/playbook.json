@@ -1,6 +1,6 @@
 {
   "id": "github-slack-development-digest",
-  "title": "Zbuduj cyfrowe podsumowanie prac deweloperskich z GitHub do Slacka za pomocą Agent Canvas",
-  "description": "Skonfiguruj Agent Canvas, GitHub MCP, Slack MCP oraz zaplanowaną automatyzację OpenHands, która publikuje podsumowanie (digest) z lokalnego LLM.",
+  "title": "Zbuduj cyfrowy biuletyn deweloperski z GitHub do Slack z Agent Canvas",
+  "description": "Skonfiguruj Agent Canvas, GitHub MCP, Slack MCP oraz zaplanowaną automatyzację OpenHands, która publikuje podsumowanie lokalnego LLM.",
   "auto_translated": true
 }

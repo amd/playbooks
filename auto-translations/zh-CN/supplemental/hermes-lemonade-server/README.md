@@ -8,28 +8,28 @@ SPDX-License-Identifier: MIT
 > **机器翻译。**本页面由英文自动翻译，未经人工审核。其中可能包含错误，某些说明、命令、下载内容、产品可用性或其他内容可能因语言或地区而异。如内容存在任何不一致或差异，应以英文原版 playbook 为准。
 <!-- auto-translated-disclaimer:end -->
 
-# 本地使用 Lemonade Server 运行 Hermes Agent
+# 使用 Lemonade Server 在本地运行 Hermes Agent
 
 ## 概述
 
-[**Hermes Agent**](https://hermes-agent.nousresearch.com/) 是由 Nous Research 打造的一款具备自我提升能力的 AI 智能体。它内置学习循环，能够从经验中构建技能，跨会话建立关于你的持久记忆，并可代表你运行定时自动化任务。与简单的聊天助手不同，Hermes 会执行真实的操作：运行 shell 命令、写入文件、浏览网页，以及将并行工作分派给子智能体。
+[**Hermes Agent**](https://hermes-agent.nousresearch.com/) 是由 Nous Research 打造的自我改进型 AI 智能体。它内置了学习循环,能够从经验中积累技能，建立跨会话的用户持久记忆，并可代表你运行计划自动化任务。与简单的聊天助手不同，Hermes 会采取真实的行动：运行 Shell 命令、写入文件、浏览网页，并将并行工作流委派给子智能体。
 
-[**Lemonade Server**](https://lemonade-server.ai/) 是驱动它运行的本地推理后端。这是一款开源服务器，可直接在你的 AMD 硬件上运行生成式 AI 模型，并通过业界标准的 OpenAI API 对外提供服务。
+[**Lemonade Server**](https://lemonade-server.ai/) 是驱动这一切的本地推理后端。它是一个开源服务器，可直接在你的 AMD 硬件上运行生成式 AI 模型，并通过行业标准的 OpenAI API 对外暴露这些能力。
 
-两者结合，构成了一套完全本地化的 AI 智能体技术栈：Lemonade 负责在你的 GPU 上处理模型推理,Hermes 则提供智能体循环、记忆、技能以及消息网关。
+两者结合，构成了一套完全本地化的 AI 智能体体系：Lemonade 负责在你的 GPU 上处理模型推理，Hermes 则提供智能体循环、记忆、技能以及消息网关。
 
-> **在继续之前：** Hermes Agent 是一款高度自主的 AI 智能体。让任何 AI 智能体访问你的系统都可能带来不可预测或意料之外的结果。请仅在你了解相关风险，并能够接受自主软件代表你行事的前提下继续操作。
+> **在继续之前：** Hermes Agent 是高度自主的 AI 智能体。让任何 AI 智能体访问你的系统都可能导致不可预测或非预期的结果。只有在你理解这些风险，并愿意接受自主软件代表你执行操作的情况下，才应继续。
 
 ---
 
 ## 你将学到什么
 
-完成本手册后，你将能够:
+完成本教程后，你将能够：
 
 - **安装 Hermes Agent**，并将其指向 **Lemonade Server** 作为其 AI 后端。
-- **（推荐）启用 Docker/Podman 沙箱隔离**，将智能体的操作与主机隔离开来。
-- **启动 Hermes 网关**，并确认你的智能体已准备就绪。
-- **连接通信渠道**（Discord 或 Telegram），以便你可以从任意设备与你的智能体聊天。
+- **（推荐）启用 Docker/Podman 沙箱**，将智能体的操作与主机隔离。
+- **启动 Hermes 网关**，并确认你的智能体已就绪。
+- **连接通信渠道**（Discord 或 Telegram），以便你可以从任意设备与智能体聊天。
 
 ---
 
@@ -48,9 +48,9 @@ SPDX-License-Identifier: MIT
 ## 安装软件先决条件
 
 <!-- @os:linux -->
-- 一台运行 **Ubuntu 24.04+** 或兼容的、带有 `apt-get` 的基于 Debian 的 Linux 发行版的 PC
-- 至少 **12 GB 内存**（对于更大的模型，建议 64 GB 以上）
-- **约 10–30 GB 的可用磁盘空间**，用于存放模型权重
+- 运行 **Ubuntu 24.04+** 或兼容的基于 Debian、支持 `apt-get` 的 Linux 发行版的电脑
+- 至少 **12 GB 内存**（若使用更大的模型，推荐 64 GB 以上）
+- 为模型权重预留 **约 10–30 GB 的可用磁盘空间**
 - [Podman](https://podman.io/docs/installation)（可选，用于对 Hermes Agent 进行沙箱隔离）
   ```bash 
   sudo apt-get install -y podman
@@ -58,20 +58,22 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- 一台运行 **Windows 10/11** 的 PC
-- 至少 **12 GB 内存**（对于更大的模型，建议 64 GB 以上）
-- **约 10–30 GB 的可用磁盘空间**，用于存放模型权重
-- Podman（可选，用于对 Hermes Agent 进行沙箱隔离）。请在 WSL 内安装:
+- 运行 **Windows 10/11** 的电脑
+- 至少 **12 GB 内存**（若使用更大的模型，推荐 64 GB 以上）
+- 为模型权重预留 **约 10–30 GB 的可用磁盘空间**
+- Podman（可选，用于对 Hermes Agent 进行沙箱隔离）。请在 WSL 内安装：
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Halo Box 已预装 Podman，无需额外设置
+> Podman 已在 Halo Box 中预装，无需额外设置
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-6-35b-a3b,podman,lemonade -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,13 +87,13 @@ lemonade --version
 
 ## 拉取并加载推荐模型
 
-本手册推荐使用的模型是 Unsloth 提供的 **Qwen3.6-35B-A3B-GGUF**，这是一款强大的 MoE 模型，具有 263k token 的上下文窗口，非常适合智能体工作负载。该模型使用 UD-Q4_K_XL 量化方式。现在拉取该模型:
+本教程推荐使用的模型是 Unsloth 推出的 **Qwen3.6-35B-A3B-GGUF**，这是一个强大的 MoE 模型，拥有 263k token 的上下文窗口，非常适合智能体类工作负载。该模型采用 UD-Q4_K_XL 量化方式。现在拉取该模型：
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-然后以较大的上下文窗口加载它，并将该设置保存下来供以后使用:
+然后以较大的上下文窗口加载它，并将此设置保存以供后续运行使用：
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -101,9 +103,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-该模型的默认上下文长度为 262,144 个 token。如果遇到内存不足（OOM）错误，可以考虑缩小上下文窗口。
+该模型默认的上下文长度为 262,144 个 token。如果遇到内存不足（OOM）错误，可考虑减小上下文窗口。
 
-> **提示：关闭思考模式以获得更快的智能体响应：** Qwen3.6-35B-A3B 默认以思考模式运行，这会在每次响应前增加延迟。对于智能体循环来说，这种开销会迅速累积。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) 仓库提供了一份现成的配置，可以关闭思考模式。要使用它，请下载该文件并导入:
+> **提示：禁用思考模式以获得更快的智能体响应：** Qwen3.6-35B-A3B 默认运行在思考模式下，这会在每次响应前增加延迟。对于智能体循环而言，这种开销会迅速累积。[lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) 仓库提供了一个现成的配置文件，可用于禁用思考模式。要使用它，请下载该文件并导入：
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -246,17 +248,17 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## 设置 WSL
 
-我们将在 WSL 内运行 Hermes Agent，并将其连接到在 Windows 上原生运行的 Lemonade。这样，你既能在 Windows 一侧保留 Lemonade 的 GPU 加速能力，同时为 Hermes 提供一个 Linux shell 环境。
+我们在 WSL 内运行 Hermes Agent，并将其连接到在 Windows 上原生运行的 Lemonade。这样一来，你可以在拥有 Hermes 的 Linux Shell 环境的同时，仍在 Windows 一侧保留 Lemonade 的 GPU 加速能力。
 
 ### 安装 WSL 和 Ubuntu
 
-以管理员身份打开 PowerShell，安装 WSL 内核:
+以管理员身份打开 PowerShell，并安装 WSL 内核：
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-然后安装 Ubuntu:
+然后安装 Ubuntu：
 
 ```powershell
 wsl --install -d Ubuntu-24.04
@@ -264,7 +266,7 @@ wsl --install -d Ubuntu-24.04
 
 ### 在 WSL 中启用 systemd
 
-在 Ubuntu 终端中运行以下命令:
+在 Ubuntu 终端中运行以下命令：
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
@@ -273,7 +275,7 @@ systemd=true
 EOF
 ```
 
-重启 WSL:
+重启 WSL：
 
 ```powershell
 wsl --shutdown
@@ -282,34 +284,34 @@ wsl
 
 ### 将 Lemonade 从 Windows 桥接到 WSL
 
-WSL2 运行在一个虚拟网络中。Windows 上的 Lemonade 绑定到 `127.0.0.1`，而 WSL 无法直接访问该地址。可以通过 Windows 端口代理，将流量从 WSL 网关 IP 转发到 Windows 本地主机。
+WSL2 运行在一个虚拟网络中。Windows 上的 Lemonade 绑定到 `127.0.0.1`，而 WSL 无法直接访问该地址。Windows 的端口代理可以将流量从 WSL 网关 IP 转发到 Windows 本地主机。
 
-**查找你的 WSL 网关 IP**（在 WSL 内运行）:
+**查找你的 WSL 网关 IP**（在 WSL 内运行）：
 
 ```bash
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**添加端口代理**（以管理员身份在 PowerShell 中运行，将 `<WSL-Gateway-IP>` 替换为你的 WSL 网关 IP）:
+**添加端口代理**（以管理员身份在 PowerShell 中运行，将 `<WSL-Gateway-IP>` 替换为你的 WSL 网关 IP）：
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**添加防火墙规则**（在同一个已提升权限的 PowerShell 窗口中）:
+**添加防火墙规则**（在同一个提升权限的 PowerShell 中）：
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**从 WSL 进行验证**:
+**从 WSL 中验证**：
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-如果你已在上一步中加载了 Qwen3.6-35B-A3B-GGUF 模型，你应该会看到列出你已加载模型的 JSON 输出。
+如果你在上一步中已经加载了 Qwen3.6-35B-A3B-GGUF 模型，应该会看到列出已加载模型的 JSON 输出。
 
 ```json
 {
@@ -327,7 +329,7 @@ curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 }
 ```
 
-> `netsh portproxy` 规则在重启后仍然有效，但 WSL 网关 IP 在执行 `wsl --shutdown` 后可能会发生变化。如果在重启后 WSL 无法再访问 Lemonade，请获取更新后的网关 IP，并用这个新 IP 更新端口代理。
+> `netsh portproxy` 规则在重启后依然有效，但在执行 `wsl --shutdown` 后，WSL 网关 IP 可能会发生变化。如果重启后 WSL 无法访问 Lemonade，请获取更新后的网关 IP，并用这个新 IP 更新端口代理设置。
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -386,7 +388,7 @@ finally {
 ## 安装 Hermes Agent
 
 <!-- @os:windows -->
-> 除非另有说明，否则请在 **WSL 终端**中运行本节的命令。
+> 除非另有说明，本节中的命令均应在你的 **WSL 终端** 中运行。
 <!-- @os:end -->
 
 ```bash
@@ -395,29 +397,29 @@ curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-
 
 `--skip-setup` 标志会跳过交互式设置向导，以便你在下一步中手动配置模型后端。
 
-重新加载你的 shell:
+重新加载你的 Shell：
 
 ```bash
 source ~/.bashrc
 ```
 
-确认安装:
+确认安装：
 
 ```bash
 hermes --version
 ```
 
-运行自诊断以检查所有依赖项:
+运行自检以检查所有依赖项：
 
 ```bash
 hermes doctor
 ```
 
-> **提示：** 如果安装后出现 `command not found`，请将 Hermes 添加到你的 PATH 中:
+> **提示：** 如果安装后出现 `command not found`，请将 Hermes 添加到你的 PATH：
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> 若要使其永久生效，请将上面这行添加到你的 `~/.bashrc` 或 `~/.zshrc` 文件中。
+> 若要使此设置永久生效，请将上述命令添加到你的 `~/.bashrc` 或 `~/.zshrc` 中。
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -471,12 +473,12 @@ finally {
 ---
 ## 配置 Hermes 以使用 Lemonade
 
-Hermes 将其模型配置存储在 `~/.hermes/config.yaml` 中。您可以使用交互式的 `hermes model` 选择器，也可以直接编写配置文件。
+Hermes 将其模型配置存储在 `~/.hermes/config.yaml` 中。你可以使用交互式 `hermes model` 选择器，也可以直接编写配置。
 
 ### 选项 1：交互式选择器
 
 <!-- @os:windows -->
-> 在您的 **WSL 终端**中运行以下命令。
+> 在 **WSL 终端**中运行以下命令。
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -498,15 +500,15 @@ hermes model
 2. **API base URL：** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API base URL：** 使用 WSL 网关 IP：在 WSL 内运行 `ip route show default | awk '{print $3}' | head -1` 获取该 IP，然后输入 `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API base URL：** 使用 WSL 网关 IP：在 WSL 中运行 `ip route show default | awk '{print $3}' | head -1` 以获取该 IP，然后输入 `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API key：** `lemonade`
 4. **API compatibility mode：** `1`（自动检测）
 5. **Select model：** 从列表中选择 `Qwen3.6-35B-A3B-GGUF`
 6. **Context length in tokens：** `262144`
-7. **Display name：** `local-lemonade`（或您喜欢的任意名称）
+7. **Display name：** `local-lemonade`（或任何你喜欢的名称）
 
-`hermes model` 会同时保存当前活动的模型选择以及一个命名的 `custom_providers` 条目，该条目会将上下文长度与端点一并存储。`~/.hermes/config.yaml` 中的结果如下所示：
+`hermes model` 会同时保存当前选中的模型以及一个命名的 `custom_providers` 条目，该条目将上下文长度与端点一起存储。`~/.hermes/config.yaml` 中的结果如下所示：
 
 ```yaml
 model:
@@ -524,7 +526,7 @@ custom_providers:
         context_length: 262144
 ```
 
-### 选项 2：直接编写配置文件
+### 选项 2：直接编写配置
 
 <!-- @os:linux -->
 
@@ -586,7 +588,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-在您的 WSL 终端中，获取 Windows 主机 IP 并写入配置：
+在你的 WSL 终端中，获取 Windows 主机的 IP 并编写配置：
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## （推荐）启用 Podman 沙盒
+## （推荐）启用 Podman 沙箱
 
-Hermes Agent 可以将所有代理的 shell 和文件操作路由到一个隔离的容器中，而不是直接在主机上运行它们。这样可以将任何意外操作的影响范围限制在沙盒内，使您的主机文件系统和网络不受影响。
+Hermes Agent 可以将所有 agent 的 shell 和文件操作路由到一个隔离的容器中，而不是直接在主机上运行。这样可以将任何意外操作的影响范围限制在沙箱内，而不会影响你的主机文件系统和网络。
 
-构建一个轻量级沙盒镜像：
+构建一个轻量级沙箱镜像：
 
 <!-- @os:linux -->
 ```bash
@@ -726,13 +728,13 @@ echo "OK: Hermes sandbox Podman image is available"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-进入您的 WSL 终端：
+进入你的 WSL 终端：
 
 ```powershell
 wsl -d Ubuntu-24.04
 ```
 
-然后，构建一个轻量级沙盒镜像：
+然后，构建一个轻量级沙箱镜像：
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -808,7 +810,7 @@ EOF
 ```
 
 > `terminal.backend` 仍然是 `docker`。
-> `HERMES_DOCKER_BINARY` 才是告知 Hermes 使用 Podman 而非该运行时的设置。
+> `HERMES_DOCKER_BINARY` 的作用是告诉 Hermes 使用 Podman 作为运行时，而不是 Docker。
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,24 +907,24 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-现在，Hermes 将启动一个持久化的沙盒容器，并将所有 `terminal` 和文件工具调用都路由到该容器中。该容器与 Hermes 进程共享生命周期，会在所有工具调用之间复用，并在 Hermes 退出时被销毁。
+此时，Hermes 将启动一个持久化的沙箱容器，并将所有 `terminal` 和文件工具调用路由到该容器中。该容器与 Hermes 进程的生命周期一致，会在所有工具调用之间被复用，并在 Hermes 退出时被销毁。
 
-> **验证沙盒是否正常工作：** 启动 Hermes（`hermes`）并让它 `run hostname` —— 您应该会看到一个简短的容器 ID，而不是您机器的主机名。您也可以让它执行 `rm -rf <path-to-a-dummy-file/folder>`：Hermes 会确认删除操作，但该文件夹仍会保留在您的主机上。该命令是在容器隔离的 `$HOME` 中运行的，而不是您的主机中。
+> **验证沙箱是否正常工作：** 启动 Hermes（`hermes`）并让它 `run hostname`——你应该会看到一个简短的容器 ID，而不是你机器的主机名。你也可以让它执行 `rm -rf <path-to-a-dummy-file/folder>`：Hermes 会确认删除操作，但该文件夹仍会保留在你的主机上。该命令是在容器隔离的 `$HOME` 中运行的，而不是你的主机环境。
 
-> **需要更强的隔离性？** Hermes 还提供了一个官方 Docker 镜像（`nousresearch/hermes-agent`），可将整个代理进程运行在容器内 —— 包括网关、工具等所有组件。有关设置详情，请参阅 [Hermes Docker 文档](https://hermes-agent.nousresearch.com/docs/user-guide/docker)。
+> **需要更强的隔离性？** Hermes 还提供了一个官方的 Docker 镜像（`nousresearch/hermes-agent`），可以将整个 agent 进程运行在容器内——包括网关、工具等所有内容。有关设置详情，请参阅 [Hermes Docker 文档](https://hermes-agent.nousresearch.com/docs/user-guide/docker)。
 
 ---
 
 <!-- @os:linux -->
-## （推荐）Hermes 与 Firecrawl 服务集成
+## （推荐）将 Hermes 与 Firecrawl 服务集成
 
-Hermes 可以使用其内置的网络工具浏览和提取网站内容。然而，许多现代网站使用了机器人检测系统，会拦截简单的 HTTP 请求，并返回验证页面而非实际内容。因此，Hermes 可能无法从这些网站中可靠地提取信息。
+Hermes 可以使用其内置的网页工具浏览并提取网站内容。但是，许多现代网站使用了机器人检测系统，会阻止简单的 HTTP 请求，并返回验证挑战页面而非实际内容。因此，Hermes 可能无法可靠地从这些网站中提取信息。
 
-为了克服这一限制，[Firecrawl](https://docs.firecrawl.dev/introduction) 提供了一个自托管的网络爬取和内容提取服务，可以绕过这些验证挑战，充分释放 Hermes 自动化的潜力。
+为了克服这一限制，[Firecrawl](https://docs.firecrawl.dev/introduction) 提供了一个自托管的网页抓取与内容提取服务，可以绕过这些验证挑战，充分释放 Hermes 自动化的潜力。
 
-在此设置中，Firecrawl 作为一组由 Podman 管理的 Docker 容器运行。为了简化生命周期管理和自动启动，我们将 Firecrawl 注册为用户级别的 `systemd` 服务，该服务负责编排底层的 Podman Compose 堆栈。这使得 Hermes 可以使用标准的 `systemctl --user` 命令来启动、停止和验证 Firecrawl 服务，而无需直接与容器交互。
+在此设置中，Firecrawl 以一组由 Podman 管理的 Docker 容器形式运行。为了简化生命周期管理并实现自动启动，我们将 Firecrawl 注册为用户级的 `systemd` 服务，用于编排底层的 Podman Compose 栈。这样一来，Hermes 就可以使用标准的 `systemctl --user` 命令来启动、停止和验证 Firecrawl 服务，而无需直接与容器交互。
 
-为简化整个流程，我们将其拆分为四个步骤：
+为了简化整个流程，我们将其拆分为四个步骤：
 
 ---
 
@@ -960,27 +962,27 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-此时，该服务已被定义，但尚未在 `systemd` 中注册。
-确保文件名与您上面创建的文件名完全一致，然后运行：
+此时，该服务已经定义完成，但尚未注册到 `systemd` 中。
+请确保文件名与你上面创建的文件名完全一致，然后运行：
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-如果成功，您应该会看到以下输出：
+如果成功，你应该会看到以下输出：
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
-`default.target.wants/` 包含了指向已配置为自动启动的服务的符号链接。
+`default.target.wants/` 包含指向已配置为自动启动的服务的符号链接。
 
-### 2. 为您的服务配置 Firecrawl
+### 2. 为你的服务配置 Firecrawl
 
-[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) 非常适合需要完全掌控其抓取和数据处理环境的用户，但代价是需要投入额外的维护和配置工作。
+[SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) 非常适合那些需要完全掌控其爬取和数据处理环境的用户，但代价是需要投入更多的维护和配置工作。
 
 首先克隆代码仓库：
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-在根目录 `/firecrawl` 下创建 `.env` 文件：
+在 `/firecrawl` 根目录中创建 `.env` 文件：
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1008,39 +1010,39 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> 将 `BULL_AUTH_KEY` 设置为一个强密钥，尤其是在任何可从不受信任的网络访问的部署中。
+> 将 `BULL_AUTH_KEY` 设置为一个强密钥，尤其是在任何可从不受信任的网络访问的部署环境中。
 ### 3. 通过 Compose 部署 Hermes
 
-在继续之前，请确保您已拉取最新的 Hermes Docker 镜像：
+在继续之前，请确保已拉取最新的 Hermes Docker 镜像：
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
 完成后，下载 Hermes Compose 文件 [hermes-compose.yaml](assets/hermes-compose.yaml) 并将其放置在根目录 `/firecrawl` 中：
 
-> 此约定是必需的，以便 `systemd` 能够按照 `WorkingDirectory=${HOME}/firecrawl` 中的指定正确定位并启动服务。
+> 这一约定是 `systemd` 能够按照 `WorkingDirectory=${HOME}/firecrawl` 中的指定正确找到并启动服务所必需的。
 
-> 您可以随时通过添加其他 Firecrawl 服务来扩展该堆栈。可用服务的完整列表可在官方 [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) 中找到。
+> 您可以随时通过添加其他 Firecrawl 服务来扩展该栈。可用服务的完整列表请参见官方 [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml)。
 
 ### 4. 通过 Firecrawl 启动 Hermes 服务
 
-在将控制权交给 `systemd` 之前，请通过手动运行该堆栈来验证一切是否正常工作：
+在将控制权交给 `systemd` 之前，先手动运行该栈，验证一切是否正常：
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-如果配置正确，您应该会看到 Hermes 容器启动，命令行输出应类似于以下内容：
+如果一切配置正确，您应该会看到 Hermes 容器启动，命令行输出应类似如下：
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-验证完成后，在继续之前先将堆栈关闭：
+验证通过后，在继续之前先将该栈关闭：
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-现在一切已验证完毕，通过 `systemd` 启动该服务：
+现在一切都已验证无误，通过 `systemd` 启动该服务：
 ```bash
 systemctl --user start firecrawl.service
 ```
-[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) 可从交互式容器内部访问，Web 仪表盘也在同一主机和端口上提供，地址为 http://127.0.0.1:9119。
+[Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) 可在交互式容器内部访问，Web 仪表盘则可在同一主机和端口上通过 http://127.0.0.1:9119 访问。
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1054,7 +1056,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes 原生版
 
-直接启动一个交互式 CLI 会话：
+直接启动交互式 CLI 会话：
 
 ```bash
 hermes
@@ -1209,17 +1211,17 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**恭喜，您已经构建了一个完全本地化的 AI 代理堆栈。**
+**恭喜，您已经搭建起一个完全本地化的 AI 智能体技术栈。**
 
 ### Web 仪表盘
 
-Hermes 包含一个基于浏览器的 UI，用于管理配置、API 密钥、模型、会话、内存和定时任务。在网关或 CLI 运行时打开第二个终端，并使用以下命令启动它：
+Hermes 提供了一个基于浏览器的用户界面，用于管理配置、API 密钥、模型、会话、记忆和定时任务。在网关或 CLI 运行时打开第二个终端，并通过以下方式启动它：
 
 ```bash
 hermes dashboard
 ```
 
-这将启动一个本地服务器，并在浏览器中打开 `http://127.0.0.1:9119`。有关完整功能参考，请参见[仪表盘文档](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard)。
+这将启动一个本地服务器，并在浏览器中打开 `http://127.0.0.1:9119`。完整功能参考请参阅[仪表盘文档](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard)。
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,29 +1230,29 @@ hermes dashboard
 
 ## 可选：连接通信渠道
 
-网关运行后，您可以从任何设备访问您的本地代理。Hermes 支持 [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord)、[Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) 及其他平台
+网关运行后，您可以从任意设备访问您的本地智能体。Hermes 支持 [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord)、[Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) 等渠道
 
 ---
 
 ### Discord
 
-Discord 需要一个**您拥有管理员权限**的服务器才能添加机器人。如果您与他人共享服务器但自己并非所有者，请改用 Telegram。
+Discord 需要一个**您拥有管理员权限**的服务器才能添加机器人。如果您只是加入了共享服务器而非自己拥有，请改用 Telegram。
 
-#### 创建 Discord 应用程序和机器人
+#### 创建 Discord 应用和机器人
 
-1. 前往 [Discord 开发者门户](https://discord.com/developers/applications) 并点击 **New Application**。为其命名（例如 "hermes-bot"）。
-2. 在侧边栏中，点击 **Bot**。为机器人设置一个用户名。
-3. 仍在 Bot 页面上，向下滚动到 **Privileged Gateway Intents**，并启用：
+1. 前往 [Discord 开发者门户](https://discord.com/developers/applications)，点击 **New Application**。为其命名（例如 "hermes-bot"）。
+2. 在侧边栏中点击 **Bot**。为机器人设置用户名。
+3. 仍在 Bot 页面，滚动到 **Privileged Gateway Intents**，并启用：
    - **Message Content Intent**（必需）
    - **Server Members Intent**（推荐）
-4. 向上滚动并点击 **Reset Token** 以生成您的机器人令牌。复制它。
+4. 向上滚动并点击 **Reset Token** 以生成机器人令牌。复制该令牌。
 
 #### 将机器人添加到您的服务器
 
-1. 在侧边栏中，点击 **OAuth2 / URL Generator**。
+1. 在侧边栏中点击 **OAuth2 / URL Generator**。
 2. 在 **Scopes** 下，启用 `bot` 和 `applications.commands`。
 3. 在 **Bot Permissions** 下，启用：View Channels、Send Messages、Read Message History、Embed Links、Attach Files。
-4. 复制生成的 URL，将其粘贴到浏览器中，选择您的服务器并确认。
+4. 复制生成的 URL，粘贴到浏览器中，选择您的服务器并确认。
 
 #### 收集您的 ID 并允许私信
 
@@ -1258,7 +1260,7 @@ Discord 需要一个**您拥有管理员权限**的服务器才能添加机器�
 - 右键点击您的服务器图标：**Copy Server ID**
 - 右键点击您自己的头像：**Copy User ID**
 
-右键点击您的服务器图标 / **Privacy Settings** / 打开 **Direct Messages** 开关。此步骤是配对步骤所必需的。
+右键点击您的服务器图标 / **Privacy Settings** / 开启 **Direct Messages**。这是完成配对步骤所必需的。
 
 #### 为 Discord 配置 Hermes
 
@@ -1276,7 +1278,7 @@ DISCORD_ALLOWED_USERS=your-discord-user-id
 hermes gateway
 ```
 
-该机器人应在几秒钟内在 Discord 中上线。给它发送一条消息，可以是私信，也可以在它能看到的频道中发送。
+几秒钟内，该机器人应会在 Discord 中上线。向其发送一条消息，可以是私信，也可以在它能看到的频道中发送。
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1287,10 +1289,10 @@ hermes gateway
 
 ### Telegram
 
-#### 创建一个 Telegram 机器人
+#### 创建 Telegram 机器人
 
 1. 打开 Telegram 并给 **@BotFather** 发消息。
-2. 发送 `/newbot` 并按照提示操作。保存它提供给您的机器人令牌。
+2. 发送 `/newbot` 并按照提示操作。保存它提供的机器人令牌。
 
 #### 为 Telegram 配置 Hermes
 
@@ -1309,16 +1311,16 @@ TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple us
 hermes gateway
 ```
 
-在 Telegram 中给您的机器人发送任意消息进行测试。现在您可以通过 Telegram 私信与您的代理聊天了。有关 Webhook 模式和高级选项，请参见[完整的 Telegram 设置指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram)。
+在 Telegram 中向您的机器人发送任意消息以进行测试。现在您可以通过 Telegram 私信与您的智能体对话了。关于 webhook 模式和高级选项，请参阅[完整的 Telegram 配置指南](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram)。
 
 ---
 
 ## 后续步骤
 
-既然您的代理现在可以从您的手机接收命令并在本地机器上执行操作，以下是三个值得探索的方向：
+既然您的智能体现在可以接收来自手机的指令并在本地机器上执行操作，以下是三个值得探索的方向：
 
-1. **自动化研究摘要**：安排 Hermes 每天早晨在网络上搜索您关心的主题，用您的本地模型总结发现，并通过 Telegram 或 Discord 将摘要推送到您的手机——所有这些都运行在您自己的硬件上，无需任何云端费用。
+1. **自动化研究摘要**：安排 Hermes 每天早上搜索您关心的主题，用您的本地模型总结搜索结果，并通过 Telegram 或 Discord 将摘要推送到您的手机——全部运行在您自己的硬件上，没有任何云端费用。
 
-2. **按需代码审查**：让 Hermes 指向一个 GitHub 仓库，要求它审查开放的拉取请求，并将评论或摘要发布回您的聊天中。借助 Docker 终端后端，所有 git 操作都在沙盒内运行，保持主机的整洁。
+2. **按需代码审查**：让 Hermes 指向一个 GitHub 仓库，请它审查未关闭的 pull request，并将评论或摘要发回您的聊天窗口。借助 Docker 终端后端，所有 git 操作都在沙盒内运行，保持主机环境整洁。
 
-3. **本地文件助手**：让 Hermes 访问一个工作目录，并要求它根据您手机上的指令来整理、重命名、总结或转换文件。由于 Docker 终端后端将所有写入操作限制在沙盒工作区内，意外的破坏性操作将被限制在其中，不会影响外部环境。
+3. **本地文件助手**：授权 Hermes 访问某个工作目录，并通过手机随时要求它整理、重命名、总结或转换文件。由于 Docker 终端后端将所有写入操作限制在沙盒工作区内，意外的破坏性操作也会被限制在可控范围内。

@@ -8,33 +8,33 @@ SPDX-License-Identifier: MIT
 > **Gépi fordítás.** Ez az oldal automatikusan lett lefordítva angol nyelvről, és emberi ellenőrzésen nem esett át. Hibákat tartalmazhat, és bizonyos utasítások, parancsok, letöltések, termékelérhetőség vagy egyéb tartalmak nyelvenként vagy régiónként eltérhetnek. Bármilyen eltérés vagy ellentmondás esetén a playbook eredeti angol nyelvű változata az irányadó.
 <!-- auto-translated-disclaimer:end -->
 
-# Hermes Agent futtatása helyben a Lemonade Server segítségével
+# Hermes Agent helyi futtatása Lemonade Server segítségével
 
 ## Áttekintés
 
-A [**Hermes Agent**](https://hermes-agent.nousresearch.com/) egy önmagát fejlesztő AI-ügynök, amelyet a Nous Research fejlesztett. Beépített tanulási hurokkal rendelkezik, tapasztalatokból épít fel képességeket, munkameneteken átívelő, tartós memóriát épít arról, hogy ki vagy, és a nevedben ütemezett automatizálásokat is futtathat. A egyszerű csevegőasszisztensekkel ellentétben a Hermes valódi cselekvéseket hajt végre: shell parancsokat futtat, fájlokat ír, böngészi az internetet, és párhuzamos munkafolyamatokat delegál alügynökök felé.
+A [**Hermes Agent**](https://hermes-agent.nousresearch.com/) egy önfejlesztő AI-ügynök, amelyet a Nous Research fejlesztett. Beépített tanulási hurokkal rendelkezik, tapasztalatokból épít készségeket, a munkameneteken átívelő, állandó memóriát épít arról, hogy ki vagy, és a nevedben ütemezett automatizálásokat futtathat. Egy egyszerű csevegő asszisztenssel ellentétben a Hermes valódi műveleteket hajt végre: shell parancsokat futtat, fájlokat ír, böngészi a webet, és párhuzamos munkafolyamatokat delegál alügynökök számára.
 
-A [**Lemonade Server**](https://lemonade-server.ai/) a helyi következtetési (inference) háttérrendszer, amely mindezt működteti. Ez egy nyílt forráskódú szerver, amely a GenAI modelleket közvetlenül az AMD hardvereden futtatja, és az iparági szabványnak számító OpenAI API-n keresztül teszi elérhetővé őket.
+A [**Lemonade Server**](https://lemonade-server.ai/) az ezt működtető helyi következtetési (inference) háttérrendszer. Ez egy nyílt forráskódú szerver, amely GenAI modelleket futtat közvetlenül az AMD hardveren, és az iparági szabványnak számító OpenAI API-n keresztül teszi azokat elérhetővé.
 
-Együtt egy teljesen helyi AI-ügynök stacket alkotnak: a Lemonade végzi a modell-következtetést a GPU-n, a Hermes pedig biztosítja az ügynökhurkot, a memóriát, a képességeket és az üzenetküldési átjárót.
+Együtt egy teljesen helyi AI-ügynök stacket alkotnak: a Lemonade végzi a modell-következtetést a GPU-don, a Hermes pedig biztosítja az ügynök-hurkot, a memóriát, a készségeket és az üzenetküldési átjárót.
 
-> **Mielőtt folytatnád:** A Hermes Agent egy erősen autonóm AI-ügynök. Ha bármely AI-ügynöknek hozzáférést adsz a rendszeredhez, az kiszámíthatatlan vagy nem szándékolt eredményekhez vezethet. Csak akkor folytasd, ha megérted a kockázatokat, és elfogadod, hogy autonóm szoftver cselekszik a nevedben.
+> **Mielőtt folytatnád:** A Hermes Agent egy nagymértékben autonóm AI-ügynök. Ha bármely AI-ügynöknek hozzáférést adsz a rendszeredhez, az kiszámíthatatlan vagy nem kívánt eredményekhez vezethet. Csak akkor folytasd, ha megérted a kockázatokat, és elfogadod, hogy autonóm szoftver cselekszik a nevedben.
 
 ---
 
 ## Amit meg fogsz tanulni
 
-Ennek a útmutatónak a végére képes leszel:
+Ennek az útmutatónak a végére képes leszel:
 
-- **Telepíteni a Hermes Agentet**, és beállítani, hogy a **Lemonade Server**-t használja AI háttérrendszerként.
-- **(Ajánlott) Engedélyezni a Docker/Podman sandboxingot**, hogy elkülönítsd az ügynök tevékenységeit a gazdarendszertől.
+- **Telepíteni a Hermes Agent-et**, és beállítani, hogy a **Lemonade Server**-t használja AI háttérrendszerként.
+- **(Ajánlott) Bekapcsolni a Docker/Podman homokozó (sandbox) funkciót**, hogy elkülönítsd az ügynök műveleteit a gazdarendszertől.
 - **Elindítani a Hermes átjárót (gateway)**, és megerősíteni, hogy az ügynököd készen áll.
-- **Csatlakoztatni egy kommunikációs csatornát** (Discord vagy Telegram), hogy bármely eszközről cseveghess az ügynököddel.
+- **Csatlakoztatni egy kommunikációs csatornát** (Discord vagy Telegram), hogy bármilyen eszközről beszélgethess az ügynököddel.
 
 ---
 
 <!-- @device:halo_box,halo,stx,krk -->
-## A memóriakonfiguráció beállítása
+## Memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
 <!-- @device:end -->
@@ -45,33 +45,35 @@ Ennek a útmutatónak a végére képes leszel:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## A szükséges szoftverek telepítése
+## Szoftveres előfeltételek telepítése
 
 <!-- @os:linux -->
-- Egy PC, amelyen **Ubuntu 24.04+** vagy egy kompatibilis, Debian-alapú Linux disztribúció fut `apt-get` csomagkezelővel
+- Egy **Ubuntu 24.04+** rendszert futtató PC, vagy egy kompatibilis, `apt-get`-et használó Debian-alapú Linux disztribúció
 - Legalább **12 GB RAM** (nagyobb modellekhez 64 GB+ ajánlott)
-- **~10–30 GB szabad lemezterület** a modellsúlyokhoz
-- [Podman](https://podman.io/docs/installation) (opcionális, a Hermes Agent sandboxingjához)
+- **~10–30 GB szabad lemezterület** a modellsúlyok számára
+- [Podman](https://podman.io/docs/installation) (opcionális, a Hermes Agent homokozóba (sandbox) zárásához)
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- Egy PC, amelyen **Windows 10/11** fut
+- Egy **Windows 10/11** rendszert futtató PC
 - Legalább **12 GB RAM** (nagyobb modellekhez 64 GB+ ajánlott)
-- **~10–30 GB szabad lemezterület** a modellsúlyokhoz
-- Podman (opcionális, a Hermes Agent sandboxingjához). Telepítsd a WSL-en belül:
+- **~10–30 GB szabad lemezterület** a modellsúlyok számára
+- Podman (opcionális, a Hermes Agent homokozóba (sandbox) zárásához). Telepítsd a WSL-en belül:
   ```bash 
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> A Podman előre telepítve van a Halo Boxon, nincs szükség beállításra
+> A Podman előre telepítve van a Halo Box eszközön, nincs szükség beállításra
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-6-35b-a3b,podman,lemonade -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -85,13 +87,13 @@ lemonade --version
 
 ## Az ajánlott modell letöltése és betöltése
 
-Ehhez az útmutatóhoz az ajánlott modell a **Qwen3.6-35B-A3B-GGUF** az Unslothtól, egy erős MoE modell 263k tokenes kontextusablakkal, amely kiválóan alkalmas ügynöki munkaterhelésekhez. Ez a modell UD-Q4_K_XL kvantálást használ. Töltsd le most:
+Az ehhez az útmutatóhoz ajánlott modell a **Qwen3.6-35B-A3B-GGUF** az Unsloth-tól, egy erős MoE modell, 263k tokenes kontextusablakkal, amely jól alkalmas ügynöki munkaterhelésekhez. Ez a modell UD-Q4_K_XL kvantálást használ. Töltsd le most:
 
 ```bash
 lemonade pull Qwen3.6-35B-A3B-GGUF
 ```
 
-Ezután töltsd be nagy kontextusablakkal, és mentsd el ezt a beállítást a jövőbeli futtatásokhoz:
+Ezután töltsd be egy nagy kontextusablakkal, és mentsd el ezt a beállítást a jövőbeli futtatásokhoz:
 
 <!-- @require:lemonade-ready -->
 <!-- @test:id=lemonade-model-load timeout=900 -->
@@ -101,9 +103,9 @@ lemonade load Qwen3.6-35B-A3B-GGUF --ctx-size 262144 --save-options
 ```
 <!-- @test:end -->
 
-A modell alapértelmezett kontextushossza 262 144 token. Ha memóriahiány (OOM) hibákba ütközöl, fontold meg a kontextusablak csökkentését.
+A modell alapértelmezett kontextushossza 262 144 token. Ha memóriahiányos (OOM) hibákba ütközöl, fontold meg a kontextusablak csökkentését.
 
-> **Tipp: Kapcsold ki a gondolkodást a gyorsabb ügynökválaszokért:** A Qwen3.6-35B-A3B alapértelmezetten gondolkodási (thinking) módban fut, ami minden válasz előtt késleltetést okoz. Az ügynökhurkoknál ez a többletidő gyorsan felhalmozódik. A [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tárolóban található egy előre elkészített konfiguráció, amely kikapcsolja a gondolkodást. A használatához töltsd le a fájlt, majd importáld:
+> **Tipp: Kapcsold ki a gondolkodást a gyorsabb ügynökválaszok érdekében:** A Qwen3.6-35B-A3B alapértelmezés szerint gondolkodási (thinking) módban fut, ami minden válasz előtt késleltetést ad hozzá. Ügynök-huroknál ez a többletterhelés gyorsan felhalmozódik. A [lemonade-sdk/recipes](https://github.com/lemonade-sdk/recipes/blob/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json) tárolóban található egy kész konfiguráció, amely kikapcsolja a gondolkodást. A használatához töltsd le a fájlt, és importáld:
 >
 > ```bash
 > curl -LO https://raw.githubusercontent.com/lemonade-sdk/recipes/main/coding-agents/Qwen3.6-35B-A3B-NoThinking.json
@@ -246,17 +248,17 @@ echo "OK: Lemonade chat/completions returned a response"
 
 ## A WSL beállítása
 
-A Hermes Agentet a WSL-en belül futtatjuk, és a Windowson natívan futó Lemonade-hoz csatlakoztatjuk. Ez egy Linux shell környezetet biztosít a Hermes számára, miközben a Lemonade GPU-gyorsítása a Windows oldalon marad.
+A Hermes Agent-et WSL-en belül futtatjuk, és a natívan Windows alatt futó Lemonade-hez kapcsoljuk. Ez Linux shell környezetet biztosít a Hermes számára, miközben a Lemonade GPU-gyorsítása a Windows oldalon marad.
 
-### A WSL és az Ubuntu telepítése
+### WSL és Ubuntu telepítése
 
-Nyisd meg a PowerShellt rendszergazdaként, és telepítsd a WSL kernelt:
+Nyisd meg a PowerShell-t rendszergazdaként, és telepítsd a WSL kernelt:
 
 ```powershell
 wsl --install --no-distribution
 ```
 
-Ezután telepítsd az Ubuntut:
+Ezután telepítsd az Ubuntu-t:
 
 ```powershell
 wsl --install -d Ubuntu-24.04
@@ -280,9 +282,9 @@ wsl --shutdown
 wsl
 ```
 
-### A Lemonade áthidalása a Windowsból a WSL-be
+### A Lemonade áthidalása Windowsról WSL-be
 
-A WSL2 egy virtuális hálózatban fut. A Lemonade a Windowson a `127.0.0.1`-hez kötődik, amelyet a WSL nem tud közvetlenül elérni. Egy Windows port proxy továbbítja a forgalmat a WSL átjáró IP-címéről a Windows localhostra.
+A WSL2 egy virtuális hálózatban fut. A Windows alatti Lemonade a `127.0.0.1` címhez kötődik, amelyet a WSL nem tud közvetlenül elérni. Egy Windows port proxy továbbítja a forgalmat a WSL átjáró IP-címéről a Windows localhost-ra.
 
 **Keresd meg a WSL átjáró IP-címét** (futtasd a WSL-en belül):
 
@@ -290,26 +292,26 @@ A WSL2 egy virtuális hálózatban fut. A Lemonade a Windowson a `127.0.0.1`-hez
 ip route show default | awk '{print $3}' | head -1
 ```
 
-**Add hozzá a port proxyt** (futtasd a PowerShellben rendszergazdaként, cseréld ki a `<WSL-Gateway-IP>` értéket a saját WSL átjáró IP-címedre):
+**Add hozzá a port proxyt** (futtasd PowerShell-ben rendszergazdaként, a `<WSL-Gateway-IP>` helyére a WSL átjáró IP-címét beírva):
 
 ```powershell
 netsh interface portproxy add v4tov4 listenaddress=<WSL-Gateway-IP> listenport=13305 connectaddress=127.0.0.1 connectport=13305
 ```
 
-**Adj hozzá egy tűzfalszabályt** (ugyanabban az emelt jogosultságú PowerShellben):
+**Add hozzá a tűzfalszabályt** (ugyanabban a rendszergazdai PowerShell-ben):
 
 ```powershell
 New-NetFirewallRule -DisplayName "Lemonade-WSL" -Direction Inbound -Protocol TCP -LocalPort 13305 -Action Allow
 ```
 
-**Ellenőrizd a WSL-ből**:
+**Ellenőrzés a WSL-ből**:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 curl -s "http://$WINDOWS_HOST:13305/api/v1/models"
 ```
 
-Ha az előző lépésben már betöltötted a Qwen3.6-35B-A3B-GGUF modellt, JSON kimenetet kell látnod, amely felsorolja a betöltött modelledet.
+Ha már betöltötted a Qwen3.6-35B-A3B-GGUF modellt az előző lépésben, egy JSON kimenetet kell látnod, amely felsorolja a betöltött modellt.
 
 ```json
 {
@@ -327,7 +329,7 @@ Ha az előző lépésben már betöltötted a Qwen3.6-35B-A3B-GGUF modellt, JSON
 }
 ```
 
-> A `netsh portproxy` szabály túléli az újraindításokat, de a WSL átjáró IP-je megváltozhat a `wsl --shutdown` után. Ha a Lemonade elérhetetlenné válik a WSL-ből egy újraindítás után, kérd le a frissített átjáró IP-t, és frissítsd a proxyt ezzel az új IP-vel.
+> A `netsh portproxy` szabály túléli az újraindítást, de a WSL átjáró IP-címe megváltozhat a `wsl --shutdown` parancs után. Ha a Lemonade elérhetetlenné válik a WSL-ből egy újraindítás után, kérd le a frissített átjáró IP-címet, és frissítsd a proxyt ezzel az új IP-címmel.
 
 <!-- @test:id=wsl-lemonade-bridge-windows timeout=300 hidden=True -->
 ```powershell
@@ -386,16 +388,16 @@ finally {
 ## A Hermes Agent telepítése
 
 <!-- @os:windows -->
-> A parancsokat ebben a szakaszban a **WSL terminálodban** futtasd, kivéve, ha másképp jelezzük.
+> Ebben a szakaszban a parancsokat a **WSL terminálodban** futtasd, hacsak másként nincs jelezve.
 <!-- @os:end -->
 
 ```bash
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
 ```
 
-A `--skip-setup` flag kihagyja az interaktív telepítővarázslót, így a következő lépésben manuálisan konfigurálhatod a modell háttérrendszerét.
+A `--skip-setup` jelző kihagyja az interaktív beállítási varázslót, így a modell háttérrendszert a következő lépésben manuálisan konfigurálhatod.
 
-Töltsd be újra a shelledet:
+Töltsd újra a shell-edet:
 
 ```bash
 source ~/.bashrc
@@ -407,17 +409,17 @@ Erősítsd meg a telepítést:
 hermes --version
 ```
 
-Futtass egy önellenőrzést az összes függőség ellenőrzéséhez:
+Futtass egy önellenőrzést az összes függőség vizsgálatához:
 
 ```bash
 hermes doctor
 ```
 
-> **Tipp:** Ha a telepítés után `command not found` üzenetet látsz, add hozzá a Hermest a PATH-hoz:
+> **Tipp:** Ha a telepítés után `command not found` üzenetet látsz, add hozzá a Hermes-t a PATH-hoz:
 > ```bash
 > export PATH="$HOME/.local/bin:$PATH"
 > ```
-> Ahhoz, hogy ez tartós legyen, add hozzá a fenti sort a `~/.bashrc` vagy `~/.zshrc` fájlodhoz.
+> Ennek állandóvá tételéhez add hozzá a fenti sort a `~/.bashrc` vagy `~/.zshrc` fájlodhoz.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-version-linux timeout=120 hidden=True -->
@@ -469,14 +471,14 @@ finally {
 <!-- @os:end -->
 
 ---
-## Hermes konfigurálása a Lemonade használatához
+## A Hermes konfigurálása a Lemonade használatára
 
 A Hermes a modellkonfigurációját a `~/.hermes/config.yaml` fájlban tárolja. Használhatod az interaktív `hermes model` választót, vagy közvetlenül is megírhatod a konfigurációt.
 
 ### 1. lehetőség: Interaktív választó
 
 <!-- @os:windows -->
-> A következő parancsot a **WSL terminálban** futtasd.
+> Futtasd a következőt a **WSL terminálban**.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -493,20 +495,20 @@ hermes model
 
 Amikor a rendszer kéri:
 
-1. Válaszd ki a **Custom endpoint (enter URL manually)** lehetőséget
+1. Válaszd a **Custom endpoint (enter URL manually)** lehetőséget
 <!-- @os:linux -->
 2. **API alap URL:** `http://127.0.0.1:13305/api/v1`
 <!-- @os:end -->
 <!-- @os:windows -->
-2. **API alap URL:** használd a WSL átjáró IP-címét: futtasd a `ip route show default | awk '{print $3}' | head -1` parancsot a WSL-en belül a lekéréséhez, majd add meg: `http://<WSL-Gateway-IP>:13305/api/v1`
+2. **API alap URL:** használd a WSL gateway IP-címét: futtasd a `ip route show default | awk '{print $3}' | head -1` parancsot a WSL-ben a lekéréséhez, majd add meg: `http://<WSL-Gateway-IP>:13305/api/v1`
 <!-- @os:end -->
 3. **API kulcs:** `lemonade`
 4. **API kompatibilitási mód:** `1` (Automatikus felismerés)
-5. **Modell kiválasztása:** válaszd ki a `Qwen3.6-35B-A3B-GGUF` modellt a listából
+5. **Modell kiválasztása:** válaszd ki a listából a(z) `Qwen3.6-35B-A3B-GGUF` modellt
 6. **Kontextushossz tokenben:** `262144`
-7. **Megjelenítendő név:** `local-lemonade` (vagy bármilyen általad választott név)
+7. **Megjelenítési név:** `local-lemonade` (vagy bármilyen más általad preferált név)
 
-A `hermes model` parancs elmenti mind az aktív modellválasztást, mind egy elnevezett `custom_providers` bejegyzést, amely a kontextushosszt is tárolja a végponttal együtt. Az eredmény a `~/.hermes/config.yaml` fájlban így néz ki:
+A `hermes model` elmenti mind az aktív modellválasztást, mind egy elnevezett `custom_providers` bejegyzést, amely az endpointtal együtt tárolja a kontextushosszt is. Az eredmény a `~/.hermes/config.yaml` fájlban így néz ki:
 
 ```yaml
 model:
@@ -586,7 +588,7 @@ echo "OK: Hermes config.yaml contains Lemonade model configuration"
 
 <!-- @os:windows -->
 
-A WSL terminálban szerezd meg a Windows gépgazda IP-címét, és írd meg a konfigurációt:
+A WSL terminálodon belül kérd le a Windows hoszt IP-címét, és írd meg a konfigurációt:
 
 ```bash
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
@@ -679,11 +681,11 @@ finally {
 
 ---
 
-## (Ajánlott) Podman sandboxing engedélyezése
+## (Ajánlott) A Podman homokozó (sandboxing) engedélyezése
 
-A Hermes Agent képes az összes ügynöki shell- és fájlműveletet egy izolált konténeren keresztül átirányítani ahelyett, hogy közvetlenül a gépeden futtatná őket. Ez korlátozza bármely nem szándékos művelet hatását a sandboxra, érintetlenül hagyva a gépeded fájlrendszerét és hálózatát.
+A Hermes Agent az összes ügynök-shell és fájlműveletet egy izolált konténeren keresztül is irányíthatja, ahelyett, hogy azokat közvetlenül a hoszton futtatná. Ez korlátozza bármely nem szándékos művelet hatókörét a homokozóra, érintetlenül hagyva a hoszt fájlrendszerét és hálózatát.
 
-Építs egy könnyűsúlyú sandbox image-et:
+Hozz létre egy könnyűsúlyú homokozó image-et:
 
 <!-- @os:linux -->
 ```bash
@@ -732,7 +734,7 @@ Lépj be a WSL terminálba:
 wsl -d Ubuntu-24.04
 ```
 
-Ezután építs egy könnyűsúlyú sandbox image-et:
+Majd hozz létre egy könnyűsúlyú homokozó image-et:
 
 ```bash
 podman build -t hermes-sandbox:bookworm-slim - <<'DOCKERFILE'
@@ -795,7 +797,7 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-Ezután konfiguráld a Hermes-t, hogy a Podman-t használja konténer futtatókörnyezetként, és állítsd be a terminál backendet:
+Ezután konfiguráld a Hermest, hogy a Podmant használja konténer-futtatókörnyezetként, és állítsd be a terminál backendjét:
 
 ```bash
 echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
@@ -807,8 +809,8 @@ terminal:
 EOF
 ```
 
-> A `terminal.backend` továbbra is `docker`.
-> A `HERMES_DOCKER_BINARY` az, ami megmondja a Hermes-nek, hogy a Podman-t használja futtatókörnyezetként a helyett.
+> A `terminal.backend` továbbra is `docker` marad.
+> A `HERMES_DOCKER_BINARY` az, ami megmondja a Hermesnek, hogy a Podmant használja futtatókörnyezetként helyette.
 
 <!-- @os:linux -->
 <!-- @test:id=hermes-sandbox-config-linux timeout=120 hidden=True -->
@@ -905,22 +907,22 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-A Hermes ezután elindít egy tartós sandbox konténert, és minden `terminal` és fájlkezelő eszközhívást ezen keresztül irányít. A konténer a Hermes folyamat élettartamát osztja meg, minden eszközhívás során újrahasznosítják, és a Hermes kilépésekor megsemmisül.
+A Hermes mostantól egy állandó homokozó-konténert indít, és minden `terminal` és fájleszköz-hívást azon keresztül irányít. A konténer a Hermes folyamatának életciklusát osztja meg, minden eszközhívás esetén újrafelhasználásra kerül, és a Hermes kilépésekor megsemmisül.
 
-> **Ellenőrizd, hogy a sandbox működik-e:** Indítsd el a Hermes-t (`hermes`), és kérd meg, hogy futtassa a `run hostname` parancsot – egy rövid konténerazonosítót kell látnod a géped hostneve helyett. Azt is kérheted tőle, hogy futtassa: `rm -rf <path-to-a-dummy-file/folder>`: a Hermes megerősíti a törlést, de a mappa továbbra is a gépeden marad. A parancs a konténer izolált `$HOME` könyvtárában futott, nem a tiéden.
+> **Ellenőrizd, hogy a homokozó működik:** Indítsd el a Hermest (`hermes`), és kérd meg, hogy `run hostname` – egy rövid konténerazonosítót kell látnod a géped hosztneve helyett. Megkérheted arra is, hogy `rm -rf <path-to-a-dummy-file/folder>`: a Hermes megerősíti a törlést, de a mappa továbbra is ott marad a hoszton. A parancs a konténer izolált `$HOME` könyvtárában futott le, nem a tiéden.
 
-> **Erősebb izolációra van szükséged?** A Hermes hivatalos Docker image-et is biztosít (`nousresearch/hermes-agent`), amely a teljes ügynöki folyamatot egy konténeren belül futtatja – gateway, eszközök, minden. A beállítási részletekért lásd a [Hermes Docker dokumentációját](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
+> **Erősebb izolációra van szükséged?** A Hermes egy hivatalos Docker image-et is biztosít (`nousresearch/hermes-agent`), amely a teljes ügynökfolyamatot egy konténeren belül futtatja – a gateway-t, az eszközöket, mindent. A beállítási részletekért lásd a [Hermes Docker dokumentációját](https://hermes-agent.nousresearch.com/docs/user-guide/docker).
 
 ---
 
 <!-- @os:linux -->
-## (Ajánlott) Hermes integráció a Firecrawl szolgáltatásokkal
+## (Ajánlott) A Hermes integrációja a Firecrawl szolgáltatásokkal
 
-A Hermes beépített webes eszközeivel képes böngészni és tartalmat kinyerni weboldalakról. Azonban sok modern weboldal botfelismerő rendszereket használ, amelyek blokkolják az egyszerű HTTP kéréseket, és a tényleges tartalom helyett kihívási oldalakat adnak vissza. Ennek eredményeként előfordulhat, hogy a Hermes nem tud megbízhatóan információt kinyerni ezekről az oldalakról.
+A Hermes a beépített webes eszközeivel böngészni tud és tartalmat tud kinyerni weboldalakról. Azonban sok modern weboldal bot-felismerő rendszereket használ, amelyek blokkolják az egyszerű HTTP-kéréseket, és a tényleges tartalom helyett kihívás-oldalakat adnak vissza. Emiatt előfordulhat, hogy a Hermes nem tud megbízhatóan információt kinyerni ezekről az oldalakról.
 
-E korlátozás leküzdésére a [Firecrawl](https://docs.firecrawl.dev/introduction) egy önhosztolt webes crawler és tartalomkinyerő szolgáltatást biztosít, amely képes megkerülni ezeket a kihívásokat, és kihasználni a Hermes automatizálásának teljes potenciálját.
+Ennek a korlátnak a leküzdésére a [Firecrawl](https://docs.firecrawl.dev/introduction) egy önhosztolt webes feltérképezési és tartalomkinyerési szolgáltatást biztosít, amely képes megkerülni ezeket a kihívásokat, és kibontakoztatni a Hermes automatizálásának teljes potenciálját.
 
-Ebben a beállításban a Firecrawl Podman-nal kezelt Docker konténerek egy csoportjaként fut. Az életciklus-kezelés és az automatikus indítás egyszerűsítése érdekében a Firecrawl-t felhasználói szintű `systemd` szolgáltatásként regisztráljuk, amely az alapul szolgáló Podman Compose stacket vezérli. Ez lehetővé teszi, hogy a Hermes standard `systemctl --user` parancsokkal indítsa, állítsa le és ellenőrizze a Firecrawl szolgáltatást, ahelyett hogy közvetlenül a konténerekkel kommunikálna.
+Ebben a beállításban a Firecrawl Docker konténerek egy halmazaként fut, amelyeket a Podman kezel. Az életciklus-kezelés és az automatikus indítás egyszerűsítése érdekében a Firecrawl-t felhasználói szintű `systemd` szolgáltatásként regisztráljuk, amely az alapul szolgáló Podman Compose stacket orkesztrálja. Ez lehetővé teszi, hogy a Hermes a Firecrawl szolgáltatást szabványos `systemctl --user` parancsokkal indítsa, állítsa le és ellenőrizze, ahelyett, hogy közvetlenül a konténerekkel kellene interakcióba lépnie.
 
 Az egyszerűség kedvéért a teljes folyamatot négy lépésre bontottuk:
 
@@ -931,7 +933,7 @@ Navigálj a systemd felhasználói konfigurációs könyvtárába:
 ```bash
 cd ~/.config/systemd/user
 ```
-Hozz létre és nyiss meg egy új fájlt `firecrawl.service` néven.
+Hozz létre és nyiss meg egy új `firecrawl.service` nevű fájlt.
 ```bash
 nano firecrawl.service
 ```
@@ -960,27 +962,27 @@ ExecStop=/usr/bin/podman compose -f hermes-compose.yaml down
 WantedBy=default.target
 
 ```
-Ezen a ponton a szolgáltatás definiálva van, de még nincs regisztrálva a `systemd`-nél. 
+Ezen a ponton a szolgáltatás már definiálva van, de még nincs regisztrálva a `systemd`-nél.
 Győződj meg róla, hogy a fájlnév pontosan megegyezik a fent létrehozottal, majd futtasd:
 ```bash
 systemctl --user daemon-reload
 systemctl --user enable firecrawl.service
 ```
-Sikeres futtatás esetén a következő kimenetet kell látnod:
+Sikeres végrehajtás esetén a következő kimenetet kell látnod:
 
 > **Created symlink '\~/.config/systemd/user/default.target.wants/firecrawl.service' → '\~/.config/systemd/user/firecrawl.service'.**
 
- A `default.target.wants/` szimbolikus linkeket tartalmaz azokhoz a szolgáltatásokhoz, amelyek automatikus indításra vannak konfigurálva.
+A `default.target.wants/` könyvtár szimbolikus linkeket tartalmaz azokra a szolgáltatásokra, amelyek automatikus indításra vannak konfigurálva.
 
 ### 2. A Firecrawl konfigurálása a szolgáltatásodhoz
 
-A [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) ideális azok számára, akik teljes ellenőrzést szeretnének a scraping és adatfeldolgozási környezeteik felett, cserébe azonban további karbantartási és konfigurációs ráfordítással jár.
+A [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) ideális azok számára, akiknek teljes kontrollra van szükségük a scraping és adatfeldolgozási környezeteik felett, de ez cserébe további karbantartási és konfigurációs ráfordítással jár.
 
-Kezdd a repozitórium klónozásával:
+Kezdd a tároló klónozásával:
 ```bash
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Hozz létre egy `.env` fájlt a gyökér `/firecrawl` könyvtárban:
+Hozd létre a `.env` fájlt a gyökér `/firecrawl` könyvtárban:
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1008,39 +1010,39 @@ BULL_AUTH_KEY=CHANGEME
 # Default: 0.8 (80%)
 # MAX_RAM=0.8
 ```
-> A `BULL_AUTH_KEY` értékét állítsd egy erős titkos kulcsra, különösen ha a telepítés nem megbízható hálózatokról is elérhető.
-### 3. Hermes telepítése Compose segítségével
+> Állítsd be a `BULL_AUTH_KEY` értékét egy erős titkos kulcsra, különösen bármely olyan telepítés esetén, amely nem megbízható hálózatokról is elérhető.
+### 3. A Hermes telepítése Compose segítségével
 
-Mielőtt továbblépnénk, győződjön meg róla, hogy letöltötte a legfrissebb Hermes Docker image-et:
+Mielőtt továbblépne, győződjön meg róla, hogy letöltötte a legújabb Hermes Docker image-et:
 ```bash
 podman pull docker.io/nousresearch/hermes-agent:latest
 ```
-Ezután töltse le a Hermes Compose fájlt [hermes-compose.yaml](assets/hermes-compose.yaml), és helyezze el a `/firecrawl` gyökérkönyvtárban:
+Ennek megtörténte után töltse le a Hermes Compose fájlt [hermes-compose.yaml](assets/hermes-compose.yaml), és helyezze a `/firecrawl` gyökérkönyvtárba:
 
-> Ez a konvenció szükséges ahhoz, hogy a `systemd` megtalálja és megfelelően elindítsa a szolgáltatást, ahogy azt a `WorkingDirectory=${HOME}/firecrawl` megadja.
+> Ez a konvenció szükséges ahhoz, hogy a `systemd` megtalálja és helyesen elindítsa a szolgáltatást, amint azt a `WorkingDirectory=${HOME}/firecrawl` megadja.
 
 > A stack bármikor bővíthető további Firecrawl szolgáltatások hozzáadásával, igény szerint. Az elérhető szolgáltatások teljes listája megtalálható a hivatalos [Firecrawl docker-compose.yaml](https://github.com/firecrawl/firecrawl/blob/main/docker-compose.yaml) fájlban.
 
-### 4. A Hermes szolgáltatás elindítása a Firecrawlon keresztül
+### 4. A Hermes szolgáltatás elindítása a Firecrawl-on keresztül
 
-Mielőtt átadná az irányítást a `systemd`-nek, ellenőrizze, hogy minden megfelelően működik-e a stack kézi futtatásával:
+Mielőtt átadná az irányítást a `systemd`-nek, ellenőrizze, hogy minden megfelelően működik-e a stack manuális futtatásával:
 ```bash
 podman compose -f hermes-compose.yaml up -d
 ```
-Ha minden megfelelően van konfigurálva, a Hermes konténernek el kell indulnia, és a parancssori kimenetnek nagyjából így kell kinéznie:
+Ha minden megfelelően van konfigurálva, látnia kell, hogy a Hermes konténer elindul, és a parancssori kimenetnek valahogy így kell kinéznie:
 <p align="center">
   <img src="assets/podman_health_verification.png" width="500" height="400" />
 </p>
 
-Az ellenőrzés után állítsa le a stack-et, mielőtt folytatná:
+Az ellenőrzés után állítsa le a stacket, mielőtt továbblépne:
 ```bash
 podman compose -f hermes-compose.yaml down
 ```
-Most, hogy mindent ellenőrzött, indítsa el a szolgáltatást a `systemd` segítségével:
+Most, hogy minden ellenőrzésre került, indítsa el a szolgáltatást a `systemd`-n keresztül:
 ```bash
 systemctl --user start firecrawl.service
 ```
-[A Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) elérhető az interaktív konténeren belülről, a Web Dashboard pedig ugyanazon a hoston és porton érhető el: http://127.0.0.1:9119.
+[A Hermes API](https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/#endpoints) elérhető az interaktív konténeren belülről, a Web Dashboard pedig ugyanazon a hoszton és porton érhető el a http://127.0.0.1:9119 címen.
 <p align="center">
   <img src="assets/System_Service_launch.png" width="500" height="500" />
 </p>
@@ -1054,7 +1056,7 @@ systemctl --user stop firecrawl.service
 
 ## Hermes Native
 
-Indítson egy interaktív CLI munkamenetet közvetlenül:
+Indítson el egy interaktív CLI munkamenetet közvetlenül:
 
 ```bash
 hermes
@@ -1209,17 +1211,17 @@ finally {
 <!-- @test:end -->
 <!-- @os:end -->
 
-**Gratulálunk, létrehozott egy teljesen helyi AI-ágensstacket.**
+**Gratulálunk, elkészítette a teljesen helyi AI ügynök stacket.**
 
 ### Web Dashboard
 
-A Hermes tartalmaz egy böngészőalapú felhasználói felületet a konfiguráció, API-kulcsok, modellek, munkamenetek, memória és cron feladatok kezeléséhez. Nyisson meg egy második terminált, miközben a gateway vagy a CLI fut, és indítsa el a következő paranccsal:
+A Hermes tartalmaz egy böngészőalapú felületet a konfiguráció, API kulcsok, modellek, munkamenetek, memória és cron feladatok kezelésére. Nyisson meg egy második terminált, miközben a gateway vagy a CLI fut, és indítsa el a következővel:
 
 ```bash
 hermes dashboard
 ```
 
-Ez elindít egy helyi szervert, és megnyitja a `http://127.0.0.1:9119` címet a böngészőjében. A teljes funkciólistáért lásd a [dashboard dokumentációt](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard).
+Ez elindít egy helyi szervert, és megnyitja a `http://127.0.0.1:9119` címet a böngészőjében. A teljes funkcióreferenciáért lásd a [dashboard dokumentációját](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-dashboard).
 <p align="center">
   <img src="assets/hermes_dashboard.jpg" width="500" height="300" />
 </p>
@@ -1228,37 +1230,37 @@ Ez elindít egy helyi szervert, és megnyitja a `http://127.0.0.1:9119` címet a
 
 ## Opcionális: Kommunikációs csatorna csatlakoztatása
 
-Amint a gateway fut, bármely eszközről elérheti a helyi ágensét. A Hermes támogatja a [Discordot](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), a [Telegramot](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) és másokat is
+Miután a gateway fut, bármilyen eszközről elérheti a helyi ügynökét. A Hermes támogatja a [Discord](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord), [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) és egyéb platformokat
 
 ---
 
 ### Discord
 
-A Discordhoz olyan szerver szükséges, ahol **Ön rendelkezik adminisztrátori hozzáféréssel** a bot hozzáadásához. Ha megosztott szervereket használ, de nincs saját szervere, használja inkább a Telegramot.
+A Discordhoz szükség van egy szerverre, ahol **rendelkezik adminisztrátori hozzáféréssel** a bot hozzáadásához. Ha szervereket oszt meg másokkal, de nincs sajátja, használja inkább a Telegramot.
 
 #### Discord alkalmazás és bot létrehozása
 
-1. Nyissa meg a [Discord Developer Portalt](https://discord.com/developers/applications), és kattintson a **New Application** gombra. Adjon neki egy nevet (pl. "hermes-bot").
-2. Az oldalsávban kattintson a **Bot** menüpontra. Állítson be egy felhasználónevet a bothoz.
-3. Még mindig a Bot oldalon, görgessen le a **Privileged Gateway Intents** részhez, és engedélyezze:
+1. Keresse fel a [Discord Developer Portal](https://discord.com/developers/applications) oldalt, és kattintson a **New Application** gombra. Adjon neki egy nevet (pl. "hermes-bot").
+2. Az oldalsávban kattintson a **Bot** elemre. Állítson be egy felhasználónevet a botnak.
+3. Továbbra is a Bot oldalon görgessen le a **Privileged Gateway Intents** részhez, és engedélyezze:
    - **Message Content Intent** (kötelező)
    - **Server Members Intent** (ajánlott)
 4. Görgessen vissza felfelé, és kattintson a **Reset Token** gombra a bot tokenjének generálásához. Másolja ki.
 
 #### A bot hozzáadása a szerverhez
 
-1. Az oldalsávban kattintson az **OAuth2 / URL Generator** menüpontra.
-2. A **Scopes** alatt engedélyezze a `bot` és `applications.commands` opciókat.
+1. Az oldalsávban kattintson az **OAuth2 / URL Generator** elemre.
+2. A **Scopes** alatt engedélyezze a `bot` és az `applications.commands` lehetőségeket.
 3. A **Bot Permissions** alatt engedélyezze: View Channels, Send Messages, Read Message History, Embed Links, Attach Files.
 4. Másolja ki a generált URL-t, illessze be a böngészőjébe, válassza ki a szerverét, és erősítse meg.
 
-#### Azonosítók begyűjtése és DM-ek engedélyezése
+#### Az azonosítók begyűjtése és a DM-ek engedélyezése
 
-Engedélyezze a Fejlesztői módot a Discordban (**User Settings / Advanced / Developer Mode**), majd:
+Engedélyezze a fejlesztői módot a Discordban (**User Settings / Advanced / Developer Mode**), majd:
 - Kattintson jobb gombbal a szerver ikonjára: **Copy Server ID**
 - Kattintson jobb gombbal a saját avatarjára: **Copy User ID**
 
-Kattintson jobb gombbal a szerver ikonjára / **Privacy Settings** / kapcsolja be a **Direct Messages** opciót. Ez szükséges a párosítási lépéshez.
+Kattintson jobb gombbal a szerver ikonjára / **Privacy Settings** / kapcsolja be a **Direct Messages** lehetőséget. Ez szükséges a párosítási lépéshez.
 
 #### A Hermes konfigurálása Discordhoz
 
@@ -1270,13 +1272,13 @@ DISCORD_BOT_TOKEN=your-bot-token
 DISCORD_ALLOWED_USERS=your-discord-user-id
 ```
 
-Ezután indítsa el a gateway-t:
+Majd indítsa el a gateway-t:
 
 ```bash
 hermes gateway
 ```
 
-A botnak néhány másodpercen belül online állapotba kell kerülnie a Discordban. Küldjön neki egy üzenetet, akár DM-ben, akár egy olyan csatornán, amelyet lát.
+A botnak néhány másodpercen belül online kell válnia a Discordban. Küldjön neki egy üzenetet, akár DM-ben, akár egy olyan csatornán, amelyet lát.
 
 <p align="center">
   <img src="assets/discord_bot.png" width="400" height="300" />
@@ -1289,8 +1291,8 @@ A botnak néhány másodpercen belül online állapotba kell kerülnie a Discord
 
 #### Telegram bot létrehozása
 
-1. Nyissa meg a Telegramot, és üzenjen a **@BotFather**-nek.
-2. Küldje el a `/newbot` parancsot, és kövesse az utasításokat. Mentse el az így kapott bot tokent.
+1. Nyissa meg a Telegramot, és küldjön üzenetet a **@BotFather**-nek.
+2. Küldje el a `/newbot` parancsot, és kövesse az utasításokat. Mentse el a megadott bot tokent.
 
 #### A Hermes konfigurálása Telegramhoz
 
@@ -1301,24 +1303,24 @@ TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_ALLOWED_USERS=your-telegram-user-id   # comma-separated for multiple users
 ```
 
-> **Nem tudja a Telegram felhasználói azonosítóját?** Írjon üzenetet az [@userinfobot](https://t.me/userinfobot) fiókjának a Telegramban, ez válaszul elküldi a számszerű azonosítóját.
+> **Nem tudja a Telegram felhasználói azonosítóját?** Küldjön üzenetet a [@userinfobot](https://t.me/userinfobot) fiókjának a Telegramban, amely válaszul elküldi a numerikus azonosítóját.
 
-Ezután indítsa el a gateway-t:
+Majd indítsa el a gateway-t:
 
 ```bash
 hermes gateway
 ```
 
-Küldjön a botjának bármilyen üzenetet a Telegramban a teszteléshez. Mostantól Telegram DM-en keresztül is beszélgethet az ágensével. A webhook módért és a fejlettebb beállításokért lásd a [teljes Telegram beállítási útmutatót](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram).
+Küldjön a botjának egy üzenetet a Telegramban a teszteléshez. Mostantól Telegram DM-en keresztül is cseveghet az ügynökével. A webhook mód és a haladó opciók érdekében lásd a [teljes Telegram beállítási útmutatót](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram).
 
 ---
 
 ## Következő lépések
 
-Most, hogy az ágense parancsokat képes fogadni a telefonjáról, és cselekedni a helyi gépén, íme három irány, amelyet érdemes megfontolni:
+Most, hogy az ügynöke parancsokat tud fogadni a telefonjáról, és végre tudja hajtani azokat a helyi gépén, íme három érdemes irány a további felfedezéshez:
 
-1. **Automatizált kutatási összefoglaló**: Ütemezze be a Hermest, hogy minden reggel keressen a weben az Önt érdeklő témákról, foglalja össze az eredményeket a helyi modelljével, és küldjön egy összefoglalót a telefonjára Telegramon vagy Discordon keresztül, mindezt a saját hardverén, felhőalapú költségek nélkül.
+1. **Automatizált kutatási összefoglaló**: Ütemezze be a Hermes-t, hogy minden reggel keressen a weben az Önt érdeklő témákban, foglalja össze az eredményeket a helyi modellel, és küldjön egy összefoglalót a telefonjára Telegramon vagy Discordon keresztül, mindezt a saját hardverén futtatva, felhőköltségek nélkül.
 
-2. **Kódellenőrzés igény szerint**: Irányítsa a Hermest egy GitHub-tárolóra, kérje meg, hogy vizsgálja át a nyitott pull request-eket, és tegye közzé a megjegyzéseit vagy egy összefoglalót a chatjében. A Docker terminál háttérrendszerrel minden git-művelet a sandboxban fut, így a gazdagép tiszta marad.
+2. **Kódáttekintés igény szerint**: Irányítsa a Hermes-t egy GitHub repóra, kérje meg, hogy tekintse át a nyitott pull requesteket, és posztoljon megjegyzéseket vagy összefoglalót vissza a csevegésébe. A Docker terminál háttérrel minden git művelet a sandboxon belül fut, így a hoszt gépe tiszta marad.
 
-3. **Helyi fájlasszisztens**: Adjon a Hermesnek hozzáférést egy munkakönyvtárhoz, és kérje meg, hogy rendszerezze, nevezze át, foglalja össze vagy alakítsa át a fájlokat igény szerint, akár a telefonjáról is. Mivel a Docker terminál háttérrendszer minden írási műveletet a sandbox munkaterületre korlátoz, a véletlen destruktív műveletek hatása korlátozott.
+3. **Helyi fájlasszisztens**: Adjon a Hermes-nek hozzáférést egy munkakönyvtárhoz, és kérje meg, hogy rendezze, nevezze át, foglalja össze vagy alakítsa át a fájlokat igény szerint, a telefonjáról. Mivel a Docker terminál háttér minden írási műveletet a sandbox munkaterületre korlátoz, a véletlen destruktív műveletek is körülhatárolva maradnak.

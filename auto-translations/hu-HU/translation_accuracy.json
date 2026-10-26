@@ -282,12 +282,12 @@
       "quality_issues": "Inconsistent register (te/ön mixing), 'Ray-munkavállaló' awkward for worker node, 'switchcsel' typo. Otherwise accurate, code intact."
     },
     "playbooks/supplemental/clustering-rccl/playbook.json": {
-      "source_sha256": "e55853ecbe0d357ac4550eb56b9c3bec4cc5c7ea6ea0fcc981ee71ec2cb6392d",
+      "source_sha256": "3a84c5ac1b78ee7d27a99e502d7e2178b89d82e04747141b9c268452f1ceafe0",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "\"Multi-node\" left untranslated; minor inconsistency with \"klaszter\"/\"fürt\" terminology otherwise good."
+      "quality_score": 90,
+      "quality_issues": "Accurate, fluent; brand terms and RCCL intact. Minor: 'klaszterezése'/'fürtöt' inconsistency, slight comma awkwardness."
     },
     "playbooks/supplemental/clustering-rpc-server/README.md": {
       "source_sha256": "40eca53770d0d4011db1b668485ba06d457963222df9179f1ba501c32c6087fa",
@@ -546,12 +546,12 @@
       "quality_issues": "Minor: 'a útmutató' should be 'az útmutató'; 'a [add_one_kernel.py]' article error. Otherwise accurate, fluent, code intact."
     },
     "playbooks/supplemental/github-slack-development-digest/README.md": {
-      "source_sha256": "cc00f17cba750b636c672726ed6b12738235ffe750c438db3472d11cbb1f601e",
+      "source_sha256": "1c162779b293628f3be365e681cf60d54e3590c509b3503576ee6fa9d94df917",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Minor grammar: 'ebbe a útmutatóba/ebben a útmutatóban' should be 'ebben az útmutatóban'. Inconsistent digest/playbook terms; otherwise accurate, code intact."
+      "quality_score": 95,
+      "quality_issues": "Minor inconsistency in formal/informal address (te/ön), small typo 'helyőrtő'. Code, URLs, brands intact."
     },
     "playbooks/supplemental/github-slack-development-digest/platform.md": {
       "source_sha256": "4a8da06a7d980811c2f8aa3f14f62b49e48aff6aa7282006d5b96f0994af1cc6",
@@ -562,28 +562,28 @@
       "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor stylistic nits only."
     },
     "playbooks/supplemental/github-slack-development-digest/playbook.json": {
-      "source_sha256": "d2ff6ac44cef585a1a6560b96ab98a921cc1163e326bd89a607aa95610739ed6",
+      "source_sha256": "f64fe0c9d4c29996bcd982a51b6e3783cfd3b82d4292a3e02a44524e4135cf82",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Minor: 'Digest' rendered as 'napi összesítő' (adds 'daily'); slight structural awkwardness but accurate."
+      "quality_issues": "Good; 'napi' adds 'daily' not in source, minor addition"
     },
     "playbooks/supplemental/hermes-lemonade-server/README.md": {
-      "source_sha256": "b6f8a16d96872f88fd63899f80b8835ac47e2958ae65debeb5865828b5a57883",
+      "source_sha256": "d22037db17e71ff287fb098c73587815a3287616649df169481b0d30f5985104",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 88,
-      "quality_issues": "Inconsistent register: shifts between informal 'te' and formal 'Ön' forms mid-document; minor 'A egyszerű' article error."
+      "quality_score": 90,
+      "quality_issues": "Inconsistent register: switches from informal 'te' (intro) to formal 'ön' (later sections). Otherwise accurate, fluent, code/URLs intact."
     },
     "playbooks/supplemental/hermes-lemonade-server/playbook.json": {
-      "source_sha256": "2acd207ea87f2406f1a2cb6eab280828860d7d7ee97d2dd4b6f510638822d4ee",
+      "source_sha256": "b336a8a4e6fb5b829b66f1a3da3edcc827e01de23c416fd7abf003aaec88c482",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 92,
-      "quality_issues": "Accurate and fluent; 'háttérszolgáltatás' slightly interprets 'backend' but acceptable."
+      "quality_score": 84,
+      "quality_issues": "Inconsistent terminology: 'ügynök'/'Agent'/'ágenst' and 'szerver'/'Server' mixed; brand names partially translated."
     },
     "playbooks/supplemental/openhands-getting-started/README.md": {
       "source_sha256": "92eb485ae459e0eab1d6b1565e3eb002f8f8ad8448e85c922c731b5cf202387a",
