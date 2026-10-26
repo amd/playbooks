@@ -203,7 +203,10 @@
       "name": "Lemonade Readiness Check",
       "description": "Waits for the Lemonade server to be reachable before dependent steps run",
       "category": "check",
-      "platforms": ["windows", "linux"],
+      "platforms": [
+        "windows",
+        "linux"
+      ],
       "file": "checks/lemonade-ready.md",
       "preinstalled": {
         "linux": [],
@@ -220,12 +223,8 @@
       ],
       "file": "lemonade_models_gpt_oss_120b.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {
@@ -261,12 +260,8 @@
       ],
       "file": "lemonade_models_gpt_oss_20b.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {
@@ -806,12 +801,8 @@
       ],
       "file": "comfyui_models.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {
@@ -845,12 +836,8 @@
       ],
       "file": "lmstudio_models_gpt_oss_120b.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {
@@ -923,12 +910,8 @@
       ],
       "file": "lmstudio_models_qwen3_coder_30b.md",
       "preinstalled": {
-        "linux": [
-          "halo_box"
-        ],
-        "windows": [
-          "halo_box"
-        ]
+        "linux": [],
+        "windows": []
       },
       "validate": {
         "linux": {

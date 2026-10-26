@@ -25,6 +25,7 @@ SCOPED = ["llama-factory-finetuning", "pytorch-finetuning",
 class WindowsTheRockProvisioning(unittest.TestCase):
     def setUp(self):
         self.cfg = trigger.load_config(GITHUB / "orchestrai-config.yml")
+        self.cfg["provisioning"]["windows_driver"]["use"] = "internal"
         self.cfg["provisioning"]["windows_driver"]["source"] = "driver"
         self.cfg["provisioning"]["therock_url"] = "https://example.invalid/linux.tar.gz"
         self.cfg["provisioning"]["windows_therock_url"] = "https://example.invalid/windows.tar.gz"

@@ -115,8 +115,8 @@ jobs:
             CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'playbooks/**' 2>/dev/null || echo "")
             PLAYBOOKS=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' \
               | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | tr '\n' ' ')
-            # ...and the shared dependency files if any of them changed.
-            if echo "$CHANGED" | grep -qE '^playbooks/dependencies/.+\.md$'; then DEPS=true; fi
+            # ...and the shared dependency docs if a doc, or a playbook doc that picks them, changed.
+            if echo "$CHANGED" | grep -qE '^playbooks/(dependencies/[^/]+|(core|supplemental)/[^/]+/[^/]+)\.md$'; then DEPS=true; fi
           fi
           echo "playbooks=$PLAYBOOKS" >> "$GITHUB_OUTPUT"
           echo "deps=$DEPS" >> "$GITHUB_OUTPUT"
