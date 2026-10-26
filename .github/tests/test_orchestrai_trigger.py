@@ -4,22 +4,19 @@
 # SPDX-License-Identifier: MIT
 
 """
-Regression tests for what orchestrai_trigger.py sends to the pipeline.
-
-run_settings.acquire_timeout was written into PLAN_JSON, but the pipeline reads
-its machine-acquire timeout only from the ACQUIRE_TIMEOUT build parameter, so the
-setting was silently ignored and every run waited the pipeline's 2400 s default.
-These tests pin that the value in orchestrai-config.yml is what the pipeline
-actually receives.
+Regression tests for orchestrai_trigger.py: Control Plane submission, the
+reporting switch (reportportal | api), config validation and scheduling policy.
 
 Usage:
     python3 .github/tests/test_orchestrai_trigger.py
 """
 
+import contextlib
+import io
+import json
 import os
 import sys
 import unittest
-import urllib.parse
 from unittest import mock
 
 import yaml
@@ -41,59 +38,192 @@ def load_config():
         return yaml.safe_load(f)
 
 
-def submitted_params(plan, platform="linux"):
-    """Run submit() against a fake pipeline server and return the form it posted."""
-    captured = {}
-
-    class Response:
-        headers = {"Location": "https://pipeline.example/queue/item/1/"}
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *exc):
-            return False
-
-    class Opener:
-        def open(self, req, timeout=None):
-            captured["body"] = req.data
-            return Response()
-
-    with mock.patch.object(trigger.urllib.request, "build_opener", lambda *a: Opener()):
-        queue = trigger.submit(plan, {"builds": []}, platform,
-                               {"url": "https://pipeline.example", "job": "pipeline"},
-                               "user", "token")
-    assert queue == "https://pipeline.example/queue/item/1/"
-    return {k: v[0] for k, v in urllib.parse.parse_qs(captured["body"].decode()).items()}
+CP_ENV = {"ORCHESTRAI_V2_CI_API_URL": "https://cp.example/api/ci/v1",
+          "ORCHESTRAI_V2_OIDC_AUDIENCE": "https://cp.example",
+          "ORCHESTRAI_V2_PORTAL_URL": "https://cp.example", "ORCHESTRAI_V2_WORKSPACE": "ws",
+          "ACTIONS_ID_TOKEN_REQUEST_URL": "https://oidc.example/token?x=1",
+          "ACTIONS_ID_TOKEN_REQUEST_TOKEN": "req", "GITHUB_REPOSITORY": "amd/playbooks",
+          "GITHUB_RUN_ID": "77", "GITHUB_RUN_ATTEMPT": "1"}
 
 
-def plan_with(acquire_timeout):
-    return {"groups": [], "run_settings": {"max_duration": 240, "max_test_case_duration": 90,
-                                           "acquire_timeout": acquire_timeout,
-                                           "machines_per_hw_group": 1}}
+class FakeApi:
+    """Stands in for http_json: the OIDC endpoint plus scripted CI API answers."""
+
+    def __init__(self, *answers):
+        self.answers, self.calls = list(answers), []
+
+    def __call__(self, method, url, headers, body=None):
+        if url.startswith("https://oidc.example/"):
+            return 200, {"value": "oidc-jwt"}
+        self.calls.append((method, url, headers, body))
+        answer = self.answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
 
 
-class AcquireTimeoutReachesThePipeline(unittest.TestCase):
+class ControlPlaneApi(unittest.TestCase):
 
-    def test_acquire_timeout_is_sent_as_the_build_parameter_in_seconds(self):
-        self.assertEqual(submitted_params(plan_with(60))["ACQUIRE_TIMEOUT"], "3600")
-        self.assertEqual(submitted_params(plan_with(45))["ACQUIRE_TIMEOUT"], "2700")
+    def setUp(self):
+        patches = [mock.patch.dict(os.environ, CP_ENV, clear=True),
+                   mock.patch.object(trigger.time, "sleep"),
+                   contextlib.redirect_stdout(io.StringIO()),
+                   contextlib.redirect_stderr(io.StringIO())]
+        for p in patches:
+            p.__enter__()
+            self.addCleanup(p.__exit__, None, None, None)
+        self.cp = trigger.control_plane()
+        self.plan = trigger.make_plan(dict(BATCH, playbooks=["gaia-agents", "cvml"]), "refs/heads/main",
+                                      load_config(), 1, "https://github.com/amd/playbooks", "a" * 40,
+                                      "https://index.example")
 
-    def test_the_configured_value_is_what_the_pipeline_receives(self):
-        """End to end from the shipped orchestrai-config.yml."""
-        cfg = load_config()
-        plan = trigger.make_plan(BATCH, "refs/heads/main", cfg, 1,
-                                 "https://github.com/amd/playbooks", "main",
-                                 "https://index.example")
-        params = submitted_params(plan)
-        self.assertEqual(params["ACQUIRE_TIMEOUT"],
-                         str(cfg["run_settings"]["acquire_timeout"] * 60))
-        self.assertEqual(params["ACQUIRE_TIMEOUT"], "3600")
+    def start(self, fake, publisher="rp-cred", platform="linux"):
+        with mock.patch.object(trigger, "http_json", fake):
+            return trigger.start_run(self.cp, f"{platform}/stx", self.plan, {"install_scripts": []},
+                                     platform, publisher, "a" * 40)
 
-    def test_the_other_parameters_are_unchanged(self):
-        params = submitted_params(plan_with(60), platform="windows")
-        self.assertEqual(set(params), {"PLAN_JSON", "BUILDS_JSON", "OS_IMAGE", "ACQUIRE_TIMEOUT"})
-        self.assertEqual(params["OS_IMAGE"], "windows")
+    def test_start_sends_one_session_per_playbook_with_oidc_and_workspace(self):
+        fake = FakeApi((201, {"run": {"id": "r1"}}))
+        self.assertEqual(self.start(fake), "r1")
+        method, url, headers, body = fake.calls[0]
+        self.assertEqual((method, url), ("POST", "https://cp.example/api/ci/v1/runs"))
+        self.assertEqual(headers["Authorization"], "Bearer oidc-jwt")
+        self.assertEqual(headers["X-OrchestrAI-Workspace"], "ws")
+        sessions = body["plan_document"]["document"]["sessions"]
+        self.assertEqual([s["name"] for s in sessions], ["playbook-gaia-agents", "playbook-cvml"])
+        self.assertEqual({s["variables"]["PLAYBOOK_SHA"] for s in sessions}, {"a" * 40})
+        self.assertEqual(sessions[0]["machine_tags"], ["apu_stx"])
+        self.assertEqual(body["require_capacity"], "queue")
+
+    def test_reportportal_publisher_is_required_and_api_mode_has_none(self):
+        fake = FakeApi((201, {"run": {"id": "r1"}}), (201, {"run": {"id": "r2"}}))
+        self.start(fake)
+        self.start(fake, publisher="")
+        rp = fake.calls[0][3]["plan_document"]["document"]["run_settings"]["result_publishers"][0]
+        self.assertEqual((rp["credential"], rp["required"], rp["attributes"]["github_run_id"]),
+                         ("rp-cred", True, "77"))
+        self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
+
+    def test_windows_image_override(self):
+        fake = FakeApi((201, {"run": {"id": "r1"}}))
+        with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_WINDOWS_IMAGE": "windows/win11-x"}):
+            self.start(fake, platform="windows")
+        self.assertEqual(fake.calls[0][3]["plan_document"]["document"]["run_settings"]["os_image"],
+                         "windows/win11-x")
+
+    def test_lost_start_is_retried_with_the_same_idempotency_key(self):
+        fake = FakeApi(OSError("reset"), (503, None), (201, {"run": {"id": "r1"}}))
+        self.assertEqual(self.start(fake), "r1")
+        keys = {c[2]["Idempotency-Key"] for c in fake.calls}
+        self.assertEqual(len(fake.calls), 3)
+        self.assertEqual(len(keys), 1)
+
+    def test_a_refusal_is_not_retried_and_reports_code_and_request_id(self):
+        fake = FakeApi((403, {"error": {"code": "no_matching_rule", "message": "no rule"},
+                              "request_id": "abc"}))
+        with self.assertRaisesRegex(ValueError, "403 no_matching_rule: no rule.*request_id=abc"):
+            self.start(fake)
+        self.assertEqual(len(fake.calls), 1)
+
+    def test_only_a_build_url_is_handed_on_and_errors_carry_their_reason(self):
+        fake = FakeApi((200, {"run": {"id": "a", "status": "queued", "pipeline_url": "https://j/queue/item/7/"}}),
+                       (200, {"run": {"id": "b", "status": "error", "error": "no image"}}),
+                       (200, {"run": {"id": "a", "status": "running", "pipeline_url": "https://j/job/p/9"}}))
+        err = io.StringIO()
+        with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
+            urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"}, 3600)
+        self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
+        self.assertIn("run b ended error without a build: no image", err.getvalue())
+
+
+class ReportingSwitch(unittest.TestCase):
+    """reportportal adds the required ReportPortal publisher; api does not."""
+
+    def run_main(self, reporting, credential="playbooks-reportportal"):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/stx": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40,
+               "ORCHESTRAI_REPORTING": reporting, "ORCHESTRAI_V2_RP_CREDENTIAL": credential}
+        start = mock.Mock(return_value="r1")
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                mock.patch.object(trigger, "start_run", start), \
+                mock.patch.object(trigger, "await_builds", return_value={"linux/stx": "https://j/1/"}), \
+                contextlib.redirect_stderr(io.StringIO()):
+            trigger.main()
+        return start.call_args.args[5]
+
+    def test_reportportal_is_the_default_and_exports(self):
+        self.assertEqual(self.run_main(""), "playbooks-reportportal")
+        self.assertEqual(self.run_main("reportportal"), "playbooks-reportportal")
+
+    def test_api_keeps_results_in_orchestrai(self):
+        self.assertEqual(self.run_main("api"), "")
+
+    def test_reportportal_without_its_credential_fails_before_submitting(self):
+        with self.assertRaises(SystemExit):
+            self.run_main("reportportal", credential="")
+        with self.assertRaises(SystemExit):
+            self.run_main("both")
+
+
+class MachinesPerBatch(unittest.TestCase):
+    """A batch never asks for more machines than it has playbooks."""
+
+    def run_main(self, mphg, batches):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps(batches), "MACHINES_PER_HW_GROUP": str(mphg),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        start, err = mock.Mock(return_value="r1"), io.StringIO()
+        self.wait = mock.Mock(side_effect=lambda _cp, runs, _s: {b: "https://j/1/" for b in runs})
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                mock.patch.object(trigger, "start_run", start), \
+                mock.patch.object(trigger, "await_builds", self.wait), \
+                contextlib.redirect_stderr(err):
+            trigger.main()
+        requested = {c.args[1]: c.args[2]["run_settings"]["machines_per_hw_group"]
+                     for c in start.call_args_list}
+        return requested, err.getvalue()
+
+    def test_machines_are_capped_at_the_playbook_count(self):
+        one = dict(BATCH, playbooks=["gaia-agents"])
+        five = dict(BATCH, playbooks=["gaia-agents", "lemonade-getting-started", "ollama-getting-started", "open-webui-chat", "lmstudio-rocm-llms"])
+        requested, log = self.run_main(2, {"linux/one": one, "linux/five": five})
+        self.assertEqual(requested, {"linux/one": 1, "linux/five": 2})
+        self.assertIn("2 batch(es), 3 machine(s) requested (machines_per_hw_group=2)", log)
+
+    def test_the_default_is_one_machine_per_batch(self):
+        requested, log = self.run_main(1, {"linux/stx": BATCH})
+        self.assertEqual(requested, {"linux/stx": 1})
+        self.assertIn("1 batch(es), 1 machine(s) requested", log)
+
+    def test_builds_are_awaited_as_long_as_the_control_plane_queues(self):
+        self.run_main(1, {"linux/stx": BATCH})
+        wait = load_config()["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN
+        self.assertEqual(self.wait.call_args.args[2], wait)
+
+
+class WorkflowWiring(unittest.TestCase):
+    """Same jobs as before; Detect & Trigger and !orc can request OIDC tokens."""
+
+    def load(self, name):
+        with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
+            return yaml.load(f, Loader=yaml.BaseLoader)
+
+    def test_jobs_reporting_input_and_oidc_permission(self):
+        wf = self.load("test-playbooks-orchestrai.yml")
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-playbooks",
+                                            "test-localized-playbooks", "test-gate"])
+        reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
+        self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
+        self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
+        step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if s.get("id") == "trigger")
+        self.assertIn("inputs.reporting", step["env"]["ORCHESTRAI_REPORTING"])
+        self.assertEqual(self.load("orchestrai-pr-command.yml")["jobs"]["command"]["permissions"]["id-token"],
+                         "write")
 
 
 class AcquireTimeoutValidation(unittest.TestCase):
@@ -110,9 +240,18 @@ class AcquireTimeoutValidation(unittest.TestCase):
         for bad in (0, -5, "60", True, 60.5, None):
             self.assertTrue(self.errors_for(acquire_timeout=bad), bad)
 
-    def test_a_timeout_that_leaves_no_time_to_run_is_rejected(self):
-        self.assertTrue(self.errors_for(acquire_timeout=240, max_duration=240))
-        self.assertEqual(self.errors_for(acquire_timeout=239, max_duration=240), [])
+    def test_a_wait_longer_than_the_build_limit_is_allowed(self):
+        # The Control Plane waits for machines before the build starts, so the
+        # wait no longer comes out of max_duration.
+        self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
+
+    def test_jobs_outlast_the_build_wait(self):
+        need = load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
+                          ("orchestrai-pr-command.yml", "command")):
+            with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
+                limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
+            self.assertGreater(limit, need, name)
 
     def test_no_overall_limit_means_no_comparison(self):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])
@@ -151,8 +290,70 @@ class SchedulingPolicy(unittest.TestCase):
         for platform in ("linux", "windows"):
             self.assertEqual(batches[f"{platform}/stx"]["playbooks"],
                              ["ollama-getting-started"])
+            # KRK's untagged playbooks run on its 64 GB machine (superset_tags).
             self.assertEqual(batches[f"{platform}/krk+ram_64gb"]["playbooks"],
-                             list(affected))
+                             [*affected, "ollama-getting-started"])
+            self.assertNotIn(f"{platform}/krk", batches)
+
+
+class FoldIntoCapacityBatch(unittest.TestCase):
+    """A device with a ram_128gb batch runs its untagged playbooks there too."""
+
+    MIXED = ["deepseek-v4-flash-ds4", "lmstudio-rocm-llms", "ollama-getting-started",
+             "cvml"]
+
+    def build(self, playbooks=None, **overrides):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        cfg.update(overrides)
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            return build(playbooks or self.MIXED, cfg, devices={"halo"}, platforms={"linux"})
+        finally:
+            os.chdir(old_cwd)
+
+    def test_untagged_halo_playbooks_join_the_128gb_batch(self):
+        matrix, batches = self.build()
+        self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
+        self.assertEqual(sorted(batches["linux/halo+ram_128gb"]["playbooks"]), sorted(self.MIXED))
+        self.assertIn("ram_128gb", batches["linux/halo+ram_128gb"]["tags"])
+        # Every Test job waits on the batch its playbook now runs in.
+        self.assertEqual({e["batch_id"] for e in matrix}, {"linux/halo+ram_128gb"})
+
+    def test_without_superset_tags_the_batches_stay_separate(self):
+        matrix, batches = self.build(superset_tags=[])
+        self.assertEqual(sorted(batches), ["linux/halo", "linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
+
+    def test_untagged_only_runs_keep_their_own_batch(self):
+        _, batches = self.build(["ollama-getting-started", "cvml"])
+        self.assertEqual(sorted(batches), ["linux/halo"])
+
+    def test_two_capacity_batches_on_one_device_are_not_guessed_between(self):
+        _, batches = self.build(device_extra_tags={
+            **load_config()["device_extra_tags"],
+            "lmstudio-rocm-llms": {"halo": ["ram_64gb"]}},
+            extra_tag_devices={"ram_128gb": ["halo"], "ram_64gb": ["halo"]})
+        self.assertEqual(sorted(batches),
+                         ["linux/halo", "linux/halo+ram_128gb", "linux/halo+ram_64gb"])
+
+    def test_localized_batches_fold_the_same_way(self):
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            matrix, batches = build(["lmstudio-rocm-llms", "comfyui-image-gen"], cfg,
+                                    devices={"halo"}, platforms={"linux"}, locale="zh-CN")
+        finally:
+            os.chdir(old_cwd)
+        if not batches:
+            self.skipTest("no zh-CN playbooks for this selection")
+        self.assertEqual(sorted(batches), ["localized/zh-CN/linux/halo+ram_128gb"])
+        self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
 
 
 class OpenHandsProvisioning(unittest.TestCase):
