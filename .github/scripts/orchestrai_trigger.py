@@ -149,7 +149,8 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "PLAYBOOK_REF": git_ref,
             "PLAYBOOK_ID": pb_id,
             "PLAYBOOK_PLATFORM": platform,
-            "PLAYBOOK_DEVICE": device,
+            # device_runs_as: playbooks run as another device's (same silicon).
+            "PLAYBOOK_DEVICE": (cfg.get("device_runs_as") or {}).get(device, device),
             "ROCM_MULTI_ARCH_INDEX_URL": rocm_index_url,
         }
         locale = batch.get("locale", "")

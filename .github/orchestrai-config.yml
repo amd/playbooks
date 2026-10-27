@@ -176,6 +176,14 @@ device_site_ids:
   r9700:    *markham
   grgh:     *markham
 
+# Device -> the device its playbooks run as. Machines are still chosen by the
+# device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
+# README @device blocks, @var values and the test library's per-device
+# dependencies treat it exactly like that one. For a device no README names yet
+# that shares another's silicon: grgh is gfx1151 like halo.
+device_runs_as:
+  grgh: halo
+
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
 # installed on demand, so a device whose only machine runs another OS needs an

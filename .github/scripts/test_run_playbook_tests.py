@@ -15,6 +15,7 @@ platform/device filtering, so a filtered-out test never triggers the warning.
 import contextlib
 import importlib.util
 import io
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -86,6 +87,26 @@ class TimeoutOutputTest(unittest.TestCase):
         self.assertIn("waiting for the lock", result.stdout)
         self.assertIn("waiting for the lock", saved)
         self.assertIn("waiting for the lock", buf.getvalue())
+
+
+class SetupFailureTest(unittest.TestCase):
+    def run_block(self, setup):
+        test = rpt.TestBlock(id="uses-venv", timeout=30, setup=setup, code="echo test body ran")
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
+            return rpt.run_test(test, Path(d), Path(d))
+
+    @unittest.skipIf(sys.platform == "win32", "bash test")
+    def test_a_failed_setup_stops_the_test(self):
+        """A venv that a skipped step never created must not fall back to system Python."""
+        result = self.run_block("source missing-env/bin/activate")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+
+    @unittest.skipIf(sys.platform == "win32", "bash test")
+    def test_a_working_setup_still_runs_the_test(self):
+        result = self.run_block("export SETUP_OK=1")
+        self.assertTrue(result.success, result.stderr)
+        self.assertIn("test body ran", result.stdout)
 
 
 if __name__ == "__main__":

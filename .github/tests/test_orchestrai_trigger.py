@@ -104,6 +104,16 @@ class ControlPlaneApi(unittest.TestCase):
                          ("rp-cred", True, "77"))
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
+    def test_a_device_can_run_its_playbooks_as_another(self):
+        cfg = dict(load_config(), device_runs_as={"grgh": "halo"})
+        def device(arch):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, tags=["t"]), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
+        self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
+        self.assertEqual(device("stx"), {("stx", ("t",))})
+        self.assertEqual(load_config()["device_runs_as"], {"grgh": "halo"})
+
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
         def sessions(arch, platform):
