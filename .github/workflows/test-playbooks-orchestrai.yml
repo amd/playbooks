@@ -111,6 +111,7 @@ jobs:
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
+      english_batch_matrix: ${{ steps.prepare-matrices.outputs.english_batch_matrix }}
       localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
       has_english_entries: ${{ steps.prepare-matrices.outputs.has_english_entries }}
       has_localized_entries: ${{ steps.prepare-matrices.outputs.has_localized_entries }}
@@ -249,31 +250,31 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
-  test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+  test-batches:
+    # One job per batch (not per playbook): it waits on the batch's build once and
+    # resolves each playbook from it, so a full run needs ~1 runner per batch
+    # instead of one per playbook, and several runs no longer starve each other.
+    name: "Test ${{ matrix.batch_id }} (${{ matrix.count }} playbooks)"
     needs: detect-and-trigger
     if: needs.detect-and-trigger.outputs.has_english_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
-    # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
-    # + 30 min) and then for the build itself (up to 4.5 h); self-hosted runners
-    # allow this.
+    # Waits for machines (acquire_timeout, 360 min, + 30 min) and then for the
+    # build itself (up to 4.5 h); self-hosted runners allow this.
     timeout-minutes: 720
-    continue-on-error: ${{ !matrix.required }}
+    # A batch with no required playbook shows its failures without failing the run.
+    continue-on-error: ${{ toJson(matrix.required) == '[]' }}
     strategy:
       fail-fast: false
-      max-parallel: 16
       matrix:
-        include: ${{ fromJson(needs.detect-and-trigger.outputs.english_matrix) }}
+        include: ${{ fromJson(needs.detect-and-trigger.outputs.english_batch_matrix) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Wait for the batch's build to start
         id: build
-        # Each batch is handed off as soon as its own build starts, so a batch
-        # still queued for machines never holds back the others.
         env:
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           BATCH_ID: ${{ matrix.batch_id }}
@@ -335,83 +336,41 @@ jobs:
             echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1
           fi
 
-      - name: Resolve per-playbook verdict
+      - name: Resolve every playbook's verdict
         if: always()
-        id: results
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
-          PLAYBOOK_ID: ${{ matrix.playbook }}
-          PLATFORM: ${{ matrix.platform }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Resolve per-playbook verdict"), which is where the user-facing !orc
-        # sticky comment comes from. Deliberately duplicated rather than
-        # factored into .github/actions/ — see the rationale on that copy.
-        #
-        # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
-        # INTERRUPTED (the batch never produced results for this playbook).
-        # GitHub has no neutral step result, so 2 still fails the job — but it is
-        # annotated as infrastructure and the artifact records outcome=NOT_RUN,
-        # so the aggregated PR report counts it separately from test failures.
-        run: |
-          rc=0
-          python3 .github/scripts/orchestrai_verdict.py || rc=$?
-          echo "verdict_rc=${rc}" >> "$GITHUB_OUTPUT"
-          if [ "$rc" = "2" ]; then
-            echo "::warning::${PLAYBOOK_ID} (${PLATFORM}) did not run — OrchestrAI infrastructure issue, not a test failure"
-          fi
-          exit "$rc"
+        # Fails only when a required playbook did not pass; each playbook's result
+        # is in the job summary table and in test-results/<playbook>/.
+        run: python3 .github/scripts/orchestrai_batch_verdict.py
 
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: batch-results-${{ strategy.job-index }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Test summary
-        if: always()
-        env:
-          RP_URL: ${{ steps.results.outputs.rp_url }}
-          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Test summary"). See the sync note on the verdict step above.
-        run: |
-          # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
-          # the job summary instead of letting it read as a failed playbook.
-          INFRA_NOTE=$(python3 - <<'PY'
-          import json
-          try:
-              d = json.load(open("test-results/summary.json"))
-          except Exception:
-              d = {}
-          outcome = (d.get("outcome") or "").upper()
-          if outcome in ("NOT_RUN", "INTERRUPTED"):
-              reason = d.get("infrastructure_reason") or "reason not reported by the pipeline"
-              print(f"> ⚠️ **{outcome}** — this playbook produced no test results. "
-                    f"Infrastructure: {reason}")
-          PY
-          )
-          {
-            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
-            echo ""
-            if [ -n "${INFRA_NOTE}" ]; then
-              echo "${INFRA_NOTE}"
-              echo ""
-            fi
-            # Link to the test results: ReportPortal when the run exported there,
-            # otherwise the OrchestrAI run. The pipeline build URL is
-            # intentionally not shown here.
-            if [ -n "${RP_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| ReportPortal | [View Results](${RP_URL}) |"
-            elif [ -n "${RUN_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
+  playbook-results:
+    name: Playbook Results
+    needs: [detect-and-trigger, test-batches]
+    if: always() && needs.detect-and-trigger.outputs.has_english_entries == 'true'
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: batch-results-*
+          path: batch-results
+      - name: One table for every playbook
+        run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
 
   test-localized-playbooks:
     name: Localized Playbooks
@@ -429,14 +388,14 @@ jobs:
 
   test-gate:
     name: Test Gate (Required)
-    needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
+    needs: [detect-and-trigger, test-batches, test-localized-playbooks]
     if: always()
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests
         run: |
           echo "detect-and-trigger: ${{ needs.detect-and-trigger.result }}"
-          echo "English playbooks:  ${{ needs.test-playbooks.result }}"
+          echo "English batches:    ${{ needs.test-batches.result }}"
           echo "Localized playbooks:${{ needs.test-localized-playbooks.result }}"
           # A failure or cancellation in detect/matrix/trigger skips both test
           # jobs, so require success here rather than checking only "failure".
@@ -444,7 +403,7 @@ jobs:
             echo "::error::Detect/trigger did not succeed — the pipeline did not run"; exit 1
           fi
           if [ "${{ needs.detect-and-trigger.outputs.has_english_entries }}" = "true" ] \
-             && [ "${{ needs.test-playbooks.result }}" != "success" ]; then
+             && [ "${{ needs.test-batches.result }}" != "success" ]; then
             echo "::error::Required English tests did not complete successfully"; exit 1
           fi
           if [ "${{ needs.detect-and-trigger.outputs.has_localized_entries }}" = "true" ] \

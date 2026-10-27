@@ -305,7 +305,7 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-playbooks",
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
                                             "test-localized-playbooks", "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
@@ -316,7 +316,7 @@ class WorkflowWiring(unittest.TestCase):
                          "write")
 
     def test_every_test_job_waits_for_its_own_batch(self):
-        for name, job in (("test-playbooks-orchestrai.yml", "test-playbooks"),
+        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
                           ("orchestrai-test-matrix.yml", "test-playbooks"),
                           ("orchestrai-pr-command.yml", "test-playbooks")):
             steps = self.load(name)["jobs"][job]["steps"]
@@ -351,7 +351,7 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # then for the build itself (4.5 h: 1080 polls x 15 s).
         need = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
                 + 1080 * 15 / 60)
-        for name, job in (("test-playbooks-orchestrai.yml", "test-playbooks"),
+        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
                           ("orchestrai-pr-command.yml", "test-playbooks"),
                           ("orchestrai-test-matrix.yml", "test-playbooks")):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:

@@ -45,12 +45,32 @@ def prepare(
 
     return {
         "english_matrix": english_matrix,
+        "english_batch_matrix": batch_matrix(english_matrix),
         "localized_matrix": localized_matrix,
         "batches": {**english_batches, **localized_batches},
         "has_english_entries": bool(english_matrix),
         "has_localized_entries": bool(localized_matrix),
         "has_entries": bool(english_matrix or localized_matrix),
     }
+
+
+def batch_matrix(matrix: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One entry per batch: the job that waits on its build and resolves every
+    playbook in it. ``required`` lists the playbooks whose failure fails the job."""
+    batches: dict[str, dict[str, Any]] = {}
+    for entry in matrix:
+        if "batch_id" not in entry:
+            continue
+        batch = batches.setdefault(entry["batch_id"], {
+            "batch_id": entry["batch_id"], "platform": entry["platform"],
+            "arch": entry["arch"], "playbooks": [], "required": []})
+        if entry["playbook"] not in batch["playbooks"]:
+            batch["playbooks"].append(entry["playbook"])
+        if entry.get("required") and entry["playbook"] not in batch["required"]:
+            batch["required"].append(entry["playbook"])
+    for batch in batches.values():
+        batch["count"] = len(batch["playbooks"])
+    return list(batches.values())
 
 
 def _load_json_env(name: str, expected: type) -> Any:
@@ -78,6 +98,7 @@ def main() -> int:
 
     print(f"English matrix: {len(outputs['english_matrix'])} entries")
     print(f"Localized matrix: {len(outputs['localized_matrix'])} entries")
+    print(f"English batches: {len(outputs['english_batch_matrix'])}")
 
     output_path = os.environ.get("GITHUB_OUTPUT")
     if not output_path:

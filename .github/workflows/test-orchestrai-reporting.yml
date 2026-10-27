@@ -33,3 +33,5 @@ jobs:
         run: python3 .github/tests/test_orchestrai_windows_therock.py
       - name: Run Windows driver selection tests
         run: python3 .github/tests/test_orchestrai_windows_driver.py
+      - name: Run OrchestrAI batch-job tests
+        run: python3 .github/tests/test_orchestrai_batch_verdict.py
