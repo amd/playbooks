@@ -169,6 +169,27 @@ superset_tags: ["ram_64gb", "ram_128gb"]
 #       platforms: ["linux", "windows"]
 extra_devices: {}
 
+# Devices no playbook.json declares yet (e.g. unreleased hardware), tested
+# wherever an existing device is. Every playbook tested on `from` for one of
+# `platforms` also runs on the device, as a non-required entry. A mirrored device
+# never takes extra tags (ram_128gb and the like), so all of its playbooks share
+# one batch per platform: the fleet may hold a single machine for it, and
+# batches split by extra tags would compete for that machine. Its broker tags
+# come from ORCHESTRAI_DEVICE_TAGS like any other device's; without a mapping
+# there, it is skipped.
+mirror_devices:
+  grgh:
+    from: halo
+    platforms: ["linux"]
+
+# Device -> platform -> OS image to request instead of the platform's default
+# (ORCHESTRAI_V2_<PLATFORM>_IMAGE). The broker re-images the acquired machine
+# to it before the run starts, so a device kept on another OS between runs is
+# converted on demand.
+device_os_images:
+  grgh:
+    linux: "ubuntu-26.04"
+
 # Extra provisioning install scripts attached to specific playbooks, on top of
 # the platform-wide provisioning.*_install_scripts below. Applied ONLY to
 # batches that contain the named playbook -- so a costly, playbook-specific setup

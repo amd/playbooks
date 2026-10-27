@@ -195,6 +195,13 @@ class MachinesPerBatch(unittest.TestCase):
         self.assertEqual(requested, {"linux/one": 1, "linux/five": 2})
         self.assertIn("2 batch(es), 3 machine(s) requested (machines_per_hw_group=2)", log)
 
+    def test_a_mirrored_device_gets_one_machine_whatever_is_asked(self):
+        five = ["gaia-agents", "lemonade-getting-started", "ollama-getting-started",
+                "open-webui-chat", "lmstudio-rocm-llms"]
+        grgh = dict(BATCH, arch="grgh", gfx="gfx1151", tags=["apu_grgh"], playbooks=five)
+        requested, _ = self.run_main(4, {"linux/grgh": grgh, "linux/stx": dict(BATCH, playbooks=five)})
+        self.assertEqual(requested, {"linux/grgh": 1, "linux/stx": 4})
+
     def test_the_default_is_one_machine_per_batch(self):
         requested, log = self.run_main(1, {"linux/stx": BATCH})
         self.assertEqual(requested, {"linux/stx": 1})

@@ -16,7 +16,7 @@ Turns a list of playbook IDs into:
 
 Device/platform come from each playbook's playbooks/<cat>/<id>/playbook.json
 (tested_platforms / required_platforms). All environment-specific policy
-(device -> broker tags, extra tags, extra devices, skips) is read from
+(device -> broker tags, extra tags, extra and mirrored devices, skips) is read from
 .github/orchestrai-config.yml so this script stays generic.
 
 Usage:
@@ -52,12 +52,15 @@ def build(playbooks, cfg, devices=None, platforms=None, locale=""):
     extra_devices = cfg.get("extra_devices", {})
     skip_devices = set(cfg.get("skip_devices", []))
     skip_playbook_devices = cfg.get("skip_playbook_devices", {}) or {}
+    mirror_devices = cfg.get("mirror_devices", {}) or {}
 
     matrix = []
     localized_only_by_playbook = {}
 
     def tags_for(playbook, device):
         """Return device-specific tags when configured, else playbook defaults."""
+        if device in mirror_devices:
+            return []  # one batch per platform on a mirrored device
         overrides = device_extra_tags.get(playbook, {})
         return overrides.get(device, extra_tags.get(playbook, []))
 
@@ -125,6 +128,17 @@ def build(playbooks, cfg, devices=None, platforms=None, locale=""):
                     })
                 if entry not in matrix:
                     matrix.append(entry)
+
+    # 2a) Mirrored devices: run wherever their `from` device runs, on the listed
+    #     platforms. Always optional -- no playbook.json has declared them.
+    for device, spec in mirror_devices.items():
+        for e in list(matrix):
+            if e["arch"] != spec["from"] or e["platform"] not in spec["platforms"]:
+                continue
+            entry = dict(e, arch=device, required=False,
+                         batch_id=batch_id_for(e["platform"], device, []))
+            if entry not in matrix:
+                matrix.append(entry)
 
     # 2b) Narrow to the devices / platforms the run explicitly asked for
     #     (workflow_dispatch device/platform inputs). None/empty = no filter.

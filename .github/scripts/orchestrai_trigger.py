@@ -168,13 +168,20 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         # secret is unset so runs still work (just unauthenticated).
         if hf_token:
             variables["HF_TOKEN"] = hf_token
-        groups.append({
+        group = {
             "id": f"playbook-{pb_id}",
             "level": "L4-sys",
             "tests": [test],
             "maas_tags": tags,
             "variables": variables,
-        })
+        }
+        # A per-group OS image makes the broker re-image the acquired machine
+        # to it (device_os_images in orchestrai-config.yml); otherwise the
+        # run requests the platform's default image.
+        os_image = ((cfg.get("device_os_images") or {}).get(device) or {}).get(platform)
+        if os_image:
+            group["os_image"] = os_image
+        groups.append(group)
 
     return {
         "source": "external-playbook-batch",
@@ -502,7 +509,8 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
                            "github_run_id": gh_run},
         }]
     sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
-                 "os_image": image, "tests": g["tests"], "variables": g["variables"]}
+                 "os_image": g.get("os_image") or image, "tests": g["tests"],
+                 "variables": g["variables"]}
                 for g in plan["groups"]]
     body = {
         "require_capacity": "queue",
@@ -603,6 +611,8 @@ def main():
         # Never more machines than the batch has playbooks: a spare machine
         # sits idle and still counts against the CI identity's quota.
         batch_machines = max(1, min(mphg, len(batch.get("playbooks") or [])))
+        if batch["arch"] in (cfg.get("mirror_devices") or {}):
+            batch_machines = 1  # the fleet may hold a single machine for it
         machines += batch_machines
         plan = make_plan(batch, git_ref, cfg, batch_machines, repo, sha, rocm_index_url)
         prepared.append((bid, batch, plan, builds))
