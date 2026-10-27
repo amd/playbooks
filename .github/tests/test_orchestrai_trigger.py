@@ -306,7 +306,7 @@ class WorkflowWiring(unittest.TestCase):
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
         self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
-                                            "test-localized-playbooks", "test-gate"])
+                                            "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
@@ -317,7 +317,6 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_every_test_job_waits_for_its_own_batch(self):
         for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
-                          ("orchestrai-test-matrix.yml", "test-playbooks"),
                           ("orchestrai-pr-command.yml", "test-playbooks")):
             steps = self.load(name)["jobs"][job]["steps"]
             ids = [s.get("id") for s in steps]
@@ -352,8 +351,7 @@ class AcquireTimeoutValidation(unittest.TestCase):
         need = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
                 + 1080 * 15 / 60)
         for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
-                          ("orchestrai-pr-command.yml", "test-playbooks"),
-                          ("orchestrai-test-matrix.yml", "test-playbooks")):
+                          ("orchestrai-pr-command.yml", "test-playbooks")):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
             self.assertGreater(limit, need, name)

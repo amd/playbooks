@@ -45,31 +45,53 @@ def prepare(
 
     return {
         "english_matrix": english_matrix,
-        "english_batch_matrix": batch_matrix(english_matrix),
         "localized_matrix": localized_matrix,
         "batches": {**english_batches, **localized_batches},
+        "batch_matrix": batch_matrix(english_matrix + localized_matrix, device_names()),
         "has_english_entries": bool(english_matrix),
         "has_localized_entries": bool(localized_matrix),
         "has_entries": bool(english_matrix or localized_matrix),
     }
 
 
-def batch_matrix(matrix: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """One entry per batch: the job that waits on its build and resolves every
-    playbook in it. ``required`` lists the playbooks whose failure fails the job."""
+CONFIG = Path(__file__).resolve().parents[1] / "orchestrai-config.yml"
+
+
+def device_names() -> dict[str, str]:
+    try:
+        import yaml
+        return (yaml.safe_load(CONFIG.read_text()) or {}).get("device_names") or {}
+    except (ImportError, OSError, ValueError):
+        return {}
+
+
+def batch_matrix(matrix: list[dict[str, Any]], names: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    """One entry per batch (English or localized): the job that waits on its build
+    and resolves every playbook in it. ``required`` lists the playbooks whose
+    failure fails the job; ``label`` is its display name, e.g. "Halo · Windows"."""
+    names = names or {}
     batches: dict[str, dict[str, Any]] = {}
     for entry in matrix:
         if "batch_id" not in entry:
             continue
+        label = f"{names.get(entry['arch'], entry['arch'])} · {entry['platform'].capitalize()}"
+        if entry.get("locale"):
+            label += f" [{entry['locale']}]"
         batch = batches.setdefault(entry["batch_id"], {
             "batch_id": entry["batch_id"], "platform": entry["platform"],
-            "arch": entry["arch"], "playbooks": [], "required": []})
+            "arch": entry["arch"], "locale": entry.get("locale", ""), "label": label,
+            "playbooks": [], "required": []})
         if entry["playbook"] not in batch["playbooks"]:
             batch["playbooks"].append(entry["playbook"])
         if entry.get("required") and entry["playbook"] not in batch["required"]:
             batch["required"].append(entry["playbook"])
+    seen: dict[str, int] = {}
     for batch in batches.values():
         batch["count"] = len(batch["playbooks"])
+        seen[batch["label"]] = seen.get(batch["label"], 0) + 1
+    for batch in batches.values():  # two batches of one device+OS: name the extra tags
+        if seen[batch["label"]] > 1 and "+" in batch["batch_id"]:
+            batch["label"] += f" ({batch['batch_id'].split('+', 1)[1]})"
     return list(batches.values())
 
 
@@ -98,7 +120,7 @@ def main() -> int:
 
     print(f"English matrix: {len(outputs['english_matrix'])} entries")
     print(f"Localized matrix: {len(outputs['localized_matrix'])} entries")
-    print(f"English batches: {len(outputs['english_batch_matrix'])}")
+    print(f"Batches: {len(outputs['batch_matrix'])}")
 
     output_path = os.environ.get("GITHUB_OUTPUT")
     if not output_path:

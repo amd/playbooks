@@ -176,6 +176,18 @@ device_site_ids:
   r9700:    *markham
   grgh:     *markham
 
+# Device -> name shown on its batch jobs and in the results grid
+# ("Halo · Windows (19 playbooks)"). A device not listed shows its id.
+device_names:
+  halo:     "Halo"
+  halo_box: "Halo Box"
+  grgh:     "Gorgon Halo"
+  stx:      "Strix"
+  krk:      "Krackan"
+  rx7900xt: "RX 7900 XT"
+  rx9070xt: "RX 9070 XT"
+  r9700:    "R9700"
+
 # Device -> the device its playbooks run as. Machines are still chosen by the
 # device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
 # README @device blocks, @var values and the test library's per-device

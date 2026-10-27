@@ -111,10 +111,8 @@ jobs:
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
-      english_batch_matrix: ${{ steps.prepare-matrices.outputs.english_batch_matrix }}
+      batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
       localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
-      has_english_entries: ${{ steps.prepare-matrices.outputs.has_english_entries }}
-      has_localized_entries: ${{ steps.prepare-matrices.outputs.has_localized_entries }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
@@ -251,12 +249,13 @@ jobs:
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-batches:
-    # One job per batch (not per playbook): it waits on the batch's build once and
-    # resolves each playbook from it, so a full run needs ~1 runner per batch
-    # instead of one per playbook, and several runs no longer starve each other.
-    name: "Test ${{ matrix.batch_id }} (${{ matrix.count }} playbooks)"
+    # One job per batch (not per playbook), English and localized alike: it waits
+    # on the batch's build once and resolves each playbook from it, so a full run
+    # needs ~1 runner per batch instead of one per playbook, and several runs no
+    # longer starve each other.
+    name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
     needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_english_entries == 'true'
+    if: needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -269,7 +268,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.detect-and-trigger.outputs.english_batch_matrix) }}
+        include: ${{ fromJson(needs.detect-and-trigger.outputs.batch_matrix) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
@@ -352,14 +351,15 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: batch-results-${{ strategy.job-index }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: batch-results-${{ strategy.job-index }}-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
   playbook-results:
-    name: Playbook Results
+    # PASS / FAIL / NOT RUN for each system (device + OS), then the full gate.
+    name: Results by Device
     needs: [detect-and-trigger, test-batches]
-    if: always() && needs.detect-and-trigger.outputs.has_english_entries == 'true'
+    if: always() && needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -369,45 +369,28 @@ jobs:
         with:
           pattern: batch-results-*
           path: batch-results
-      - name: One table for every playbook
+      - name: Each system's result
         run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
-
-  test-localized-playbooks:
-    name: Localized Playbooks
-    needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_localized_entries == 'true'
-    uses: ./.github/workflows/orchestrai-test-matrix.yml
-    with:
-      matrix_json: ${{ needs.detect-and-trigger.outputs.localized_matrix }}
-      run_ids: ${{ needs.detect-and-trigger.outputs.run_ids }}
-      run_urls: ${{ needs.detect-and-trigger.outputs.run_urls }}
-    permissions:
-      contents: read
-      id-token: write
-    secrets: inherit
 
   test-gate:
     name: Test Gate (Required)
-    needs: [detect-and-trigger, test-batches, test-localized-playbooks]
+    needs: [detect-and-trigger, test-batches, playbook-results]
     if: always()
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests
         run: |
           echo "detect-and-trigger: ${{ needs.detect-and-trigger.result }}"
-          echo "English batches:    ${{ needs.test-batches.result }}"
-          echo "Localized playbooks:${{ needs.test-localized-playbooks.result }}"
-          # A failure or cancellation in detect/matrix/trigger skips both test
+          echo "batches:            ${{ needs.test-batches.result }}"
+          # A failure or cancellation in detect/matrix/trigger skips the batch
           # jobs, so require success here rather than checking only "failure".
           if [ "${{ needs.detect-and-trigger.result }}" != "success" ]; then
             echo "::error::Detect/trigger did not succeed — the pipeline did not run"; exit 1
           fi
-          if [ "${{ needs.detect-and-trigger.outputs.has_english_entries }}" = "true" ] \
+          # A batch job fails only when one of its required playbooks did not
+          # pass (batches with nothing required are continue-on-error).
+          if [ "${{ needs.detect-and-trigger.outputs.has_entries }}" = "true" ] \
              && [ "${{ needs.test-batches.result }}" != "success" ]; then
-            echo "::error::Required English tests did not complete successfully"; exit 1
-          fi
-          if [ "${{ needs.detect-and-trigger.outputs.has_localized_entries }}" = "true" ] \
-             && [ "${{ needs.test-localized-playbooks.result }}" != "success" ]; then
-            echo "::error::Required localized tests did not complete successfully"; exit 1
+            echo "::error::Required playbooks did not all pass — see Results by Device"; exit 1
           fi
           echo "All required tests passed (or none were needed)"
