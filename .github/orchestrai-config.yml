@@ -176,6 +176,15 @@ device_site_ids:
   r9700:    *markham
   grgh:     *markham
 
+# Device -> platform -> OS image its sessions request instead of the platform's
+# default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
+# installed on demand, so a device whose only machine runs another OS needs an
+# image on the broker's on-demand list. grgh's machine runs Ubuntu; its Windows
+# batch asks for a custom Windows 11 build until the stock one can be deployed.
+device_os_images:
+  grgh:
+    windows: "windows/windows-26300-9550-20261006"
+
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
 # Empty by default; example (commented) showing the format:

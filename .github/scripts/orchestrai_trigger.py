@@ -179,6 +179,10 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         sites = (cfg.get("device_site_ids") or {}).get(device)
         if sites:
             group["site_ids"] = list(sites)
+        # An OS image of its own for this device and platform (device_os_images).
+        os_image = ((cfg.get("device_os_images") or {}).get(device) or {}).get(platform)
+        if os_image:
+            group["os_image"] = os_image
         groups.append(group)
 
     return {
@@ -507,7 +511,8 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
                            "github_run_id": gh_run},
         }]
     sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
-                 "os_image": image, "tests": g["tests"], "variables": g["variables"],
+                 "os_image": g.get("os_image") or image, "tests": g["tests"],
+                 "variables": g["variables"],
                  **({"site_ids": g["site_ids"]} if g.get("site_ids") else {})}
                 for g in plan["groups"]]
     body = {

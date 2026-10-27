@@ -104,6 +104,19 @@ class ControlPlaneApi(unittest.TestCase):
                          ("rp-cred", True, "77"))
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
+    def test_a_device_image_reaches_only_that_device_and_platform(self):
+        cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
+        def sessions(arch, platform):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, platform=platform), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            fake = FakeApi((201, {"run": {"id": "r1"}}))
+            with mock.patch.object(trigger, "http_json", fake):
+                trigger.start_run(self.cp, f"{platform}/{arch}", plan, {}, platform, "", "a" * 40)
+            return {s["os_image"] for s in fake.calls[0][3]["plan_document"]["document"]["sessions"]}
+        self.assertEqual(sessions("grgh", "windows"), {"windows/custom-x"})
+        self.assertEqual(sessions("grgh", "linux"), {"ubuntu"})
+        self.assertEqual(sessions("stx", "windows"), {"windows"})
+
     def test_device_sites_reach_every_session_of_that_device_only(self):
         cfg = load_config()
         # Every configured device stays in Markham.
