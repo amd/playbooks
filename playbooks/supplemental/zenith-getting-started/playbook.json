@@ -1,0 +1,52 @@
+{
+  "id": "zenith-getting-started",
+  "title": "Getting Started with Your Windows Ryzen AI Halo",
+  "description": "Tour the preinstalled AI stack and developer tooling on your Windows Ryzen AI Halo, then connect the Zenith agent tools to a local model served by Lemonade.",
+  "time": 30,
+  "supported_platforms": {
+    "halo_box": [
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo_box": [
+      "windows"
+    ]
+  },
+  "required_platforms": {
+    "halo_box": [
+      "windows"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": true,
+  "tags": [
+    "lemonade",
+    "getting-started",
+    "zenith",
+    "npu",
+    "gpu",
+    "inference",
+    "agents"
+  ],
+  "coverImage": "../../dependencies/assets/multi_modality.png",
+  "recommendedSystemMemory": 64,
+  "authors": [
+    {
+      "name": "Adam Lam",
+      "github": "adamlam-amd",
+      "github_url": "https://github.com/adamlam-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-10-29",
+  "updated_date": "2026-10-29"
+}
