@@ -15,6 +15,10 @@ ComfyUI is a powerful, node-based interface for Stable Diffusion and other diffu
 
 This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on your GPU to generate high-quality AI images.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the model download section, check whether the model is already available in ComfyUI — if it is, you can skip the download; if not, follow the steps there to download it.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 - How to launch ComfyUI and load the Z-Image Turbo template
@@ -295,12 +299,13 @@ To launch ComfyUI on Windows, click the ComfyUI Desktop Launcher which is found 
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-Then, click the ComfyUI button at the top-middle of the app. This will open a settings tab. Open the Storage tab and make sure the paths are set as follows to access the pre-installed models.
+Then, click the ComfyUI button at the top-middle of the app. This will open a settings tab. If your Halo Device has models pre-installed, open the Storage tab and make sure the paths are set as follows to access the pre-installed models.
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
 </p>
 
+Otherwise, follow the prompts in the template to install the models.
 
 <!-- @os:end -->
 
