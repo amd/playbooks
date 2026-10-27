@@ -106,7 +106,11 @@ class ControlPlaneApi(unittest.TestCase):
 
     def test_device_sites_reach_every_session_of_that_device_only(self):
         cfg = load_config()
-        self.assertEqual(cfg["device_site_ids"]["krk"], ["maas-mkm-mnb", "maas-mkm-cs"])
+        # Every configured device stays in Markham.
+        self.assertTrue(cfg["device_site_ids"])
+        self.assertEqual({tuple(v) for v in cfg["device_site_ids"].values()},
+                         {("maas-mkm-mnb", "maas-mkm-cs")})
+        cfg["device_site_ids"] = {"krk": ["maas-mkm-mnb", "maas-mkm-cs"]}  # stx: any site
         krk = trigger.make_plan(dict(BATCH, arch="krk", playbooks=["gaia-agents", "cvml"]), "refs/heads/main",
                                 cfg, 1, "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
         self.assertEqual({tuple(g["site_ids"]) for g in krk["groups"]}, {("maas-mkm-mnb", "maas-mkm-cs")})

@@ -162,11 +162,19 @@ extra_tag_devices:
 superset_tags: ["ram_64gb", "ram_128gb"]
 
 # Sites a device's batches may be placed at (OrchestrAI site ids; a device not
-# listed may run at any site). KRK stays in Markham: its HYD machines fail
-# provisioning on HYD DNS/Artifactory and are 32 GB. Sites: maas-mkm-mnb,
-# maas-mkm-cs (Markham), maas-hyd-ha (Hyderabad).
+# listed may run at any site). Every device stays in Markham: HYD machines are
+# slow to provision and fetch from Artifactory/PyPI caches far from them, and
+# HYD KRKs are 32 GB. Sites: maas-mkm-mnb, maas-mkm-cs (Markham), maas-hyd-ha
+# (Hyderabad).
 device_site_ids:
-  krk: ["maas-mkm-mnb", "maas-mkm-cs"]
+  krk:      &markham ["maas-mkm-mnb", "maas-mkm-cs"]
+  halo:     *markham
+  halo_box: *markham
+  stx:      *markham
+  rx7900xt: *markham
+  rx9070xt: *markham
+  r9700:    *markham
+  grgh:     *markham
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
