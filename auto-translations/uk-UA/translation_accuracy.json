@@ -34,12 +34,12 @@
       "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. UI strings left in English (acceptable but arguably could be noted)."
     },
     "playbooks/dependencies/comfyui_models.md": {
-      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "source_sha256": "aca3c00aef9acd22b010f1407ebff7af8492d4407084f04d2fa09e4d5931cfa8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 95,
-      "quality_issues": "Accurate, fluent; code, URLs, brands intact. Button label 'Download' kept in English, acceptable given backtick formatting."
+      "quality_score": 96,
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact; minor stylistic nits only."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "0b567e5e986ee1c34e6d6bfdf053f73e3630540235d56c7ac8cd08b17896f7d6",
@@ -66,20 +66,20 @@
       "quality_issues": "Excellent; 'безшумно' slightly awkward for 'silently', minor stylistic nit."
     },
     "playbooks/dependencies/lmstudio.md": {
-      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
+      "source_sha256": "1b3bdd21937e48222d3a9b03b0d851773bd168a67c4c80a2f26ee884e714021d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent; code, URLs, brands intact. UI terms left untranslated (acceptable choice)."
+      "quality_score": 94,
+      "quality_issues": "Accurate, fluent; minor untranslated 'playbook' term kept in English, acceptable technical choice."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
-      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "source_sha256": "b01f1bc19aae4624d867d4e5fe847a1f228d7f083436ffac2d49bc66510d772e",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, code/URLs/brands intact. Minor: mixed English UI terms untranslated (acceptable)."
+      "quality_issues": "Accurate, fluent translation; code, URLs, brands intact. Minor: 'Download' button left untranslated but acceptable."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
@@ -96,14 +96,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
       "quality_issues": "Excellent, fluent, accurate; code, URLs, brands intact. Minor: 0.5 ГБ decimal notation acceptable but Ukrainian prefers comma."
-    },
-    "playbooks/dependencies/n8n.md": {
-      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 97,
-      "quality_issues": "Accurate, fluent, all code/URLs intact. Minor stylistic phrasing only."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "ad48a5e1521ba90e7afd6f3a31abe2694999e7faec6a323be62d0a3ecf094f8c",
@@ -144,14 +136,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 92,
       "quality_issues": "Tab names left untranslated (Updates, Manage), but acceptable as UI labels; otherwise accurate and fluent."
-    },
-    "playbooks/dependencies/vllm.md": {
-      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 91,
-      "quality_issues": "'launcher' rendered as generic 'команда запуску'; slight loss of specificity but accurate and fluent."
     },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
@@ -442,20 +426,20 @@
       "quality_issues": "Accurate, fluent, terminology and brand terms intact; minor stylistic naturalness only"
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "cb1857950d9714b04de671cdd89115d401ab8f4cbc828e6186ef0232ef9c93ee",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Untranslated leading IMPORTANT block; minor terminology inconsistency (донавчання vs тонке налаштування). Otherwise fluent, accurate, code intact."
+      "quality_issues": "Minor terminology inconsistency (дотренування vs тонке налаштування, батч vs пакет); otherwise accurate, fluent, code/tags intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 88,
-      "quality_issues": "Untranslated 'Software' in title; otherwise accurate and fluent."
+      "quality_issues": "Inconsistent rendering of 'fine-tuning' (налаштування vs донавчання); 'Software' left untranslated but acceptable as brand."
     },
     "playbooks/supplemental/pytorch-kernels/platform.md": {
       "source_sha256": "c0fedbe76ab2f3e0008d66137de1b15393f70af2694785ffc467e6b54f170f6a",

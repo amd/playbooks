@@ -4,7 +4,11 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### LM Studio에서 GPT-OSS 120B 다운로드하기
+### GPT-OSS 120B을 LM Studio에서 다운로드하기
+
+<!-- @device:halo_box -->
+> **참고:** 이 모델이 이미 LM Studio에서 사용 가능하다면 이 섹션을 건너뛸 수 있습니다. 그렇지 않다면 아래 단계를 따라 다운로드하세요.
+<!-- @device:end -->
 
 GPT-OSS 120B 모델을 다운로드하려면:
 
@@ -17,7 +21,7 @@ GPT-OSS 120B 모델을 다운로드하려면:
 
 LM Studio가 자동으로 모델을 다운로드하여 올바른 디렉터리에 배치합니다.
 
-추가 모델을 다운로드하고 싶다면 Discover 탭에서 검색하면 LM Studio가 나머지 작업을 처리합니다.
+추가 모델을 다운로드하고 싶다면 Discover 탭에서 검색할 수 있으며, 나머지는 LM Studio가 처리합니다.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

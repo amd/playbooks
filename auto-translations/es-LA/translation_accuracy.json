@@ -34,12 +34,12 @@
       "quality_issues": "UI strings left in English ('Automatic Updates', 'Next') acceptable but could be translated or annotated; otherwise accurate and fluent."
     },
     "playbooks/dependencies/comfyui_models.md": {
-      "source_sha256": "8cb46545df5efaaae1521a92e385e95f3dcdabdbdd3a8ddce9c94a0e0680a9b5",
+      "source_sha256": "aca3c00aef9acd22b010f1407ebff7af8492d4407084f04d2fa09e4d5931cfa8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent; code blocks, URLs, brands intact. 'Download' button label kept in English, acceptable if UI matches."
+      "quality_score": 95,
+      "quality_issues": "Accurate, fluent; code blocks, URLs, brands intact. Minor: 'Download' left untranslated (acceptable as UI label)."
     },
     "playbooks/dependencies/driver.md": {
       "source_sha256": "0b567e5e986ee1c34e6d6bfdf053f73e3630540235d56c7ac8cd08b17896f7d6",
@@ -66,12 +66,12 @@
       "quality_issues": "Accurate, fluent, all code/URLs/brands intact. Minor: 'El CLI' gender inconsistent but acceptable."
     },
     "playbooks/dependencies/lmstudio.md": {
-      "source_sha256": "7bf63eab985e835155ecc012bee6c157069e27bc9030a3a975ef0652fe0b5443",
+      "source_sha256": "1b3bdd21937e48222d3a9b03b0d851773bd168a67c4c80a2f26ee884e714021d",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 98,
-      "quality_issues": "Accurate, fluent, all code/URLs/markup intact. UI terms kept in English (appropriate for menus)."
+      "quality_score": 97,
+      "quality_issues": "Excellent translation; code, URLs, brands intact. UI terms kept in English appropriately."
     },
     "playbooks/dependencies/memoryconfig.md": {
       "source_sha256": "a2be25b6873874f73bfefffbc434e25b81334679dbbcba2748e6e87aa1e8e758",
@@ -80,14 +80,6 @@
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
       "quality_issues": "Accurate, fluent, code and markup intact. UI terms appropriately kept in English matching interface."
-    },
-    "playbooks/dependencies/n8n.md": {
-      "source_sha256": "921441b6697d8ab93bbbc5a9bb71d737f616df42dd40a39b063af61e5aa5c6fa",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 96,
-      "quality_issues": "Accurate, fluent; code, URLs, brands intact. Minor: 'globalmente' slightly literal but acceptable."
     },
     "playbooks/dependencies/nodejs.md": {
       "source_sha256": "ad48a5e1521ba90e7afd6f3a31abe2694999e7faec6a323be62d0a3ecf094f8c",
@@ -129,14 +121,6 @@
       "quality_score": 90,
       "quality_issues": "UI tab names 'Updates'/'Manage' left untranslated, likely intentional matching actual UI; otherwise accurate and fluent."
     },
-    "playbooks/dependencies/vllm.md": {
-      "source_sha256": "8876f624743d3b843409b5cd523a262e60ba53539710bf26c00d80a88153391e",
-      "prompt_version": "2",
-      "model": "Claude-Sonnet-5",
-      "judge_model": "Claude-Opus-4.8",
-      "quality_score": 90,
-      "quality_issues": "Accurate, fluent; 'iniciador' for launcher acceptable but slightly loose; otherwise clean and intact."
-    },
     "playbooks/dependencies/vscode.md": {
       "source_sha256": "09b668411f70fb8781a2d0d7c7e4417250e610839d0f6213d5f2ff846ceda8f2",
       "prompt_version": "2",
@@ -146,12 +130,12 @@
       "quality_issues": "Flawless; code, URLs, brands intact. UI tab names kept in English is acceptable."
     },
     "playbooks/dependencies/lmstudio_models_gpt_oss_120b.md": {
-      "source_sha256": "e33b569398da8f57d5da1bbd94f0c0e005ee7a4c206a577236f785cba3865fcd",
+      "source_sha256": "b01f1bc19aae4624d867d4e5fe847a1f228d7f083436ffac2d49bc66510d772e",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 96,
-      "quality_issues": "Accurate, fluent, code/URLs intact; UI terms appropriately kept in English."
+      "quality_issues": "Accurate, fluent, all code/URLs/brands intact. UI terms appropriately kept in English."
     },
     "playbooks/dependencies/lmstudio_models_qwen3_9b.md": {
       "source_sha256": "51c02b376e3faea175b98d9d6586c91a9524c83348cedf4bd76323499a3d486e",
@@ -442,20 +426,20 @@
       "quality_issues": "Accurate, fluent, brand terms intact; minor gerund vs imperative inconsistency between title and body."
     },
     "playbooks/supplemental/pytorch-finetuning/README.md": {
-      "source_sha256": "d6b66b52107f19e10f53a4dbac24c90a47ac5723bee591cd7e6ed4bf3026676d",
+      "source_sha256": "cb1857950d9714b04de671cdd89115d401ab8f4cbc828e6186ef0232ef9c93ee",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
-      "quality_score": 94,
-      "quality_issues": "Accurate, fluent; code/URLs/brands intact. First IMPORTANT admonition left untranslated (likely intentional github-only tag)."
+      "quality_score": 95,
+      "quality_issues": "Untranslated IMPORTANT note block (likely intentional github-only tag); otherwise accurate, fluent, terminology and code intact."
     },
     "playbooks/supplemental/pytorch-finetuning/playbook.json": {
-      "source_sha256": "b6e938616f1c620508e5b8a50e4e07008ab3d1ce6398cb45acbd373a74b316c7",
+      "source_sha256": "edfbd025fcce55a03c54a50dca617bc17bf927da67e2e82056d8b4183ad2ccd8",
       "prompt_version": "2",
       "model": "Claude-Sonnet-5",
       "judge_model": "Claude-Opus-4.8",
       "quality_score": 90,
-      "quality_issues": "Good; 'modelos de lenguaje grande' slightly awkward, 'grandes' preferred; otherwise accurate, terms intact."
+      "quality_issues": "Minor: 'modelos de lenguaje grande' slightly awkward; 'modelos grandes de lenguaje' preferred. Otherwise accurate, terminology intact."
     },
     "playbooks/supplemental/pytorch-kernels/README.md": {
       "source_sha256": "521f29360e9bba4b8a19cf40efb40f83eecdb87412a0d3ca176e5317203998a4",

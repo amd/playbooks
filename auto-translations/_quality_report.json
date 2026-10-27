@@ -1,182 +1,182 @@
 {
   "per_locale": {
     "ar": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "cs-CZ": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "da-DK": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.5,
-      "min": 78,
+      "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "de-DE": {
-      "files_scored": 80,
-      "mean": 93.1,
+      "files_scored": 78,
+      "mean": 92.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "el-GR": {
-      "files_scored": 80,
-      "mean": 92.3,
+      "files_scored": 78,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "es-LA": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "fi-FI": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 78,
+      "mean": 92.0,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-CA": {
-      "files_scored": 80,
-      "mean": 90.7,
+      "files_scored": 78,
+      "mean": 90.6,
       "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "fr-FR": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "he": {
-      "files_scored": 80,
-      "mean": 92.2,
+      "files_scored": 78,
+      "mean": 92.0,
       "min": 60,
       "judge_model": "Claude-Opus-4.8"
     },
     "hu-HU": {
-      "files_scored": 80,
-      "mean": 92.1,
+      "files_scored": 78,
+      "mean": 92.0,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "it-IT": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ja-JP": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.3,
       "min": 20,
       "judge_model": "Claude-Opus-4.8"
     },
     "ko-KR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nb-NO": {
-      "files_scored": 80,
-      "mean": 91.9,
+      "files_scored": 78,
+      "mean": 91.8,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "nl-NL": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pl-PL": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.2,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-BR": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.7,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "pt-PT": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.9,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "ro-RO": {
-      "files_scored": 80,
-      "mean": 92.5,
+      "files_scored": 78,
+      "mean": 92.4,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "ru-RU": {
-      "files_scored": 80,
-      "mean": 92.9,
+      "files_scored": 78,
+      "mean": 92.8,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "sk-SK": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.6,
       "min": 82,
       "judge_model": "Claude-Opus-4.8"
     },
     "sl-SI": {
-      "files_scored": 80,
-      "mean": 90.5,
+      "files_scored": 78,
+      "mean": 90.6,
       "min": 68,
       "judge_model": "Claude-Opus-4.8"
     },
     "sr-Latn": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 91.1,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "sv-SE": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.0,
       "min": 88,
       "judge_model": "Claude-Opus-4.8"
     },
     "th-TH": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 92.7,
       "min": 70,
       "judge_model": "Claude-Opus-4.8"
     },
     "tr-TR": {
-      "files_scored": 80,
-      "mean": 92.4,
+      "files_scored": 78,
+      "mean": 92.6,
       "min": 80,
       "judge_model": "Claude-Opus-4.8"
     },
     "uk-UA": {
-      "files_scored": 80,
-      "mean": 92.6,
+      "files_scored": 78,
+      "mean": 92.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.6,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
-      "files_scored": 80,
-      "mean": 93.2,
+      "files_scored": 78,
+      "mean": 93.3,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     }
@@ -234,7 +234,7 @@
       "locale": "sl-SI",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 72,
-      "issues": "Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'."
+      "issues": "\"Fino prilagajanje/nastavite\" awkward; preferred term is \"prilagajanje/dodatno učenje\"; inconsistent fine-tune rendering; otherwise accurate, brands intact."
     },
     {
       "locale": "sl-SI",
@@ -249,16 +249,10 @@
       "issues": "Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate."
     },
     {
-      "locale": "da-DK",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'."
-    },
-    {
       "locale": "de-DE",
       "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
       "score": 78,
-      "issues": "Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb."
+      "issues": "'Feintunen' is awkward anglicism; inconsistent terminology (feinabstimmen vs Feintunen); otherwise accurate, terms/brands intact."
     },
     {
       "locale": "de-DE",
@@ -271,12 +265,6 @@
       "file": "playbooks/core/vscode-qwen3-coder/playbook.json",
       "score": 78,
       "issues": "\"LLM Coding\" left partly untranslated; \"Coding\" awkward in Greek title, slightly unnatural phrasing."
-    },
-    {
-      "locale": "el-GR",
-      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact."
     },
     {
       "locale": "es-LA",
@@ -343,6 +331,12 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
       "issues": "Product name 'AMD Sync' mistranslated as 'synchronizacją AMD' in title; otherwise accurate and fluent."
+    },
+    {
+      "locale": "ro-RO",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 78,
+      "issues": "Title mixes English 'Fine-Tuning' with Romanian; 'Software' awkward placement; otherwise accurate, fluent, terms intact."
     },
     {
       "locale": "ro-RO",
@@ -466,6 +460,12 @@
     },
     {
       "locale": "el-GR",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "\"Λεπτομερής εκπαίδευση\" is imprecise for fine-tuning; otherwise accurate, fluent, terms/brands intact."
+    },
+    {
+      "locale": "el-GR",
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
       "issues": "Trademark ™ likely belongs to Unsloth, not LLM; slightly awkward phrasing. Terminology otherwise accurate."
@@ -499,6 +499,12 @@
       "file": "playbooks/supplemental/llama-factory-finetuning/playbook.json",
       "score": 82,
       "issues": "Slight inconsistency: 'Réglage fin' vs 'Ajustez avec précision' for fine-tune; otherwise accurate, fluent, terms intact."
+    },
+    {
+      "locale": "fr-CA",
+      "file": "playbooks/supplemental/pytorch-finetuning/playbook.json",
+      "score": 82,
+      "issues": "Awkward 'Ajustez (fine-tuning)' phrasing; 'de grands modèles' preferable; otherwise accurate, terms and brands intact."
     },
     {
       "locale": "fr-CA",

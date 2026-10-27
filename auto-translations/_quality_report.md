@@ -4,38 +4,38 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 
 | Locale | Files | Mean | Min | Judge |
 |--------|-------|------|-----|-------|
-| ar | 80 | 93.0 | 82 | Claude-Opus-4.8 |
-| cs-CZ | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| da-DK | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| de-DE | 80 | 93.1 | 78 | Claude-Opus-4.8 |
-| el-GR | 80 | 92.3 | 78 | Claude-Opus-4.8 |
-| es-LA | 80 | 92.8 | 78 | Claude-Opus-4.8 |
-| fi-FI | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| fr-CA | 80 | 90.7 | 72 | Claude-Opus-4.8 |
-| fr-FR | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| he | 80 | 92.2 | 60 | Claude-Opus-4.8 |
-| hu-HU | 80 | 92.1 | 78 | Claude-Opus-4.8 |
-| it-IT | 80 | 93.9 | 78 | Claude-Opus-4.8 |
-| ja-JP | 80 | 92.4 | 20 | Claude-Opus-4.8 |
-| ko-KR | 80 | 93.5 | 82 | Claude-Opus-4.8 |
-| nb-NO | 80 | 91.9 | 82 | Claude-Opus-4.8 |
-| nl-NL | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| pl-PL | 80 | 93.2 | 78 | Claude-Opus-4.8 |
-| pt-BR | 80 | 93.7 | 82 | Claude-Opus-4.8 |
-| pt-PT | 80 | 92.9 | 82 | Claude-Opus-4.8 |
-| ro-RO | 80 | 92.5 | 78 | Claude-Opus-4.8 |
-| ru-RU | 80 | 92.9 | 88 | Claude-Opus-4.8 |
-| sk-SK | 80 | 91.6 | 82 | Claude-Opus-4.8 |
-| sl-SI | 80 | 90.5 | 68 | Claude-Opus-4.8 |
-| sr-Latn | 80 | 91.1 | 78 | Claude-Opus-4.8 |
-| sv-SE | 80 | 93.0 | 88 | Claude-Opus-4.8 |
-| th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
-| tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
-| uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
-| zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
+| ar | 78 | 93.0 | 82 | Claude-Opus-4.8 |
+| cs-CZ | 78 | 92.3 | 78 | Claude-Opus-4.8 |
+| da-DK | 78 | 92.5 | 82 | Claude-Opus-4.8 |
+| de-DE | 78 | 92.9 | 78 | Claude-Opus-4.8 |
+| el-GR | 78 | 92.5 | 78 | Claude-Opus-4.8 |
+| es-LA | 78 | 92.8 | 78 | Claude-Opus-4.8 |
+| fi-FI | 78 | 92.0 | 82 | Claude-Opus-4.8 |
+| fr-CA | 78 | 90.6 | 72 | Claude-Opus-4.8 |
+| fr-FR | 78 | 93.1 | 78 | Claude-Opus-4.8 |
+| he | 78 | 92.0 | 60 | Claude-Opus-4.8 |
+| hu-HU | 78 | 92.0 | 78 | Claude-Opus-4.8 |
+| it-IT | 78 | 93.9 | 78 | Claude-Opus-4.8 |
+| ja-JP | 78 | 92.3 | 20 | Claude-Opus-4.8 |
+| ko-KR | 78 | 93.5 | 82 | Claude-Opus-4.8 |
+| nb-NO | 78 | 91.8 | 82 | Claude-Opus-4.8 |
+| nl-NL | 78 | 92.6 | 78 | Claude-Opus-4.8 |
+| pl-PL | 78 | 93.2 | 78 | Claude-Opus-4.8 |
+| pt-BR | 78 | 93.7 | 82 | Claude-Opus-4.8 |
+| pt-PT | 78 | 92.9 | 82 | Claude-Opus-4.8 |
+| ro-RO | 78 | 92.4 | 78 | Claude-Opus-4.8 |
+| ru-RU | 78 | 92.8 | 88 | Claude-Opus-4.8 |
+| sk-SK | 78 | 91.6 | 82 | Claude-Opus-4.8 |
+| sl-SI | 78 | 90.6 | 68 | Claude-Opus-4.8 |
+| sr-Latn | 78 | 91.1 | 78 | Claude-Opus-4.8 |
+| sv-SE | 78 | 93.0 | 88 | Claude-Opus-4.8 |
+| th-TH | 78 | 92.7 | 70 | Claude-Opus-4.8 |
+| tr-TR | 78 | 92.6 | 80 | Claude-Opus-4.8 |
+| uk-UA | 78 | 92.5 | 78 | Claude-Opus-4.8 |
+| zh-CN | 78 | 93.6 | 78 | Claude-Opus-4.8 |
+| zh-TW | 78 | 93.3 | 78 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (93)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -47,14 +47,12 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | fr-CA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 72 | Trademark symbol misplaced (belongs to Unsloth, not LLM); 'affinés' vs 'réglage fin' terminology inconsistency; awkward phrasing. |
 | he | playbooks/supplemental/clustering-rpc-server-4-node/playbook.json | 72 | Title 'AiCluster' is mistranslation/garbled; 'Clustering' not properly rendered. Rest accurate and fluent. |
 | ja-JP | playbooks/supplemental/vllm-inference/playbook.json | 72 | Added 'Ryzen AI Max+' not in source; 'integrated GPU' loosely rendered as iGPU. |
-| sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 72 | Inconsistent terminology (fino uravnavanje vs fino prilagodite); 'Software' untranslated; awkward phrasing 'Fino'. |
+| sl-SI | playbooks/supplemental/pytorch-finetuning/playbook.json | 72 | "Fino prilagajanje/nastavite" awkward; preferred term is "prilagajanje/dodatno učenje"; inconsistent fine-tune rendering; otherwise accurate, brands intact. |
 | sl-SI | playbooks/supplemental/pytorch-kernels/playbook.json | 72 | Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order. |
 | cs-CZ | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth); slight inconsistency in fine-tuning terminology; otherwise accurate. |
-| da-DK | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Inconsistent term: 'Finjustering' vs 'Fine-tun'; latter is anglicism, should be 'Finjuster'. |
-| de-DE | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Fine-tuning translated as 'optimieren' loses precision; 'Feinabstimmung' inconsistent with body verb. |
+| de-DE | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | 'Feintunen' is awkward anglicism; inconsistent terminology (feinabstimmen vs Feintunen); otherwise accurate, terms/brands intact. |
 | de-DE | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced (should follow Unsloth, not LLMs); minor stylistic awkwardness in 'feinabgestimmte'. |
 | el-GR | playbooks/core/vscode-qwen3-coder/playbook.json | 78 | "LLM Coding" left partly untranslated; "Coding" awkward in Greek title, slightly unnatural phrasing. |
-| el-GR | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Inconsistent terminology: 'Ρύθμιση ακριβείας' vs 'Συντονίστε' for fine-tune; parenthetical clutter but code/brands intact. |
 | es-LA | playbooks/supplemental/github-slack-development-digest/playbook.json | 78 | Inconsistent formality (Cree vs Configura); 'digest' left untranslated in title while translated later as 'resumen'. |
 | fr-CA | playbooks/supplemental/amd-sync/playbook.json | 78 | Inconsistent: title translates 'AMD Sync' as 'synchronisation AMD' but body keeps 'AMD Sync'; 'métriques' anglicism (préfère 'mesures'). |
 | fr-CA | playbooks/supplemental/speech2speech-translation/playbook.json | 78 | Title drops speech-to-speech nuance; 'voix-à-voix' awkward calque, 'traduction vocale directe' preferred. |
@@ -66,6 +64,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | nl-NL | playbooks/supplemental/llama-factory-finetuning/playbook.json | 78 | Inconsistent 'fijnafstemmen'/'verfijn'; incorrect hyphenation 'LLaMA-Factory-' alters brand; slight mistranslation of technique scope. |
 | nl-NL | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 78 | Untranslated 'Running' in title; otherwise accurate and fluent. |
 | pl-PL | playbooks/supplemental/amd-sync/playbook.json | 78 | Product name 'AMD Sync' mistranslated as 'synchronizacją AMD' in title; otherwise accurate and fluent. |
+| ro-RO | playbooks/supplemental/pytorch-finetuning/playbook.json | 78 | Title mixes English 'Fine-Tuning' with Romanian; 'Software' awkward placement; otherwise accurate, fluent, terms intact. |
 | ro-RO | playbooks/supplemental/vllm-inference/playbook.json | 78 | 'Primii' typo (should be 'Primii/Primii pași→Primii'), 'serverea' is an invented/incorrect term for 'serving'. |
 | sl-SI | playbooks/supplemental/amd-sync/playbook.json | 78 | Title mistranslates 'AMD Sync' brand as 'sinhronizacijo AMD'; body correctly keeps 'AMD Sync'. Inconsistency. |
 | sl-SI | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark ™ misplaced (belongs to Unsloth/LLMs brand); inconsistent terminology 'fino prilagajanje' vs 'fino nastavljanje'. |
@@ -86,12 +85,14 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | de-DE | playbooks/supplemental/lemonade-getting-started/playbook.json | 82 | Omitted 'Gen AI' (Gen KI); translated as generic 'KI-Modelle', losing generative AI specificity. |
 | de-DE | playbooks/supplemental/github-slack-development-digest/playbook.json | 82 | Inconsistent register (Erstelle vs Konfigurieren Sie); 'ein Digest' gender debatable, minor fluency issues |
 | el-GR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Inconsistent fine-tune rendering (Βελτιστοποίηση vs Συντονίστε); minor terminology awkwardness but adequate, brands/acronyms intact. |
+| el-GR | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | "Λεπτομερής εκπαίδευση" is imprecise for fine-tuning; otherwise accurate, fluent, terms/brands intact. |
 | el-GR | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark ™ likely belongs to Unsloth, not LLM; slightly awkward phrasing. Terminology otherwise accurate. |
 | el-GR | playbooks/supplemental/openhands-getting-started/playbook.json | 82 | "πράκτορα κωδικοποίησης" awkward; "coding agent" better as "προγραμματισμού". Otherwise accurate, brands intact. |
 | es-LA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; 'LLMs™' brand term altered; slightly verbose but adequate and fluent. |
 | fi-FI | playbooks/supplemental/lemonade-getting-started/playbook.json | 82 | Title awkward 'Aloita käytön kanssa'; otherwise accurate and fluent. |
 | fr-CA | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | Inconsistent 'diffusion'/'servir' for 'serving'; 'de grands modèles' preferred over 'des grands modèles'. |
 | fr-CA | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Slight inconsistency: 'Réglage fin' vs 'Ajustez avec précision' for fine-tune; otherwise accurate, fluent, terms intact. |
+| fr-CA | playbooks/supplemental/pytorch-finetuning/playbook.json | 82 | Awkward 'Ajustez (fine-tuning)' phrasing; 'de grands modèles' preferable; otherwise accurate, terms and brands intact. |
 | fr-CA | playbooks/supplemental/vllm-inference/playbook.json | 82 | "le service" ambiguous for serving; "GPU" acceptable but "processeur graphique" preferred by OQLF. |
 | fr-FR | playbooks/core/lmstudio-rocm-llms/playbook.json | 82 | 'diffusion' suboptimal for 'serving'; 'de grands modèles' more correct than 'des grands modèles' |
 | fr-FR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Inconsistent terminology: 'Réglage fin' vs 'Affinez'; 'de grands modèles' preferred over 'des grands'. |

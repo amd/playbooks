@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo_box -->
 LM Studio poate fi instalat din **AMD Ryzen™ AI Developer Center**. Accesați fila **Updates** și instalați LM Studio dacă nu este deja prezent.
 
-Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Settings > General > Models Directory. Apoi schimbați calea la `C:\Users\Public\models`
+Dacă sistemul dvs. are modele preinstalate, navigați la Settings > General > Models Directory. Apoi schimbați calea la `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -23,6 +23,8 @@ Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Setting
 2. Instalați. 
 <!-- @device:end -->
 
+> **Modele:** Dacă sistemul dvs. a venit cu modelul acestui playbook preinstalat, îndreptați LM Studio către directorul de modele preinstalate de mai sus pentru a-l folosi. În caz contrar, descărcați modelul din fila **Discover** a LM Studio (pictograma de căutare) înainte de a continua.
+
 > Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI-ul (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
@@ -33,8 +35,8 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Notă: Puteți alege să instalați fie fișierul .deb, fie AppImage. 
-1. Descărcați appimage de aici: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+> Notă: Puteți alege să instalați fie .deb, fie AppImage. 
+1. Descărcați appimage-ul de aici: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. rulați `sudo apt install libfuse2`  
 3. rulați `cd ~/Downloads`  
 4. rulați `chmod +x LM-Studio-*.AppImage`  
@@ -42,12 +44,14 @@ lms --help
 > Sfat: După instalare, lansați LM Studio o dată pentru a inițializa CLI-ul (`lms`).
 
 <!-- @device:halo_box -->
-Pentru a permite LM Studio să vadă modelele preinstalate, navigați la Settings > General > Models Directory. Apoi schimbați calea la `/var/cache/models`.
+Dacă sistemul dvs. are modele preinstalate, navigați la Settings > General > Models Directory. Apoi schimbați calea la `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modele:** Dacă sistemul dvs. a venit cu modelul acestui playbook preinstalat, îndreptați LM Studio către directorul de modele preinstalate de mai sus pentru a-l folosi. În caz contrar, descărcați modelul din fila **Discover** a LM Studio (pictograma de căutare) înainte de a continua.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

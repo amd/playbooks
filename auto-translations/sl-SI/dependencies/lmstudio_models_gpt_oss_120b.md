@@ -6,6 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### Prenos GPT-OSS 120B v LM Studio
 
+<!-- @device:halo_box -->
+> **Opomba:** Če je ta model v LM Studio že na voljo, lahko ta razdelek preskočite. V nasprotnem primeru sledite spodnjim korakom za prenos.
+<!-- @device:end -->
+
 Za prenos modela GPT-OSS 120B:
 
 1. Pritisnite "Ctrl" + "Shift" + "M" na tipkovnici ali kliknite zavihek "Discover" (ikona povečevalnega stekla) v levi stranski vrstici
@@ -15,7 +19,7 @@ Za prenos modela GPT-OSS 120B:
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio bo samodejno prenesel model in ga postavil v ustrezno mapo.
+LM Studio bo samodejno prenesel in namestil model v pravilno mapo.
 
 Če želite prenesti dodatne modele, jih lahko poiščete v zavihku Discover, LM Studio pa bo poskrbel za preostalo.
 

@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-LM Studio lze nainstalovat z **AMD Ryzen™ AI Developer Center**. Přejděte na kartu **Updates** a nainstalujte LM Studio, pokud ještě není přítomen.
+LM Studio lze nainstalovat z **AMD Ryzen™ AI Developer Center**. Přejděte na kartu **Updates** a nainstalujte LM Studio, pokud ještě není přítomno.
 
-Aby LM Studio vidělo předinstalované modely, přejděte na Settings > General > Models Directory. Poté změňte cestu na `C:\Users\Public\models`
+Pokud má váš systém předinstalované modely, přejděte na Settings > General > Models Directory. Poté změňte cestu na `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -19,11 +19,13 @@ Aby LM Studio vidělo předinstalované modely, přejděte na Settings > General
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-1. Stáhněte instalační program zde: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Nainstalujte. 
+1. Stáhněte instalační program odtud: [https://lmstudio.ai/download](https://lmstudio.ai/download)
+2. Nainstalujte jej. 
 <!-- @device:end -->
 
-> Tip: Po instalaci spusťte LM Studio jednou, aby se inicializovalo rozhraní CLI (`lms`).
+> **Modely:** Pokud byl ve vašem systému tento model z této příručky předinstalován, nasměrujte LM Studio na výše uvedený adresář s předinstalovanými modely, abyste jej mohli použít. V opačném případě si model stáhněte z karty **Discover** (ikona lupy) v LM Studio, než budete pokračovat.
+
+> Tip: Po instalaci spusťte LM Studio jednou, abyste inicializovali CLI (`lms`).
 
 <!-- @test:id=lmstudio-cli-windows timeout=60 hidden=True -->
 ```powershell
@@ -33,21 +35,23 @@ lms --help
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> Poznámka: Můžete si vybrat instalaci buď .deb, nebo AppImage. 
-1. Stáhněte appimage zde: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
+> Poznámka: Můžete zvolit instalaci buď přes .deb, nebo přes AppImage. 
+1. Stáhněte appimage odtud: [https://lmstudio.ai/download?os=linux](https://lmstudio.ai/download?os=linux)
 2. spusťte `sudo apt install libfuse2`  
 3. spusťte `cd ~/Downloads`  
 4. spusťte `chmod +x LM-Studio-*.AppImage`  
 5. spusťte `./LM-Studio-*.AppImage`  
-> Tip: Po instalaci spusťte LM Studio jednou, aby se inicializovalo rozhraní CLI (`lms`).
+> Tip: Po instalaci spusťte LM Studio jednou, abyste inicializovali CLI (`lms`).
 
 <!-- @device:halo_box -->
-Aby LM Studio vidělo předinstalované modely, přejděte na Settings > General > Models Directory. Poté změňte cestu na `/var/cache/models`.
+Pokud má váš systém předinstalované modely, přejděte na Settings > General > Models Directory. Poté změňte cestu na `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Modely:** Pokud byl ve vašem systému tento model z této příručky předinstalován, nasměrujte LM Studio na výše uvedený adresář s předinstalovanými modely, abyste jej mohli použít. V opačném případě si model stáhněte z karty **Discover** (ikona lupy) v LM Studio, než budete pokračovat.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash

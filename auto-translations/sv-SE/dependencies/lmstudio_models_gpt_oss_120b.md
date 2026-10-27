@@ -4,20 +4,24 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-### Ladda ner GPT-OSS 120B i LM Studio
+### Hämta GPT-OSS 120B i LM Studio
 
-Så här laddar du ner GPT-OSS 120B-modellen:
+<!-- @device:halo_box -->
+> **Obs!** Om den här modellen redan finns tillgänglig i LM Studio kan du hoppa över det här avsnittet. Annars följer du stegen nedan för att hämta den.
+<!-- @device:end -->
 
-1. Tryck på "Ctrl" + "Shift" + "M" på tangentbordet eller klicka på fliken "Discover" (förstoringsglasikonen) i sidofältet till vänster
+Så här hämtar du modellen GPT-OSS 120B:
+
+1. Tryck på "Ctrl" + "Shift" + "M" på tangentbordet eller klicka på fliken "Discover" (förstoringsglas-ikonen) i sidofältet till vänster
 2. Sök efter `ggml-org/gpt-oss-120b-GGUF`
 3. Välj `mxfp4` och klicka på Download
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_download.png" alt="LM Studio Download Models" width="600"/>
 
-LM Studio laddar automatiskt ner modellen och placerar den i rätt katalog.
+LM Studio hämtar automatiskt modellen och placerar den i rätt katalog.
 
-Om du vill ladda ner fler modeller kan du söka efter dem på fliken Discover, så tar LM Studio hand om resten.
+Om du vill hämta fler modeller kan du söka efter dem på fliken Discover, så sköter LM Studio resten.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-model-present-windows timeout=60 hidden=True -->

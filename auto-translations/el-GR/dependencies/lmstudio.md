@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 
 <!-- @device:halo_box -->
-Το LM Studio μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Updates** και εγκαταστήστε το LM Studio εάν δεν υπάρχει ήδη.
+Το LM Studio μπορεί να εγκατασταθεί από το **AMD Ryzen™ AI Developer Center**. Μεταβείτε στην καρτέλα **Updates** και εγκαταστήστε το LM Studio αν δεν υπάρχει ήδη.
 
-Για να επιτρέψετε στο LM Studio να βλέπει τα προεγκατεστημένα μοντέλα, μεταβείτε στο Settings > General > Models Directory. Στη συνέχεια, αλλάξτε τη διαδρομή σε `C:\Users\Public\models`
+Αν το σύστημά σας διαθέτει προεγκατεστημένα μοντέλα, μεταβείτε στο Settings > General > Models Directory. Στη συνέχεια, αλλάξτε τη διαδρομή σε `C:\Users\Public\models`
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_windows_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
@@ -20,8 +20,10 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 1. Κατεβάστε το πρόγραμμα εγκατάστασης από εδώ: [https://lmstudio.ai/download](https://lmstudio.ai/download)
-2. Εγκαταστήστε. 
+2. Εγκαταστήστε το. 
 <!-- @device:end -->
+
+> **Μοντέλα:** Αν το σύστημά σας ήρθε με το προεγκατεστημένο μοντέλο αυτού του playbook, κατευθύνετε το LM Studio στον παραπάνω κατάλογο προεγκατεστημένων μοντέλων για να το χρησιμοποιήσετε. Διαφορετικά, κατεβάστε το μοντέλο από την καρτέλα **Discover** του LM Studio (εικονίδιο αναζήτησης) πριν συνεχίσετε.
 
 > Συμβουλή: Μετά την εγκατάσταση, εκκινήστε το LM Studio μία φορά για να αρχικοποιήσετε το CLI (`lms`).
 
@@ -42,12 +44,14 @@ lms --help
 > Συμβουλή: Μετά την εγκατάσταση, εκκινήστε το LM Studio μία φορά για να αρχικοποιήσετε το CLI (`lms`).
 
 <!-- @device:halo_box -->
-Για να επιτρέψετε στο LM Studio να βλέπει τα προεγκατεστημένα μοντέλα, μεταβείτε στο Settings > General > Models Directory. Στη συνέχεια, αλλάξτε τη διαδρομή σε `/var/cache/models`.
+Αν το σύστημά σας διαθέτει προεγκατεστημένα μοντέλα, μεταβείτε στο Settings > General > Models Directory. Στη συνέχεια, αλλάξτε τη διαδρομή σε `/var/cache/models`.
 
 <p align="center">
   <img src="/api/dependencies/assets/lmstudio_linux_directory.png" alt="Adding pre-installed models to LM Studio" width="600"/>
 </p>
 <!-- @device:end -->
+
+> **Μοντέλα:** Αν το σύστημά σας ήρθε με το προεγκατεστημένο μοντέλο αυτού του playbook, κατευθύνετε το LM Studio στον παραπάνω κατάλογο προεγκατεστημένων μοντέλων για να το χρησιμοποιήσετε. Διαφορετικά, κατεβάστε το μοντέλο από την καρτέλα **Discover** του LM Studio (εικονίδιο αναζήτησης) πριν συνεχίσετε.
 
 <!-- @test:id=lmstudio-cli-linux timeout=60 hidden=True -->
 ```bash
