@@ -131,7 +131,18 @@ class BatchVerdict(unittest.TestCase):
         self.assertIn("| Strix | ⚠️ NOT RUN (0/1) | — |", out.stdout)
         self.assertIn("::error title=Halo · Linux::FAIL", out.stdout)
         self.assertIn("::notice title=Halo · Windows::PASS", out.stdout)
-        self.assertIn("| `b` | Halo · Linux | ✦ | ❌ FAILED |", out.stdout)
+        # The configuration table: playbooks x configurations, — where a playbook did not run.
+        self.assertIn("## OrchestrAI playbooks by configuration", out.stdout)
+        self.assertIn("| Playbook | Halo · Linux | Halo · Windows | Strix · Linux |", out.stdout)
+        self.assertIn("| `b` | ❌ FAILED ✦ | ✅ PASSED ✦ | — |", out.stdout)
+
+    def test_configuration_cells_link_the_job_reportportal_and_live_run(self):
+        row = {"playbook": "a", "batch_id": "linux/halo", "label": "Halo · Linux", "platform": "linux",
+               "required": False, "outcome": "PASSED", "rp_url": "https://rp/1", "reason": "",
+               "job_url": "https://gh/job/9", "run_url": "https://oai/run/7"}
+        table = bv.by_configuration([row])
+        self.assertIn("| Playbook | Halo · Linux<br>[live results](https://oai/run/7) |", table)
+        self.assertIn("| `a` | ✅ [PASSED](https://gh/job/9) · [ReportPortal](https://rp/1) |", table)
 
 
 if __name__ == "__main__":

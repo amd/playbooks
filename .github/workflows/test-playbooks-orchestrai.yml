@@ -341,6 +341,7 @@ jobs:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
           BATCH_JSON: ${{ toJson(matrix) }}
           RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
         # Fails only when a required playbook did not pass; each playbook's result

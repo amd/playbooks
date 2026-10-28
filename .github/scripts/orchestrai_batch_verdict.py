@@ -17,6 +17,7 @@ Env:
     BATCH_JSON   {"batch_id", "label", "platform", "arch", "locale", "playbooks": [...], "required": [...]}
     BUILD_URL, ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN  (for the verdict)
     RUN_URL      optional OrchestrAI run link, shown when there is no ReportPortal link
+    JOB_URL      optional link to this batch's GitHub job (the configuration table links to it)
 Exit: 1 when the batch failed as above, else 0.
 
 orchestrai_batch_verdict.py --merge DIR reads every batch.json under DIR (the
@@ -58,20 +59,19 @@ def resolve(playbook, batch, out_dir):
         outputs = dict(line.split("=", 1) for line in gh_out.read_text().splitlines() if "=" in line)
     outcome = (summary.get("outcome") or LABEL.get(rc, "FAILED")).upper()
     return {"playbook": playbook, "platform": batch["platform"], "arch": batch["arch"],
+            "job_url": os.environ.get("JOB_URL", ""), "run_url": os.environ.get("RUN_URL", ""),
             "batch_id": batch["batch_id"], "label": batch.get("label") or batch["batch_id"],
             "locale": batch.get("locale", ""), "required": playbook in batch["required"],
             "outcome": outcome, "rc": rc, "rp_url": outputs.get("rp_url", ""),
             "reason": summary.get("infrastructure_reason") or ""}
 
 
-def table(rows, run_url="", with_batch=False):
-    lines = ["| Playbook |" + (" System |" if with_batch else "") + " Required | Result | Results |",
-             "|---|" + ("---|" if with_batch else "") + "---|---|---|"]
+def table(rows, run_url=""):
+    lines = ["| Playbook | Required | Result | Results |", "|---|---|---|---|"]
     for r in rows:
         link = r["rp_url"] or run_url
         note = f" — {r['reason']}" if r["reason"] else ""
-        lines.append(f"| `{r['playbook']}` |" + (f" {r.get('label') or r['batch_id']} |" if with_batch else "")
-                     + f" {'✦' if r['required'] else ''} | "
+        lines.append(f"| `{r['playbook']}` | {'✦' if r['required'] else ''} | "
                      f"{ICON.get(r['outcome'], '❌')} {r['outcome']}{note} | "
                      f"{f'[View]({link})' if link else ''} |")
     return "\n".join(lines)
@@ -83,6 +83,32 @@ def system_status(rows):
     if outcomes == {"PASSED"}:
         return "PASS"
     return "FAIL" if "FAILED" in outcomes else "NOT RUN"
+
+
+def by_configuration(rows):
+    """Playbooks x configurations: each cell links its result to the batch's job
+    and to ReportPortal; each column header links the configuration's live run."""
+    configs = {}
+    for r in rows:
+        configs.setdefault(r.get("label") or r["batch_id"], r.get("run_url", ""))
+    labels = sorted(configs)
+    cells = {(r["playbook"], r.get("label") or r["batch_id"]): r for r in rows}
+    def header(label):
+        return f"{label}<br>[live results]({configs[label]})" if configs[label] else label
+    def cell(r):
+        if not r:
+            return "—"
+        status = f"[{r['outcome']}]({r['job_url']})" if r.get("job_url") else r["outcome"]
+        rp = f" · [ReportPortal]({r['rp_url']})" if r.get("rp_url") else ""
+        return f"{ICON.get(r['outcome'], '❌')} {status}{rp}{' ✦' if r.get('required') else ''}"
+    out = ["## OrchestrAI playbooks by configuration", "",
+           "Result links open the batch's GitHub job; ReportPortal links open the recorded "
+           "launch when available. ✦ = required.", "",
+           "| Playbook | " + " | ".join(header(l) for l in labels) + " |",
+           "|---|" + "---|" * len(labels)]
+    for pb in sorted({r["playbook"] for r in rows}):
+        out.append(f"| `{pb}` | " + " | ".join(cell(cells.get((pb, l))) for l in labels) + " |")
+    return "\n".join(out) + "\n"
 
 
 def merge(root):
@@ -105,10 +131,7 @@ def merge(root):
              "|---|" + "---|" * len(platforms)]
     for device in sorted(grid):
         lines.append(f"| {device} | " + " | ".join(grid[device].get(p, "—") for p in platforms) + " |")
-    rows.sort(key=lambda r: (r.get("label") or r["batch_id"], r["playbook"]))
-    text = ("\n".join(lines) + "\n\n" + ("_No batch results._" if not rows else
-            "<details><summary>Every playbook</summary>\n\n" + table(rows, with_batch=True)
-            + "\n\n</details>") + "\n")
+    text = "\n".join(lines) + "\n\n" + (by_configuration(rows) if rows else "_No batch results._\n")
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
