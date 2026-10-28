@@ -177,7 +177,7 @@ class ControlPlaneApi(unittest.TestCase):
         with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
             urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"}, 3600)
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
-        self.assertIn("run b ended error without a build: no image", err.getvalue())
+        self.assertIn("run b ended error without a build: error=no image", err.getvalue())
 
 
 class ReportingSwitch(unittest.TestCase):
@@ -325,6 +325,14 @@ class WorkflowWiring(unittest.TestCase):
             self.assertIn("--await-build", steps[ids.index("build")]["run"])
             self.assertIn("steps.build.outputs.build_url", steps[ids.index("wait")]["env"]["STARTED_BUILD_URL"])
             self.assertEqual(self.load(name)["jobs"][job]["permissions"]["id-token"], "write", name)
+
+
+class FailureReason(unittest.TestCase):
+    def test_a_run_that_ended_says_why_whatever_the_field(self):
+        self.assertEqual(trigger.failure_reason({"status": "error", "error": "no machine"}), "error=no machine")
+        self.assertEqual(trigger.failure_reason({"status": "error", "outcome": {"failure_reason": "reimage failed"}}),
+                         "outcome.failure_reason=reimage failed")
+        self.assertEqual(trigger.failure_reason({"status": "error", "id": "r1"}), "")
 
 
 class AcquireTimeoutValidation(unittest.TestCase):
