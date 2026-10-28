@@ -14,11 +14,14 @@ name: Translate Playbooks
 
 on:
   # Maintenance mode: retranslate a playbook once its English source lands on main.
+  # Push-triggered runs translate into Simplified Chinese (zh-CN) only; every other
+  # locale is translated on demand via workflow_dispatch below.
   push:
     branches: [main]
     paths:
       - 'playbooks/**'
   # On-demand backfill: translate a specific playbook (or all) into chosen locales.
+  # This is the only way to translate into locales other than zh-CN.
   workflow_dispatch:
     inputs:
       playbook_id:
@@ -26,9 +29,9 @@ on:
         required: false
         type: string
       locales:
-        description: 'Comma-separated target locales (defaults to all 30)'
+        description: "Comma-separated target locales, or 'all' for all 30 (defaults to zh-CN)"
         required: false
-        default: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+        default: 'zh-CN'
         type: string
 
 permissions:
@@ -60,9 +63,12 @@ jobs:
       branch: ${{ steps.push.outputs.branch }}
       summary: ${{ steps.push.outputs.summary }}
     env:
+      # Locales translated automatically on push to main: Simplified Chinese only.
+      DEFAULT_LOCALES: 'zh-CN'
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
-      DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+      # Translated only on manual dispatch (locales input, or 'all').
+      ALL_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
       # LLM API endpoint config, read from repository secrets. For exactly what
       # each secret should contain (with examples), see the "What the repository
       # maintainers need to do" table in auto-translations/README.md.
@@ -94,6 +100,7 @@ jobs:
         run: |
           LOCALES="${{ github.event.inputs.locales }}"
           if [ -z "$LOCALES" ]; then LOCALES="$DEFAULT_LOCALES"; fi
+          if [ "$LOCALES" = "all" ]; then LOCALES="$ALL_LOCALES"; fi
           echo "locales=$LOCALES" >> "$GITHUB_OUTPUT"
           echo "Target locales: $LOCALES"
 
