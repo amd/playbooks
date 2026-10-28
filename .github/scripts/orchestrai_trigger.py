@@ -532,6 +532,20 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     return run["id"]
 
 
+def failure_reason(run):
+    """Why a run ended: its error/reason/message/failure/detail fields, one level
+    deep (the Control Plane does not always use the same key)."""
+    found = []
+    def scan(obj, prefix=""):
+        for key, value in (obj or {}).items():
+            if isinstance(value, dict) and not prefix:
+                scan(value, f"{key}.")
+            elif value and any(w in key.lower() for w in ("error", "reason", "message", "failure", "detail")):
+                found.append(f"{prefix}{key}={value if isinstance(value, str) else json.dumps(value)}")
+    scan(run)
+    return "; ".join(found)[:800]
+
+
 def await_builds(cp, runs, wait_seconds):
     """Wait until each run has started its pipeline build; {batch_id: build URL}."""
     urls, pending = {}, dict(runs)
@@ -551,7 +565,7 @@ def await_builds(cp, runs, wait_seconds):
                 print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
                 del pending[bid]
             elif run.get("status") in TERMINAL:
-                reason = run.get("error") or run.get("status_reason") or run.get("message") or ""
+                reason = failure_reason(run)
                 print(f"::error::{bid}: run {rid} ended {run.get('status')} without a build"
                       + (f": {reason}" if reason else ""), file=sys.stderr)
                 del pending[bid]
