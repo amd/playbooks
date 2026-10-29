@@ -326,6 +326,24 @@ class WorkflowWiring(unittest.TestCase):
             self.assertEqual(self.load(name)["jobs"][job]["permissions"]["id-token"], "write", name)
 
 
+class RetryRun(unittest.TestCase):
+    def submit(self, retry):
+        cp = {"api_url": "https://cp/api/ci/v1", "audience": "a", "portal_url": "https://cp", "workspace": "w"}
+        plan = trigger.make_plan(BATCH, "refs/heads/main", load_config(), 1,
+                                 "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        api = mock.Mock(return_value={"run": {"id": "r1"}})
+        env = {"GITHUB_RUN_ID": "77", "GITHUB_RUN_ATTEMPT": "1", **({"ORCHESTRAI_RETRY": retry} if retry else {})}
+        with mock.patch.object(trigger, "api", api), mock.patch.dict(os.environ, env, clear=True):
+            trigger.start_run(cp, "linux/stx", plan, {}, "linux", "", "a" * 40)
+        body, key = api.call_args[0][3], api.call_args[0][4]
+        return body["plan_document"]["name"], key
+
+    def test_a_retry_is_a_new_run_not_the_original_again(self):
+        (name, key), (rname, rkey) = self.submit(""), self.submit("1")
+        self.assertNotEqual(key, rkey)  # the idempotency key would return the first run
+        self.assertTrue(rname.endswith(" retry 1") and not name.endswith("retry 1"))
+
+
 class FailureReason(unittest.TestCase):
     def test_a_run_that_ended_says_why_whatever_the_field(self):
         self.assertEqual(trigger.failure_reason({"status": "error", "error": "no machine"}), "error=no machine")

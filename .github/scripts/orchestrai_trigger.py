@@ -500,6 +500,8 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
         "windows" if platform == "windows" else "ubuntu")
     settings = {**plan["run_settings"], "executor": "jenkins", "os_image": image}
     gh_run = os.environ.get("GITHUB_RUN_ID", "")
+    # A retry of a batch's NOT_RUN playbooks (ORCHESTRAI_RETRY=n) is a new run.
+    retry = os.environ.get("ORCHESTRAI_RETRY", "")
     attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "")
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if publisher:
@@ -519,13 +521,14 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     body = {
         "require_capacity": "queue",
         "plan_document": {
-            "name": f"Playbooks {bid} {gh_run}/{attempt}",
+            "name": f"Playbooks {bid} {gh_run}/{attempt}" + (f" retry {retry}" if retry else ""),
             "description": f"Started by https://github.com/{repo}/actions/runs/{gh_run}",
             "document": {"sessions": sessions, "run_settings": settings},
         },
         "builds_json": builds,
     }
-    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid]).encode()).hexdigest()
+    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid] + ([retry] if retry else []))
+                         .encode()).hexdigest()
     run = api(cp, "POST", "/runs", body, key).get("run") or {}
     if not run.get("id"):
         raise ValueError("the CI API start response has no run id")

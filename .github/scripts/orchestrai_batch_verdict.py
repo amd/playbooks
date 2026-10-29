@@ -20,6 +20,13 @@ Env:
     JOB_URL      optional link to this batch's GitHub job (the configuration table links to it)
 Exit: 1 when the batch failed as above, else 0.
 
+Retry: with RETRY_OF=<first attempt's batch.json>, BATCH_JSON lists only the
+playbooks being retried (those that did NOT_RUN or were INTERRUPTED); their new
+results replace the first attempt's in batch.json, marked with the attempt and
+the first outcome, and the first attempt's files move to <playbook>-attempt1/.
+DEFER_EXIT=1 records results without failing; orchestrai_batch_verdict.py
+--exit-code then decides the job from the final batch.json.
+
 orchestrai_batch_verdict.py --merge DIR reads every batch.json under DIR (the
 downloaded batch artifacts) and reports each system (device + OS) as PASS, FAIL
 or NOT RUN: a device x OS grid and one annotation per system on the run page,
@@ -58,7 +65,7 @@ def resolve(playbook, batch, out_dir):
                 pass
         outputs = dict(line.split("=", 1) for line in gh_out.read_text().splitlines() if "=" in line)
     outcome = (summary.get("outcome") or LABEL.get(rc, "FAILED")).upper()
-    return {"playbook": playbook, "platform": batch["platform"], "arch": batch["arch"],
+    return {"playbook": playbook, "platform": batch["platform"], "arch": batch["arch"], "attempt": 1,
             "job_url": os.environ.get("JOB_URL", ""), "run_url": os.environ.get("RUN_URL", ""),
             "batch_id": batch["batch_id"], "label": batch.get("label") or batch["batch_id"],
             "locale": batch.get("locale", ""), "required": playbook in batch["required"],
@@ -66,11 +73,26 @@ def resolve(playbook, batch, out_dir):
             "reason": summary.get("infrastructure_reason") or ""}
 
 
+def retry_note(r):
+    if r.get("attempt", 1) < 2:
+        return ""
+    return f" (retry {r['attempt'] - 1}; first: {r.get('first_outcome', '?')})"
+
+
+RETRYABLE = ("NOT_RUN", "INTERRUPTED")
+
+
+def batch_failed(rows, batch):
+    """Required playbooks that did not pass; with nothing required, any that did not."""
+    pool = [r for r in rows if r["required"]] if batch["required"] else rows
+    return [r["playbook"] for r in pool if r["outcome"] != "PASSED"]
+
+
 def table(rows, run_url=""):
     lines = ["| Playbook | Required | Result | Results |", "|---|---|---|---|"]
     for r in rows:
         link = r["rp_url"] or run_url
-        note = f" — {r['reason']}" if r["reason"] else ""
+        note = (f" — {r['reason']}" if r["reason"] else "") + retry_note(r)
         lines.append(f"| `{r['playbook']}` | {'✦' if r['required'] else ''} | "
                      f"{ICON.get(r['outcome'], '❌')} {r['outcome']}{note} | "
                      f"{f'[View]({link})' if link else ''} |")
@@ -100,7 +122,7 @@ def by_configuration(rows):
             return "—"
         status = f"[{r['outcome']}]({r['job_url']})" if r.get("job_url") else r["outcome"]
         rp = f" · [ReportPortal]({r['rp_url']})" if r.get("rp_url") else ""
-        return f"{ICON.get(r['outcome'], '❌')} {status}{rp}{' ✦' if r.get('required') else ''}"
+        return f"{ICON.get(r['outcome'], '❌')} {status}{rp}{' ✦' if r.get('required') else ''}{retry_note(r)}"
     out = ["## OrchestrAI playbooks by configuration", "",
            "Result links open the batch's GitHub job; ReportPortal links open the recorded "
            "launch when available. ✦ = required.", "",
@@ -143,25 +165,49 @@ def merge(root):
 def main():
     if sys.argv[1:2] == ["--merge"]:
         return merge(sys.argv[2])
+    if sys.argv[1:2] == ["--exit-code"]:  # the batch job's result, from the final batch.json
+        failed = batch_failed(json.loads(Path(sys.argv[2]).read_text()), json.loads(os.environ["BATCH_JSON"]))
+        if failed:
+            print(f"::error::did not pass: {', '.join(failed)}")
+        return 1 if failed else 0
+    if sys.argv[1:2] == ["--retryable"]:  # playbooks to retry, one per line
+        rows = json.loads(Path(sys.argv[2]).read_text())
+        print("\n".join(r["playbook"] for r in rows if r["outcome"] in RETRYABLE))
+        return 0
     batch = json.loads(os.environ["BATCH_JSON"])
     out_dir = Path("test-results")
     out_dir.mkdir(exist_ok=True)
+    first = {}
+    if os.environ.get("RETRY_OF"):
+        first = {r["playbook"]: r for r in json.loads(Path(os.environ["RETRY_OF"]).read_text())}
+        for pb in batch["playbooks"]:  # keep the first attempt's files
+            if (out_dir / pb).is_dir():
+                shutil.rmtree(out_dir / f"{pb}-attempt1", ignore_errors=True)
+                (out_dir / pb).rename(out_dir / f"{pb}-attempt1")
     rows = [resolve(pb, batch, out_dir) for pb in batch["playbooks"]]
+    for r in rows:
+        if r["playbook"] in first:
+            prev = first[r["playbook"]]
+            r.update(attempt=prev.get("attempt", 1) + 1, first_outcome=prev["outcome"],
+                     first_reason=prev.get("reason", ""))
+    retried = rows
+    if first:
+        rows = [next((n for n in retried if n["playbook"] == pb), old) for pb, old in first.items()]
     (out_dir / "batch.json").write_text(json.dumps(rows, indent=2))
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
-            f.write(f"### {batch.get('label') or batch['batch_id']} ({len(rows)} playbooks)\n\n"
-                    f"{table(rows, os.environ.get('RUN_URL', ''))}\n\n")
-    failed = [r["playbook"] for r in rows if r["required"] and r["rc"] != 0]
-    for r in rows:
+            title = batch.get("label") or batch["batch_id"]
+            title += f" — retry of {len(retried)} that did not run" if first else f" ({len(rows)} playbooks)"
+            f.write(f"### {title}\n\n{table(retried, os.environ.get('RUN_URL', ''))}\n\n")
+    for r in retried:
         if r["rc"] != 0:
             kind = "error" if r["required"] else "warning"
             print(f"::{kind}::{r['playbook']} ({batch['batch_id']}): {r['outcome']}"
                   + (f" — {r['reason']}" if r["reason"] else ""))
-    if not batch["required"]:
-        failed = [r["playbook"] for r in rows if r["rc"] != 0]
-    return 1 if failed else 0
+    if os.environ.get("DEFER_EXIT"):
+        return 0
+    return 1 if batch_failed(rows, batch) else 0
 
 
 if __name__ == "__main__":

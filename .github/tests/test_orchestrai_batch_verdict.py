@@ -113,6 +113,56 @@ class BatchVerdict(unittest.TestCase):
         self.assertEqual(self.run_batch(["good-a", "bad-b"], [])[0], 1)
         self.assertEqual(self.run_batch(["good-a"], [])[0], 0)
 
+    def test_only_playbooks_that_did_not_run_are_retried(self):
+        rows = [{"playbook": p, "outcome": o} for p, o in
+                (("good-a", "PASSED"), ("bad-b", "FAILED"), ("norun-c", "NOT_RUN"), ("cut-d", "INTERRUPTED"))]
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "batch.json").write_text(json.dumps(rows))
+            out = subprocess.run([sys.executable, str(HERE.parent / "scripts/orchestrai_batch_verdict.py"),
+                                  "--retryable", str(Path(d, "batch.json"))], capture_output=True, text=True)
+        self.assertEqual(out.stdout.split(), ["norun-c", "cut-d"])  # never a FAILED test
+
+    def test_a_retry_replaces_the_first_attempt_and_the_job_judges_both(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        stub = Path(tmp.name, "verdict.py")
+        stub.write_text(STUB)
+        batch = {"batch_id": "linux/halo", "label": "Halo · Linux", "platform": "linux", "arch": "halo",
+                 "playbooks": ["good-a", "norun-c"], "required": ["good-a", "norun-c"]}
+        cwd = os.getcwd()
+        os.chdir(tmp.name)
+        try:
+            with mock.patch.object(bv, "VERDICT", stub), mock.patch("sys.stdout"), \
+                    mock.patch.dict(os.environ, {"BATCH_JSON": json.dumps(batch), "DEFER_EXIT": "1",
+                                                 "GITHUB_STEP_SUMMARY": ""}):
+                self.assertEqual(bv.main(), 0)  # deferred, though norun-c did not run
+            Path("first.json").write_text(Path("test-results/batch.json").read_text())
+            # The retry: norun-c now passes (the stub decides by name, so rename it).
+            retry = dict(batch, playbooks=["norun-c"])
+            stub.write_text(STUB.replace('pb.split("-")[0]', '"good" if pb == "norun-c" else pb.split("-")[0]'))
+            with mock.patch.object(bv, "VERDICT", stub), mock.patch("sys.stdout"), \
+                    mock.patch.dict(os.environ, {"BATCH_JSON": json.dumps(retry), "RETRY_OF": "first.json",
+                                                 "DEFER_EXIT": "1", "GITHUB_STEP_SUMMARY": ""}):
+                bv.main()
+            rows = {r["playbook"]: r for r in json.loads(Path("test-results/batch.json").read_text())}
+            kept = sorted(p.name for p in Path("test-results").iterdir() if p.is_dir())
+            with mock.patch.dict(os.environ, {"BATCH_JSON": json.dumps(batch)}), \
+                    mock.patch.object(sys, "argv", ["v", "--exit-code", "test-results/batch.json"]), \
+                    mock.patch("sys.stdout"):
+                final = bv.main()
+        finally:
+            os.chdir(cwd)
+        self.assertEqual((rows["norun-c"]["outcome"], rows["norun-c"]["attempt"], rows["norun-c"]["first_outcome"]),
+                         ("PASSED", 2, "NOT_RUN"))
+        self.assertEqual((rows["good-a"]["outcome"], rows["good-a"]["attempt"]), ("PASSED", 1))
+        self.assertEqual(kept, ["good-a", "norun-c", "norun-c-attempt1"])
+        self.assertEqual(final, 0)  # passed on retry
+        self.assertIn("(retry 1; first: NOT_RUN)", bv.by_configuration(list(rows.values())))
+
+    def test_the_job_still_fails_when_the_retry_does_not_run_either(self):
+        rows = [{"playbook": "norun-c", "required": True, "outcome": "NOT_RUN"}]
+        self.assertEqual(bv.batch_failed(rows, {"required": ["norun-c"]}), ["norun-c"])
+
     def test_merge_reports_each_system_then_every_playbook(self):
         batches = {"Halo · Linux": ("linux", [("a", "PASSED"), ("b", "FAILED")]),
                    "Halo · Windows": ("windows", [("a", "PASSED"), ("b", "PASSED")]),
