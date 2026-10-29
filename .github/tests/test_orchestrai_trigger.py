@@ -315,6 +315,32 @@ class WorkflowWiring(unittest.TestCase):
         self.assertEqual(self.load("orchestrai-pr-command.yml")["jobs"]["command"]["permissions"]["id-token"],
                          "write")
 
+    def test_every_job_that_submits_runs_installs_pyyaml_first(self):
+        """Each job is a fresh environment: a job that starts runs (the trigger
+        without --await-build reads the YAML config) must install PyYAML itself.
+        The batch job's retry once crashed with No module named 'yaml'."""
+        for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
+            for job_id, job in self.load(name)["jobs"].items():
+                steps = job.get("steps") or []
+                for i, step in enumerate(steps):
+                    run = step.get("run") or ""
+                    if "orchestrai_trigger.py" in run and "--await-build" not in run:
+                        before = " ".join(s.get("run") or "" for s in steps[:i])
+                        self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
+
+    def test_the_trigger_fails_without_pyyaml_except_await_build(self):
+        """--await-build must keep working where PyYAML is absent."""
+        code = ("import sys, builtins; real = builtins.__import__\n"
+                "def no_yaml(n, *a, **k):\n"
+                "    if n == 'yaml': raise ModuleNotFoundError(\"No module named 'yaml'\")\n"
+                "    return real(n, *a, **k)\n"
+                "builtins.__import__ = no_yaml\n"
+                f"sys.path.insert(0, {SCRIPTS_DIR!r}); import orchestrai_trigger as t\n"
+                "print(t.acquire_timeout_minutes(sys.argv[1]))")
+        import subprocess
+        out = subprocess.run([sys.executable, "-c", code, CONFIG], capture_output=True, text=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+
     def test_every_test_job_waits_for_its_own_batch(self):
         for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
                           ("orchestrai-pr-command.yml", "test-playbooks")):

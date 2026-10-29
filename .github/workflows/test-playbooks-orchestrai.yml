@@ -327,6 +327,17 @@ jobs:
           print("playbooks=" + json.dumps(batch["playbooks"]))
           PY
 
+      # The trigger reads orchestrai-config.yml (PyYAML); Detect & Trigger's
+      # install does not reach this job.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        if: always() && steps.pick.outputs.batches_json != ''
+        with:
+          python-version: '3.12'
+
+      - name: Install the trigger's dependencies
+        if: always() && steps.pick.outputs.batches_json != ''
+        run: pip install --quiet pyyaml
+
       - name: Retry them in a new OrchestrAI run
         id: retry_trigger
         if: always() && steps.pick.outputs.batches_json != ''
