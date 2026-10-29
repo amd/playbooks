@@ -117,6 +117,10 @@ extra_tags:
 # was marked timed out, while openclaw passed on the 128 GB batch the same night.
 # The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
+  # grgh's one machine (DT574) reports 188 GiB to the OS but carries no ram_*
+  # tag, so the 128 GB requirement in extra_tags would drop its batch.
+  deepseek-v4-flash-ds4:
+    grgh: []
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
