@@ -49,6 +49,7 @@ HARNESS = (
     ".github/scripts/run_playbook_tests.py",
     ".github/scripts/build_test_matrix.py",
     ".github/workflows/test-playbooks.yml",
+    ".github/runners.json",
 )
 
 
@@ -202,6 +203,9 @@ class FixtureCase(unittest.TestCase):
         meta = json.loads(pj.read_text())
         meta["tested_platforms"] = {f"dev{i}": ["linux", "windows"] for i in range(200)}
         pj.write_text(json.dumps(meta, indent=2))
+        (self.fx / ".github" / "runners.json").write_text(json.dumps(  # runnable devices only count
+            [{"name": f"dev{i}-{o}", "os": o, "group": f"dev{i}", "labels": []}
+             for i in range(200) for o in ("Linux", "Windows")]))
         proc = subprocess.run(
             [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
              "--github-output", os.devnull],
@@ -215,8 +219,19 @@ class FixtureCase(unittest.TestCase):
         meta = json.loads(pj.read_text())
         meta["tested_platforms"]["newdev"] = ["linux"]
         pj.write_text(json.dumps(meta, indent=2))
+        runners = self.fx / ".github" / "runners.json"  # a new device comes with its runner
+        runners.write_text(json.dumps(json.loads(runners.read_text())
+                                      + [{"name": "newdev-0", "os": "Linux", "group": "newdev", "labels": []}]))
         got = select(self.fx)
         self.assertEqual([(e["platform"], e["arch"]) for e in got], [("linux", "newdev")])
+
+    def test_a_device_without_runners_is_not_scheduled(self):
+        """Devices only OrchestrAI tests (e.g. grgh) have no runner here."""
+        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
+        meta = json.loads(pj.read_text())
+        meta["tested_platforms"]["norunner"] = ["linux"]
+        pj.write_text(json.dumps(meta, indent=2))
+        self.assertEqual(select(self.fx), [])
 
     def test_required_flag_flip_is_selected(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
@@ -264,7 +279,8 @@ class FixtureCase(unittest.TestCase):
         """Dropping a device from tested_platforms must still run the lost entry."""
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
-        dev = sorted(meta["tested_platforms"])[0]
+        fleet = {r["group"] for r in json.loads((self.fx / ".github" / "runners.json").read_text())}
+        dev = sorted(d for d in meta["tested_platforms"] if d in fleet)[0]
         lost = meta["tested_platforms"].pop(dev)
         pj.write_text(json.dumps(meta, indent=2))
         got = select(self.fx)
