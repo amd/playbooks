@@ -212,7 +212,7 @@ class TestResult:
     timed_out: bool = False
 
 
-def _kill_tree(proc: subprocess.Popen) -> None:
+def _kill_tree(proc: subprocess.Popen, own_group: bool) -> None:
     """Kill a step and everything it started."""
     if os.name == "nt":
         # /T finds children through their parent, so run it before the shell dies.
@@ -220,13 +220,15 @@ def _kill_tree(proc: subprocess.Popen) -> None:
             subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
                            capture_output=True, timeout=60, check=False)
         proc.kill()
-    else:
+    elif own_group:
         # TERM first: sudo forwards it to the command it runs.
         for sig in (signal.SIGTERM, signal.SIGKILL):
             with contextlib.suppress(ProcessLookupError, PermissionError):
                 os.killpg(proc.pid, sig)
             with contextlib.suppress(subprocess.TimeoutExpired):
                 proc.wait(timeout=5)
+    else:
+        proc.kill()
     with contextlib.suppress(subprocess.TimeoutExpired):
         proc.wait(timeout=15)
 
@@ -239,16 +241,18 @@ def run_step_command(cmd, cwd, timeout: int, env: dict):
     with tempfile.TemporaryFile("w+", errors="replace") as out, \
             tempfile.TemporaryFile("w+", errors="replace") as err:
         # Own process group, so a timeout spares servers that earlier steps left running.
+        # Not in a terminal run: there the step keeps the terminal, so sudo can prompt.
+        own_group = os.name != "nt" and not os.isatty(0)
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
-                                start_new_session=os.name != "nt")
+                                start_new_session=own_group)
         timed_out = False
         try:
             proc.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             timed_out = True
-            _kill_tree(proc)
+            _kill_tree(proc, own_group)
         except BaseException:
-            _kill_tree(proc)
+            _kill_tree(proc, own_group)
             raise
         out.seek(0)
         err.seek(0)

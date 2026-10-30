@@ -20,6 +20,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "run_playbook_tests", Path(__file__).with_name("run_playbook_tests.py")
@@ -95,7 +96,8 @@ class TimeoutOutputTest(unittest.TestCase):
             pidfile = Path(d) / "pid"
             script = f"sleep 60 & echo $! > {pidfile}; wait"
             start = time.monotonic()
-            _, timed_out, _, _ = rpt.run_step_command(["bash", "-c", script], d, 1, dict(os.environ))
+            with mock.patch.object(rpt.os, "isatty", return_value=False):  # as in CI
+                _, timed_out, _, _ = rpt.run_step_command(["bash", "-c", script], d, 1, dict(os.environ))
             self.assertLess(time.monotonic() - start, 10)
             self.assertTrue(timed_out)
             with self.assertRaises(ProcessLookupError):
