@@ -35,10 +35,18 @@ jobs:
     name: OrchestrAI PR command
     if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    # Must exceed acquire_timeout + 30 min (tested).
+    timeout-minutes: 420
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       has_entries: ${{ steps.build-matrix.outputs.has_entries }}
       build_urls: ${{ steps.trigger.outputs.build_urls }}
+      run_urls: ${{ steps.trigger.outputs.run_urls }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       head_ref: ${{ steps.pr.outputs.head_ref }}
       locale: ${{ steps.detect.outputs.locale }}
@@ -178,10 +186,6 @@ jobs:
         env:
           BATCHES_JSON: ${{ steps.build-matrix.outputs.batches }}
           GIT_REF: ${{ steps.pr.outputs.head_ref }}
-          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
-          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-          ORCHESTRAI_PIPELINE_URL: ${{ vars.ORCHESTRAI_PIPELINE_URL }}
-          ORCHESTRAI_PIPELINE_JOB: ${{ vars.ORCHESTRAI_PIPELINE_JOB }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
           ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
@@ -194,6 +198,15 @@ jobs:
           # Test the PR's own code, not the configured repo@main.
           ORCHESTRAI_PLAYBOOK_REPO: ${{ steps.pr.outputs.head_repo }}
           ORCHESTRAI_PLAYBOOK_SHA: ${{ steps.pr.outputs.head_sha }}
+          ORCHESTRAI_REPORTING: ${{ vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+          ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+          ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+          ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
@@ -236,14 +249,15 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          MAX=1080; FAIL_MAX=20; i=0; fails=0
-          while [ "$i" -lt "$MAX" ]; do
+          # 330 min of wall-clock time: max_duration (300m) plus 30 min to wind down.
+          DEADLINE=$((SECONDS + 330 * 60)); FAIL_MAX=20; finished=""; fails=0
+          while [ "$SECONDS" -lt "$DEADLINE" ]; do
             if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
               fails=0
               building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
               result=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('result') or '')" 2>/dev/null || echo "")
               if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result"; break
+                echo "Batch build finished: $result"; finished=1; break
               fi
             else
               fails=$((fails + 1))
@@ -251,9 +265,9 @@ jobs:
                 echo "::error::OrchestrAI pipeline unreachable"; exit 1
               fi
             fi
-            i=$((i + 1)); sleep 15
+            sleep 15
           done
-          if [ "$i" -ge "$MAX" ]; then echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1; fi
+          if [ -z "$finished" ]; then echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1; fi
 
       - name: Resolve per-playbook verdict
         if: always()
@@ -297,6 +311,7 @@ jobs:
         if: always()
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
+          RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
         # KEEP IN SYNC with the identical step in test-playbooks-orchestrai.yml
         # ("Test summary"). See the sync note on the verdict step above.
         run: |
@@ -327,6 +342,9 @@ jobs:
             if [ -n "${RP_URL}" ]; then
               echo "| | |"; echo "|---|---|"
               echo "| ReportPortal | [View Results](${RP_URL}) |"
+            elif [ -n "${RUN_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 

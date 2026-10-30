@@ -43,9 +43,10 @@ workflow runs when:
 - **A PR merges to `main`** touching `playbooks/**` (a new or edited playbook, or
   a changed shared dependency file). This is the maintenance path.
 - **On-demand backfill** via *Run workflow* (`workflow_dispatch`) - optionally
-  for one playbook, otherwise **all** playbooks; defaults to all 30 languages.
-  This fires the same automated pipeline (used to re-translate everything after a
-  model change or when adding a language).
+  for one playbook, otherwise **all** playbooks; defaults to zh-CN. Pass a
+  comma-separated `locales` list, or `all` for all 30 languages. This fires the same
+  automated pipeline and is the only way to translate into locales other than zh-CN
+  (used to re-translate everything after a model change or when adding a language).
 
 ### 2. Detect what to translate
 On a merge, the workflow diffs the commit and translates **only** the affected
@@ -210,15 +211,16 @@ no manual translation step. See the next section.
 | Independent quality score per file (`translation_accuracy.json`) | Implemented |
 | Idempotent + resumable (source-hash manifest) | Implemented |
 | `localized-playbooks/` override + region-only playbooks | Implemented |
-| GitHub Actions workflow: triggers, detect-changed, direct-push, all 30 locales | Implemented |
+| GitHub Actions workflow: triggers, detect-changed, direct-push, zh-CN on push + all 30 locales on manual dispatch | Implemented |
 | Provider-agnostic client (Anthropic-style / OpenAI-compatible APIs) | Implemented |
 | **Dedicated self-hosted runner labeled `translation`** | Implemented |
 | **`LLM_*` repository secrets set** | Implemented |
 | Website language selector for end users | Out of scope (website team) |
 
 The runner and secrets are now in place, so the workflow runs automatically: a
-push to `main` touching `playbooks/**` translates the changed playbook(s) into all
-locales and direct-pushes the results - no code changes and no manual step.
+push to `main` touching `playbooks/**` translates the changed playbook(s) into
+Simplified Chinese (zh-CN) and opens a PR with the results. Other locales are
+translated only by manually running the workflow.
 
 > [!NOTE]
 > Everything below refers to one workflow file,
@@ -288,9 +290,9 @@ locales and direct-pushes the results - no code changes and no manual step.
 ### The result
 Once the runner + secrets are in place, no code changes are needed: a PR that
 merges to `main` touching `playbooks/**` automatically translates the changed
-playbook(s) into all 30 languages on the dedicated runner and direct-pushes the
-results here. In production this is entirely automated - there is no manual
-translation step.
+playbook(s) into Simplified Chinese (zh-CN) on the dedicated runner. The other
+29 languages are translated only when someone runs the workflow manually
+(`workflow_dispatch` with a `locales` list, or `all`).
 
 ---
 

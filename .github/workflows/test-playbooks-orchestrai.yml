@@ -4,19 +4,21 @@
 #
 # OrchestrAI playbook CI (opt-in, additive).
 #
-# Runs each playbook on real AMD hardware via the OrchestrAI pipeline (
-# MAAS broker) instead of on a device-attached GitHub runner. It is independent
-# of the native test-playbooks.yml — enable it by providing the secrets/vars
-# below; otherwise it simply no-ops on a fork without them.
+# Runs each playbook on real AMD hardware through the OrchestrAI Control Plane
+# instead of on a device-attached GitHub runner. Detect & Trigger starts one run
+# per hardware batch with a GitHub OIDC token; each Test job waits on its batch's
+# pipeline build and reports that playbook's result. Settings and access rules:
+# .github/orchestrai-config.yml.
 #
 # Required repo secrets:   ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN
-# Optional repo secrets:   ORCHESTRAI_HF_TOKEN — a HuggingFace token passed to
-#   test machines as HF_TOKEN so live HF pulls (dependency cache misses, uncached
-#   datasets) are authenticated and avoid HF's shared-IP rate limit (429).
-# Optional repo variables: ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
+#   (read the pipeline builds; the workflow no-ops on a fork without them)
+# Required repo variables: ORCHESTRAI_V2_CI_API_URL, ORCHESTRAI_V2_OIDC_AUDIENCE,
+#   ORCHESTRAI_V2_PORTAL_URL, ORCHESTRAI_V2_WORKSPACE, and for ReportPortal
+#   reporting ORCHESTRAI_V2_RP_CREDENTIAL / ORCHESTRAI_V2_RP_PROJECT.
+# Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
+#                          without inputs; default reportportal)
+#                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
 #                          ORCHESTRAI_WAIT_RUNNER    (default ubuntu-latest)
-#   -> set these to runners that can reach the OrchestrAI pipeline URL in
-#      .github/orchestrai-config.yml.
 # Required for Linux Radeon batches: ORCHESTRAI_LINUX_DRIVER_SOURCE points to
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
@@ -56,7 +58,7 @@ on:
           - linux
           - windows
       machines_per_hw_group:
-        description: 'Machines per hardware group (1 = same-HW playbooks share one machine, sequential)'
+        description: 'Machines per hardware group, capped at its playbook count (1 = share one machine; use 1 for full runs, more doubles quota use)'
         required: false
         type: string
         default: '1'
@@ -69,6 +71,17 @@ on:
           - default
           - public
           - internal
+      reporting:
+        description: 'Results: reportportal (also export to ReportPortal) or api (OrchestrAI only)'
+        type: choice
+        default: reportportal
+        options:
+          - reportportal
+          - api
+      playbook_ref:
+        description: 'amd/playbooks branch, tag or commit to test'
+        type: string
+        default: main
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
   # `!orc` or `!localized-orc` on it (see orchestrai-pr-command.yml) — that runs
@@ -92,6 +105,11 @@ jobs:
   detect-and-trigger:
     name: Detect & Trigger
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    # Must exceed acquire_timeout + 30 min (tested).
+    timeout-minutes: 420
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
       localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
@@ -99,6 +117,7 @@ jobs:
       has_localized_entries: ${{ steps.prepare-matrices.outputs.has_localized_entries }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       build_urls: ${{ steps.trigger.outputs.build_urls }}
+      run_urls: ${{ steps.trigger.outputs.run_urls }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -193,13 +212,6 @@ jobs:
           BATCHES_JSON: ${{ steps.prepare-matrices.outputs.batches }}
           GIT_REF: ${{ github.ref }}
           MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
-          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
-          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-          # Optional HF token so live HuggingFace pulls (dep cache misses,
-          # uncached datasets) are authenticated and avoid the shared-IP 429.
-          ORCHESTRAI_HF_TOKEN: ${{ secrets.ORCHESTRAI_HF_TOKEN }}
-          ORCHESTRAI_PIPELINE_URL: ${{ vars.ORCHESTRAI_PIPELINE_URL }}
-          ORCHESTRAI_PIPELINE_JOB: ${{ vars.ORCHESTRAI_PIPELINE_JOB }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
           ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
@@ -213,10 +225,22 @@ jobs:
           ORCHESTRAI_WINDOWS_DRIVER_URL: ${{ vars.ORCHESTRAI_WINDOWS_DRIVER_URL }}
           # On a pull_request, test the PR's OWN code (same as the !orc path),
           # not the configured repo@main. These are empty on schedule/dispatch, so
-          # orchestrai_trigger.py falls back to playbook_repo@main there. Fork PRs
+          # orchestrai_trigger.py tests playbook_repo@playbook_ref there. Fork PRs
           # never reach this step: the secret gate above is false without secrets.
           ORCHESTRAI_PLAYBOOK_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
           ORCHESTRAI_PLAYBOOK_SHA: ${{ github.event.pull_request.head.sha }}
+          ORCHESTRAI_PLAYBOOK_REF: ${{ inputs.playbook_ref }}
+          # reportportal (default, also the nightly) or api; the repo variable
+          # sets it for runs without inputs.
+          ORCHESTRAI_REPORTING: ${{ inputs.reporting || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+          ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+          ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+          ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
   test-playbooks:
@@ -257,12 +281,13 @@ jobs:
           NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
           printf 'machine %s login %s password %s\n' \
             "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          # Bounded poll: ~4.5h cap (1080 * 15s) — covers max_duration (240m) plus
-          # provisioning/queue, but never hangs to the GitHub job timeout.
-          MAX=1080          # ~4.5h cap (1080 * 15s) — covers max_duration + queue
+          # Bounded poll: 330 min of wall-clock time (not a count of polls, which
+          # each take 15s plus the request) — max_duration (300m) plus 30 min for
+          # the build to wind down, and under GitHub's 360-minute job timeout.
+          DEADLINE=$((SECONDS + 330 * 60))
           FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
-          i=0; fails=0
-          while [ "$i" -lt "$MAX" ]; do
+          finished=""; fails=0
+          while [ "$SECONDS" -lt "$DEADLINE" ]; do
             if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
               fails=0
               building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
@@ -270,7 +295,7 @@ jobs:
               # The batch result reflects ALL its playbooks; this job's verdict is
               # resolved per-playbook in the next step from summary.json.
               if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result (per-playbook verdict resolved next)"; break
+                echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1; break
               fi
             else
               fails=$((fails + 1))
@@ -278,10 +303,9 @@ jobs:
                 echo "::error::OrchestrAI pipeline unreachable ($FAIL_MAX consecutive failures)"; exit 1
               fi
             fi
-            i=$((i + 1))
             sleep 15
           done
-          if [ "$i" -ge "$MAX" ]; then
+          if [ -z "$finished" ]; then
             echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1
           fi
 
@@ -325,6 +349,7 @@ jobs:
         if: always()
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
+          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
         # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
         # ("Test summary"). See the sync note on the verdict step above.
         run: |
@@ -350,11 +375,15 @@ jobs:
               echo "${INFRA_NOTE}"
               echo ""
             fi
-            # Link to ReportPortal (test results) only. The pipeline build URL is
+            # Link to the test results: ReportPortal when the run exported there,
+            # otherwise the OrchestrAI run. The pipeline build URL is
             # intentionally not shown here.
             if [ -n "${RP_URL}" ]; then
               echo "| | |"; echo "|---|---|"
               echo "| ReportPortal | [View Results](${RP_URL}) |"
+            elif [ -n "${RUN_URL}" ]; then
+              echo "| | |"; echo "|---|---|"
+              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -366,6 +395,7 @@ jobs:
     with:
       matrix_json: ${{ needs.detect-and-trigger.outputs.localized_matrix }}
       build_urls: ${{ needs.detect-and-trigger.outputs.build_urls }}
+      run_urls: ${{ needs.detect-and-trigger.outputs.run_urls }}
     secrets: inherit
 
   test-gate:
