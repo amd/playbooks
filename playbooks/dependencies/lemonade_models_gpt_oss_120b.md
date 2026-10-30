@@ -6,6 +6,10 @@ SPDX-License-Identifier: MIT
 
 ### Downloading GPT-OSS 120B for Lemonade
 
+<!-- @device:halo_box -->
+> **Note:** If this model is already available in Lemonade, you can skip this section. Otherwise, follow the steps below to download it.
+<!-- @device:end -->
+
 The Lemonade server serves the GPT-OSS 120B MXFP4 GGUF model (`gpt-oss-120b-mxfp-GGUF`). To download it ahead of time:
 
 ```bash

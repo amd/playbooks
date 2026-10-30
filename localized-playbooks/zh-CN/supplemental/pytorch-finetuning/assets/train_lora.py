@@ -17,6 +17,7 @@ Training Speed: 3-5x faster than full fine-tuning
 import gc
 import logging
 import os
+import time
 import torch
 
 # bitsandbytes logs a harmless "ROCm binary not found" error at import when its
@@ -111,7 +112,15 @@ if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
 n_samples = 8 if QUICK_TRAIN else 1000
 if QUICK_TRAIN:
     print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
-ds = MsDataset.load("AI-ModelScope/databricks-dolly-15k", subset_name="default", split="train").shuffle(seed=42).select(range(n_samples))
+for attempt in range(3):  # ModelScope's API call can time out from outside China
+    try:
+        ds = MsDataset.load("AI-ModelScope/databricks-dolly-15k", subset_name="default", split="train")
+        break
+    except Exception:
+        if attempt == 2:
+            raise
+        time.sleep(30)
+ds = ds.shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     if "messages" in ex:
