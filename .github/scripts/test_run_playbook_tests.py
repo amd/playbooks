@@ -15,7 +15,9 @@ platform/device filtering, so a filtered-out test never triggers the warning.
 import contextlib
 import importlib.util
 import io
+import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -86,6 +88,18 @@ class TimeoutOutputTest(unittest.TestCase):
         self.assertIn("waiting for the lock", result.stdout)
         self.assertIn("waiting for the lock", saved)
         self.assertIn("waiting for the lock", buf.getvalue())
+
+    @unittest.skipIf(os.name == "nt", "bash step")
+    def test_a_timeout_kills_the_child_holding_the_output(self):
+        with tempfile.TemporaryDirectory() as d:
+            pidfile = Path(d) / "pid"
+            script = f"sleep 60 & echo $! > {pidfile}; wait"
+            start = time.monotonic()
+            _, timed_out, _, _ = rpt.run_step_command(["bash", "-c", script], d, 1, dict(os.environ))
+            self.assertLess(time.monotonic() - start, 10)
+            self.assertTrue(timed_out)
+            with self.assertRaises(ProcessLookupError):
+                os.kill(int(pidfile.read_text()), 0)
 
 
 if __name__ == "__main__":
