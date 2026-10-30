@@ -158,6 +158,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -208,6 +209,54 @@ class TestResult:
     duration: float
     error_message: str = ""
     skipped: bool = False
+    timed_out: bool = False
+
+
+def _kill_tree(proc: subprocess.Popen, own_group: bool) -> None:
+    """Kill a step and everything it started."""
+    if os.name == "nt":
+        # /T finds children through their parent, so run it before the shell dies.
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                           capture_output=True, timeout=60, check=False)
+        proc.kill()
+    elif own_group:
+        # TERM first: sudo forwards it to the command it runs.
+        for sig in (signal.SIGTERM, signal.SIGKILL):
+            with contextlib.suppress(ProcessLookupError, PermissionError):
+                os.killpg(proc.pid, sig)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=5)
+    else:
+        proc.kill()
+    with contextlib.suppress(subprocess.TimeoutExpired):
+        proc.wait(timeout=15)
+
+
+def run_step_command(cmd, cwd, timeout: int, env: dict):
+    """Run a step, killing its whole tree on timeout. Returns (returncode, timed_out, stdout, stderr).
+
+    Output goes to files: with pipes, subprocess.run on Windows waits for children holding them.
+    """
+    with tempfile.TemporaryFile("w+", errors="replace") as out, \
+            tempfile.TemporaryFile("w+", errors="replace") as err:
+        # Own process group, so a timeout spares servers that earlier steps left running.
+        # Not in a terminal run: there the step keeps the terminal, so sudo can prompt.
+        own_group = os.name != "nt" and not os.isatty(0)
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
+                                start_new_session=own_group)
+        timed_out = False
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            _kill_tree(proc, own_group)
+        except BaseException:
+            _kill_tree(proc, own_group)
+            raise
+        out.seek(0)
+        err.seek(0)
+        return proc.returncode, timed_out, out.read(), err.read()
 
 
 @dataclass
@@ -1000,61 +1049,34 @@ def run_test(
     # Execute the test
     start_time = time.time()
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=workdir,
-            capture_output=True,
-            text=True,
-            timeout=test.timeout,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        returncode, timed_out, stdout, stderr = run_step_command(
+            cmd, workdir, test.timeout, {**os.environ, "PYTHONUNBUFFERED": "1"}
         )
         duration = time.time() - start_time
 
         # Save output to files
-        stdout_file = results_dir / f"{test.id}_stdout.txt"
-        stderr_file = results_dir / f"{test.id}_stderr.txt"
-        stdout_file.write_text(result.stdout, encoding="utf-8")
-        stderr_file.write_text(result.stderr, encoding="utf-8")
-
-        success = result.returncode == 0
-
-        print(f"Exit code: {result.returncode}")
-        print(f"Duration: {duration:.2f}s")
-        console_log_chars = 10000
-        if result.stdout:
-            print(f"STDOUT (last {console_log_chars} chars):\n{result.stdout[-console_log_chars:]}")
-        if result.stderr:
-            print(f"STDERR (last {console_log_chars} chars):\n{result.stderr[-console_log_chars:]}")
-
-        return TestResult(
-            test_id=test.id,
-            success=success,
-            exit_code=result.returncode,
-            stdout=result.stdout,
-            stderr=result.stderr,
-            duration=duration,
-        )
-
-    except subprocess.TimeoutExpired as e:
-        duration = time.time() - start_time
-        error_msg = f"Test timed out after {test.timeout} seconds"
-        print(f"TIMEOUT: {error_msg}")
-        # What it printed before it was killed (e.g. apt waiting for a lock); bytes despite text=True.
-        stdout, stderr = (o.decode("utf-8", "replace") if isinstance(o, bytes) else o or "" for o in (e.stdout, e.stderr))
         (results_dir / f"{test.id}_stdout.txt").write_text(stdout, encoding="utf-8")
         (results_dir / f"{test.id}_stderr.txt").write_text(stderr, encoding="utf-8")
+
+        error_msg = f"Test timed out after {test.timeout} seconds" if timed_out else ""
+        print(f"TIMEOUT: {error_msg}" if timed_out else f"Exit code: {returncode}")
+        print(f"Duration: {duration:.2f}s")
+        when = " before the timeout" if timed_out else ""
+        console_log_chars = 10000
         if stdout:
-            print(f"STDOUT before the timeout (last 10000 chars):\n{stdout[-10000:]}")
+            print(f"STDOUT{when} (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
         if stderr:
-            print(f"STDERR before the timeout (last 10000 chars):\n{stderr[-10000:]}")
+            print(f"STDERR{when} (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
+
         return TestResult(
             test_id=test.id,
-            success=False,
-            exit_code=-1,
+            success=not timed_out and returncode == 0,
+            exit_code=-1 if timed_out else returncode,
             stdout=stdout,
             stderr=stderr,
             duration=duration,
             error_message=error_msg,
+            timed_out=timed_out,
         )
     except Exception as e:
         duration = time.time() - start_time
@@ -1111,6 +1133,7 @@ def write_failure_metadata(
         "result": {
             "exit_code": result.exit_code,
             "duration": result.duration,
+            "timed_out": result.timed_out,
             "error_message": result.error_message,
             "stdout_excerpt": stdout_excerpt,
             "stderr_excerpt": stderr_excerpt,
@@ -1229,6 +1252,7 @@ def _run_playbook_tests_at_path(
                 "skipped": r.skipped,
                 "exit_code": r.exit_code,
                 "duration": r.duration,
+                "timed_out": r.timed_out,
                 "error_message": r.error_message,
             }
             for r in suite.results
