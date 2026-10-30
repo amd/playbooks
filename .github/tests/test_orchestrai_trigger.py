@@ -207,6 +207,16 @@ class MachinesPerBatch(unittest.TestCase):
 
 
 class WorkflowWiring(unittest.TestCase):
+
+    def test_localized_playbooks_run_only_when_a_locale_is_requested(self):
+        with open(os.path.join(GITHUB_DIR, "workflows", "test-playbooks-orchestrai.yml")) as f:
+            text = f.read()
+        wf = yaml.load(text, Loader=yaml.BaseLoader)
+        self.assertEqual(wf["on"]["workflow_dispatch"]["inputs"]["locale"]["default"], "")
+        # No implicit zh-CN for the nightly (schedule has no inputs) or a blank dispatch.
+        self.assertNotIn("inputs.locale || 'zh-CN'", text)
+        self.assertIn("LOCALIZED='[]'", text)
+
     """Same jobs as before; Detect & Trigger and !orc can request OIDC tokens."""
 
     def load(self, name):
