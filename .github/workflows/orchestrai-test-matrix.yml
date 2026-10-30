@@ -11,8 +11,8 @@ on:
         description: Matrix entries for one independently bounded GitHub job matrix
         required: true
         type: string
-      build_urls:
-        description: OrchestrAI batch IDs mapped to their pipeline build URLs
+      run_ids:
+        description: OrchestrAI batch IDs mapped to their OrchestrAI run ids
         required: true
         type: string
       run_urls:
@@ -30,6 +30,13 @@ jobs:
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
+    # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
+    # + 30 min) and then for the build itself (up to 4.5 h); self-hosted runners
+    # allow this.
+    timeout-minutes: 720
     continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false
@@ -39,15 +46,28 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
+      - name: Wait for the batch's build to start
+        id: build
+        # Each batch is handed off as soon as its own build starts, so a batch
+        # still queued for machines never holds back the others.
+        env:
+          RUN_ID: ${{ fromJson(inputs.run_ids || '{}')[matrix.batch_id] }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-build
+
       - name: Wait for OrchestrAI pipeline build
         id: wait
         env:
-          BUILD_URLS_JSON: ${{ inputs.build_urls }}
+          STARTED_BUILD_URL: ${{ steps.build.outputs.build_url }}
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
         run: |
-          BUILD_URL=$(python3 -c "import json,os;print(json.loads(os.environ.get('BUILD_URLS_JSON','{}') or '{}').get(os.environ['BATCH_ID'],''))")
+          BUILD_URL="${STARTED_BUILD_URL}"
           if [ -z "$BUILD_URL" ]; then
             echo "::error::No OrchestrAI pipeline build URL for batch ${BATCH_ID}"; exit 1
           fi
