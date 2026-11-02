@@ -976,7 +976,7 @@ def run_test(
             if setup_prefix:
                 # A failed setup (e.g. a venv an earlier, skipped step never
                 # created) must stop the test, not let it run on system Python.
-                script_content = (f"{{ {setup_prefix}\n}} || {{ echo \"setup failed: {setup_prefix}\" >&2; exit 1; }}\n"
+                script_content = (f"{{ {setup_prefix}\n}} || {{ echo 'setup failed' >&2; exit 1; }}\n"
                                   f"{script_content}")
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
@@ -990,7 +990,7 @@ def run_test(
         script_content = effective_code
         if setup_prefix:
             # Same as bash: stop when the setup fails.
-            script_content = (f"{setup_prefix}\nif (-not $?) {{ Write-Error 'setup failed: {setup_prefix}'; exit 1 }}\n"
+            script_content = (f"{setup_prefix}\nif (-not $?) {{ Write-Error 'setup failed'; exit 1 }}\n"
                               f"{script_content}")
     elif test.language == "python":
         # For Python code blocks, write to temp file and execute
