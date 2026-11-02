@@ -918,6 +918,33 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
     return unique_tests
 
 
+def bash_with_setup(setup: str, body: str) -> str:
+    """Run *setup* before *body* in one bash session; any failing setup command stops the test.
+
+    A failed setup (e.g. a venv an earlier, skipped step never created) must not let
+    the test run on system Python. set -e is ignored on the left of ``||``, so the
+    setup runs at top level under set -e, with an EXIT trap that reports the failure."""
+    return (f"trap 'echo \"setup failed\" >&2; exit 1' EXIT\nset -e\n{setup}\n"
+            f"set +e\ntrap - EXIT\n{body}")
+
+
+def powershell_with_setup(setup: str, body: str) -> str:
+    """PowerShell counterpart of bash_with_setup.
+
+    Stop turns failing cmdlets and blocked or missing scripts (Activate.ps1) into
+    exceptions; native failures are caught by $PSNativeCommandUseErrorActionPreference
+    on PowerShell 7.3+ and by $LASTEXITCODE on Windows PowerShell 5.1."""
+    # ponytail: on 5.1 a failing native command followed by a succeeding one in the
+    # same setup goes unnoticed; split such setups or run them on PowerShell 7.
+    fail = "{ [Console]::Error.WriteLine('setup failed'); exit 1 }"
+    return ("$__eap = $ErrorActionPreference; $__nat = $PSNativeCommandUseErrorActionPreference\n"
+            "$ErrorActionPreference = 'Stop'; $PSNativeCommandUseErrorActionPreference = $true\n"
+            f"try {{\n{setup}\n}} catch {fail}\n"
+            f"if ($LASTEXITCODE) {fail}\n"
+            "$ErrorActionPreference = $__eap; $PSNativeCommandUseErrorActionPreference = $__nat\n"
+            f"{body}")
+
+
 def run_test(
     test: TestBlock,
     playbook_path: Path,
@@ -974,10 +1001,7 @@ def run_test(
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
             if setup_prefix:
-                # A failed setup (e.g. a venv an earlier, skipped step never
-                # created) must stop the test, not let it run on system Python.
-                script_content = (f"{{ {setup_prefix}\n}} || {{ echo 'setup failed' >&2; exit 1; }}\n"
-                                  f"{script_content}")
+                script_content = bash_with_setup(setup_prefix, script_content)
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
         script_content = effective_code
@@ -989,9 +1013,7 @@ def run_test(
         shell_cmd = ["powershell", "-Command"]
         script_content = effective_code
         if setup_prefix:
-            # Same as bash: stop when the setup fails.
-            script_content = (f"{setup_prefix}\nif (-not $?) {{ Write-Error 'setup failed'; exit 1 }}\n"
-                              f"{script_content}")
+            script_content = powershell_with_setup(setup_prefix, script_content)
     elif test.language == "python":
         # For Python code blocks, write to temp file and execute
         script_file = results_dir / f"test_{test.id}.py"
@@ -1003,7 +1025,7 @@ def run_test(
                 script_content = f'{setup_prefix} && python "{script_file}"'
             else:
                 shell_cmd = ["bash", "-c"]
-                script_content = f'{setup_prefix} && python "{script_file}"'
+                script_content = bash_with_setup(setup_prefix, f'python "{script_file}"')
         else:
             shell_cmd = ["python", str(script_file)]
             script_content = None
@@ -1021,7 +1043,7 @@ def run_test(
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
             if setup_prefix:
-                script_content = f"{setup_prefix}\n{script_content}"
+                script_content = bash_with_setup(setup_prefix, script_content)
 
     # Build the command
     if script_content is not None:

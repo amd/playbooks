@@ -102,12 +102,16 @@ def select(fixture: Path, base: str = "HEAD") -> list[dict]:
     return json.loads(proc.stdout)
 
 
-def full_count(fixture: Path) -> int:
+def select_all(fixture: Path) -> list[dict]:
     proc = subprocess.run(
         [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all"],
         cwd=fixture, capture_output=True, text=True, check=True,
     )
-    return len(json.loads(proc.stdout))
+    return json.loads(proc.stdout)
+
+
+def full_count(fixture: Path) -> int:
+    return len(select_all(fixture))
 
 
 class FixtureCase(unittest.TestCase):
@@ -219,19 +223,46 @@ class FixtureCase(unittest.TestCase):
         meta = json.loads(pj.read_text())
         meta["tested_platforms"]["newdev"] = ["linux"]
         pj.write_text(json.dumps(meta, indent=2))
-        runners = self.fx / ".github" / "runners.json"  # a new device comes with its runner
-        runners.write_text(json.dumps(json.loads(runners.read_text())
-                                      + [{"name": "newdev-0", "os": "Linux", "group": "newdev", "labels": []}]))
+        self.add_runner("newdev")  # a new device comes with its runner, already in base
+        git("add", "-A", ".github", cwd=self.fx)
+        git("commit", "-qm", "add newdev runner", cwd=self.fx)
         got = select(self.fx)
         self.assertEqual([(e["platform"], e["arch"]) for e in got], [("linux", "newdev")])
 
-    def test_a_device_without_runners_is_not_scheduled(self):
-        """Devices only OrchestrAI tests (e.g. grgh) have no runner here."""
+    def add_runner(self, group):
+        runners = self.fx / ".github" / "runners.json"
+        runners.write_text(json.dumps(json.loads(runners.read_text())
+                                      + [{"name": f"{group}-0", "os": "Linux", "group": group, "labels": []}]))
+
+    def add_tested_device(self, device):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
-        meta["tested_platforms"]["norunner"] = ["linux"]
+        meta["tested_platforms"][device] = ["linux"]
         pj.write_text(json.dumps(meta, indent=2))
+        return pj.parent.name
+
+    def test_a_device_without_runners_is_not_scheduled(self):
+        """Devices only OrchestrAI tests (e.g. grgh) have no runner here."""
+        self.add_tested_device("norunner")
         self.assertEqual(select(self.fx), [])
+
+    def test_a_runner_only_change_schedules_its_device(self):
+        """Adding a runner for an already-tested device must not wait for a playbook edit."""
+        runners = self.fx / ".github" / "runners.json"
+        fleet = runners.read_text()
+        dev, plat = next((e["arch"], e["platform"]) for e in select_all(self.fx))
+        runners.write_text(json.dumps([r for r in json.loads(fleet)
+                                       if (r["group"], r["os"].lower()) != (dev, plat)]))
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", f"{plat}/{dev} has no runner yet", cwd=self.fx)
+        runners.write_text(fleet)
+        self.assertIn((plat, dev), {(e["platform"], e["arch"]) for e in select(self.fx)})
+
+    def test_runner_group_matches_the_device_regardless_of_case(self):
+        pb = self.add_tested_device("mixedcase")
+        self.add_runner("MixedCase")
+        got = {(e["playbook"], e["platform"], e["arch"]) for e in select(self.fx)}
+        self.assertIn((pb, "linux", "mixedcase"), got)
 
     def test_required_flag_flip_is_selected(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
