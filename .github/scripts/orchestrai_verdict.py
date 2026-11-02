@@ -51,6 +51,7 @@ Outputs:
 """
 
 import base64
+import hashlib
 import json
 import os
 import re
@@ -91,15 +92,28 @@ def fetch(url, user, token):
     runner any other local process could read the pipeline token. Doing the HTTP
     in-process (stdlib only — this job has no pip install step) keeps the secret
     in this process's memory only.
+
+    With ORCHESTRAI_FETCH_CACHE=<dir> (orchestrai_batch_verdict.py, which runs
+    this once per playbook of a finished build) each successful body is kept
+    there and reused, so a batch downloads its summary and console once.
     """
+    cache_dir = os.environ.get("ORCHESTRAI_FETCH_CACHE")
+    cached = os.path.join(cache_dir, hashlib.sha256(url.encode()).hexdigest()) if cache_dir else ""
+    if cached and os.path.exists(cached):
+        with open(cached, encoding="utf-8") as f:
+            return f.read()
     req = urllib.request.Request(url)
     req.add_header("Authorization",
                    "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode())
     try:
         with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as r:
-            return r.read().decode("utf-8", "replace")
+            body = r.read().decode("utf-8", "replace")
     except Exception:
         return None
+    if cached:
+        with open(cached, "w", encoding="utf-8") as f:
+            f.write(body)
+    return body
 
 
 def normalise_groups(summary):
