@@ -10,8 +10,8 @@ OrchestrAI pipeline trigger
 For each batch (one per platform/device[+extra-tags]) builds a plan -- one
 session per playbook, sharing the batch's hardware -- and starts it through the
 OrchestrAI Control Plane CI API with the job's GitHub OIDC token.
-Waits until the Control Plane has started each batch's pipeline build and
-records its URL so the matrix jobs can wait on it.
+Records each batch's run id; every Test job then waits (--await-build) until
+the Control Plane has started its batch's pipeline build.
 
 Environment-specific values (provisioning scripts, TheRock URLs, Linux/Windows
 driver sources, run settings) come from .github/orchestrai-config.yml and the
@@ -28,9 +28,10 @@ Inputs (env):
     ORCHESTRAI_V2_*         Control Plane endpoint, workspace and ReportPortal credential
 
 Outputs:
-    build_urls={...}  -> $GITHUB_OUTPUT   (batch_id -> pipeline build URL)
+    run_ids={...}     -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run id)
     run_urls={...}    -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run URL)
     --dry-run prints each plan/builds payload and starts nothing.
+    --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
 """
 
 import argparse
@@ -46,8 +47,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-import yaml
-
 # Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
 # for API_RETRY_SECONDS. A run waits for machines for its acquire_timeout; ours
 # waits that long plus BUILD_WAIT_MARGIN for its build.
@@ -59,6 +58,7 @@ TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
 
 
 def load_config(path):
+    import yaml  # only the config path needs it; --await-build runs without PyYAML
     with open(path) as f:
         return yaml.safe_load(f)
 
@@ -149,7 +149,8 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "PLAYBOOK_REF": git_ref,
             "PLAYBOOK_ID": pb_id,
             "PLAYBOOK_PLATFORM": platform,
-            "PLAYBOOK_DEVICE": device,
+            # device_runs_as: playbooks run as another device's (same silicon).
+            "PLAYBOOK_DEVICE": (cfg.get("device_runs_as") or {}).get(device, device),
             "ROCM_MULTI_ARCH_INDEX_URL": rocm_index_url,
         }
         locale = batch.get("locale", "")
@@ -168,13 +169,22 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         # secret is unset so runs still work (just unauthenticated).
         if hf_token:
             variables["HF_TOKEN"] = hf_token
-        groups.append({
+        group = {
             "id": f"playbook-{pb_id}",
             "level": "L4-sys",
             "tests": [test],
             "maas_tags": tags,
             "variables": variables,
-        })
+        }
+        # Only machines at these sites (device_site_ids in the config).
+        sites = (cfg.get("device_site_ids") or {}).get(device)
+        if sites:
+            group["site_ids"] = list(sites)
+        # An OS image of its own for this device and platform (device_os_images).
+        os_image = ((cfg.get("device_os_images") or {}).get(device) or {}).get(platform)
+        if os_image:
+            group["os_image"] = os_image
+        groups.append(group)
 
     return {
         "source": "external-playbook-batch",
@@ -490,6 +500,8 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
         "windows" if platform == "windows" else "ubuntu")
     settings = {**plan["run_settings"], "executor": "jenkins", "os_image": image}
     gh_run = os.environ.get("GITHUB_RUN_ID", "")
+    # A retry of a batch's NOT_RUN playbooks (ORCHESTRAI_RETRY=n) is a new run.
+    retry = os.environ.get("ORCHESTRAI_RETRY", "")
     attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "")
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if publisher:
@@ -502,22 +514,39 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
                            "github_run_id": gh_run},
         }]
     sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
-                 "os_image": image, "tests": g["tests"], "variables": g["variables"]}
+                 "os_image": g.get("os_image") or image, "tests": g["tests"],
+                 "variables": g["variables"],
+                 **({"site_ids": g["site_ids"]} if g.get("site_ids") else {})}
                 for g in plan["groups"]]
     body = {
         "require_capacity": "queue",
         "plan_document": {
-            "name": f"Playbooks {bid} {gh_run}/{attempt}",
+            "name": f"Playbooks {bid} {gh_run}/{attempt}" + (f" retry {retry}" if retry else ""),
             "description": f"Started by https://github.com/{repo}/actions/runs/{gh_run}",
             "document": {"sessions": sessions, "run_settings": settings},
         },
         "builds_json": builds,
     }
-    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid]).encode()).hexdigest()
+    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid] + ([retry] if retry else []))
+                         .encode()).hexdigest()
     run = api(cp, "POST", "/runs", body, key).get("run") or {}
     if not run.get("id"):
         raise ValueError("the CI API start response has no run id")
     return run["id"]
+
+
+def failure_reason(run):
+    """Why a run ended: its error/reason/message/failure/detail fields, one level
+    deep (the Control Plane does not always use the same key)."""
+    found = []
+    def scan(obj, prefix=""):
+        for key, value in (obj or {}).items():
+            if isinstance(value, dict) and not prefix:
+                scan(value, f"{key}.")
+            elif value and any(w in key.lower() for w in ("error", "reason", "message", "failure", "detail")):
+                found.append(f"{prefix}{key}={value if isinstance(value, str) else json.dumps(value)}")
+    scan(run)
+    return "; ".join(found)[:800]
 
 
 def await_builds(cp, runs, wait_seconds):
@@ -539,7 +568,7 @@ def await_builds(cp, runs, wait_seconds):
                 print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
                 del pending[bid]
             elif run.get("status") in TERMINAL:
-                reason = run.get("error") or run.get("status_reason") or run.get("message") or ""
+                reason = failure_reason(run)
                 print(f"::error::{bid}: run {rid} ended {run.get('status')} without a build"
                       + (f": {reason}" if reason else ""), file=sys.stderr)
                 del pending[bid]
@@ -550,11 +579,51 @@ def await_builds(cp, runs, wait_seconds):
     return urls
 
 
+def acquire_timeout_minutes(config_path):
+    """run_settings.acquire_timeout from the config, read without PyYAML (the
+    Test jobs that wait for builds do not install it)."""
+    text = open(config_path, encoding="utf-8").read()
+    m = re.search(r"^\s*acquire_timeout:\s*(\d+)", text, re.M)
+    if not m:
+        raise ValueError(f"{config_path} has no run_settings.acquire_timeout")
+    return int(m.group(1))
+
+
+def await_build_main(config_path):
+    """--await-build: one Test job waits for its batch's build (RUN_ID, BATCH_ID).
+
+    Writes build_url to $GITHUB_OUTPUT; leaves it unset when the run ends or
+    times out without a build, which the verdict step reports as NOT_RUN.
+    """
+    rid, bid = os.environ.get("RUN_ID", ""), os.environ.get("BATCH_ID", "")
+    if not rid:
+        print(f"::error::batch {bid} has no OrchestrAI run (it failed to start; "
+              f"see Detect & Trigger)", file=sys.stderr)
+        return
+    try:
+        # The Control Plane holds a queued run for its acquire_timeout; never
+        # give up on it sooner.
+        wait = acquire_timeout_minutes(config_path) * 60 + BUILD_WAIT_MARGIN
+        url = await_builds(control_plane(), {bid: rid}, wait).get(bid, "")
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return
+    out = os.environ.get("GITHUB_OUTPUT")
+    if url and out:
+        with open(out, "a") as f:
+            f.write(f"build_url={url}\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--await-build", action="store_true",
+                    help="wait for one batch's build (Test jobs); see await_build_main")
     args = ap.parse_args()
+    if args.await_build:
+        await_build_main(args.config)
+        return
 
     cfg = apply_env_overrides(load_config(args.config))
     batches = json.loads(os.environ.get("BATCHES_JSON", "{}") or "{}")
@@ -651,26 +720,25 @@ def main():
             continue
         run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
-    # The Control Plane holds a queued run for its acquire_timeout; never give up
-    # on it sooner.
-    build_urls = await_builds(cp, runs, rs["acquire_timeout"] * 60 + BUILD_WAIT_MARGIN)
-    failed = [bid for bid in batches if bid not in build_urls]
-    print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
+    # Each Test job waits for its own batch's build (--await-build), so a batch
+    # still queued for machines never holds back the batches that have started.
+    failed = [bid for bid in batches if bid not in runs]
+    print(f"\nStarted {len(runs)} OrchestrAI run(s)", file=sys.stderr)
 
-    # Emit the URLs FIRST so the batches that did trigger still run downstream,
+    # Emit the runs FIRST so the batches that started still run downstream,
     # even if we exit non-zero for an empty result below.
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a") as f:
-            f.write(f"build_urls={json.dumps(build_urls)}\n")
+            f.write(f"run_ids={json.dumps(runs)}\n")
             f.write(f"run_urls={json.dumps(run_urls)}\n")
 
     # Surface dropped batches HERE, at the trigger, instead of letting each of
     # their downstream test jobs discover the gap one-by-one as "No build URL".
-    if not build_urls:
+    if not runs:
         # Nothing triggered at all: fail hard. There is no partial run to
         # preserve, and every downstream job would otherwise fail identically.
-        print("::error::No OrchestrAI pipeline builds were triggered — every batch "
+        print("::error::No OrchestrAI runs were started — every batch "
               f"failed to submit ({len(failed)} batch(es): {', '.join(failed)}).",
               file=sys.stderr)
         sys.exit(1)
@@ -680,9 +748,9 @@ def main():
         # annotation names the dropped batches so the cause is visible at the
         # trigger; their own downstream jobs still fail, so the run as a whole
         # is not reported green.
-        print(f"::error::{len(failed)} batch(es) failed to trigger and will report "
+        print(f"::error::{len(failed)} batch(es) failed to start and will report "
               f"no build URL downstream: {', '.join(failed)}. The other "
-              f"{len(build_urls)} batch(es) were triggered and will run.",
+              f"{len(runs)} batch(es) were started and will run.",
               file=sys.stderr)
 
 
