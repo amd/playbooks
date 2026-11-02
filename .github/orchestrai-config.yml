@@ -117,6 +117,10 @@ extra_tags:
 # was marked timed out, while openclaw passed on the 128 GB batch the same night.
 # The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
+  # grgh's one machine (DT574) reports 188 GiB to the OS but carries no ram_*
+  # tag, so the 128 GB requirement in extra_tags would drop its batch.
+  deepseek-v4-flash-ds4:
+    grgh: []
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
@@ -160,6 +164,50 @@ extra_tag_devices:
 # machine instead of two (they run one after another on it). Remove a tag here
 # to keep its batches separate.
 superset_tags: ["ram_64gb", "ram_128gb"]
+
+# Sites a device's batches may be placed at (OrchestrAI site ids; a device not
+# listed may run at any site). Every device stays in Markham: HYD machines are
+# slow to provision and fetch from Artifactory/PyPI caches far from them, and
+# HYD KRKs are 32 GB. Sites: maas-mkm-mnb, maas-mkm-cs (Markham), maas-hyd-ha
+# (Hyderabad).
+device_site_ids:
+  krk:      &markham ["maas-mkm-mnb", "maas-mkm-cs"]
+  halo:     *markham
+  halo_box: *markham
+  stx:      *markham
+  rx7900xt: *markham
+  rx9070xt: *markham
+  r9700:    *markham
+  grgh:     *markham
+
+# Device -> name shown on its batch jobs and in the results grid
+# ("Halo · Windows (19 playbooks)"). A device not listed shows its id.
+device_names:
+  halo:     "Halo"
+  halo_box: "Halo Box"
+  grgh:     "Gorgon Halo"
+  stx:      "Strix"
+  krk:      "Krackan"
+  rx7900xt: "RX 7900 XT"
+  rx9070xt: "RX 9070 XT"
+  r9700:    "R9700"
+
+# Device -> the device its playbooks run as. Machines are still chosen by the
+# device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
+# README @device blocks, @var values and the test library's per-device
+# dependencies treat it exactly like that one. For a device no README names yet
+# that shares another's silicon: grgh is gfx1151 like halo.
+device_runs_as:
+  grgh: halo
+
+# Device -> platform -> OS image its sessions request instead of the platform's
+# default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
+# installed on demand, so a device whose only machine runs another OS needs an
+# image on the broker's on-demand list. grgh's machine runs Ubuntu; its Windows
+# batch asks for a custom Windows 11 build until the stock one can be deployed.
+device_os_images:
+  grgh:
+    windows: "windows/windows-26300-9550-20261006"
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.

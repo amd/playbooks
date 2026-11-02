@@ -104,6 +104,50 @@ class ControlPlaneApi(unittest.TestCase):
                          ("rp-cred", True, "77"))
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
+    def test_a_device_can_run_its_playbooks_as_another(self):
+        cfg = dict(load_config(), device_runs_as={"grgh": "halo"})
+        def device(arch):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, tags=["t"]), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
+        self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
+        self.assertEqual(device("stx"), {("stx", ("t",))})
+        self.assertEqual(load_config()["device_runs_as"], {"grgh": "halo"})
+
+    def test_a_device_image_reaches_only_that_device_and_platform(self):
+        cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
+        def sessions(arch, platform):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, platform=platform), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            fake = FakeApi((201, {"run": {"id": "r1"}}))
+            with mock.patch.object(trigger, "http_json", fake):
+                trigger.start_run(self.cp, f"{platform}/{arch}", plan, {}, platform, "", "a" * 40)
+            return {s["os_image"] for s in fake.calls[0][3]["plan_document"]["document"]["sessions"]}
+        self.assertEqual(sessions("grgh", "windows"), {"windows/custom-x"})
+        self.assertEqual(sessions("grgh", "linux"), {"ubuntu"})
+        self.assertEqual(sessions("stx", "windows"), {"windows"})
+
+    def test_device_sites_reach_every_session_of_that_device_only(self):
+        cfg = load_config()
+        # Every configured device stays in Markham.
+        self.assertTrue(cfg["device_site_ids"])
+        self.assertEqual({tuple(v) for v in cfg["device_site_ids"].values()},
+                         {("maas-mkm-mnb", "maas-mkm-cs")})
+        cfg["device_site_ids"] = {"krk": ["maas-mkm-mnb", "maas-mkm-cs"]}  # stx: any site
+        krk = trigger.make_plan(dict(BATCH, arch="krk", playbooks=["gaia-agents", "cvml"]), "refs/heads/main",
+                                cfg, 1, "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        self.assertEqual({tuple(g["site_ids"]) for g in krk["groups"]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        stx = trigger.make_plan(BATCH, "refs/heads/main", cfg, 1, "https://github.com/amd/playbooks",
+                                "a" * 40, "https://index.example")
+        self.assertNotIn("site_ids", stx["groups"][0])
+        fake = FakeApi((201, {"run": {"id": "r1"}}), (201, {"run": {"id": "r2"}}))
+        with mock.patch.object(trigger, "http_json", fake):
+            trigger.start_run(self.cp, "linux/krk", krk, {}, "linux", "", "a" * 40)
+            trigger.start_run(self.cp, "linux/stx", stx, {}, "linux", "", "a" * 40)
+        sessions = [c[3]["plan_document"]["document"]["sessions"] for c in fake.calls]
+        self.assertEqual({tuple(s["site_ids"]) for s in sessions[0]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        self.assertNotIn("site_ids", sessions[1][0])
+
     def test_windows_image_override(self):
         fake = FakeApi((201, {"run": {"id": "r1"}}))
         with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_WINDOWS_IMAGE": "windows/win11-x"}):
@@ -133,7 +177,7 @@ class ControlPlaneApi(unittest.TestCase):
         with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
             urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"}, 3600)
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
-        self.assertIn("run b ended error without a build: no image", err.getvalue())
+        self.assertIn("run b ended error without a build: error=no image", err.getvalue())
 
 
 class ReportingSwitch(unittest.TestCase):
@@ -149,7 +193,7 @@ class ReportingSwitch(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
-                mock.patch.object(trigger, "await_builds", return_value={"linux/stx": "https://j/1/"}), \
+                mock.patch.object(trigger, "await_builds", side_effect=AssertionError("Detect must not wait")), \
                 contextlib.redirect_stderr(io.StringIO()):
             trigger.main()
         return start.call_args.args[5]
@@ -177,7 +221,7 @@ class MachinesPerBatch(unittest.TestCase):
                "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
                "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
         start, err = mock.Mock(return_value="r1"), io.StringIO()
-        self.wait = mock.Mock(side_effect=lambda _cp, runs, _s: {b: "https://j/1/" for b in runs})
+        self.wait = mock.Mock()
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
@@ -200,10 +244,46 @@ class MachinesPerBatch(unittest.TestCase):
         self.assertEqual(requested, {"linux/stx": 1})
         self.assertIn("1 batch(es), 1 machine(s) requested", log)
 
-    def test_builds_are_awaited_as_long_as_the_control_plane_queues(self):
+    def test_detect_and_trigger_does_not_wait_for_builds(self):
+        # Each Test job waits for its own batch (--await-build).
         self.run_main(1, {"linux/stx": BATCH})
-        wait = load_config()["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN
-        self.assertEqual(self.wait.call_args.args[2], wait)
+        self.wait.assert_not_called()
+
+
+class AwaitBuild(unittest.TestCase):
+    """--await-build: one Test job waits for its own batch's build."""
+
+    def run_it(self, run_id, found):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": run_id, "BATCH_ID": "linux/stx",
+                                          "GITHUB_OUTPUT": os.devnull}), \
+                mock.patch.object(trigger, "await_builds", return_value=found) as wait, \
+                mock.patch.object(trigger, "acquire_timeout_minutes", return_value=360), \
+                mock.patch("builtins.open", mock.mock_open()) as opened, \
+                contextlib.redirect_stderr(out):
+            trigger.await_build_main(CONFIG)
+        written = "".join(c.args[0] for c in opened().write.call_args_list)
+        return wait, written, out.getvalue()
+
+    def test_writes_the_build_url_for_this_batch_only(self):
+        wait, written, _ = self.run_it("r1", {"linux/stx": "https://j/job/p/9/"})
+        self.assertEqual(wait.call_args.args[1], {"linux/stx": "r1"})
+        # As long as the Control Plane keeps the run queued, plus the margin.
+        self.assertEqual(wait.call_args.args[2], 360 * 60 + trigger.BUILD_WAIT_MARGIN)
+        self.assertEqual(written, "build_url=https://j/job/p/9/\n")
+
+    def test_no_build_leaves_the_url_unset_for_not_run(self):
+        _, written, _ = self.run_it("r1", {})
+        self.assertEqual(written, "")
+
+    def test_a_batch_that_never_started_says_so(self):
+        wait, written, err = self.run_it("", {})
+        wait.assert_not_called()
+        self.assertIn("failed to start", err)
+
+    def test_acquire_timeout_is_read_from_the_config_without_yaml(self):
+        self.assertEqual(trigger.acquire_timeout_minutes(CONFIG),
+                         load_config()["run_settings"]["acquire_timeout"])
 
 
 class WorkflowWiring(unittest.TestCase):
@@ -215,8 +295,8 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-playbooks",
-                                            "test-localized-playbooks", "test-gate"])
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
+                                            "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
@@ -224,6 +304,68 @@ class WorkflowWiring(unittest.TestCase):
         self.assertIn("inputs.reporting", step["env"]["ORCHESTRAI_REPORTING"])
         self.assertEqual(self.load("orchestrai-pr-command.yml")["jobs"]["command"]["permissions"]["id-token"],
                          "write")
+
+    def test_every_job_that_submits_runs_installs_pyyaml_first(self):
+        """Each job is a fresh environment: a job that starts runs (the trigger
+        without --await-build reads the YAML config) must install PyYAML itself.
+        The batch job's retry once crashed with No module named 'yaml'."""
+        for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
+            for job_id, job in self.load(name)["jobs"].items():
+                steps = job.get("steps") or []
+                for i, step in enumerate(steps):
+                    run = step.get("run") or ""
+                    if "orchestrai_trigger.py" in run and "--await-build" not in run:
+                        before = " ".join(s.get("run") or "" for s in steps[:i])
+                        self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
+
+    def test_the_trigger_fails_without_pyyaml_except_await_build(self):
+        """--await-build must keep working where PyYAML is absent."""
+        code = ("import sys, builtins; real = builtins.__import__\n"
+                "def no_yaml(n, *a, **k):\n"
+                "    if n == 'yaml': raise ModuleNotFoundError(\"No module named 'yaml'\")\n"
+                "    return real(n, *a, **k)\n"
+                "builtins.__import__ = no_yaml\n"
+                f"sys.path.insert(0, {SCRIPTS_DIR!r}); import orchestrai_trigger as t\n"
+                "print(t.acquire_timeout_minutes(sys.argv[1]))")
+        import subprocess
+        out = subprocess.run([sys.executable, "-c", code, CONFIG], capture_output=True, text=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+
+    def test_every_test_job_waits_for_its_own_batch(self):
+        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
+                          ("orchestrai-pr-command.yml", "test-playbooks")):
+            steps = self.load(name)["jobs"][job]["steps"]
+            ids = [s.get("id") for s in steps]
+            self.assertLess(ids.index("build"), ids.index("wait"), name)
+            self.assertIn("--await-build", steps[ids.index("build")]["run"])
+            self.assertIn("steps.build.outputs.build_url", steps[ids.index("wait")]["env"]["STARTED_BUILD_URL"])
+            self.assertEqual(self.load(name)["jobs"][job]["permissions"]["id-token"], "write", name)
+
+
+class RetryRun(unittest.TestCase):
+    def submit(self, retry):
+        cp = {"api_url": "https://cp/api/ci/v1", "audience": "a", "portal_url": "https://cp", "workspace": "w"}
+        plan = trigger.make_plan(BATCH, "refs/heads/main", load_config(), 1,
+                                 "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        api = mock.Mock(return_value={"run": {"id": "r1"}})
+        env = {"GITHUB_RUN_ID": "77", "GITHUB_RUN_ATTEMPT": "1", **({"ORCHESTRAI_RETRY": retry} if retry else {})}
+        with mock.patch.object(trigger, "api", api), mock.patch.dict(os.environ, env, clear=True):
+            trigger.start_run(cp, "linux/stx", plan, {}, "linux", "", "a" * 40)
+        body, key = api.call_args[0][3], api.call_args[0][4]
+        return body["plan_document"]["name"], key
+
+    def test_a_retry_is_a_new_run_not_the_original_again(self):
+        (name, key), (rname, rkey) = self.submit(""), self.submit("1")
+        self.assertNotEqual(key, rkey)  # the idempotency key would return the first run
+        self.assertTrue(rname.endswith(" retry 1") and not name.endswith("retry 1"))
+
+
+class FailureReason(unittest.TestCase):
+    def test_a_run_that_ended_says_why_whatever_the_field(self):
+        self.assertEqual(trigger.failure_reason({"status": "error", "error": "no machine"}), "error=no machine")
+        self.assertEqual(trigger.failure_reason({"status": "error", "outcome": {"failure_reason": "reimage failed"}}),
+                         "outcome.failure_reason=reimage failed")
+        self.assertEqual(trigger.failure_reason({"status": "error", "id": "r1"}), "")
 
 
 class AcquireTimeoutValidation(unittest.TestCase):
@@ -245,10 +387,13 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # wait no longer comes out of max_duration.
         self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
 
-    def test_jobs_outlast_the_build_wait(self):
-        need = load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
-        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
-                          ("orchestrai-pr-command.yml", "command")):
+    def test_test_jobs_outlast_the_machine_wait_and_the_build(self):
+        # Each Test job waits for its batch's build (acquire_timeout + margin),
+        # then for the build itself (4.5 h: 1080 polls x 15 s).
+        need = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+                + 1080 * 15 / 60)
+        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
+                          ("orchestrai-pr-command.yml", "test-playbooks")):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
             self.assertGreater(limit, need, name)
