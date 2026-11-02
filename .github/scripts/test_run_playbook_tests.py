@@ -16,6 +16,7 @@ import contextlib
 import importlib.util
 import io
 import os
+import sys
 import tempfile
 import time
 import unittest
@@ -102,6 +103,26 @@ class TimeoutOutputTest(unittest.TestCase):
             self.assertTrue(timed_out)
             with self.assertRaises(ProcessLookupError):
                 os.kill(int(pidfile.read_text()), 0)
+
+
+class SetupFailureTest(unittest.TestCase):
+    def run_block(self, setup):
+        test = rpt.TestBlock(id="uses-venv", timeout=30, setup=setup, code="echo test body ran")
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
+            return rpt.run_test(test, Path(d), Path(d))
+
+    @unittest.skipIf(sys.platform == "win32", "bash test")
+    def test_a_failed_setup_stops_the_test(self):
+        """A venv that a skipped step never created must not fall back to system Python."""
+        result = self.run_block("source missing-env/bin/activate")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+
+    @unittest.skipIf(sys.platform == "win32", "bash test")
+    def test_a_working_setup_still_runs_the_test(self):
+        result = self.run_block("export SETUP_OK=1")
+        self.assertTrue(result.success, result.stderr)
+        self.assertIn("test body ran", result.stdout)
 
 
 if __name__ == "__main__":
