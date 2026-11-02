@@ -194,6 +194,79 @@ class BatchVerdict(unittest.TestCase):
         self.assertIn("| Playbook | Halo · Linux<br>[live results](https://oai/run/7) |", table)
         self.assertIn("| `a` | ✅ [PASSED](https://gh/job/9) · [ReportPortal](https://rp/1) |", table)
 
+    def test_a_retried_row_keeps_the_batch_run_in_the_header(self):
+        first = {"playbook": "a", "batch_id": "linux/halo", "label": "Halo · Linux", "platform": "linux",
+                 "required": False, "outcome": "PASSED", "rp_url": "", "reason": "", "job_url": "",
+                 "attempt": 2, "first_outcome": "NOT_RUN", "run_url": "https://oai/run/retry",
+                 "batch_run_url": "https://oai/run/batch"}
+        second = dict(first, playbook="b", attempt=1, run_url="https://oai/run/batch")
+        table = bv.by_configuration([first, second])
+        self.assertIn("Halo · Linux<br>[live results](https://oai/run/batch)", table)
+        self.assertIn("[retry run](https://oai/run/retry)", table)
+
+
+class FetchCache(unittest.TestCase):
+    def test_a_batch_downloads_each_url_once_and_never_caches_a_failure(self):
+        import orchestrai_verdict as v
+        calls = []
+
+        class Response:
+            def __init__(self, body):
+                self.body = body
+            def __enter__(self):
+                return self
+            def __exit__(self, *exc):
+                return False
+            def read(self):
+                return self.body
+
+        def urlopen(req, timeout):
+            calls.append(req.full_url)
+            if req.full_url.endswith("down"):
+                raise OSError("unreachable")
+            return Response(b"{}")
+
+        with tempfile.TemporaryDirectory() as cache, \
+                mock.patch.dict(os.environ, {"ORCHESTRAI_FETCH_CACHE": cache}), \
+                mock.patch.object(v.urllib.request, "urlopen", urlopen):
+            self.assertEqual([v.fetch("https://b/summary", "u", "t") for _ in range(3)], ["{}"] * 3)
+            self.assertEqual([v.fetch("https://b/down", "u", "t") for _ in range(2)], [None, None])
+        self.assertEqual(calls, ["https://b/summary", "https://b/down", "https://b/down"])
+
+
+class Workflows(unittest.TestCase):
+    """The workflow contracts the batch job and !orc rely on."""
+
+    @staticmethod
+    def load(name):
+        import yaml
+        return yaml.safe_load((HERE.parent / "workflows" / name).read_text())
+
+    def test_no_wait_fails_the_batch_job_and_no_retry_runs_once_cancelled(self):
+        job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
+        steps = {s.get("id"): s for s in job["steps"] if s.get("id")}
+        for sid in ("build", "wait", "retry_trigger", "retry_build", "retry_wait"):
+            self.assertIs(steps[sid].get("continue-on-error"), True, sid)
+        retry = [s for s in job["steps"] if "pick" in str(s.get("if", "")) or "retry" in str(s.get("if", ""))
+                 or s.get("id") == "pick"]
+        self.assertGreaterEqual(len(retry), 7)
+        for s in retry:
+            self.assertTrue(s["if"].startswith("!cancelled()"), s.get("name") or s.get("uses"))
+        self.assertLessEqual(job["timeout-minutes"], 1440)  # the GITHUB_TOKEN's lifetime
+
+    def test_orc_runs_the_controller_from_its_own_revision(self):
+        jobs = self.load("orchestrai-pr-command.yml")["jobs"]
+        command = jobs["command"]["steps"]
+        self.assertIn({"path": ".orc", "persist-credentials": False},
+                      [s.get("with") for s in command if "checkout" in s.get("uses", "")])
+        for s in command:
+            if ".github/scripts/" in s.get("run", ""):
+                self.assertIn(".orc/.github/scripts/", s["run"], s.get("name"))
+        for name in ("test-playbooks", "report"):
+            for s in jobs[name]["steps"]:
+                if "checkout" in s.get("uses", ""):
+                    self.assertNotIn("ref", s.get("with") or {}, name)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

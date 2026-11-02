@@ -67,6 +67,7 @@ def resolve(playbook, batch, out_dir):
     outcome = (summary.get("outcome") or LABEL.get(rc, "FAILED")).upper()
     return {"playbook": playbook, "platform": batch["platform"], "arch": batch["arch"], "attempt": 1,
             "job_url": os.environ.get("JOB_URL", ""), "run_url": os.environ.get("RUN_URL", ""),
+            "batch_run_url": os.environ.get("RUN_URL", ""),
             "batch_id": batch["batch_id"], "label": batch.get("label") or batch["batch_id"],
             "locale": batch.get("locale", ""), "required": playbook in batch["required"],
             "outcome": outcome, "rc": rc, "rp_url": outputs.get("rp_url", ""),
@@ -111,8 +112,8 @@ def by_configuration(rows):
     """Playbooks x configurations: each cell links its result to the batch's job
     and to ReportPortal; each column header links the configuration's live run."""
     configs = {}
-    for r in rows:
-        configs.setdefault(r.get("label") or r["batch_id"], r.get("run_url", ""))
+    for r in rows:  # the batch's own run, not a retry's (that holds only the retried subset)
+        configs.setdefault(r.get("label") or r["batch_id"], r.get("batch_run_url") or r.get("run_url", ""))
     labels = sorted(configs)
     cells = {(r["playbook"], r.get("label") or r["batch_id"]): r for r in rows}
     def header(label):
@@ -122,7 +123,9 @@ def by_configuration(rows):
             return "—"
         status = f"[{r['outcome']}]({r['job_url']})" if r.get("job_url") else r["outcome"]
         rp = f" · [ReportPortal]({r['rp_url']})" if r.get("rp_url") else ""
-        return f"{ICON.get(r['outcome'], '❌')} {status}{rp}{' ✦' if r.get('required') else ''}{retry_note(r)}"
+        retry_run = f" · [retry run]({r['run_url']})" if r.get("attempt", 1) > 1 and r.get("run_url") else ""
+        return (f"{ICON.get(r['outcome'], '❌')} {status}{rp}{retry_run}"
+                f"{' ✦' if r.get('required') else ''}{retry_note(r)}")
     out = ["## OrchestrAI playbooks by configuration", "",
            "Result links open the batch's GitHub job; ReportPortal links open the recorded "
            "launch when available. ✦ = required.", "",
@@ -184,12 +187,18 @@ def main():
             if (out_dir / pb).is_dir():
                 shutil.rmtree(out_dir / f"{pb}-attempt1", ignore_errors=True)
                 (out_dir / pb).rename(out_dir / f"{pb}-attempt1")
-    rows = [resolve(pb, batch, out_dir) for pb in batch["playbooks"]]
+    with tempfile.TemporaryDirectory() as cache:  # one download per build, not per playbook
+        os.environ["ORCHESTRAI_FETCH_CACHE"] = cache
+        try:
+            rows = [resolve(pb, batch, out_dir) for pb in batch["playbooks"]]
+        finally:
+            del os.environ["ORCHESTRAI_FETCH_CACHE"]
     for r in rows:
         if r["playbook"] in first:
             prev = first[r["playbook"]]
             r.update(attempt=prev.get("attempt", 1) + 1, first_outcome=prev["outcome"],
-                     first_reason=prev.get("reason", ""))
+                     first_reason=prev.get("reason", ""),
+                     batch_run_url=prev.get("batch_run_url") or prev.get("run_url", ""))
     retried = rows
     if first:
         rows = [next((n for n in retried if n["playbook"] == pb), old) for pb, old in first.items()]

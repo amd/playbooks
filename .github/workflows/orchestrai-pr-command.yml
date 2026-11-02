@@ -14,6 +14,16 @@
 # Only users with write access (OWNER/MEMBER/COLLABORATOR) can trigger it, since
 # it runs internal hardware with the OrchestrAI pipeline secrets. issue_comment runs from the
 # default branch, so this file must be on the default branch to take effect.
+#
+# The controller (.github/scripts and orchestrai-config.yml) always comes from
+# this workflow's own revision, the default branch: a PR branch's copy may be
+# older or newer than this file expects. The PR head supplies only the
+# playbooks under test (the command job's root checkout) and the SHA OrchestrAI
+# tests. To try changes to the controller itself, dispatch
+# test-playbooks-orchestrai.yml on the branch.
+#
+# Requires ORCHESTRAI_WAIT_RUNNER (a self-hosted runner label): the Test jobs
+# wait for machines and the build, up to 12 h.
 
 name: OrchestrAI PR command
 
@@ -35,7 +45,6 @@ jobs:
     name: OrchestrAI PR command
     if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
-    # Must exceed acquire_timeout + 30 min (tested).
     permissions:
       contents: read
       pull-requests: write
@@ -89,6 +98,13 @@ jobs:
           ref: ${{ steps.pr.outputs.head_sha }}
           fetch-depth: 0
 
+      # The controller, from this workflow's revision (see the header).
+      - if: steps.pr.outputs.fork == 'false'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          path: .orc
+          persist-credentials: false
+
       - if: steps.pr.outputs.fork == 'false'
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
@@ -101,9 +117,13 @@ jobs:
         env:
           JU: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           JT: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+          WAIT_RUNNER: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
         run: |
           if [ -z "$JU" ] || [ -z "$JT" ]; then
             echo "::error::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) are not set"; exit 1
+          fi
+          if [ -z "$WAIT_RUNNER" ]; then
+            echo "::error::Set the repository variable ORCHESTRAI_WAIT_RUNNER to a self-hosted runner label: the Test jobs run up to 12 h"; exit 1
           fi
 
       - name: Parse command into playbook list
@@ -177,7 +197,7 @@ jobs:
           LOCALE: ${{ steps.detect.outputs.locale }}
           PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
           ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
-        run: python3 .github/scripts/orchestrai_matrix.py
+        run: python3 .orc/.github/scripts/orchestrai_matrix.py --config .orc/.github/orchestrai-config.yml
 
       - name: Trigger OrchestrAI pipeline builds (PR code)
         id: trigger
@@ -206,19 +226,18 @@ jobs:
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
           ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
-        run: python3 .github/scripts/orchestrai_trigger.py
+        run: python3 .orc/.github/scripts/orchestrai_trigger.py --config .orc/.github/orchestrai-config.yml
 
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: command
     if: needs.command.outputs.has_entries == 'true'
-    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
     # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
-    # + 30 min) and then for the build itself (up to 4.5 h); self-hosted runners
-    # allow this.
+    # + 30 min) and then for the build itself (330 min).
     timeout-minutes: 720
     continue-on-error: ${{ !matrix.required }}
     strategy:
@@ -227,9 +246,8 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.command.outputs.matrix) }}
     steps:
+      # The controller's revision (this workflow's), not the PR head.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          ref: ${{ needs.command.outputs.head_sha }}
 
       - name: Wait for the batch's build to start
         id: build
@@ -251,42 +269,7 @@ jobs:
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        run: |
-          BUILD_URL="${STARTED_BUILD_URL}"
-          if [ -z "$BUILD_URL" ]; then
-            echo "::error::No OrchestrAI pipeline build URL for batch ${BATCH_ID}"; exit 1
-          fi
-          echo "build_url=${BUILD_URL}" >> "$GITHUB_OUTPUT"
-          echo "Waiting for OrchestrAI pipeline build ..."
-          # SECURITY: pass credentials via a 0600 netrc file, never as `curl -u
-          # user:token` — argv is world-readable (/proc/<pid>/cmdline, ps) for the
-          # life of each curl, which would leak the pipeline token to any other
-          # process on a shared/persistent self-hosted runner. mktemp creates the
-          # file 0600; printf is a shell builtin, so the token never hits argv.
-          NETRC="$(mktemp)"
-          trap 'rm -f "$NETRC"' EXIT
-          NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
-          printf 'machine %s login %s password %s\n' \
-            "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          # 330 min of wall-clock time: max_duration (300m) plus 30 min to wind down.
-          DEADLINE=$((SECONDS + 330 * 60)); FAIL_MAX=20; finished=""; fails=0
-          while [ "$SECONDS" -lt "$DEADLINE" ]; do
-            if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
-              fails=0
-              building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
-              result=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('result') or '')" 2>/dev/null || echo "")
-              if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result"; finished=1; break
-              fi
-            else
-              fails=$((fails + 1))
-              if [ "$fails" -ge "$FAIL_MAX" ]; then
-                echo "::error::OrchestrAI pipeline unreachable"; exit 1
-              fi
-            fi
-            sleep 15
-          done
-          if [ -z "$finished" ]; then echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1; fi
+        run: bash .github/scripts/orchestrai_wait_build.sh
 
       - name: Resolve per-playbook verdict
         if: always()
@@ -297,12 +280,9 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        # KEEP IN SYNC with the identical step in test-playbooks-orchestrai.yml
-        # ("Resolve per-playbook verdict"). Deliberately duplicated rather than
-        # factored into .github/actions/: this workflow runs from the DEFAULT
-        # branch but `uses: ./...` resolves against the PR checkout, so a local
-        # composite action would hard-fail `!orc` on every PR branch that
-        # predates it.
+        # One job per playbook here; test-playbooks-orchestrai.yml resolves a
+        # whole batch at once (orchestrai_batch_verdict.py runs this same script
+        # for each playbook).
         #
         # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
         # INTERRUPTED (the batch never produced results for this playbook).
@@ -331,8 +311,6 @@ jobs:
         env:
           RP_URL: ${{ steps.results.outputs.rp_url }}
           RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
-        # KEEP IN SYNC with the identical step in test-playbooks-orchestrai.yml
-        # ("Test summary"). See the sync note on the verdict step above.
         run: |
           # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
           # the job summary instead of letting it read as a failed playbook.
@@ -372,9 +350,8 @@ jobs:
     if: always() && needs.command.result == 'success' && needs.command.outputs.head_sha != ''
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
+      # The controller's revision (this workflow's), not the PR head.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          ref: ${{ needs.command.outputs.head_sha }}
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.12'

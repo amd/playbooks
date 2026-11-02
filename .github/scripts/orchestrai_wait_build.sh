@@ -20,7 +20,9 @@ printf 'machine %s login %s password %s\n' \
   "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
 # Bounded poll: 330 min of wall-clock time (not a count of polls, which
 # each take 15s plus the request) — max_duration (300m) plus 30 min for
-# the build to wind down, and under GitHub's 360-minute job timeout.
+# the build to wind down. It starts once the build has started; the wait
+# for machines before it (acquire_timeout + 30 min) is --await-build's.
+# The Test jobs' timeout-minutes budget both, per attempt.
 DEADLINE=$((SECONDS + 330 * 60))
 FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
 finished=""; fails=0
