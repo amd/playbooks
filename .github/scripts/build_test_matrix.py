@@ -18,7 +18,7 @@ How --mode changed works:
     1. Materialise the base revision (git archive) into a temp tree.
     2. Harness check: if any file that governs how tests execute differs between
        base and head, run the FULL matrix. This is deny-by-default over
-       .github/scripts/ and test-playbooks.yml, minus HARNESS_EXCLUDED.
+       .github/scripts/, test-playbooks.yml and runners.json, minus HARNESS_EXCLUDED.
     3. Otherwise the extractor is identical on both sides, so compute a per-entry
        signature with THIS checkout's extractor against each tree and diff them.
        An entry runs if it is new, its matrix identity changed, its signature
@@ -54,7 +54,8 @@ MATRIX_JOB_LIMIT = 256
 # Files that govern how tests execute. Deny-by-default: anything added under
 # these prefixes is covered without anyone remembering. Editing any of them
 # forces the full matrix, so signatures never have to model harness behaviour.
-HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml")
+HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml",
+                    ".github/runners.json")  # decides which entries are scheduled
 
 # Files under those prefixes that provably cannot change a playbook test verdict.
 # Omitting one only costs a needless full run; wrongly adding one hides a real
@@ -122,12 +123,12 @@ def drop_entries_without_runners(entries: list[dict]) -> list[dict]:
     An unreadable runners.json drops nothing (the workflow then fails as before)."""
     try:
         data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
-        fleet = {(str(r.get("group", "")), str(r.get("os", "")).lower()) for r in data}
+        fleet = {(str(r.get("group", "")).lower(), str(r.get("os", "")).lower()) for r in data}
     except (OSError, json.JSONDecodeError, AttributeError):
         return entries
     kept, dropped = [], {}
     for e in entries:
-        if (e["arch"], e["platform"]) in fleet:
+        if (e["arch"].lower(), e["platform"].lower()) in fleet:
             kept.append(e)
         else:
             key = f"{e['platform']}/{e['arch']}"

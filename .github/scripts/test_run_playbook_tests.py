@@ -16,6 +16,8 @@ import contextlib
 import importlib.util
 import io
 import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -105,24 +107,79 @@ class TimeoutOutputTest(unittest.TestCase):
                 os.kill(int(pidfile.read_text()), 0)
 
 
+@unittest.skipIf(sys.platform == "win32", "bash test")
 class SetupFailureTest(unittest.TestCase):
-    def run_block(self, setup):
-        test = rpt.TestBlock(id="uses-venv", timeout=30, setup=setup, code="echo test body ran")
+    def run_block(self, setup, language="bash", code="echo test body ran"):
+        test = rpt.TestBlock(id="uses-venv", timeout=30, setup=setup, language=language, code=code)
         with tempfile.TemporaryDirectory() as d, contextlib.redirect_stdout(io.StringIO()):
             return rpt.run_test(test, Path(d), Path(d))
 
-    @unittest.skipIf(sys.platform == "win32", "bash test")
     def test_a_failed_setup_stops_the_test(self):
         """A venv that a skipped step never created must not fall back to system Python."""
         result = self.run_block("source missing-env/bin/activate")
         self.assertFalse(result.success)
         self.assertNotIn("test body ran", result.stdout)
+        self.assertIn("setup failed", result.stderr)
 
-    @unittest.skipIf(sys.platform == "win32", "bash test")
+    def test_an_early_failure_in_a_multi_command_setup_stops_the_test(self):
+        result = self.run_block("false; export SETUP_OK=1")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+
+    def test_a_failed_setup_stops_python_and_unknown_language_tests(self):
+        for language, code in (("python", "print('test body ran')"), ("console", "echo test body ran")):
+            with self.subTest(language=language):
+                result = self.run_block("false; true", language, code)
+                self.assertFalse(result.success)
+                self.assertNotIn("test body ran", result.stdout)
+                self.assertIn("setup failed", result.stderr)
+
     def test_a_working_setup_still_runs_the_test(self):
-        result = self.run_block("export SETUP_OK=1")
-        self.assertTrue(result.success, result.stderr)
-        self.assertIn("test body ran", result.stdout)
+        result = self.run_block("export SETUP_OK=1", code='false; echo "test body ran $SETUP_OK"')
+        self.assertTrue(result.success, result.stderr)  # set -e does not leak into the body
+        self.assertIn("test body ran 1", result.stdout)
+
+
+POWERSHELL = shutil.which("powershell") or shutil.which("pwsh")
+
+
+@unittest.skipUnless(POWERSHELL, "needs powershell or pwsh")
+class PowerShellSetupFailureTest(unittest.TestCase):
+    BODY = "Get-Item missing-file 2>$null; Write-Output \"test body ran $env:VIRTUAL_ENV\""
+    NATIVE_FAIL = "cmd /c exit 3" if sys.platform == "win32" else "sh -c 'exit 3'"
+
+    def run_setup(self, setup, cwd, *flags):
+        script = rpt.powershell_with_setup(setup, self.BODY)
+        return subprocess.run([POWERSHELL, "-NoProfile", *flags, "-Command", script],
+                              cwd=cwd, capture_output=True, text=True, timeout=60)
+
+    def make_venv(self, d):
+        subprocess.run([sys.executable, "-m", "venv", "env"], cwd=d, check=True)
+        return str(Path("env", "Scripts" if sys.platform == "win32" else "bin", "Activate.ps1"))
+
+    def test_a_working_activation_runs_the_body_in_the_venv(self):
+        with tempfile.TemporaryDirectory() as d:
+            proc = self.run_setup(self.make_venv(d), d)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("test body ran", proc.stdout)  # the body's own errors do not stop it
+        self.assertIn("env", proc.stdout.split("test body ran", 1)[1])
+
+    def test_a_failed_setup_stops_the_test(self):
+        for setup in ("missing-env\\Scripts\\activate", self.NATIVE_FAIL,
+                      f"{self.NATIVE_FAIL}; $env:SETUP_OK = '1'",
+                      "Get-Item missing-file; $env:SETUP_OK = '1'"):
+            with self.subTest(setup=setup), tempfile.TemporaryDirectory() as d:
+                proc = self.run_setup(setup, d)
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertNotIn("test body ran", proc.stdout)
+                self.assertIn("setup failed", proc.stderr)
+
+    @unittest.skipUnless(sys.platform == "win32", "execution policy is enforced on Windows only")
+    def test_an_activation_blocked_by_execution_policy_stops_the_test(self):
+        with tempfile.TemporaryDirectory() as d:
+            proc = self.run_setup(self.make_venv(d), d, "-ExecutionPolicy", "Restricted")
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertNotIn("test body ran", proc.stdout)
 
 
 if __name__ == "__main__":
