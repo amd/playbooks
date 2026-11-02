@@ -116,6 +116,27 @@ def _load_runner_catalog() -> list[dict]:
     return catalog
 
 
+def drop_entries_without_runners(entries: list[dict]) -> list[dict]:
+    """Keep entries whose device has a runner for their OS in runners.json.
+
+    An unreadable runners.json drops nothing (the workflow then fails as before)."""
+    try:
+        data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
+        fleet = {(str(r.get("group", "")), str(r.get("os", "")).lower()) for r in data}
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return entries
+    kept, dropped = [], {}
+    for e in entries:
+        if (e["arch"], e["platform"]) in fleet:
+            kept.append(e)
+        else:
+            key = f"{e['platform']}/{e['arch']}"
+            dropped[key] = dropped.get(key, 0) + 1
+    for key, n in sorted(dropped.items()):
+        annotate("notice", f"{key}: no runner in runners.json; {n} entr{'y' if n == 1 else 'ies'} not scheduled")
+    return kept
+
+
 def validate_runner_label(label: str, platform: str, device: str) -> None:
     """Fail fast unless *label* names a runner matching *platform* and *device*.
 
@@ -368,6 +389,11 @@ def main() -> None:
                 )
             else:
                 annotate("warning", f"No trustworthy base {args.base}; running the full matrix")
+
+    # This workflow runs on self-hosted runners: an entry for a device and OS with
+    # no runner in runners.json would queue until it times out (e.g. grgh, which
+    # only OrchestrAI tests). Drop such entries and say so.
+    entries = drop_entries_without_runners(entries)
 
     # Apply workflow_dispatch filters (platform / device) to whatever the mode
     # produced. An empty result after filtering is a user error (e.g. asking for
