@@ -1559,6 +1559,8 @@ def main():
         help="Disable canonical fallback for localized content",
     )
     args = parser.parse_args()
+    # SIGTERM to the runner alone: exit through run_step_command so it kills the step's tree.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
     success = run_playbook_tests(
         args.playbook,
