@@ -113,14 +113,40 @@ class BatchVerdict(unittest.TestCase):
         self.assertEqual(self.run_batch(["good-a", "bad-b"], [])[0], 1)
         self.assertEqual(self.run_batch(["good-a"], [])[0], 0)
 
-    def test_only_playbooks_that_did_not_run_are_retried(self):
-        rows = [{"playbook": p, "outcome": o} for p, o in
-                (("good-a", "PASSED"), ("bad-b", "FAILED"), ("norun-c", "NOT_RUN"), ("cut-d", "INTERRUPTED"))]
+    def test_only_playbooks_that_provably_never_ran_are_retried(self):
+        rows = [{"playbook": p, "outcome": o, "cause": c} for p, o, c in (
+            ("good-a", "PASSED", ""), ("bad-b", "FAILED", ""),
+            ("norun-c", "NOT_RUN", "never_ran"), ("nobuild-e", "NOT_RUN", "no_build"),
+            ("hang-d", "INTERRUPTED", "did_not_finish"),          # a hang or a lost machine
+            ("unread-f", "NOT_RUN", "evidence_unavailable"),      # unknown is not "never ran"
+            ("odd-g", "INTERRUPTED", "interrupted"), ("old-h", "NOT_RUN", ""))]  # no cause: older verdict
         with tempfile.TemporaryDirectory() as d:
             Path(d, "batch.json").write_text(json.dumps(rows))
             out = subprocess.run([sys.executable, str(HERE.parent / "scripts/orchestrai_batch_verdict.py"),
                                   "--retryable", str(Path(d, "batch.json"))], capture_output=True, text=True)
-        self.assertEqual(out.stdout.split(), ["norun-c", "cut-d"])  # never a FAILED test
+        self.assertEqual(out.stdout.split(), ["norun-c", "nobuild-e"])
+
+    def test_errors_show_as_failures_and_infrastructure_as_not_run(self):
+        row = lambda o: {"outcome": o}  # noqa: E731
+        self.assertEqual(bv.system_status([row("PASSED"), row("ERROR")]), "FAIL")
+        self.assertEqual(bv.system_status([row("PASSED"), row("SOMETHING_NEW")]), "FAIL")
+        self.assertEqual(bv.system_status([row("PASSED"), row("INTERRUPTED"), row("NOT_RUN")]), "NOT RUN")
+
+    def test_a_batch_without_results_is_reported_not_left_out(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "a").mkdir()
+            Path(d, "a", "batch.json").write_text(json.dumps([
+                {"playbook": "x", "batch_id": "linux/halo", "label": "Halo · Linux", "platform": "linux",
+                 "outcome": "PASSED", "required": True, "rp_url": "", "reason": ""}]))
+            expected = [{"batch_id": "linux/halo", "label": "Halo · Linux", "platform": "linux", "playbooks": ["x"]},
+                        {"batch_id": "windows/stx", "label": "Strix · Windows", "platform": "windows",
+                         "playbooks": ["x", "y"]}]
+            out = subprocess.run([sys.executable, str(HERE.parent / "scripts/orchestrai_batch_verdict.py"),
+                                  "--merge", d], capture_output=True, text=True,
+                                 env={**os.environ, "EXPECTED_BATCHES": json.dumps(expected),
+                                      "GITHUB_STEP_SUMMARY": ""})
+        self.assertIn("| Strix | — | ⚠️ NO RESULTS (0/2) |", out.stdout)
+        self.assertIn("::error title=Strix · Windows::NO RESULTS", out.stdout)
 
     def test_a_retry_replaces_the_first_attempt_and_the_job_judges_both(self):
         tmp = tempfile.TemporaryDirectory()
@@ -228,10 +254,42 @@ class FetchCache(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as cache, \
                 mock.patch.dict(os.environ, {"ORCHESTRAI_FETCH_CACHE": cache}), \
-                mock.patch.object(v.urllib.request, "urlopen", urlopen):
+                mock.patch.object(v.urllib.request, "urlopen", urlopen), \
+                mock.patch.object(v.time, "sleep"):
             self.assertEqual([v.fetch("https://b/summary", "u", "t") for _ in range(3)], ["{}"] * 3)
             self.assertEqual([v.fetch("https://b/down", "u", "t") for _ in range(2)], [None, None])
-        self.assertEqual(calls, ["https://b/summary", "https://b/down", "https://b/down"])
+        # A transient failure is retried (3 attempts each time), never cached.
+        self.assertEqual(calls, ["https://b/summary"] + ["https://b/down"] * 6)
+
+    def test_the_cache_returns_the_exact_body(self):
+        import orchestrai_verdict as v
+
+        class Response:
+            def __enter__(self):
+                return self
+            def __exit__(self, *exc):
+                return False
+            def read(self):
+                return b"a\r\nb\rc\n"
+
+        with tempfile.TemporaryDirectory() as cache, \
+                mock.patch.dict(os.environ, {"ORCHESTRAI_FETCH_CACHE": cache}), \
+                mock.patch.object(v.urllib.request, "urlopen", lambda req, timeout: Response()):
+            first, again = v.fetch("https://b/console", "u", "t"), v.fetch("https://b/console", "u", "t")
+        self.assertEqual(first, again)
+        self.assertEqual(again, "a\r\nb\rc\n")
+
+    def test_a_missing_file_is_not_retried(self):
+        import orchestrai_verdict as v
+        calls = []
+
+        def urlopen(req, timeout):
+            calls.append(1)
+            raise v.urllib.error.HTTPError(req.full_url, 404, "Not Found", {}, None)
+
+        with mock.patch.object(v.urllib.request, "urlopen", urlopen), mock.patch.object(v.time, "sleep"):
+            self.assertIsNone(v.fetch("https://b/none", "u", "t"))
+        self.assertEqual(len(calls), 1)
 
 
 class Workflows(unittest.TestCase):
@@ -258,6 +316,26 @@ class Workflows(unittest.TestCase):
         self.assertIn("steps.retry_deps.outcome == 'success'", steps["retry_trigger"]["if"])
         self.assertIn("[matrix.batch_id]", steps["retry_build"]["if"])
         self.assertIn("steps.retry_build.outputs.build_url", steps["retry_resolve"]["if"])
+
+    def test_a_retry_waits_for_the_first_run_to_end(self):
+        job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
+        pick = next(s for s in job["steps"] if s.get("id") == "pick")
+        self.assertEqual(pick["env"]["FIRST_WAIT"], "${{ steps.wait.outcome }}")
+        self.assertIn('[ "$FIRST_WAIT" != "success" ]', pick["run"])  # a gave-up wait proves nothing
+        self.assertIn("--run-status", pick["run"])
+        self.assertIn("never_started|passed|failed|unstable|error) ;;", pick["run"])  # not cancelled, not unknown
+
+    def test_results_by_device_knows_every_expected_batch(self):
+        step = next(s for s in self.load("test-playbooks-orchestrai.yml")["jobs"]["playbook-results"]["steps"]
+                    if "--merge" in s.get("run", ""))
+        self.assertIn("outputs.batch_matrix", step["env"]["EXPECTED_BATCHES"])
+
+    def test_only_an_authorized_command_shares_the_orc_concurrency_group(self):
+        wf = self.load("orchestrai-pr-command.yml")
+        condition = wf["jobs"]["command"]["if"]
+        group = wf["concurrency"]["group"]
+        self.assertIn(f"({condition}) && format('orchestrai-orc-", group)
+        self.assertIn("|| format('orchestrai-orc-ignored-{0}', github.run_id)", group)
 
     def test_a_retry_tests_the_commit_the_first_attempt_resolved(self):
         jobs = self.load("test-playbooks-orchestrai.yml")["jobs"]

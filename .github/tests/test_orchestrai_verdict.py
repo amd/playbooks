@@ -133,6 +133,40 @@ def run_verdict(summary, playbook, console="", platform="linux", build_url=BUILD
     return code, doc, buf.getvalue()
 
 
+
+class TestRetryCause(unittest.TestCase):
+    """Only a playbook that provably never executed gets a retryable cause."""
+
+    def cause(self, summary, **kw):
+        return run_verdict(summary, "alpha", **kw)[1]["cause"]
+
+    def test_never_executed_is_retryable(self):
+        self.assertEqual(self.cause(OLD_SCHEMA, build_url=""), "no_build")
+        self.assertEqual(self.cause({"expected_groups": ["playbook-alpha"], "groups": {}}), "never_ran")
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 1, "not_run": 1, "status": "NOT_RUN"}}}), "never_ran")
+
+    def test_hangs_unknown_evidence_and_bad_documents_are_not(self):
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 0, "errors": 1, "did_not_finish": 1,
+            "status": "FAILED"}}}), "did_not_finish")
+        self.assertEqual(self.cause(UNREACHABLE, console=UNREACHABLE), "evidence_unavailable")
+        self.assertEqual(self.cause({"groups": []}), "malformed_summary")
+        self.assertEqual(self.cause({"expected_groups": ["playbook-beta"], "groups": {}}), "not_in_plan")
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "status": "PASSED"}}}),
+            "no_tests_recorded")
+
+    def test_a_verdict_crash_is_not_retryable(self):
+        def boom(*a, **k):
+            raise RuntimeError("x")
+        self.assertEqual(run_verdict({}, "alpha", patch={"normalise_groups": boom})[1]["cause"],
+                         "verdict_error")
+
+    def test_a_definite_verdict_has_no_cause(self):
+        self.assertIsNone(self.cause({"groups": {"playbook-alpha": {
+            "passed": 1, "failed": 0, "skipped": 0, "errors": 0, "status": "PASSED"}}}))
+
 class TestPassingPath(unittest.TestCase):
     def test_group_passed_exits_zero_with_populated_results(self):
         code, doc, _ = run_verdict(OLD_SCHEMA, "alpha")

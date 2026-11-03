@@ -36,8 +36,12 @@ permissions:
   pull-requests: write
   issues: write
 
+# Concurrency applies to every comment, before the job's `if:` filters it, so a
+# comment that is not an authorized command gets a group of its own: otherwise
+# any "LGTM" would cancel a running !orc. Keep the condition in sync with the
+# command job's `if:`.
 concurrency:
-  group: orchestrai-orc-${{ startsWith(github.event.comment.body, '!localized-orc') && 'localized' || 'english' }}-${{ github.event.issue.number }}
+  group: ${{ (github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && format('orchestrai-orc-{0}-{1}', startsWith(github.event.comment.body, '!localized-orc') && 'localized' || 'english', github.event.issue.number) || format('orchestrai-orc-ignored-{0}', github.run_id) }}
   cancel-in-progress: true
 
 jobs:
