@@ -16,57 +16,59 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> Ehhez az útmutatóhoz legalább **32 GB** rendszermemória szükséges.
+> Ez a playbook legalább **32 GB** rendszermemóriát igényel.
 <!-- @device:end -->
 
 ## Áttekintés
 
-A kódolóügynökök (coding agents) hatékony eszközök, amelyek a nagy nyelvi modellekre (LLM-ekre) épülő MI-ügynökökkel való együttműködés révén segítik a fejlesztőket. Beágyazhatók a fejlesztői környezetbe, például a terminálba vagy a VS Code-ba, így zökkenőmentesen illeszkednek a fejlesztő munkafolyamatába.
+A kódoló ügynökök (coding agents) hatékony eszközök, amelyek a nagy nyelvi modellek (LLM-ek) által támogatott AI-ügynökökkel való együttműködésen keresztül segítik a fejlesztők munkáját. Beágyazhatók a fejlesztői környezetbe, például a terminálba vagy a VS Code-ba, így zökkenőmentesen illeszkednek a fejlesztő munkafolyamatába.
 
-Ez az útmutató bemutatja, hogyan futtathat kódolóügynököt teljesen a helyi gépén a Cline, a VS Code és az LM Studio segítségével.
+Ez az útmutató bemutatja, hogyan használhatod a Cline-t, a VS Code-ot és az LM Studio-t egy teljesen a helyi gépeden futó kódoló ügynök futtatásához.
 
-## Amit meg fog tanulni
+## Amit meg fogsz tanulni
 
-* Hogyan futtassa a VS Code-ot a Cline kódolóügynökkel szoftverfejlesztési feladatok támogatására.
-* Hogyan konfigurálja a Cline-t úgy, hogy az LM Studio-val kommunikáljon a kódolóügynökök helyi következtetéséhez (inference).
-* Hogyan használja a helyi kódolóügynököket valós szoftverfejlesztési feladatok megoldására.
+* Hogyan futtasd a VS Code-ot a Cline kódoló ügynökkel a szoftverfejlesztési feladatok elősegítéséhez.
+* Hogyan konfiguráld a Cline-t, hogy az LM Studio-val kommunikáljon a kódoló ügynökök helyi következtetéséhez (inference).
+* Hogyan használj helyi kódoló ügynököket valós szoftverfejlesztési feladatok megoldásához.
 
-## A memóriakonfiguráció beállítása
+<!-- @device:halo_box,halo,stx,krk -->
+## Memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Szoftverfrissítések ellenőrzése
-> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheti a Ryzen AI Developer Center segítségével.
+## Szoftverfrissítések keresése
+> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheted a Ryzen AI Developer Center segítségével.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## A szoftverelőfeltételek telepítése
+## A szükséges szoftverek telepítése
 
 <!-- @require:lmstudio,vscode -->
 
 ## Az LM Studio indítása és konfigurálása
 
-Az LM Studio-t fogjuk használni a kódolóügynököt működtető LLM kiszolgálására.
+Az LM Studio-t fogjuk használni a kódoló ügynököt működtető LLM kiszolgálásához.
 
-- A keresősávban keressen rá az `LM Studio` kifejezésre, és indítsa el az alkalmazást. A következő oldal fogadja majd.
+- A keresősávban keress rá az `LM Studio` névre, és indítsd el az alkalmazást. A következő oldal fog megjelenni.
 
-![LM Studio kezdőképernyője](assets/initial-lm-studio.png)
+![LM Studio kezdőképernyő](assets/initial-lm-studio.png)
 
-Ezután be kell töltenünk az LLM-et a rendszerre. A `Qwen3-Coder-30B-A3B` modellt fogjuk használni, nagy kontextushosszal. (Ha még nincs telepítve, a Model fülön telepítheti.)
-- Kattintson az LM Studio ablak tetején található keresősávra, vagy nyomja meg a `CTRL+L` billentyűkombinációt. Kattintson a `Manually choose model load parameters` kapcsolóra, majd válassza ki a Qwen3-Coder-30B-A3B modellt.
-- Módosítsa a kontextushosszt `4096`-ról `32768`-ra, és győződjön meg róla, hogy a `GPU Offload` a maximumon van. Ezután kattintson a `Load Model` gombra.
+Ezután be kell töltenünk az LLM-et a rendszerbe. A `Qwen3-Coder-30B-A3B` modellt fogjuk használni nagy kontextushosszal. (Ha még nincs telepítve, használd a Model fület a telepítéshez.)
+- Kattints a keresősávra az LM Studio ablak tetején, vagy nyomd meg a `CTRL+L` billentyűkombinációt. Kattints a `Manually choose model load parameters` kapcsolóra, majd kattints a Qwen3-Coder-30B-A3B modellre.
+- Változtasd meg a kontextushosszt `4096`-ról `32768`-ra, és győződj meg róla, hogy a `GPU Offload` a maximumon van. Ezután kattints a `Load Model` gombra.
 
 ![Modell kiválasztása](assets/model-list-zoomed.png)
 
-Nagy kontextushosszt használunk, hogy az ügynök nagyobb kódbázisokat is fel tudjon dolgozni, és emlékezzen az elvégzett módosításokra.
+Nagy kontextushosszt használunk, hogy az ügynök nagy kódbázisokat is fel tudjon dolgozni, és emlékezzen a végrehajtott módosításokra.
 
 ![Modell konfigurálása](assets/selecting-model-zoomed.png)
 
 Ezután engedélyeznünk kell az LM Studio szervert.
-- Kattintson a Developer fülre, vagy nyomja meg a `CTRL+2` billentyűkombinációt az LM Studio bal oldalán.
-- Ellenőrizze az állapotkapcsolót, és győződjön meg róla, hogy `Running` értékre van állítva.
+- Kattints a Developer fülre, vagy nyomd meg a `CTRL+2` billentyűkombinációt az LM Studio bal oldalán.
+- Ellenőrizd az állapotkapcsolót, és győződj meg róla, hogy `Running` értékre van állítva.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -153,13 +155,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## A VS Code indítása és konfigurálása
 
-Telepítjük a Cline bővítményt a VS Code-ban, és összekapcsoljuk az imént létrehozott LM Studio szerverrel.
-- A keresősávban keressen rá a `VS Code` kifejezésre, és indítsa el az alkalmazást.
-- Kattintson az `Extensions` ikonra a VS Code bal oldali oszlopában, és keressen rá a `Cline` kifejezésre. Ezután kattintson az `Install` gombra.
+Telepíteni fogjuk a Cline bővítményt a VS Code-ba, és összekapcsoljuk az imént létrehozott LM Studio szerverrel.
+- A keresősávban keress rá a `VS Code` névre, és indítsd el az alkalmazást.
+- Kattints az `Extensions` ikonra a VS Code bal oldali oszlopában, és keress rá a `Cline` névre. Ezután kattints az `Install` gombra.
 
 ![Cline bővítmény telepítése](assets/installing-cline-vscode-extension.png)
 
-- A bal oldalon meg kell jelennie egy Cline ikonnak. Kattintson rá a Cline megnyitásához. Megjelenik egy ablak a következő kérdéssel: `How will you use Cline?` Mivel egy helyi LLM-et fogunk használni, amely az LM Studio-n keresztül fut, válassza a `Bring my own API Key` lehetőséget, majd kattintson a `Continue` gombra.
+- Ekkor egy Cline ikon jelenik meg a bal oldalon. Kattints rá a Cline megnyitásához. Megjelenik egy ablak, amely megkérdezi: `How will you use Cline?` Mivel az LM Studio-n keresztül futó helyi LLM-et fogjuk használni, válaszd a `Bring my own API Key` lehetőséget, majd kattints a `Continue` gombra.
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -182,31 +184,31 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 ![Fiók létrehozása](assets/cline-how-will-you-use-cline-zoomed.png)
 
 Ezután konfigurálnunk kell a Cline-t, hogy kommunikáljon az általunk beállított LM Studio szerverrel.
-- Állítsa be az API Provider-t `LM Studio`-ra, a modellt pedig `Qwen3-Coder-30B-A3B-GGUF`-ra.
+- Állítsd az API Provider értékét `LM Studio`-ra, a modellt pedig `Qwen3-Coder-30B-A3B-GGUF`-ra.
 
->**Tipp**: Előfordulhat, hogy újabb modellek is elérhetők. Ha szeretné, fontolja meg a Qwen3.6 modellekre való letöltést és váltást.
+>**Tipp**: Előfordulhat, hogy újabb modellek is elérhetők. Ha szeretnéd, fontold meg a Qwen3.6 modellek letöltését és azokra való átváltást.
 
 
 ![Modell konfigurálása](assets/cline-model-configuration-zoomed.png)
 
 ## Az első projekt létrehozása
 
-Használjuk a helyi ügynökünket egy weboldal létrehozására! Nyisson meg a VS Code-ban egy tetszőleges könyvtárat, ahol a Cline létrehozza majd a fájlokat.
-- Ehhez a VS Code bal felső sarkában válassza a `File -> Open Folder` menüpontot, és válasszon egy mappát, például a `Documents`-et.
+Használjuk a helyi ügynökünket egy weboldal létrehozásához! Nyisd meg a VSCode-ot egy tetszőleges könyvtárban, ahol a Cline létre fogja hozni a fájlokat.
+- Ehhez lépj a `File -> Open Folder` menüpontra a VS Code bal felső sarkában, és válassz egy mappát, például a `Documents` mappát.
 
-![VS Code üres mappa](assets/open-cline-test.png)
+![Üres mappa a VS Code-ban](assets/open-cline-test.png)
 
-Most már készen állunk arra, hogy utasítást adjunk a helyi kódolóügynöknek.
-- Kattintson a bal oldali oszlopban a Cline bővítményre, és adjon meg egy utasítást az ügynök elindításához. Példaként használjuk a következő utasítást:
+Most már készen állunk arra, hogy utasítást adjunk a helyi kódoló ügynöknek.
+- Kattints a bal oldali oszlopban a Cline bővítményre, és írj be egy promptot az ügynök elindításához. Például használjuk a következő promptot:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-Az ügynök ezután elkezdi létrehozni a fájlokat az utasításnak megfelelően. Felhasználóként megfigyelheti, ahogy a kód generálódik a VS Code-ban, az alábbiak szerint. Előfordulhat, hogy minden alkalommal rá kell kattintania a `Save` gombra, amikor a Cline egy fájlt szeretne létrehozni.
+Az ügynök ezután elkezdi létrehozni a fájlokat a prompt alapján. Felhasználóként figyelemmel kísérheted a kód generálását a VS Code-ban, az alábbiakban látható módon. Előfordulhat, hogy minden alkalommal rá kell kattintanod a `Save` gombra, amikor a Cline egy fájlt szeretne létrehozni.
 
 ![Cline kódgenerálás](assets/cline-code-generation.png)
 
-A szoftver legenerálása után az ügynök feladata befejeződött, és futtathatja az alkalmazást. Ebben az esetben az ügynök három fájlt hozott létre: `index.html`, `script.js` és `styles.css`. Egyszerűen kattintson duplán a HTML fájlra, és betölthetjük, illetve interakcióba léphetünk a generált weboldallal.
+A szoftver legenerálása után az ügynök feladata befejeződött, és futtathatod az alkalmazást. Ebben az esetben az ügynök három fájlt hozott létre: `index.html`, `script.js` és `styles.css`. Egyszerűen dupla kattintással a HTML fájlra betölthetjük és megnyithatjuk a generált weboldalt.
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,22 +281,23 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## Következő lépések
 
-A weboldal legenerálása után tovább dolgozhatsz a Cline segítségével a weboldal fejlesztésén. Két lehetséges fejlesztés:
+A weboldal legenerálása után folytathatod a munkát a Cline-nal a weboldal továbbfejlesztése érdekében. Két lehetséges fejlesztés:
 
-- **Dokumentáció**: Ha az ügynöknek a `Add a README` promptot adod meg, az elegendő ahhoz, hogy létrehozzon egy `README.md` fájlt, amely dokumentálja a weboldalt.
-- **Animáció**: Kérd meg a modellt az `Add an animation that visually represents a large language model running on a laptop.` prompttal, hogy generáljon egy animációt a weboldalhoz.
+- **Dokumentáció**: Elegendő az `Add a README` utasítást megadni az ügynöknek, és az egy `README.md` fájlt generál, amely dokumentálja a weboldalt.
+- **Animáció**: Adj a modellnek egy `Add an animation that visually represents a large language model running on a laptop.` promptot, hogy animációt generáljon a weboldalhoz.
 
-Bátorítjuk az olvasót, hogy próbáljon meg más alkalmazásokat is generálni ezzel a beállítással. Az alábbiakban néhány szórakoztató példát mutatunk be, amelyeket kipróbáltunk:
+Arra biztatjuk az olvasót, hogy próbáljon más alkalmazásokat is generálni ezzel a beállítással. Íme néhány szórakoztató példa, amit mi is kipróbáltunk:
 
-- **Retró árkádjátékok**: Próbálj ki más promptokat is. Az is szórakoztató lehet, ha az ügynök retró stílusú játékokat készít Pythonban a `PyGame` csomag használatával a következő prompt segítségével:
+- **Retro arcade játékok**: Próbálj ki más promptokat is. Az is szórakoztató lehet, ha az ügynök retró stílusú játékokat hoz létre Pythonban a `PyGame` csomag segítségével, a következő prompttal:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **Adatelemzés**: Az egyik terület, ahol a kódoló ügynökök különösen hasznosak, a szkriptelés és az adatelemzés. Ez a prompt bemutatja a helyi modell képességét részvényárfolyam-vizualizációs adatelemző szoftver generálására:
+- **Adatelemzés**: Az egyik terület, ahol a kódoló ügynökök különösen hasznosak, a szkriptelés és az adatelemzés. Ez egy prompt, amely bemutatja a helyi modell képességét részvényárfolyamok vizualizációját szolgáló adatelemző szoftver generálására:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -302,8 +305,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## Erőforrások
 
-Az alábbiakban további erőforrásokat találsz, hogy többet megtudj a kódoló ügynökökről, a Cline-ról, valamint a munkaterhelések futtatásáról 
+Az alábbiakban további erőforrásokat talál a Coding Agentekről, a Cline-ról, valamint a munkaterhelések futtatásáról szóló bővebb tájékozódáshoz.
 
-* További információ az AMD LM Studio partnerségéről és integrációjáról: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* További információk az AMD és az LM Studio partnerségéről és integrációjáról: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
 * AMD blogbejegyzés a Cline futtatásáról AMD Ryzen™ AI és Radeon™ grafikus kártyákon: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Cline blogbejegyzés a kódoló ügynökök helyi futtatásáról AI PC-ken: https://cline.bot/blog/local-models-amd
+* Cline blogbejegyzés a kódoló ágensek helyi futtatásáról AI PC-ken: https://cline.bot/blog/local-models-amd

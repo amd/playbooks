@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-Full Fine-tuning Gemma 3 4B on AMD Strix Halo (GFX1151)
+Full Fine-tuning Gemma 3 4B on AMD GPUs
 
 This script demonstrates full parameter fine-tuning which updates all model weights.
 Best for: Maximum quality when you have sufficient GPU memory

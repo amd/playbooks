@@ -20,6 +20,10 @@ Coding agents are powerful tools that empower developers through collaboration w
 
 This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a coding agent entirely on your local machine.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the **Launch and Configure LM Studio** section, check whether the model is already available in LM Studio — if it is, you can load it directly; if not, download it there first.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 * How to run VS Code with the Cline coding agent to aid in software engineering tasks.
@@ -41,7 +45,9 @@ This tutorial demonstrates how to use Cline, VS Code, and LM Studio to run a cod
 
 ## Installing Software Prerequisites
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lmstudio,vscode -->
+<!-- @prereq:lmstudio-models-qwen3-coder-30b,lmstudio,vscode -->
 
 ## Launch and Configure LM Studio
 
@@ -51,7 +57,7 @@ We will use LM Studio to serve the LLM powering the coding agent.
 
 ![LM Studio Initial Screen](assets/initial-lm-studio.png)
 
-Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length. (Use the Model tab to install it if you haven't already).
+Next, we must load the LLM on the system. We are going to use the `Qwen3-Coder-30B-A3B` model with a large context length. If the model isn't already installed, use the Model tab (search icon) to download it first; systems that shipped with the model pre-installed can load it directly.
 - Click on the search bar on the top of the LM Studio window or press `CTRL+L`. Click the switch `Manually choose model load parameters` and then click on the Qwen3-Coder-30B-A3B model.
 - Change the context length from `4096` to `32768`, and make sure `GPU Offload` is at the max. Then, click `Load Model`
 

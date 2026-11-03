@@ -11,46 +11,48 @@ SPDX-License-Identifier: MIT
 
 ## نظرة عامة
 
-يُعد الضبط الدقيق الفعّال أمرًا حيويًا لتكييف نماذج اللغة الكبيرة (LLMs) مع المهام التطبيقية. LLaMA Factory هي منصة مفتوحة المصدر وسهلة الاستخدام تُبسّط عملية تدريب وضبط نماذج اللغة الكبيرة والنماذج متعددة الوسائط. تتيح للمستخدمين تخصيص مئات النماذج المُدرَّبة مسبقًا محليًا بأقل قدر من البرمجة.
+يُعد الضبط الدقيق الفعّال أمرًا حيويًا لتكييف نماذج اللغة الكبيرة (LLMs) مع المهام النهائية. LLaMA Factory هي منصة مفتوحة المصدر وسهلة الاستخدام تُبسّط تدريب وضبط نماذج اللغة الكبيرة والنماذج متعددة الوسائط. تتيح للمستخدمين تخصيص مئات النماذج المدرَّبة مسبقًا محليًا بأقل قدر من البرمجة.
 
-يُعلّمك هذا الدليل كيفية ضبط نماذج اللغة الكبيرة باستخدام LLaMA Factory على عتاد AMD المحلي الخاص بك.
+يعلّمك هذا الدليل كيفية ضبط نماذج LLM دقيقًا باستخدام LLaMA Factory على أجهزة AMD المحلية لديك.
 
 <!-- @device:stx,krk -->
-> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل ما لا يقل عن **32 جيجابايت من ذاكرة النظام**، مع توفر ما لا يقل عن **16 جيجابايت منها لوحدة معالجة الرسومات (GPU)** (الـ 16 جيجابايت جزء من الـ 32 جيجابايت، وليست إضافة إليها).
+> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل ما لا يقل عن **32 جيجابايت من ذاكرة النظام (RAM)**، مع توفر **16 جيجابايت على الأقل منها متاحة للـ GPU** (الـ 16 جيجابايت هي جزء من الـ 32 جيجابايت، وليست إضافة إليها).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل ما لا يقل عن **16 جيجابايت من إجمالي ذاكرة وحدة معالجة الرسومات (GPU)** و**32 جيجابايت من ذاكرة النظام**.
-> - على نظام Windows، يجمع إجمالي ذاكرة وحدة معالجة الرسومات بين ذاكرة الفيديو المخصصة لبطاقة الرسومات وذاكرة GPU المشتركة (المُستعارة من ذاكرة النظام).
-> - لذلك، يمكن للبطاقات التي تقل عن 16 جيجابايت من ذاكرة الفيديو المخصصة تشغيل هذا الدليل باستخدام ذاكرة GPU المشتركة لتعويض الفرق.
+> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل ما لا يقل عن **16 جيجابايت من إجمالي ذاكرة الـ GPU** و**32 جيجابايت من ذاكرة النظام (RAM)**.
+> - في Windows، تجمع ذاكرة الـ GPU الإجمالية بين ذاكرة VRAM المخصصة لبطاقة الرسومات وذاكرة الـ GPU المشتركة (المستعارة من ذاكرة النظام).
+> - لذلك، يمكن للبطاقات التي تحتوي على أقل من 16 جيجابايت من VRAM المخصصة أن تشغّل هذا الدليل مع ذلك باستخدام ذاكرة الـ GPU المشتركة لتعويض الفرق.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل بطاقة رسومات تحتوي على ما لا يقل عن **16 جيجابايت من ذاكرة GPU المخصصة** و**32 جيجابايت من ذاكرة النظام**.
-> - على نظام Linux، يعمل التدريب بالكامل ضمن ذاكرة الفيديو المخصصة لبطاقة الرسومات.
-> - لا يتم اللجوء إلى ذاكرة GPU المشتركة (ذاكرة النظام) عند نفاد ذاكرة الفيديو.
-> - ستنفد ذاكرة البطاقات التي تقل عن 16 جيجابايت من ذاكرة الفيديو المخصصة أثناء التدريب على Linux، حتى لو كان النظام يحتوي على ذاكرة نظام وفيرة.
+> **ملاحظة:** تتطلب تقنيات الضبط الدقيق في هذا الدليل بطاقة رسومات بها ما لا يقل عن **16 جيجابايت من ذاكرة GPU المخصصة** و**32 جيجابايت من ذاكرة النظام (RAM)**.
+> - في Linux، يعمل التدريب بالكامل ضمن ذاكرة VRAM المخصصة لبطاقة الرسومات.
+> - لا يتم الرجوع إلى ذاكرة الـ GPU المشتركة (ذاكرة النظام) عند نفاد VRAM.
+> - البطاقات التي تحتوي على أقل من 16 جيجابايت من VRAM المخصصة ستنفد ذاكرتها أثناء التدريب على Linux، حتى لو كان النظام يحتوي على ذاكرة RAM وفيرة.
 <!-- @os:end -->
 <!-- @device:end -->
 
-## ما ستتعلمه
+## ماذا ستتعلم
 
-- كيفية إعداد LLaMA Factory مع برنامج AMD ROCm™
-- كيفية تهيئة معلمات الضبط الدقيق لنموذج اللغة الكبيرة (باستخدام Qwen/Qwen3-4B-Instruct-2507 كمثال)
+- كيفية إعداد LLaMA Factory باستخدام برنامج AMD ROCm™
+- كيفية تهيئة معلمات الضبط الدقيق لنماذج LLM (باستخدام Qwen/Qwen3-4B-Instruct-2507 كمثال)
 - كيفية تشغيل الضبط الدقيق باستخدام LLaMA Factory
 - كيفية تشغيل الاستدلال باستخدام النموذج المضبوط دقيقًا
 - كيفية تصدير النموذج المضبوط دقيقًا
 
-## الوقت المُقدَّر
+## الوقت المقدَّر
 
-- المدة: سيستغرق تشغيل هذا الدليل حوالي 60 دقيقة (بحسب حجم النموذج/مجموعة البيانات وسرعة الشبكة لديك).
-- راجع [مستودع LLaMA Factory على GitHub](https://github.com/hiyouga/LlamaFactory) لمزيد من المعلومات.
+- المدة: سيستغرق تشغيل هذا الدليل حوالي 60 دقيقة (بحسب حجم النموذج/مجموعة البيانات وسرعة الشبكة).
+- راجع [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) لمزيد من المعلومات.
 
-## ضبط إعدادات الذاكرة
+<!-- @device:halo_box,halo,stx,krk -->
+## تعيين تهيئة الذاكرة
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## التحقق من تحديثات البرامج
@@ -58,7 +60,7 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## تثبيت متطلبات البرامج المسبقة
+## تثبيت متطلبات البرامج الأساسية
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -82,7 +84,7 @@ pip --version
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -94,13 +96,13 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**امنح مستخدمك صلاحية الوصول إلى أجهزة GPU** (سجّل الخروج ثم الدخول مجددًا ليصبح هذا نافذ المفعول):
+**امنح مستخدمك حق الوصول إلى أجهزة GPU** (يجب تسجيل الخروج ثم الدخول مجددًا لتفعيل هذا):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -137,7 +139,23 @@ llamafactory-env\Scripts\activate
 ### تثبيت التبعيات الأساسية
 
 <!-- @require:pytorch,driver -->
- 
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
 ### تثبيت التبعيات الإضافية
 
 > **ملاحظة**: تأكد من أن إصدار Python هو 3.11 أو 3.12 أو 3.13
@@ -166,9 +184,9 @@ python -m pip install huggingface_hub
 
 ### تثبيت LLaMA Factory
 
-يعتمد LLaMA Factory على PyTorch. يُفترض أنك قد ثبّتَه بالفعل وفقًا للمتطلبات المذكورة أعلاه.
+يعتمد LLaMA Factory على PyTorch. من المفترض أن يكون مثبتًا لديك بالفعل وفقًا للمتطلبات المذكورة أعلاه.
 
-قم بتنزيل الكود المصدري من [مستودع LLaMA Factory الرسمي على GitHub](https://github.com/hiyouga/LlamaFactory)، وثبّت تبعياته.
+قم بتنزيل الشيفرة المصدرية من [مستودع GitHub الرسمي لـ LLaMA Factory](https://github.com/hiyouga/LlamaFactory)، وقم بتثبيت تبعياته.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -193,7 +211,7 @@ pip install -r requirements/metrics.txt
 <!-- @test:end --> 
 <!-- @device:end -->
 
-تحقق مما إذا كان `llamafactory-cli` قابلاً للتنفيذ.
+تحقق مما إذا كان `llamafactory-cli` قابلًا للتنفيذ.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-llamafactory-cli timeout=60 hidden=False setup=activate-venv -->
@@ -226,26 +244,26 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-بعد أن نجحت في تثبيت LLaMA Factory، دعنا نُشغّل الضبط الدقيق عليه.
+بعد أن قمت بتثبيت LLaMA Factory بنجاح، دعنا نشغّل الضبط الدقيق عليه.
 
 ## استخدام واجهة سطر أوامر LLaMA Factory للضبط الدقيق
 
-يتناول هذا القسم كيفية إعداد مجموعات بيانات الضبط الدقيق، وتهيئة معلمات LoRA/QLoRA، وتشغيل الضبط الدقيق باستخدام LoRA.
+سيتناول هذا القسم كيفية إعداد مجموعات بيانات الضبط الدقيق، وتهيئة معلمات LoRA/QLoRA، وتشغيل الضبط الدقيق باستخدام LoRA.
 
 ### إعداد مجموعة البيانات
 
-يدعم LLaMA Factory ضبط مجموعات البيانات بصيغة Alpaca وصيغة ShareGPT. تم تعريف جميع مجموعات البيانات المتاحة في ملف [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). إذا كنت تستخدم مجموعة بيانات مخصصة، فتأكد من إضافة وصف لها في `dataset_info.json` وتحديد اسم مجموعة البيانات قبل التدريب. يمكن العثور على التفاصيل في وثائقهم [هنا](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+يدعم LLaMA Factory مجموعات بيانات الضبط الدقيق بتنسيق Alpaca وتنسيق ShareGPT. تم تعريف جميع مجموعات البيانات المتاحة في [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). إذا كنت تستخدم مجموعة بيانات مخصصة، فيرجى التأكد من إضافة وصف لمجموعة البيانات في `dataset_info.json` وتحديد اسم مجموعة البيانات قبل التدريب. يمكن العثور على التفاصيل في وثائقهم [هنا](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
 في هذا الدليل، سنستخدم مجموعتي بيانات identity وalpaca_en_demo كمثال، وسنقوم بتهيئة معلومات مجموعة البيانات في الخطوة التالية.
-### تهيئة معاملات الضبط الدقيق
+### تكوين معلمات الضبط الدقيق
 
-يدعم LLaMA Factory مخططات متعددة للضبط الدقيق.
+يدعم LLaMA Factory أنظمة متعددة للضبط الدقيق.
 
-| مخططات الضبط الدقيق | أمثلة LLaMA Factory |
+| أنظمة الضبط الدقيق | أمثلة LLaMA Factory |
 |-----------|------|
-| المعاملات الكاملة (Full-Parameter)    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| الضبط الدقيق باستخدام LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
-| الضبط الدقيق باستخدام QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+| Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
+| ضبط دقيق LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| ضبط دقيق QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-تحدد ملفات التهيئة النموذجية هذه معاملات النموذج، ومعاملات طريقة الضبط الدقيق، ومعاملات مجموعة البيانات، ومعاملات التقييم، وغيرها. يمكنك تهيئتها وفقًا لاحتياجاتك الخاصة. في هذا الدليل، سنستخدم [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+تحدد ملفات التكوين النموذجية هذه معلمات النموذج، ومعلمات طريقة الضبط الدقيق، ومعلمات مجموعة البيانات، ومعلمات التقييم، وغيرها. يمكنك تكوينها وفقًا لاحتياجاتك الخاصة. في هذا الدليل، سنستخدم [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
-**شرح المعاملات الأساسية:**
+**شرح المعلمات الرئيسية:**
 - `model_name_or_path` - اسم نموذج Hugging Face أو مسار ملف النموذج المحلي.
 - `stage` - مرحلة التدريب. الخيارات: rm (نمذجة المكافأة)، pt (التدريب المسبق)، sft (الضبط الدقيق الخاضع للإشراف)، PPO، DPO، KTO، ORPO.
 - `do_train` - true للتدريب، false للتقييم
 - `finetuning_type` - طريقة الضبط الدقيق. الخيارات: freeze، lora، full
-- `lora_rank` - أبعاد المصفوفة منخفضة الرتبة المستخدمة في LoRA، القيم النموذجية: 4، 6، 8، 16 (القيم الأصغر = معاملات أقل = ضبط دقيق أسرع؛ القيم الأكبر = تكيف أفضل مع المهمة ولكن استخدام أعلى للموارد).
+- `lora_rank` - أبعاد المصفوفة منخفضة الرتبة المستخدمة في LoRA، القيم النموذجية: 4، 6، 8، 16 (القيم الأصغر = معلمات أقل = ضبط دقيق أسرع؛ القيم الأكبر = تكيف أفضل مع المهام لكن استخدام أعلى للموارد).
 - `lora_target` - الوحدات المستهدفة لطريقة LoRA. الافتراضي: all.
-- `dataset` - مجموعة (مجموعات) البيانات المراد استخدامها. استخدم "," للفصل بين مجموعات البيانات المتعددة
-- `output_dir` - مسار إخراج الضبط الدقيق
-- `logging_steps` - الفاصل الزمني لتسجيل الخطوات
-- `save_steps` - الفاصل الزمني لحفظ نقطة تفتيش النموذج.
-- `overwrite_output_dir` - ما إذا كان يُسمح بالكتابة فوق دليل الإخراج.
+- `dataset` - مجموعة (مجموعات) البيانات المراد استخدامها. استخدم "," للفصل بين مجموعات بيانات متعددة
+- `output_dir` - مسار مخرجات الضبط الدقيق
+- `logging_steps` - فاصل التسجيل بالخطوات
+- `save_steps` - فاصل حفظ نقاط تفتيش النموذج.
+- `overwrite_output_dir` - ما إذا كان يُسمح بالكتابة فوق دليل المخرجات.
 - `per_device_train_batch_size` - حجم دفعة التدريب لكل جهاز.
 - `gradient_accumulation_steps` - عدد خطوات تراكم التدرج.
 - `learning_rate` - معدل التعلم
 - `num_train_epochs` - عدد حقب التدريب
-- `lr_scheduler_type` - جدولة معدل التعلم. الخيارات: linear، cosine، polynomial، constant، إلخ.
+- `lr_scheduler_type` - جدول معدل التعلم. الخيارات: linear، cosine، polynomial، constant، إلخ.
 - `warmup_ratio` - نسبة إحماء معدل التعلم
 
 <!-- @os:linux -->
-سنقوم بتعديل القيمة الافتراضية لـ `lora_rank` لتشغيل الضبط الدقيق على معالجات AMD Ryzen™ الرسومية وAMD Radeon™.
+سنقوم بتعديل القيمة الافتراضية لـ `lora_rank` لتشغيل الضبط الدقيق على وحدات معالجة الرسومات AMD Ryzen™ وAMD Radeon™.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-سنقوم بتحديث تهيئة الضبط الدقيق الافتراضية لـ LoRA لتحسين التوافق مع معالجات AMD Ryzen™ وAMD Radeon™ الرسومية:
-- ضبط `lora_rank` من `8` إلى `6` لتقليل استخدام الذاكرة أثناء الضبط الدقيق.
-- استخدام `fp16` بدلاً من `bf16` لتوافق أوسع مع معالجات AMD الرسومية واستخدام أقل للذاكرة.
-- ضبط `dataloader_num_workers` على `0` في نظام Windows لتجنب أخطاء `"Can't pickle local object<>"` الناتجة عن تحميل البيانات متعدد العمليات.
+سنقوم بتحديث تكوين الضبط الدقيق الافتراضي لـ LoRA لتحسين التوافق مع وحدات معالجة الرسومات AMD Ryzen™ وAMD Radeon™:
+- تعيين `lora_rank` من `8` إلى `6` لتقليل استخدام الذاكرة أثناء الضبط الدقيق.
+- استخدام `fp16` بدلاً من `bf16` لتوافق أوسع مع وحدات معالجة الرسومات AMD واستخدام أقل للذاكرة.
+- تعيين `dataloader_num_workers` إلى `0` على Windows لتجنب أخطاء `"Can't pickle local object<>"` الناتجة عن تحميل البيانات متعدد العمليات.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -320,13 +338,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### تشغيل الضبط الدقيق باستخدام LLaMA Factory 
+### تشغيل الضبط الدقيق لـ LLaMA Factory
 
-**llamafactory-cli** هي أداة سطر الأوامر (CLI) الرسمية لـ LLaMA Factory، تم تطويرها لتبسيط سير عمل LLM من البداية إلى النهاية (تحضير البيانات ← الضبط الدقيق ← التقييم ← النشر) دون كتابة كود معقد.
+**llamafactory-cli** هي أداة واجهة سطر الأوامر (CLI) الرسمية لـ LLaMA Factory، تم تطويرها لتبسيط سير عمل النماذج اللغوية الكبيرة من طرف إلى طرف (تحضير البيانات ← الضبط الدقيق ← التقييم ← النشر) دون كتابة كود معقد.
 
-بالنسبة للتدريب/الضبط الدقيق، يُعد **llamafactory-cli train** الأمر الفرعي الأساسي لواجهة سطر أوامر LLaMA Factory. فهو يجرّد سير عمل الضبط الدقيق (المعالجة المسبقة للبيانات، ضبط المعاملات الفائقة، تحسين الأجهزة) في أمر واحد بواجهة سطر الأوامر، ويدعم عدة نماذج للضبط الدقيق (LoRA/QLoRA/الضبط الدقيق الكامل)، وهو مُحسّن لمعالجات الرسومات ذات الموارد المنخفضة (على سبيل المثال، QLoRA على 16 جيجابايت من ذاكرة الفيديو).
+بالنسبة للتدريب/الضبط الدقيق، يُعد **llamafactory-cli train** الأمر الفرعي الأساسي لواجهة سطر أوامر LLaMA Factory. فهو يجرّد سير عمل الضبط الدقيق (المعالجة المسبقة للبيانات، ضبط المعلمات الفائقة، تحسين الأجهزة) في أمر واحد لواجهة سطر الأوامر، مع دعم أنماط ضبط دقيق متعددة (LoRA/QLoRA/الضبط الدقيق الكامل)، وهو محسّن لوحدات معالجة الرسومات ذات الموارد المنخفضة (مثل QLoRA على 16GB VRAM).
 
-يمكنك تشغيل الضبط الدقيق باستخدام LLaMA Factory باستخدام الأمر التالي، والذي يعتمد على ملف التهيئة المعدَّل للضبط الدقيق باستخدام Qwen3 LoRA.
+يمكنك تشغيل الضبط الدقيق لـ LLaMA Factory باستخدام الأمر التالي، والذي يعتمد على ملف التكوين المعدَّل للضبط الدقيق لـ Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-بعد تشغيل الضبط الدقيق لنموذج اللغة الكبير، يتم تخزين جميع المخرجات الناتجة في "output_dir"، بما في ذلك ملفات نقاط تفتيش النموذج، وملفات التهيئة، ومقاييس التدريب.
+بعد تشغيل الضبط الدقيق للنموذج اللغوي الكبير، يتم تخزين جميع المخرجات المُنشأة في "output_dir"، بما في ذلك ملفات نقاط تفتيش النموذج، وملفات التكوين، ومقاييس التدريب.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -439,32 +464,32 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### اختبار النموذج المضبوط دقيقًا 
+### اختبار النموذج المُضبط دقيقًا
 
-صُمم **llamafactory-cli chat** للدردشة/الاستدلال التفاعلي مع نماذج اللغة الكبيرة (سواء النماذج الأساسية أو النماذج المضبوطة دقيقًا باستخدام LoRA). يوفر LLaMA Factory تهيئة نموذجية لتشغيل استدلال النماذج المضبوطة دقيقًا في [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). يمكنك أيضًا تعديل هذه التهيئة النموذجية لتغيير الإعدادات، مثل خلفية الاستدلال.
+صُممت **llamafactory-cli chat** للدردشة/الاستدلال التفاعلي مع النماذج اللغوية الكبيرة (سواء النماذج الأساسية أو النماذج المُضبطة دقيقًا بواسطة LoRA). يوفر LLaMA Factory تكوينًا نموذجيًا لتشغيل الاستدلال للنماذج المُضبطة دقيقًا في [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). يمكنك أيضًا تعديل هذا التكوين النموذجي لتغيير الإعدادات، مثل واجهة الاستدلال الخلفية.
 
-استخدم الأمر التالي لاختبار نموذج Qwen3 المضبوط دقيقًا:
+استخدم الأمر التالي لاختبار نموذج Qwen3 المُضبط دقيقًا:
 
 ```bash
 llamafactory-cli chat examples/inference/qwen3_lora_sft.yaml
 ```
-فيما يلي مثال على دردشة باستخدام النموذج المضبوط دقيقًا:
+يظهر أدناه مثال على محادثة باستخدام النموذج المُضبط دقيقًا:
 
 <p align="center">
   <img src="assets/qwen3_chat.png" alt="Test Qwen3 Fine-Tuned model" width="600"/>
 </p>
 
 
-### تصدير النموذج المضبوط دقيقًا
+### تصدير النموذج المُضبط دقيقًا
 
-بالنسبة لحالات الاستخدام الإنتاجية، يجب دمج النموذج المدرَّب مسبقًا ومحوّل LoRA وتصديرهما في نموذج واحد. يمكن استخدام هذا النموذج المدمج كملف نموذج عادي من Hugging Face. يوفر LLaMA Factory التهيئات النموذجية في [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+لاستخدامات الإنتاج، يجب دمج النموذج المُدرَّب مسبقًا ومحوّل LoRA وتصديرهما في نموذج واحد. يمكن استخدام هذا النموذج المدمج كملف نموذج عادي من Hugging Face. يوفر LLaMA Factory تكوينات نموذجية في [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
-استخدم الأمر التالي لتصدير نموذج Qwen3 المضبوط دقيقًا:
+استخدم الأمر التالي لتصدير نموذج Qwen3 المُضبط دقيقًا:
 
 ```bash
 llamafactory-cli export examples/merge_lora/qwen3_lora_sft.yaml
 ```
-تظهر أدناه نتيجة تصدير النموذج المضبوط دقيقًا.
+تظهر أدناه نتيجة تصدير النموذج المُضبط دقيقًا.
 
 <p align="center">
   <img src="assets/qwen3_export.png" alt="Export Qwen3 Fine-Tuned model " width="600"/>
@@ -568,24 +593,24 @@ print("PASS: Exported merged model output looks correct")
 <!-- @test:end -->
 ## استخدام واجهة LLaMA Factory الرسومية
 
-يدعم `LLaMA-Factory` أيضًا الضبط الدقيق للنماذج اللغوية الكبيرة بدون كتابة أكواد من خلال واجهة ويب في المتصفح.
+يدعم `LLaMA-Factory` أيضًا الضبط الدقيق للنماذج اللغوية الكبيرة (LLMs) بدون كتابة أكواد، وذلك من خلال واجهة ويب في المتصفح.
 
 استخدم الأمر التالي لفتحها:
 
 ```bash
 llamafactory-cli webui
 ```
-تقدم `LlamaFactory Web UI` واجهة مبسطة لإدارة سير عمل التعلم الآلي، بما في ذلك التدريب والتقييم والتنبؤ والدردشة وتصدير النماذج. فيما يلي مقدمة موجزة عن كل علامة تبويب:
+توفر `LlamaFactory Web UI` واجهة مبسّطة لإدارة سير عمل التعلم الآلي، بما في ذلك التدريب والتقييم والتنبؤ والمحادثة وتصدير النماذج. فيما يلي مقدمة موجزة عن كل علامة تبويب:
 
-* **Train**: تتيح لك علامة التبويب هذه اختيار نموذج ومجموعة بيانات، وضبط معلمات التدريب، وبدء عملية التدريب. من الضروري فهم المعلمات الإلزامية والاختيارية لتحسين إعداد التدريب.
-* **Evaluate & Predict**: بعد التدريب، يمكنك تقييم أداء النموذج وإجراء التنبؤات باستخدام علامة التبويب هذه. توفر رؤى حول دقة النموذج وفعاليته على بيانات جديدة.
-* **Chat**: بمجرد اكتمال التدريب، قم بتحميل النموذج في علامة تبويب Chat للتفاعل معه ورؤية نتائج عملك. تتيح هذه الميزة التواصل في الوقت الفعلي مع النموذج المُدرَّب.
-* **Export**: تسهّل علامة التبويب هذه تصدير النماذج المُدرَّبة للنشر أو الاستخدام لاحقًا. يمكنك حفظ نماذجك بصيغ متنوعة مناسبة لتطبيقات مختلفة.
+* **Train**: تتيح لك علامة التبويب هذه اختيار نموذج ومجموعة بيانات، وضبط معاملات التدريب، وبدء عملية التدريب. من الضروري فهم المعاملات الإلزامية والاختيارية لتحسين إعداد التدريب.
+* **Evaluate & Predict**: بعد التدريب، يمكنك تقييم أداء النموذج وإجراء تنبؤات باستخدام هذه العلامة. توفر هذه العلامة رؤى حول دقة النموذج وفعاليته على بيانات جديدة.
+* **Chat**: بمجرد اكتمال التدريب، قم بتحميل النموذج في علامة التبويب Chat للتفاعل معه ورؤية نتائج عملك. تتيح هذه الميزة التواصل في الوقت الفعلي مع النموذج المدرَّب.
+* **Export**: تُسهّل علامة التبويب هذه تصدير النماذج المدرَّبة للنشر أو الاستخدام الإضافي. يمكنك حفظ نماذجك بصيغ مختلفة مناسبة لتطبيقات متنوعة.
 
-للحصول على إرشادات مفصلة، نشجعك على الرجوع إلى الوثائق الرسمية على [مستودع LlamaFactory على GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) و[LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). بالإضافة إلى ذلك، يوفر [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) رؤى قيّمة حول الواجهة ووظائفها.
+للحصول على إرشادات مفصّلة، نشجعك على الرجوع إلى الوثائق الرسمية على [مستودع LlamaFactory على GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) وعلى [موقع LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). بالإضافة إلى ذلك، توفر [ويكي LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) رؤى قيّمة حول الواجهة ووظائفها.
 
 ## الخطوات التالية
 - جرّب نماذج مختلفة مثل `gpt-oss` وغيرها من أحدث النماذج المتطورة.
-- جرّب خلفيات (backends) مختلفة على النموذج المضبوط دقيقًا
+- جرّب استخدام خلفيات (backends) مختلفة مع النموذج المضبوط دقيقًا
 
-لمزيد من التوثيق، يرجى زيارة: https://llamafactory.readthedocs.io/en/latest/
+لمزيد من الوثائق، يُرجى زيارة: https://llamafactory.readthedocs.io/en/latest/

@@ -1,0 +1,6 @@
+{
+  "id": "clustering-rpc-server-4-node",
+  "title": "Agrupamiento de cuatro Ryzen™ AI Halo mediante RPC",
+  "description": "Configurar la inferencia distribuida mediante servidor RPC en cuatro dispositivos AMD Ryzen™ AI Halo con llama.cpp para ejecutar modelos de 1T o más parámetros",
+  "auto_translated": true
+}

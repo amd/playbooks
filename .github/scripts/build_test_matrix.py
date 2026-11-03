@@ -164,7 +164,8 @@ def harness_files(root: Path) -> dict[str, bytes]:
             if rel in HARNESS_EXCLUDED:
                 continue
             mode = b"\x01" if os.access(path, os.X_OK) else b"\x00"
-            out[rel] = mode + hashlib.sha256(path.read_bytes()).digest()
+            content = path.read_bytes().replace(b"\r\n", b"\n")
+            out[rel] = mode + hashlib.sha256(content).digest()
     return out
 
 
@@ -172,11 +173,14 @@ def harness_changed(base_tree: Path) -> bool:
     return harness_files(REPO_ROOT) != harness_files(base_tree)
 
 
-def materialise_base(base: str, dest: Path) -> bool:
+def materialise_base(base: str, dest: Path, include_localized: bool = False) -> bool:
     """Extract the base revision's playbooks and .github into dest."""
     try:
+        paths = ["playbooks", ".github"]
+        if include_localized:
+            paths.append("localized-playbooks")
         archive = subprocess.run(
-            ["git", "archive", "--format=tar", base, "--", "playbooks", ".github"],
+            ["git", "archive", "--format=tar", base, "--", *paths],
             cwd=REPO_ROOT, capture_output=True, check=True,
             stdin=subprocess.DEVNULL, timeout=ARCHIVE_TIMEOUT,
         )
@@ -240,6 +244,70 @@ def select_changed(base_tree: Path) -> list[dict]:
     return selected
 
 
+def tree_digest(path: Path) -> str:
+    """Hash a localized content subtree for conservative change detection."""
+    if not path.is_dir():
+        return ""
+    digest = hashlib.sha256()
+    for child in sorted(p for p in path.rglob("*") if p.is_file()):
+        digest.update(str(child.relative_to(path)).replace(os.sep, "/").encode())
+        digest.update(hashlib.sha256(child.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> list[dict]:
+    """Select localized entries whose overlay, metadata, or dependencies changed."""
+    if harness_changed(base_tree):
+        annotate("notice", "Test harness changed; running the full localized matrix")
+        return head
+
+    head_dependencies = REPO_ROOT / "localized-playbooks" / locale / "dependencies"
+    base_dependencies = base_tree / "localized-playbooks" / locale / "dependencies"
+    if tree_digest(head_dependencies) != tree_digest(base_dependencies):
+        annotate("notice", "Localized dependencies changed; running the full matrix")
+        return head
+
+    english_dependencies_changed = tree_digest(
+        REPO_ROOT / "playbooks" / "dependencies"
+    ) != tree_digest(base_tree / "playbooks" / "dependencies")
+
+    try:
+        base_entries = R.build_localized_matrix_entries(base_tree, locale)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        annotate("warning", f"Cannot expand localized base metadata: {exc}; running all")
+        return head
+
+    base_by_key = {
+        (e["playbook"], e["platform"], e["arch"]): e for e in base_entries
+    }
+    selected = []
+    for entry in head:
+        key = (entry["playbook"], entry["platform"], entry["arch"])
+        prior = base_by_key.get(key)
+        changed = prior != entry
+        for category in ("core", "supplemental"):
+            rel = Path("localized-playbooks") / locale / category / entry["playbook"]
+            if tree_digest(REPO_ROOT / rel) != tree_digest(base_tree / rel):
+                changed = True
+                break
+            if not entry.get("localized_only", True):
+                english_rel = Path("playbooks") / category / entry["playbook"]
+                if tree_digest(REPO_ROOT / english_rel) != tree_digest(
+                    base_tree / english_rel
+                ):
+                    changed = True
+                    break
+        if not entry.get("localized_only", True) and english_dependencies_changed:
+            changed = True
+        if changed:
+            selected.append(entry)
+    annotate(
+        "notice",
+        f"Selected {len(selected)} localized entries; skipped {len(head) - len(selected)} unchanged",
+    )
+    return selected
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the playbook CI test matrix")
     parser.add_argument("--mode", required=True, choices=["all", "playbook", "changed"])
@@ -254,11 +322,29 @@ def main() -> None:
     parser.add_argument("--runner-label",
                         help="Append this label to every entry's runner selection "
                              "so a specific self-hosted runner can be targeted")
+    parser.add_argument(
+        "--locale",
+        default="",
+        help="Build the matrix for this localized-playbooks locale instead of English",
+    )
     parser.add_argument("--github-output", type=Path)
+    parser.add_argument(
+        "--allow-empty",
+        action="store_true",
+        help="Return an empty matrix instead of failing when a filter matches nothing",
+    )
     args = parser.parse_args()
 
-    entries = R.build_matrix_entries(REPO_ROOT)
-    if not entries:
+    try:
+        entries = (
+            R.build_localized_matrix_entries(REPO_ROOT, args.locale)
+            if args.locale
+            else R.build_matrix_entries(REPO_ROOT)
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"FATAL: cannot build test matrix: {exc}", file=sys.stderr)
+        sys.exit(1)
+    if not entries and not args.allow_empty:
         print("FATAL: this checkout lists no matrix entries", file=sys.stderr)
         sys.exit(1)
 
@@ -266,7 +352,7 @@ def main() -> None:
         if not args.playbook_id:
             parser.error("--mode playbook requires --playbook-id")
         entries = [e for e in entries if e["playbook"] == args.playbook_id]
-        if not entries:
+        if not entries and not args.allow_empty:
             print(f"FATAL: no matrix entries for playbook '{args.playbook_id}'", file=sys.stderr)
             sys.exit(1)
     elif args.mode == "changed":
@@ -274,8 +360,12 @@ def main() -> None:
             parser.error("--mode changed requires --base")
         with tempfile.TemporaryDirectory(prefix="base-tree-") as tmp:
             base_tree = Path(tmp)
-            if materialise_base(args.base, base_tree):
-                entries = select_changed(base_tree)
+            if materialise_base(args.base, base_tree, include_localized=bool(args.locale)):
+                entries = (
+                    select_localized_changed(base_tree, args.locale, entries)
+                    if args.locale
+                    else select_changed(base_tree)
+                )
             else:
                 annotate("warning", f"No trustworthy base {args.base}; running the full matrix")
 
@@ -286,7 +376,7 @@ def main() -> None:
         entries = [e for e in entries if e["platform"] == args.platform]
     if args.device:
         entries = [e for e in entries if e["arch"] == args.device]
-    if (args.platform or args.device) and not entries:
+    if (args.platform or args.device) and not entries and not args.allow_empty:
         filt = ", ".join(
             f"{k}={v}" for k, v in (("platform", args.platform), ("device", args.device)) if v
         )
@@ -306,11 +396,13 @@ def main() -> None:
         # here instead of leaving a job queued for a runner that never appears.
         validate_runner_label(args.runner_label, args.platform, args.device)
 
-    # Stamp runner_label on every entry (empty string when not targeting) so the
-    # job-name template can surface it without leaving a dangling '@'. Done after
-    # select_changed(), so change detection never sees this field.
+    # Keep a localized entry's pool label separate from a manually requested
+    # machine label. English entries retain runner_label for compatibility with
+    # the upstream matrix schema, while the workflow uses target_runner_label
+    # when it needs to display the explicitly selected machine.
     for entry in entries:
-        entry["runner_label"] = args.runner_label or ""
+        entry["runner_label"] = entry.get("runner_label") or args.runner_label or ""
+        entry["target_runner_label"] = args.runner_label or ""
 
     # Append the extra label to runs-on. GitHub schedules a job on a runner only
     # if the runner carries every label in runs-on, so a label unique to one

@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA é a estrutura de código aberto da AMD para criar agentes de IA que são executados localmente em hardware AMD com aceleração Ryzen AI.
+GAIA é o framework de código aberto da AMD para criar agentes de IA que são executados localmente em hardware AMD com aceleração Ryzen AI.
 
 #### Instalando o GAIA
 
@@ -31,7 +31,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. No Linux, abra um terminal no diretório de sua escolha e siga os comandos para criar um venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ pip install amd-gaia
 
 <!-- @os:linux -->
 1. No Linux, abra um terminal no diretório de sua escolha e siga os comandos para criar um venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -287,6 +287,6 @@ Verifique se o GAIA v0.16.2 ou posterior está instalado:
 gaia --version
 ```
 
-> **Importante**: certifique-se de que o Lemonade Server esteja em execução antes de usar o GAIA. O GAIA exige que o Lemonade Server seja iniciado manualmente.
+> **Importante**: Certifique-se de que o Lemonade Server esteja em execução antes de usar o GAIA. O GAIA requer que o Lemonade Server seja iniciado manualmente.
 
-Para obter mais informações, consulte a [documentação do GAIA](https://amd-gaia.ai).
+Para mais informações, consulte a [documentação do GAIA](https://amd-gaia.ai).

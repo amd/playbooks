@@ -1,6 +1,6 @@
 {
   "id": "open-webui-chat",
-  "title": "التحدث مع نماذج اللغة الكبيرة (LLMs) في Open WebUI",
-  "description": "استخدم Open WebUI للدردشة مع نماذج اللغة الكبيرة (LLMs) محليًا.",
+  "title": "الدردشة مع نماذج اللغة الكبيرة (LLMs) في Open WebUI",
+  "description": "استخدم Open WebUI للدردشة مع نماذج اللغة الكبيرة محليًا.",
   "auto_translated": true
 }

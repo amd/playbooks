@@ -16,25 +16,27 @@ SPDX-License-Identifier: MIT
 
 ## Επισκόπηση
 
-Το λογισμικό AMD ROCm™ και το PyTorch stack δημιουργούν ένα ενοποιημένο οικοσύστημα για AI on-device. Λειτουργεί τόσο σε Windows όσο και σε Linux με επίσημη υποστήριξη για ένα ευρύ φάσμα συσκευών, συμπεριλαμβανομένων των Ryzen™ AI APUs και των Radeon™ GPUs.
+Το λογισμικό AMD ROCm™ και η στοίβα PyTorch δημιουργούν ένα ενοποιημένο οικοσύστημα για AI σε τοπική συσκευή. Λειτουργεί τόσο σε Windows όσο και σε Linux με επίσημη υποστήριξη για ένα ευρύ φάσμα συσκευών, συμπεριλαμβανομένων των Ryzen™ AI APU και των Radeon™ GPU.
 
-Αυτό το playbook θα σας διδάξει πώς να εκτελείτε μετάφραση ομιλίας-σε-ομιλία χαμηλής καθυστέρησης, εκφραστική και ιδιωτική, εξ ολοκλήρου στο edge.
+Αυτό το εγχειρίδιο θα σας διδάξει πώς να εκτελέσετε μετάφραση ομιλίας-σε-ομιλία με χαμηλή καθυστέρηση, εκφραστική και ιδιωτική, εξ ολοκλήρου στο edge.
 
 ## Τι θα μάθετε
 
 - Πώς να ρυθμίσετε το περιβάλλον speech-to-speech
-- Πώς να γράψετε κώδικα Python για να φορτώσετε και να χρησιμοποιήσετε μοντέλα speech-speech
+- Πώς να γράψετε κώδικα Python για τη φόρτωση και χρήση μοντέλων speech-to-speech
 - Πώς να εκτελέσετε και να πειραματιστείτε με το Gradio UI
 
 ## Γιατί να χρησιμοποιήσετε μετάφραση ομιλίας-σε-ομιλία σε πραγματικό χρόνο;
 
-- Εξαλείφει την τριβή μεταξύ μετάφρασης και γλωσσικών φραγμών
-- Μεταφέρει τόνο, συναίσθημα και πρόθεση χωρίς άβολες παύσεις
-- Επιτρέπει την παγκόσμια συνεργασία και την ταχύτερη λήψη αποφάσεων
+- Εξαλείφει την τριβή μεταξύ μετάφρασης και γλωσσικών εμποδίων
+- Μεταφέρει τόνο, συναίσθημα και πρόθεση χωρίς αμήχανες παύσεις
+- Επιτρέπει την παγκόσμια συνεργασία και τη ταχύτερη λήψη αποφάσεων
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Ρύθμιση της Διαμόρφωσης Μνήμης
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Έλεγχος για Ενημερώσεις Λογισμικού
@@ -43,15 +45,15 @@ SPDX-License-Identifier: MIT
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Εγκατάσταση Απαιτούμενου Λογισμικού
+## Εγκατάσταση Προαπαιτούμενων Λογισμικού
 
 ### Δημιουργία Εικονικού Περιβάλλοντος
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Σε Linux, ανοίξτε ένα τερματικό και εκτελέστε την ακόλουθη εντολή για να δημιουργήσετε ένα venv με ήδη εγκατεστημένα ROCm+Pytorch:
+Σε Linux, ανοίξτε ένα τερματικό και εκτελέστε την ακόλουθη εντολή για να δημιουργήσετε ένα venv με το ROCm+Pytorch ήδη εγκατεστημένο:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -63,7 +65,7 @@ source s2st-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Παραχωρήστε στον χρήστη σας πρόσβαση σε συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να ισχύσει αυτό):
+**Παραχωρήστε στον χρήστη σας πρόσβαση στις συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να τεθεί αυτό σε ισχύ):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -71,7 +73,7 @@ sudo usermod -aG render,video $LOGNAME
 
 Σε Linux, ανοίξτε ένα τερματικό και εκτελέστε την ακόλουθη εντολή για να δημιουργήσετε ένα venv:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -85,9 +87,9 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Σε Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv με ήδη εγκατεστημένα ROCm+Pytorch:
+Σε Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv με το ROCm+Pytorch ήδη εγκατεστημένο:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
@@ -95,7 +97,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell τους (π.χ.
+> **Συμβουλή**: Οι χρήστες Windows μπορεί να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell (π.χ.
 > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
@@ -103,7 +105,7 @@ s2st-env\Scripts\activate
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 Σε Windows, ανοίξτε ένα τερματικό στον κατάλογο της επιλογής σας και ακολουθήστε τις εντολές για να δημιουργήσετε ένα venv:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env
 s2st-env\Scripts\activate
@@ -111,7 +113,7 @@ s2st-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="s2st-env\Scripts\activate" -->
 
-> **Συμβουλή**: Οι χρήστες Windows ενδέχεται να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell τους (π.χ.
+> **Συμβουλή**: Οι χρήστες Windows μπορεί να χρειαστεί να τροποποιήσουν την Πολιτική Εκτέλεσης PowerShell (π.χ.
 > ρυθμίζοντάς την σε RemoteSigned ή Unrestricted) πριν εκτελέσουν ορισμένες εντολές Powershell.
 
 <!-- @device:end -->
@@ -127,10 +129,10 @@ s2st-env\Scripts\activate
 
 ### Πρόσθετες Εξαρτήσεις
 
-Εγκαταστήστε τις εξαρτήσεις m4t χρησιμοποιώντας pip:
+Εγκαταστήστε τις εξαρτήσεις m4t χρησιμοποιώντας το pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
 <!-- @test:end -->
 
@@ -204,17 +206,17 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 #### Μάθετε για το seamless-m4t-v2
 
-Δείτε το [model card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) στο Hugging Face για περισσότερες πληροφορίες.
-Αυτή είναι η τεχνική αρχιτεκτονική των μοντέλων speech-speech:
+Ανατρέξτε στην [κάρτα μοντέλου](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) στο Hugging Face για περισσότερες πληροφορίες.
+Αυτή είναι η τεχνική αρχιτεκτονική των μοντέλων speech-to-speech:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
 </p>
 
-#### Λήψη Scripts
+#### Λήψη Σεναρίων (Scripts)
 
-Αυτό το playbook περιλαμβάνει έτοιμα προς χρήση scripts. Παρακαλούμε κατεβάστε όλα στον ίδιο κατάλογο με το περιβάλλον που δημιουργήσατε.
+Αυτό το εγχειρίδιο περιλαμβάνει έτοιμα προς χρήση σενάρια. Παρακαλούμε κατεβάστε όλα τα σενάρια στον ίδιο κατάλογο με το περιβάλλον που δημιουργήσατε.
 
-| Script | Περιγραφή | Χρήση |
+| Σενάριο | Περιγραφή | Χρήση |
 |--------|-------------|-------|
 | [infer.py](assets/infer.py) | Βασική δημιουργία κειμένου LLM | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Παράδειγμα αρχείου ήχου | N/A |
@@ -224,11 +226,11 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 ### Ξεκινώντας με το infer.py
 
-Για να εκτελέσετε το script, τρέξτε 
+Για να εκτελέσετε το σενάριο, τρέξτε 
 ```bash
 python infer.py
 ```
-> **Σημείωση**: Ενδέχεται να δείτε κάποιες προειδοποιήσεις. Αυτό είναι αναμενόμενο.
+> **Σημείωση**: Ίσως δείτε κάποιες προειδοποιήσεις. Αυτό είναι αναμενόμενο.
  
   
 #### Επεξήγηση του Κώδικα
@@ -261,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Απόσπασμα 2: Φόρτωση των μοντέλων από το HuggingFace**
 
-Αυτή η συνάρτηση λαμβάνει ένα model ID και κατεβάζει το μοντέλο εάν δεν έχει ήδη κατέβει. Στη συνέχεια επιστρέφει τον processor και το μοντέλο για να τα χρησιμοποιήσει η επόμενη συνάρτηση.
+Αυτή η συνάρτηση δέχεται ένα ID μοντέλου και κατεβάζει το μοντέλο εάν δεν έχει ήδη κατέβει. Στη συνέχεια επιστρέφει τον επεξεργαστή και το μοντέλο για χρήση από την επόμενη συνάρτηση.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -282,7 +284,7 @@ def load_model(model_id: str, device: torch.device):
 
 **Απόσπασμα 3: Εισαγωγή αρχείου ήχου .wav και προεπεξεργασία του**
 
-Αυτή η συνάρτηση φορτώνει το αρχείο ήχου και το επαναδειγματοληπτεί στον στοχευόμενο ρυθμό.
+Αυτή η συνάρτηση φορτώνει το ηχητικό απόσπασμα και το επαναδειγματοληπτεί στον στοχευμένο ρυθμό.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -302,9 +304,9 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
     return audio
 ```
 
-**Απόσπασμα 4: Εκτέλεση συμπερασμού**
+**Απόσπασμα 4: Εκτέλεση συμπερασματολογίας**
 
-Αυτή η συνάρτηση εκτελεί συμπερασμό με το μοντέλο και επιστρέφει την παραγόμενη έξοδο.
+Αυτή η συνάρτηση εκτελεί συμπερασματολογία με το μοντέλο και επιστρέφει το παραγόμενο αποτέλεσμα.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -399,14 +401,14 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### Εκτέλεση της επίδειξης Gradio UI:
 
-Τώρα που εκτελέσατε ένα βασικό παράδειγμα script, οι ακόλουθες οδηγίες παρέχουν ένα χρήσιμο UI που βασίζεται στον κώδικα που γράψαμε και κάνει εύκολη τη ζωντανή μετάφραση speech-speech.
+Τώρα που έχετε εκτελέσει ένα βασικό παράδειγμα σεναρίου, οι ακόλουθες οδηγίες παρέχουν ένα χρήσιμο UI που βασίζεται στον κώδικα που έχουμε γράψει και διευκολύνει τη μετάφραση ομιλίας-σε-ομιλία σε πραγματικό χρόνο.
 
-#### Εκτέλεση του Gradio Τοπικά
+#### Εκτέλεση του Gradio τοπικά
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Στη συνέχεια, ανοίξτε το πρόγραμμα περιήγησής σας στο `http://127.0.0.1:7860` για να αποκτήσετε πρόσβαση στο UI.
+Στη συνέχεια, ανοίξτε το πρόγραμμα περιήγησης στο διαδίκτυο στη διεύθυνση `http://127.0.0.1:7860` για πρόσβαση στο UI.
 
 
 ### Παράδειγμα Gradio UI:
@@ -529,11 +531,11 @@ PY
 ## Επόμενα Βήματα
 
 - Συνδυάστε δεκάδες γλώσσες για γρήγορη μετάφραση.
-- Μοιραστείτε την επίδειξή σας με άλλους: Προσθέστε --share για να δημιουργήσετε έναν δημόσιο σύνδεσμο στον οποίο μπορεί να έχει πρόσβαση οποιοσδήποτε εξ αποστάσεως, ή αναπτύξτε μόνιμα χρησιμοποιώντας τα Hugging Face Spaces
+- Μοιραστείτε την επίδειξή σας με άλλους: Προσθέστε --share για να δημιουργήσετε έναν δημόσιο σύνδεσμο στον οποίο μπορεί να έχει πρόσβαση οποιοσδήποτε εξ αποστάσεως, ή αναπτύξτε την μόνιμα χρησιμοποιώντας τα Hugging Face Spaces
 
 ## Πόροι
 
 Παρακάτω θα βρείτε ορισμένους επιπλέον πόρους για να μάθετε περισσότερα σχετικά με τη μετάφραση ομιλίας-σε-ομιλία:  
-* Το repo βρίσκεται εδώ https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Το αποθετήριο βρίσκεται εδώ https://huggingface.co/facebook/seamless-m4t-v2-large 
 * Ακαδημαϊκή έρευνα σχετική με το "Seamless: Multilingual Expressive and Streaming Speech Translation"
-* Κοινή χρήση και ανάπτυξη Gradio: [Οδηγός Κοινής Χρήσης της Εφαρμογής σας](https://www.gradio.app/guides/sharing-your-app) και [Ανάπτυξη στα Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Κοινή χρήση και ανάπτυξη Gradio: [Οδηγός Κοινής Χρήσης της Εφαρμογής σας](https://www.gradio.app/guides/sharing-your-app) και [Ανάπτυξη στο Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

@@ -1,6 +1,6 @@
 {
   "id": "pytorch-kernels",
-  "title": "Izdelava kernelov po meri za GPU s PyTorch in AMD ROCm™",
-  "description": "Pišite in optimizirajte kernele GPU po meri z uporabo PyTorch in programske opreme AMD ROCm™",
+  "title": "Izdelava GPU jeder po meri s PyTorch in AMD ROCm™",
+  "description": "Pišite in optimizirajte kernele po meri za GPU s programsko opremo PyTorch in AMD ROCm™",
   "auto_translated": true
 }

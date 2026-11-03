@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "RyzenAI Halo 2台をRCCLでクラスタリング",
-  "description": "RCCLを使用した2台のRyzen™ AI Haloデバイスによるマルチノードクラスターのセットアップ(分散ワークロード向け)",
+  "title": "Ryzen™ AI Halo 2台をRCCLでクラスタリング",
+  "description": "RCCLを使用して2台のRyzen™ AI Haloデバイスでマルチノードクラスターをセットアップし、分散ワークロードに対応する",
   "auto_translated": true
 }

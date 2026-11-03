@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
-  "title": "Rozpoczynanie pracy z vLLM",
-  "description": "Dowiedz się, jak uruchamiać wnioskowanie i serwowanie przy użyciu skonteneryzowanego vLLM na zintegrowanym GPU",
+  "title": "Pierwsze kroki z vLLM",
+  "description": "Dowiedz się, jak uruchamiać wnioskowanie i serwowanie za pomocą skonteneryzowanego vLLM na zintegrowanej karcie graficznej (iGPU)",
   "auto_translated": true
 }

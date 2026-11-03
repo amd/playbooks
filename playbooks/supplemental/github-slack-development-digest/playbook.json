@@ -120,7 +120,7 @@
     ]
   },
   "difficulty": "advanced",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
@@ -153,5 +153,15 @@
       }
     }
   },
-  "primaryModel": "Qwen3.6-35B-A3B"
+  "primaryModel": "Qwen3.6-35B-A3B",
+  "authors": [
+    {
+      "name": "Graham Neubig",
+      "github": "neubig",
+      "github_url": "https://github.com/neubig",
+      "type": "community"
+    }
+  ],
+  "published_date": "2026-07-16",
+  "updated_date": "2026-10-26"
 }

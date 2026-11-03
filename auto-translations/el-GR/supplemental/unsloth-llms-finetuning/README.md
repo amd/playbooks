@@ -16,35 +16,35 @@ SPDX-License-Identifier: MIT
 
 ## Επισκόπηση
 
-Αυτό το playbook δείχνει πώς να κάνετε fine-tune ένα γλωσσικό μοντέλο τοπικά με το Unsloth σε υλικό AMD.
+Αυτό το playbook δείχνει πώς να πραγματοποιήσετε fine-tuning ενός γλωσσικού μοντέλου τοπικά με το Unsloth σε υλικό AMD.
 
-Χρησιμοποιεί ένα σύντομο παράδειγμα Supervised Fine-Tuning (SFT) με προσαρμογείς LoRA στο `unsloth/gemma-4-E4B-it`, χρησιμοποιώντας ένα υποσύνολο του dataset `mlabonne/FineTome-100k`. Ο στόχος είναι να σας δώσει μια απλή end-to-end ροή εργασίας που καλύπτει τη ρύθμιση, την εκπαίδευση, το inference και την αποθήκευση του αποτελέσματος του fine-tuning.
+Χρησιμοποιεί ένα σύντομο παράδειγμα Supervised Fine-Tuning (SFT) με προσαρμογείς LoRA στο `unsloth/gemma-4-E4B-it`, χρησιμοποιώντας ένα υποσύνολο του dataset `mlabonne/FineTome-100k`. Ο στόχος είναι να σας δώσει μια απλή end-to-end ροή εργασίας που καλύπτει τη ρύθμιση, την εκπαίδευση, το inference και την αποθήκευση του τελικού αποτελέσματος fine-tuning.
 
-Το παράδειγμα έχει σχεδιαστεί ώστε να είναι πρακτικό και εύκολο στην τροποποίηση, ώστε να μπορείτε να το χρησιμοποιήσετε ως σημείο εκκίνησης για τα δικά σας datasets και μοντέλα.
+Το παράδειγμα έχει σχεδιαστεί ώστε να είναι πρακτικό και εύκολο στην τροποποίηση, ώστε να μπορείτε να το χρησιμοποιήσετε ως αφετηρία για τα δικά σας datasets και μοντέλα.
 
-## Τι Θα Μάθετε
+## Τι θα μάθετε
 
 - Πώς να ρυθμίσετε το περιβάλλον Unsloth
-- Πώς να κάνετε fine-tune ένα LLM χρησιμοποιώντας SFT με το Unsloth
+- Πώς να κάνετε fine-tune ενός LLM χρησιμοποιώντας SFT με το Unsloth
 - Πώς να αποθηκεύσετε το αποτέλεσμα του fine-tuning σε τοπικό αποθηκευτικό χώρο
 
 <!-- @device:halo,stx,krk -->
-> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν τουλάχιστον **64 GB μνήμης συστήματος**, με τουλάχιστον **24 GB από αυτά διαθέσιμα στη GPU** (τα 24 GB αποτελούν μέρος των 64 GB, όχι επιπλέον αυτών).
+> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν τουλάχιστον **64 GB μνήμης συστήματος (RAM)**, με τουλάχιστον **24 GB από αυτά διαθέσιμα στην GPU** (τα 24 GB αποτελούν μέρος των 64 GB, όχι επιπλέον αυτών).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν τουλάχιστον **24 GB συνολικής μνήμης GPU** και **32 GB μνήμης συστήματος**.
-> - Στα Windows, η συνολική μνήμη GPU συνδυάζει την αποκλειστική VRAM της κάρτας γραφικών με τη διαμοιραζόμενη μνήμη GPU (δανεισμένη από τη μνήμη συστήματος).
-> - Επομένως, κάρτες με λιγότερα από 24 GB αποκλειστικής VRAM μπορούν και πάλι να εκτελέσουν αυτό το playbook χρησιμοποιώντας διαμοιραζόμενη μνήμη GPU για να καλύψουν τη διαφορά.
+> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν τουλάχιστον **24 GB συνολικής μνήμης GPU** και **32 GB μνήμης συστήματος (RAM)**.
+> - Στα Windows, η συνολική μνήμη GPU συνδυάζει την αποκλειστική VRAM της κάρτας γραφικών με κοινόχρηστη μνήμη GPU (η οποία δανείζεται από τη μνήμη συστήματος).
+> - Επομένως, κάρτες με λιγότερα από 24 GB αποκλειστικής VRAM μπορούν και πάλι να εκτελέσουν αυτό το playbook χρησιμοποιώντας κοινόχρηστη μνήμη GPU για να καλύψουν τη διαφορά.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν κάρτα γραφικών με τουλάχιστον **24 GB αποκλειστικής μνήμης GPU** και **32 GB μνήμης συστήματος**.
+> **Σημείωση:** Οι τεχνικές fine-tuning σε αυτό το playbook απαιτούν κάρτα γραφικών με τουλάχιστον **24 GB αποκλειστικής μνήμης GPU** και **32 GB μνήμης συστήματος (RAM)**.
 > - Στο Linux, η εκπαίδευση εκτελείται εξ ολοκλήρου στην αποκλειστική VRAM της κάρτας γραφικών.
-> - Δεν γίνεται επαναφορά σε διαμοιραζόμενη μνήμη GPU (μνήμη συστήματος) όταν εξαντλείται η VRAM.
-> - Κάρτες με λιγότερα από 24 GB αποκλειστικής VRAM θα εξαντλήσουν τη μνήμη κατά την εκπαίδευση στο Linux, ακόμα κι αν το σύστημα διαθέτει άφθονη RAM.
+> - Δεν γίνεται επαναφορά σε κοινόχρηστη μνήμη GPU (μνήμη συστήματος) όταν εξαντλείται η VRAM.
+> - Κάρτες με λιγότερα από 24 GB αποκλειστικής VRAM θα εξαντλήσουν τη μνήμη κατά τη διάρκεια της εκπαίδευσης στο Linux, ακόμα κι αν το σύστημα διαθέτει άφθονη RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -52,13 +52,15 @@ SPDX-License-Identifier: MIT
 
 Το Unsloth διευκολύνει την εκτέλεση fine-tuning LLM σε τοπικό υλικό, μειώνοντας τη χρήση μνήμης και επιταχύνοντας την εκπαίδευση σε σύγκριση με μια τυπική ρύθμιση.
 
-Σε αυτό το playbook, χρησιμοποιούμε το Unsloth μαζί με **LoRA-based SFT**. Αυτό σημαίνει ότι το βασικό μοντέλο παραμένει ως επί το πλείστον παγωμένο, ενώ εκπαιδεύεται ένα πολύ μικρότερο σύνολο βαρών προσαρμογέα. Αυτό ταιριάζει καλά με την τοπική ανάπτυξη, καθώς είναι πιο ελαφρύ από το πλήρες fine-tuning και πιο γρήγορο στην επανάληψη.
+Σε αυτό το playbook, χρησιμοποιούμε το Unsloth σε συνδυασμό με **SFT βασισμένο σε LoRA**. Αυτό σημαίνει ότι το βασικό μοντέλο παραμένει σε μεγάλο βαθμό αμετάβλητο (frozen), ενώ εκπαιδεύεται ένα πολύ μικρότερο σύνολο βαρών προσαρμογέα. Αυτό ταιριάζει καλά με την τοπική ανάπτυξη, καθώς είναι πιο ελαφρύ από το πλήρες fine-tuning και επιτρέπει γρηγορότερη επαναληπτική δοκιμή.
 
-Το Unsloth υποστηρίζει επίσης άλλες προσεγγίσεις εκπαίδευσης, συμπεριλαμβανομένων του QLoRA και ροών εργασίας ενισχυτικής μάθησης. Αυτό το playbook εστιάζει πρώτα στην απλούστερη διαδρομή: ένα μικρό παράδειγμα LoRA fine-tuning που οι χρήστες μπορούν να εκτελέσουν, να κατανοήσουν και να επεκτείνουν.
+Το Unsloth υποστηρίζει επίσης άλλες προσεγγίσεις εκπαίδευσης, συμπεριλαμβανομένων του QLoRA και ροών εργασίας ενισχυτικής μάθησης (reinforcement learning). Αυτό το playbook εστιάζει πρώτα στην απλούστερη διαδρομή: ένα μικρό παράδειγμα fine-tuning με LoRA που οι χρήστες μπορούν να εκτελέσουν, να κατανοήσουν και να επεκτείνουν.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Ρύθμιση της Διαμόρφωσης Μνήμης
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Έλεγχος για Ενημερώσεις Λογισμικού
@@ -69,11 +71,11 @@ SPDX-License-Identifier: MIT
 
 ## Εγκατάσταση Προαπαιτούμενων Λογισμικού
 
-### Δημιουργία Εικονικού Περιβάλλοντος
+### Δημιουργία Εικονικού Περιβάλλοντος (Virtual Environment)
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Ανοίξτε ένα τερματικό και δημιουργήστε ένα venv με το λογισμικό AMD ROCm™ και το PyTorch ήδη εγκατεστημένα:
+Ανοίξτε ένα τερματικό και δημιουργήστε ένα venv με το AMD ROCm™ software και το PyTorch ήδη εγκατεστημένα:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -85,14 +87,14 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Παραχωρήστε στον χρήστη σας πρόσβαση στις συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να ενεργοποιηθεί αυτό):
+**Παραχωρήστε στον χρήστη σας πρόσβαση σε συσκευές GPU** (αποσυνδεθείτε και συνδεθείτε ξανά για να ισχύσει αυτό):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 Ανοίξτε ένα τερματικό και δημιουργήστε ένα venv:
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -105,7 +107,7 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Σημείωση:** Απαιτείται η Python 3.13 για τα Windows.
+> **Σημείωση:** Απαιτείται Python 3.13 για Windows.
 
 <!-- @device:halo_box -->
 Ανοίξτε ένα τερματικό PowerShell και δημιουργήστε ένα εικονικό περιβάλλον:
@@ -131,7 +133,53 @@ python -m venv unsloth-env
 <!-- @os:end -->
 
 ### Εγκατάσταση Βασικών Εξαρτήσεων
-<!-- @require:pytorch,driver -->
+<!-- @require:driver -->
+
+> **Σημαντικό:** Το Unsloth δεν υποστηρίζει ακόμη την έκδοση PyTorch 2.13 που συνοδεύει το ROCm 10. Για αυτό το playbook, εγκαταστήστε **ROCm 7.14 με PyTorch 2.12** χρησιμοποιώντας τις παρακάτω εντολές. Μην χρησιμοποιήσετε τα πακέτα ROCm 10 / PyTorch 2.13.
+
+**Εγκαταστήστε το PyTorch με υποστήριξη AMD ROCm™ software** στο δημιουργημένο εικονικό περιβάλλον:
+
+<!-- @device:halo,halo_box -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1151]==2.12.0+rocm7.14.0" "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:stx -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1150]==2.12.0+rocm7.14.0" "torchvision[device-gfx1150]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:krk -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1152]==2.12.0+rocm7.14.0" "torchvision[device-gfx1152]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx7900xt -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1100]==2.12.0+rocm7.14.0" "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx9070xt,r9700 -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1201]==2.12.0+rocm7.14.0" "torchvision[device-gfx1201]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+Για άλλες συσκευές, ανατρέξτε στο [ROCm 7.14 Documentation](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) για πλήρεις οδηγίες.
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -162,16 +210,15 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
-pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
-pip install triton-windows
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton-windows
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Σημείωση:** Κατά τη διάρκεια της εισαγωγής, το Unsloth ενδέχεται να ελέγξει προαιρετικά μονοπάτια επιτάχυνσης `bitsandbytes`. Σε ορισμένες εκδόσεις ROCm, ενδέχεται να δείτε ένα μήνυμα όπως `bitsandbytes library load error: Configured ROCm binary not found`. Αυτό το playbook χρησιμοποιεί τυπικό LoRA fine-tuning με `optim="adamw_torch"`, οπότε δεν βασιζόμαστε στον βελτιστοποιητή `bitsandbytes` ή στο 4-bit QLoRA. Αυτό το μήνυμα μπορεί να αγνοηθεί με ασφάλεια.
+> **Σημείωση:** Κατά την εισαγωγή (import), το Unsloth ενδέχεται να ελέγξει προαιρετικές διαδρομές επιτάχυνσης του `bitsandbytes`. Σε ορισμένες εκδόσεις ROCm, ενδέχεται να δείτε ένα μήνυμα όπως `bitsandbytes library load error: Configured ROCm binary not found`. Αυτό το playbook χρησιμοποιεί τυπικό fine-tuning με LoRA με `optim="adamw_torch"`, επομένως δεν βασιζόμαστε στον βελτιστοποιητή `bitsandbytes` ή στο 4-bit QLoRA. Αυτό το μήνυμα μπορεί να αγνοηθεί με ασφάλεια.
 
 <!-- @os:windows -->
-> **Σημείωση:** Στα Windows ROCm, το Unsloth θα εκτυπώσει αρκετές προειδοποιήσεις κατά την εκκίνηση — δείτε [Γνωστές Προειδοποιήσεις](#known-warnings) παρακάτω. Όλες είναι ασφαλείς να αγνοηθούν· η εκπαίδευση λειτουργεί σωστά.
+> **Σημείωση:** Στα Windows ROCm, το Unsloth θα εμφανίσει αρκετές προειδοποιήσεις κατά την εκκίνηση — δείτε [Known Warnings](#known-warnings) παρακάτω. Όλες αυτές μπορούν να αγνοηθούν με ασφάλεια· η εκπαίδευση λειτουργεί σωστά.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -194,7 +241,7 @@ print("PASS: All required imports succeeded")
 ```
 <!-- @test:end -->
 
-## Λήψη του Script Fine-Tuning του Unsloth
+## Λήψη του Script Fine-Tuning για Unsloth
 
 Αντί να εκτελέσετε χειροκίνητα κάθε βήμα, αυτό το playbook παρέχει ένα καθαρό, end-to-end script εδώ: [test_unsloth.py](assets/test_unsloth.py).
 
@@ -231,18 +278,17 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-Το υπόλοιπο του playbook θα εξετάσει εννοιολογικά κάθε κύριο βήμα του script. 
+Το υπόλοιπο του playbook θα καλύψει εννοιολογικά κάθε βασικό βήμα του script.
 
 ## Πώς Λειτουργεί
 
-Το script test_unsloth.py εκτελεί τα ακόλουθα βήματα:
+Το script test_unsloth.py εκτελεί τα εξής βήματα:
 * **Φόρτωση Μοντέλου**: Φορτώνει το unsloth/gemma-4-E4B-it χρησιμοποιώντας το FastModel.
-* **Προετοιμασία Δεδομένων**: Τυποποιεί το dataset (π.χ., FineTome-100k) και εφαρμόζει το πρότυπο συνομιλίας Gemma-4.
-* **Εφαρμογή LoRA**: Προσθέτει προσαρμογείς στις μονάδες γλώσσας, προσοχής και MLP για αποδοτική εκπαίδευση.
-* **Εκπαίδευση**: Χρησιμοποιεί το SFTTrainer με masking απώλειας μόνο για την απάντηση.
-* **Inference**: Εκτελεί μια γρήγορη δοκιμή παραγωγής για την επαλήθευση της απόδοσης.
+* **Προετοιμασία Δεδομένων**: Τυποποιεί το dataset (π.χ. FineTome-100k) και εφαρμόζει το πρότυπο συνομιλίας (chat template) του Gemma-4.
+* **Εφαρμογή LoRA**: Προσθέτει προσαρμογείς στις μονάδες γλώσσας, προσοχής (attention) και MLP για αποδοτική εκπαίδευση.
+* **Εκπαίδευση**: Χρησιμοποιεί το SFTTrainer με masking απώλειας μόνο στην απάντηση (response-only loss masking).
+* **Inference**: Εκτελεί μια γρήγορη δοκιμή παραγωγής για να επαληθεύσει την απόδοση.
 * **Αποθήκευση**: Εξάγει τους προσαρμογείς LoRA τοπικά.
-
 ## Βασική Διαμόρφωση
 
 Μπορείτε να τροποποιήσετε τις παρακάτω σταθερές για να προσαρμόσετε την εκτέλεσή σας:
@@ -254,37 +300,38 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-Παράδειγμα του μηνύματος καλωσορίσματος του Unsloth και εξόδου κατά τη φόρτωση των βαρών του μοντέλου:
+Παράδειγμα του μηνύματος υποδοχής του Unsloth και της εξόδου κατά τη φόρτωση των βαρών του μοντέλου:
 
 ![alt text](assets/welcome.png)
 
-## Προετοιμασία Dataset
+## Προετοιμασία Συνόλου Δεδομένων
 
 Χρησιμοποιούμε ένα υποσύνολο του:
 ```text
 mlabonne/FineTome-100k
 ```
-Το dataset είναι: 
-* Μετατρέπεται σε μορφή συνομιλίας
+Το σύνολο δεδομένων:
+* Μετατρέπεται σε μορφή chat
 * Επεξεργάζεται χρησιμοποιώντας το πρότυπο συνομιλίας Gemma-4
 * Καθαρίζεται για την αφαίρεση διπλότυπων tokens BOS
 
 ## Εκπαίδευση του Μοντέλου
 
-Το script εκτελεί μια σύντομη επίδειξη εκπαίδευσης, με τις παρακάτω παραμέτρους:
+Το script εκτελεί μια σύντομη επίδειξη εκπαίδευσης, με τις εξής παραμέτρους:
 - ~50 βήματα
 - Μικρό μέγεθος batch
 - Συσσώρευση κλίσης (gradient accumulation)
 
-Κατά τη διάρκεια της εκπαίδευσης, θα δείτε logs όπως:
+Κατά τη διάρκεια της εκπαίδευσης, θα δείτε καταγραφές όπως:
 
 ![alt text](assets/training.png)
 
 
 ## Αποθήκευση και Ανάπτυξη
-### Τοπική αποθήκευση (LoRA)
 
-Το σενάριο αποθηκεύει αυτόματα τους προσαρμογείς LoRA στο OUTPUT_DIR.
+### Τοπική Αποθήκευση (LoRA)
+
+Το script αποθηκεύει αυτόματα τους προσαρμογείς LoRA στο OUTPUT_DIR.
 ```python
 model.save_pretrained("gemma_4_lora")  
 tokenizer.save_pretrained("gemma_4_lora")
@@ -326,7 +373,7 @@ print(f"Found adapter weights: {adapter_weights}")
 ### Αποθήκευση συγχωνευμένου μοντέλου (για vLLM) 
 
 <!-- @os:windows -->
-> **Σημείωση:** Το vLLM δεν υποστηρίζει Windows. Για να αναπτύξετε το βελτιστοποιημένο σας μοντέλο σε Windows, χρησιμοποιήστε το llama.cpp (βλ. [Εξαγωγή GGUF](#export-gguf-for-llamacpp) παρακάτω) ή μεταφέρετε το συγχωνευμένο μοντέλο σε μηχάνημα Linux που εκτελεί vLLM.
+> **Σημείωση:** Το vLLM δεν υποστηρίζει Windows. Για να αναπτύξετε το προσαρμοσμένο σας μοντέλο σε Windows, χρησιμοποιήστε το llama.cpp (δείτε [Εξαγωγή GGUF](#export-gguf-for-llamacpp) παρακάτω) ή μεταφέρετε το συγχωνευμένο μοντέλο σε μηχάνημα Linux που εκτελεί vLLM.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -370,39 +417,39 @@ print("PASS: Merged model output looks correct")
 
 ### Εξαγωγή GGUF (για llama.cpp)
 
-Μετατροπή απευθείας σε GGUF για τοπική εξαγωγή συμπερασμάτων:
+Μετατρέψτε απευθείας σε GGUF για τοπική εξαγωγή συμπερασμάτων:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
 <!-- @os:windows -->
-## Γνωστές προειδοποιήσεις
+## Γνωστές Προειδοποιήσεις
 
-Αυτές οι προειδοποιήσεις εκτυπώνονται από το Unsloth κατά την εκκίνηση σε Windows ROCm και είναι όλες ασφαλείς για αγνόηση:
+Αυτές οι προειδοποιήσεις εκτυπώνονται από το Unsloth κατά την εκκίνηση σε Windows ROCm και είναι όλες ασφαλείς να αγνοηθούν:
 
-| Προειδοποίηση | Αιτία | Ασφαλής για αγνόηση; |
+| Προειδοποίηση | Αιτία | Ασφαλής αγνόηση; |
 |---|---|---|
-| `bitsandbytes library load error` | Το bitsandbytes δεν διαθέτει build για Windows ROCm | Ναι — αυτό το playbook χρησιμοποιεί το `adamw_torch`, όχι το bnb |
-| `No ROCm platform found for torch.distributed` | Το ROCm σε Windows δεν υποστηρίζει κατανεμημένη εκπαίδευση | Ναι — η εκπαίδευση με μία GPU δεν επηρεάζεται |
-| `Unsloth: WARNING! You are using an unsupported platform` | Το Unsloth επισημαίνει builds εκτός Linux | Ναι — το Windows ROCm λειτουργεί για SFT με μία GPU |
-| `triton is not available` | Το Triton δεν διαθέτει build για Windows | Ναι — το Unsloth επιστρέφει σε πυρήνες PyTorch |
+| `bitsandbytes library load error` | Το bitsandbytes δεν έχει build για Windows ROCm | Ναι — αυτό το playbook χρησιμοποιεί `adamw_torch`, όχι bnb |
+| `No ROCm platform found for torch.distributed` | Το ROCm σε Windows δεν έχει κατανεμημένη εκπαίδευση | Ναι — η εκπαίδευση με μονό GPU δεν επηρεάζεται |
+| `Unsloth: WARNING! You are using an unsupported platform` | Το Unsloth επισημαίνει build που δεν είναι Linux | Ναι — το Windows ROCm λειτουργεί για SFT με μονό GPU |
+| `triton is not available` | Το Triton δεν έχει build για Windows | Ναι — το Unsloth επιστρέφει σε πυρήνες PyTorch |
 
-Η εκπαίδευση θα προχωρήσει κανονικά παρά αυτές τις προειδοποιήσεις.
+Η εκπαίδευση θα προχωρήσει σωστά παρά αυτές τις προειδοποιήσεις.
 <!-- @os:end -->
 
-## Επόμενα βήματα
+## Επόμενα Βήματα
 - Δοκιμάστε το [Unsloth Studio](https://unsloth.ai/docs/new/studio), ένα διαισθητικό GUI για το Unsloth
 - Εκπαιδεύστε στα δικά σας συγκεκριμένα σύνολα δεδομένων
-- Δοκιμάστε βελτιστοποίηση με διαφορετικές υπερπαραμέτρους
+- Δοκιμάστε το finetuning με διαφορετικές υπερπαραμέτρους
 - Αναπτύξτε με vLLM ή llama.cpp
 - Δοκιμάστε το QLoRA για μια ρύθμιση με χαμηλότερη χρήση μνήμης
 
 ## Πόροι
 
-Παρακάτω θα βρείτε ορισμένους επιπλέον πόρους για να μάθετε περισσότερα σχετικά με το Unsloth και τη βελτιστοποίηση:
+Παρακάτω παρατίθενται ορισμένοι επιπλέον πόροι για να μάθετε περισσότερα σχετικά με το Unsloth και το finetuning:
 
 * [Τεκμηρίωση Unsloth](https://docs.unsloth.ai)
 
 * [Unsloth GitHub](https://github.com/unslothai/unsloth)
 
-* [Οδηγός βελτιστοποίησης Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [Οδηγός Fine-tuning του Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

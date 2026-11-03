@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-A GAIA az AMD nyílt forráskódú keretrendszere olyan AI-ügynökök készítéséhez, amelyek helyben, AMD hardveren futnak Ryzen AI gyorsítással.
+GAIA az AMD nyílt forráskódú keretrendszere olyan AI-ügynökök létrehozásához, amelyek helyben futnak AMD hardveren, Ryzen AI gyorsítással.
 
 #### A GAIA telepítése
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
+1. Windows esetén nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. Linux esetén nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat a venv létrehozásához.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. Windows rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
+1. Windows esetén nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat a venv létrehozásához.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. Linux rendszeren nyisson meg egy terminált a kívánt könyvtárban, majd kövesse a parancsokat a venv létrehozásához.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. Linux esetén nyisson meg egy terminált a kívánt könyvtárban, és kövesse a parancsokat a venv létrehozásához.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -281,12 +281,12 @@ fi
 
 #### A telepítés ellenőrzése
 
-Ellenőrizze, hogy a GAIA v0.16.2 vagy újabb verziója van-e telepítve:
+Ellenőrizze, hogy a GAIA v0.16.2 vagy újabb verziója van telepítve:
 
 ```bash
 gaia --version
 ```
 
-> **Fontos**: A GAIA használata előtt győződjön meg róla, hogy a Lemonade Server fut. A GAIA-nak manuálisan elindított Lemonade Serverre van szüksége.
+> **Fontos**: Győződjön meg róla, hogy a Lemonade Server fut, mielőtt a GAIA-t használná. A GAIA-hoz manuálisan el kell indítani a Lemonade Servert.
 
 További információért lásd a [GAIA dokumentációját](https://amd-gaia.ai).

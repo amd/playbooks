@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA — це фреймворк AMD з відкритим кодом для створення AI-агентів, які працюють локально на обладнанні AMD з прискоренням Ryzen AI.
+GAIA — це відкритий фреймворк AMD для створення AI-агентів, які працюють локально на апаратному забезпеченні AMD з прискоренням Ryzen AI.
 
 #### Встановлення GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. У Windows відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
+1. У Windows відкрийте термінал у потрібному каталозі та виконайте наведені команди, щоб створити venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. У Linux відкрийте термінал у потрібному каталозі та виконайте наведені команди, щоб створити venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. У Windows відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
+1. У Windows відкрийте термінал у потрібному каталозі та виконайте наведені команди, щоб створити venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. У Linux відкрийте термінал у потрібному каталозі та виконайте команди для створення venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. У Linux відкрийте термінал у потрібному каталозі та виконайте наведені команди, щоб створити venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -287,6 +287,6 @@ fi
 gaia --version
 ```
 
-> **Важливо**: перед використанням GAIA переконайтеся, що Lemonade Server запущено. GAIA вимагає, щоб Lemonade Server було запущено вручну.
+> **Важливо**: переконайтеся, що Lemonade Server запущено, перед тим як використовувати GAIA. GAIA вимагає, щоб Lemonade Server було запущено вручну.
 
-Додаткову інформацію див. у [документації GAIA](https://amd-gaia.ai).
+Додаткову інформацію можна знайти в [документації GAIA](https://amd-gaia.ai).

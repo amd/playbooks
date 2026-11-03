@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### Driver AMD GPU
 
-Instalați driverul AMD GPU (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dvs., consultați [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Instalați driverul AMD GPU (amdgpu) folosind fluxul Radeon Software for Linux (RSL). Pentru instrucțiuni specifice distribuției dvs., consultați instalarea ROCm la: [Install the kernel driver](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install). 
+
+Pentru driverul propriu-zis, consultați [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

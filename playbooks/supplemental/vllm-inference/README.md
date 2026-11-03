@@ -74,6 +74,7 @@ python3 -m venv vllm-env
 source vllm-env/bin/activate
 ```
 <!-- @device:end -->
+<!-- @os:end -->
 
 Install the OpenAI package
 ```bash

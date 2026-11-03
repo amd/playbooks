@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA je AMD-jevo odprtokodno ogrodje za izdelavo agentov umetne inteligence, ki se izvajajo lokalno na strojni opremi AMD s pospeševanjem Ryzen AI.
+GAIA je AMD-jevo odprtokodno ogrodje za izdelavo agentov umetne inteligence, ki se izvajajo lokalno na AMD strojni opremi s pospeševanjem Ryzen AI.
 
-#### Namestitev GAIA
+#### Nameščanje GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+1. V okolju Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. V okolju Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. V sistemu Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+1. V okolju Windows odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. V sistemu Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. V okolju Linux odprite terminal v mapi po vaši izbiri in sledite ukazom za ustvarjanje venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -281,12 +281,12 @@ fi
 
 #### Preverjanje namestitve
 
-Preverite, ali je nameščena GAIA različica 0.16.2 ali novejša:
+Preverite, ali je nameščena različica GAIA v0.16.2 ali novejša:
 
 ```bash
 gaia --version
 ```
 
-> **Pomembno**: Pred uporabo GAIA se prepričajte, da je Lemonade Server zagnan. GAIA zahteva, da je Lemonade Server zagnan ročno.
+> **Pomembno**: Pred uporabo GAIA se prepričajte, da je Lemonade Server zagnan. GAIA zahteva, da se Lemonade Server zažene ročno.
 
 Za več informacij glejte [dokumentacijo GAIA](https://amd-gaia.ai).

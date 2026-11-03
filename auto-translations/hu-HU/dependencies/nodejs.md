@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-A Node.js 22.22.1 LTS az ajánlott verzió ehhez a platformhoz.
-
 <!-- @os:windows -->
 
-1. Töltsd le a Windows 64-bit telepítőt innen: [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Töltsd le a Windows 64-bites telepítőt a [nodejs.org](https://nodejs.org/en/download/) oldalról
 2. Futtasd a telepítőt, és kövesd az utasításokat
 3. Ellenőrizd a telepítést:
 ```cmd
@@ -38,4 +36,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Megjegyzés**: További telepítési lehetőségekért és platformokért lásd: [Node.js Downloads](https://nodejs.org/en/download/).
+> **Megjegyzés**: A további telepítési lehetőségekért és platformokért lásd a [Node.js letöltések](https://nodejs.org/en/download/) oldalt.

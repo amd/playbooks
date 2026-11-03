@@ -6,13 +6,13 @@ SPDX-License-Identifier: MIT
 
 ### GAIA
 
-GAIA to opracowana przez AMD platforma open source do budowania agentów AI działających lokalnie na sprzęcie AMD z akceleracją Ryzen AI.
+GAIA to opracowana przez AMD platforma open-source do budowania agentów AI działających lokalnie na sprzęcie AMD z akceleracją Ryzen AI.
 
 #### Instalowanie GAIA
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
+1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-halo-box-windows timeout=60 -->
 ```bash
 python -m venv gaia-env --system-site-packages
@@ -30,8 +30,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
-<!-- @test:id=create-venv-halo-box-linux timeout=60 -->
+1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj polecenia, aby utworzyć środowisko venv.
+<!-- @test:id=create-venv-halo-box-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -53,7 +53,7 @@ pip install amd-gaia
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
+1. W systemie Windows otwórz terminal w wybranym katalogu i wykonaj polecenia, aby utworzyć środowisko venv.
 <!-- @test:id=create-venv-windows timeout=60 -->
 ```bash
 python -m venv gaia-env
@@ -71,8 +71,8 @@ pip install amd-gaia
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj poniższe polecenia, aby utworzyć środowisko venv.
-<!-- @test:id=create-venv-linux timeout=60 -->
+1. W systemie Linux otwórz terminal w wybranym katalogu i wykonaj polecenia, aby utworzyć środowisko venv.
+<!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -99,7 +99,7 @@ Po instalacji uruchom `gaia init`, aby skonfigurować Lemonade Server i pobrać 
 gaia init
 ```
 
-Powoduje to zainstalowanie Lemonade Server, pobranie domyślnych modeli oraz weryfikację konfiguracji.
+To polecenie instaluje Lemonade Server, pobiera domyślne modele i weryfikuje konfigurację.
 
 <!-- @os:linux -->
 <!-- @test:id=verify-lspci-linux timeout=120 hidden=True -->
@@ -287,6 +287,6 @@ Sprawdź, czy zainstalowana jest wersja GAIA v0.16.2 lub nowsza:
 gaia --version
 ```
 
-> **Ważne**: Przed rozpoczęciem korzystania z GAIA upewnij się, że Lemonade Server jest uruchomiony. GAIA wymaga ręcznego uruchomienia Lemonade Server.
+> **Ważne**: Upewnij się, że Lemonade Server jest uruchomiony przed użyciem GAIA. GAIA wymaga ręcznego uruchomienia Lemonade Server.
 
-Więcej informacji można znaleźć w [dokumentacji GAIA](https://amd-gaia.ai).
+Więcej informacji znajduje się w [dokumentacji GAIA](https://amd-gaia.ai).
