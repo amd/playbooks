@@ -44,9 +44,7 @@ Supported test attributes:
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
     - hidden: true/false - if true, hides the code block from the website (default: false)
     - setup: Shell commands to run before the test script (e.g. venv activation).
-             For Python tests, wraps execution in a shell that runs the setup first:
-                 setup="source llm-env/bin/activate"  →  bash -c "source llm-env/bin/activate && python <script>"
-             For shell tests, the setup commands are prepended to the script body.
+             If the setup fails, the test stops with "setup failed" (see below).
 
 Setup attribute:
     The `setup` attribute lets you specify shell commands (e.g. venv activation)
@@ -60,10 +58,22 @@ Setup attribute:
         ```
         <!-- @test:end -->
 
-    The runner expands this to: `bash -c "source llm-env/bin/activate && python test_verify-imports.py"`
-    On Windows, it uses PowerShell instead of bash.
+    The setup runs in the same shell session as the test, before it:
 
-    For shell-based tests, the setup commands are prepended to the script body.
+    - Linux (bash, Python and other tests): bash runs the setup under set -e,
+      checks its final status, then runs the test. Any failing setup command,
+      including a failed guard such as `[ -d env ] && source env/bin/activate`,
+      stops the test. Keep setups to plain commands: set -e does not see failures
+      inside if conditions or functions called from them, and the setup must not
+      rely on setting errexit or an EXIT trap, which the runner resets before the
+      test body.
+    - Windows, PowerShell tests: the setup runs in try/catch with
+      $ErrorActionPreference = 'Stop', so a failing cmdlet, a missing or blocked
+      script (Activate.ps1) or a native command with a nonzero exit stops the test,
+      with the error message. On Windows PowerShell 5.1 only the last native exit
+      code is checked.
+    - Windows, all other tests (cmd, bash, Python, ...): cmd.exe chains the setup
+      and the test's commands with &&, so the first failing command stops the test.
 
 Reusable setup definitions (@setup):
     Instead of repeating raw shell commands in every test's `setup` attribute,
@@ -923,9 +933,16 @@ def bash_with_setup(setup: str, body: str) -> str:
 
     A failed setup (e.g. a venv an earlier, skipped step never created) must not let
     the test run on system Python. set -e is ignored on the left of ``||``, so the
-    setup runs at top level under set -e, with an EXIT trap that reports the failure."""
+    setup runs at top level under set -e, with an EXIT trap that reports the failure.
+    set -e also ignores a failure before the last command of an ``&&`` list, so the
+    setup's final status is checked as well (``[ -d env ] && source env/bin/activate``).
+    Neither catches every failure inside arbitrary shell logic (e.g. in an ``if``
+    condition or a function called from one); keep setups to plain commands.
+
+    The wrapper owns errexit and the EXIT trap: it turns errexit off and clears the
+    EXIT trap before the body, so a setup must not rely on setting either."""
     return (f"trap 'echo \"setup failed\" >&2; exit 1' EXIT\nset -e\n{setup}\n"
-            f"set +e\ntrap - EXIT\n{body}")
+            f"[ $? -eq 0 ]\nset +e\ntrap - EXIT\n{body}")
 
 
 def powershell_with_setup(setup: str, body: str) -> str:
@@ -938,8 +955,11 @@ def powershell_with_setup(setup: str, body: str) -> str:
     # same setup goes unnoticed; split such setups or run them on PowerShell 7.
     # The error is printed from runtime values, never by splicing the setup text
     # into a string literal, where its quotes would break the parse.
+    # $LASTEXITCODE is reset first so a value left by the profile or an earlier
+    # command cannot fail a setup that runs no native command.
     return ("$__eap = $ErrorActionPreference; $__nat = $PSNativeCommandUseErrorActionPreference\n"
             "$ErrorActionPreference = 'Stop'; $PSNativeCommandUseErrorActionPreference = $true\n"
+            "$global:LASTEXITCODE = 0\n"
             f"try {{\n{setup}\n}} catch {{\n"
             "    [Console]::Error.WriteLine(\"setup failed: $($_.Exception.Message)\")\n"
             "    [Console]::Error.WriteLine($_.InvocationInfo.PositionMessage); exit 1\n}\n"
