@@ -1,6 +1,6 @@
 {
   "id": "zenith-getting-started",
-  "title": "Getting Started with Your Windows Ryzen AI Halo",
+  "title": "Getting Started with Your Ryzen AI Halo (Project Zenith)",
   "description": "Tour the preinstalled AI stack and developer tooling on your Windows Ryzen AI Halo, then connect the Zenith agent tools to a local model served by Lemonade.",
   "time": 30,
   "supported_platforms": {
@@ -37,7 +37,7 @@
     "inference",
     "agents"
   ],
-  "coverImage": "../../dependencies/assets/multi_modality.png",
+  "coverImage": "/assets/cover_image_zenith.png",
   "recommendedSystemMemory": 64,
   "authors": [
     {
