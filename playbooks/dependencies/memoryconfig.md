@@ -14,9 +14,6 @@ Download and install the latest **AMD Software: Adrenalin Edition** from
 > it, launch it manually from
 > `C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe`.
 
-<!-- CI-only presence check: confirm Adrenalin is installed at the documented
-     path. Hidden from the website; non-failing so a runner without Adrenalin
-     does not block unrelated playbooks. -->
 <!-- @test:id=adrenalin-installed-windows timeout=60 hidden=True continue_on_error=true -->
 ```powershell
 if (Test-Path "C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe") {
