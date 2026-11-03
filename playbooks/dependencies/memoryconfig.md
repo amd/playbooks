@@ -30,9 +30,6 @@ if (Test-Path "C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe") {
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- CI-only presence check: there is no Adrenalin on Linux, so confirm the GPU
-     is reachable via ROCm instead. Hidden from the website; non-failing. -->
-<!-- @test:id=gpu-visible-linux timeout=60 hidden=True continue_on_error=true -->
 ```bash
 if command -v rocminfo >/dev/null 2>&1 && rocminfo | grep -q gfx; then
   echo "OK: GPU visible to ROCm"
