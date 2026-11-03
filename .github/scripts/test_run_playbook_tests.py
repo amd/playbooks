@@ -134,6 +134,19 @@ class SetupFailureTest(unittest.TestCase):
                 self.assertNotIn("test body ran", result.stdout)
                 self.assertIn("setup failed", result.stderr)
 
+    def test_a_real_venv_activation_passes_under_set_e(self):
+        """Every bash setup in the playbooks is `source <venv>/bin/activate`."""
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "assets").mkdir()  # tests run in the playbook's assets folder
+            subprocess.run([sys.executable, "-m", "venv", "env"], cwd=Path(d) / "assets", check=True)
+            test = rpt.TestBlock(id="uses-venv", timeout=30, setup="source env/bin/activate",
+                                 code='echo "test body ran in $VIRTUAL_ENV"')
+            with contextlib.redirect_stdout(io.StringIO()):
+                result = rpt.run_test(test, Path(d), Path(d))
+        self.assertTrue(result.success, result.stderr)
+        self.assertIn("test body ran in ", result.stdout)
+        self.assertIn("env", result.stdout.split("test body ran in ", 1)[1])
+
     def test_a_working_setup_still_runs_the_test(self):
         result = self.run_block("export SETUP_OK=1", code='false; echo "test body ran $SETUP_OK"')
         self.assertTrue(result.success, result.stderr)  # set -e does not leak into the body
@@ -147,6 +160,7 @@ POWERSHELL = shutil.which("powershell") or shutil.which("pwsh")
 class PowerShellSetupFailureTest(unittest.TestCase):
     BODY = "Get-Item missing-file 2>$null; Write-Output \"test body ran $env:VIRTUAL_ENV\""
     NATIVE_FAIL = "cmd /c exit 3" if sys.platform == "win32" else "sh -c 'exit 3'"
+    NATIVE_STDERR_OK = 'cmd /c "echo harmless 1>&2"' if sys.platform == "win32" else "sh -c 'echo harmless >&2'"
 
     def run_setup(self, setup, cwd, *flags):
         script = rpt.powershell_with_setup(setup, self.BODY)
@@ -173,6 +187,19 @@ class PowerShellSetupFailureTest(unittest.TestCase):
                 self.assertNotEqual(proc.returncode, 0)
                 self.assertNotIn("test body ran", proc.stdout)
                 self.assertIn("setup failed", proc.stderr)
+
+    def test_the_setup_error_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            proc = self.run_setup("Get-Item \"it's-missing\"", d)  # quotes must not break the script
+        self.assertIn("setup failed: ", proc.stderr)
+        self.assertIn("it's-missing", proc.stderr)
+
+    def test_a_native_command_writing_to_stderr_but_succeeding_passes(self):
+        """Windows PowerShell 5.1 may turn native stderr into an error record under Stop."""
+        with tempfile.TemporaryDirectory() as d:
+            proc = self.run_setup(self.NATIVE_STDERR_OK, d)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("test body ran", proc.stdout)
 
     @unittest.skipUnless(sys.platform == "win32", "execution policy is enforced on Windows only")
     def test_an_activation_blocked_by_execution_policy_stops_the_test(self):

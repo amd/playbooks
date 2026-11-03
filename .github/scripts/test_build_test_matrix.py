@@ -207,9 +207,10 @@ class FixtureCase(unittest.TestCase):
         meta = json.loads(pj.read_text())
         meta["tested_platforms"] = {f"dev{i}": ["linux", "windows"] for i in range(200)}
         pj.write_text(json.dumps(meta, indent=2))
-        (self.fx / ".github" / "runners.json").write_text(json.dumps(  # runnable devices only count
-            [{"name": f"dev{i}-{o}", "os": o, "group": f"dev{i}", "labels": []}
-             for i in range(200) for o in ("Linux", "Windows")]))
+        runners = self.fx / ".github" / "runners.json"  # runnable devices only count
+        runners.write_text(json.dumps(json.loads(runners.read_text()) + [
+            {"name": f"dev{i}-{o}", "os": o, "group": f"dev{i}", "labels": []}
+            for i in range(200) for o in ("Linux", "Windows")]))
         proc = subprocess.run(
             [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
              "--github-output", os.devnull],
@@ -257,6 +258,35 @@ class FixtureCase(unittest.TestCase):
         git("commit", "-qm", f"{plat}/{dev} has no runner yet", cwd=self.fx)
         runners.write_text(fleet)
         self.assertIn((plat, dev), {(e["platform"], e["arch"]) for e in select(self.fx)})
+
+    def build_all(self):
+        return subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
+             "--github-output", os.devnull], cwd=self.fx, capture_output=True, text=True)
+
+    def require(self, device):
+        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
+        meta = json.loads(pj.read_text())
+        meta["tested_platforms"][device] = ["linux"]
+        meta.setdefault("required_platforms", {})[device] = ["linux"]
+        pj.write_text(json.dumps(meta, indent=2))
+
+    def test_a_required_entry_whose_runner_vanished_fails(self):
+        """An accidental catalog removal must not shrink required coverage silently."""
+        dev = next(e["arch"] for e in select_all(self.fx) if e["platform"] == "linux")
+        self.require(dev)
+        runners = self.fx / ".github" / "runners.json"
+        runners.write_text(json.dumps([r for r in json.loads(runners.read_text())
+                                       if (r["group"], r["os"].lower()) != (dev, "linux")]))
+        proc = self.build_all()
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn(f"linux/{dev}", proc.stderr)
+
+    def test_a_required_orchestrai_only_entry_is_left_out(self):
+        self.require("grgh")
+        proc = self.build_all()
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertNotIn("grgh", {e["arch"] for e in json.loads(proc.stdout)})
 
     def test_runner_group_matches_the_device_regardless_of_case(self):
         pb = self.add_tested_device("mixedcase")

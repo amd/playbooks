@@ -936,11 +936,14 @@ def powershell_with_setup(setup: str, body: str) -> str:
     on PowerShell 7.3+ and by $LASTEXITCODE on Windows PowerShell 5.1."""
     # ponytail: on 5.1 a failing native command followed by a succeeding one in the
     # same setup goes unnoticed; split such setups or run them on PowerShell 7.
-    fail = "{ [Console]::Error.WriteLine('setup failed'); exit 1 }"
+    # The error is printed from runtime values, never by splicing the setup text
+    # into a string literal, where its quotes would break the parse.
     return ("$__eap = $ErrorActionPreference; $__nat = $PSNativeCommandUseErrorActionPreference\n"
             "$ErrorActionPreference = 'Stop'; $PSNativeCommandUseErrorActionPreference = $true\n"
-            f"try {{\n{setup}\n}} catch {fail}\n"
-            f"if ($LASTEXITCODE) {fail}\n"
+            f"try {{\n{setup}\n}} catch {{\n"
+            "    [Console]::Error.WriteLine(\"setup failed: $($_.Exception.Message)\")\n"
+            "    [Console]::Error.WriteLine($_.InvocationInfo.PositionMessage); exit 1\n}\n"
+            "if ($LASTEXITCODE) { [Console]::Error.WriteLine(\"setup failed: exit code $LASTEXITCODE\"); exit 1 }\n"
             "$ErrorActionPreference = $__eap; $PSNativeCommandUseErrorActionPreference = $__nat\n"
             f"{body}")
 
