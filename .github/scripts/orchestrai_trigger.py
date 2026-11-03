@@ -33,6 +33,7 @@ Outputs:
     playbook_repo, playbook_sha -> $GITHUB_OUTPUT   (what every batch tests)
     --dry-run prints each plan/builds payload and starts nothing.
     --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
+    --run-status (RUN_ID env): status -> $GITHUB_OUTPUT, before a retry
 """
 
 import argparse
@@ -615,13 +616,39 @@ def await_build_main(config_path):
             f.write(f"build_url={url}\n")
 
 
+def run_status_main():
+    """--run-status: the Control Plane's status for one run (RUN_ID), written as
+    status=<status> to $GITHUB_OUTPUT: never_started without a run, nothing when
+    it cannot be read. A retry needs the first run to have ended, or two runs of
+    the same playbooks could hold machines at once."""
+    rid = os.environ.get("RUN_ID", "")
+    status = "never_started"
+    if rid:
+        try:
+            run = api(control_plane(), "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
+        except ValueError as exc:
+            print(f"::warning::run {rid} status unavailable: {exc}", file=sys.stderr)
+            return
+        status = run.get("status") or ""
+        print(f"run {rid}: {status or 'no status'}", file=sys.stderr)
+    out = os.environ.get("GITHUB_OUTPUT")
+    if status and out:
+        with open(out, "a") as f:
+            f.write(f"status={status}\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--await-build", action="store_true",
                     help="wait for one batch's build (Test jobs); see await_build_main")
+    ap.add_argument("--run-status", action="store_true",
+                    help="write one run's Control Plane status (RUN_ID); see run_status_main")
     args = ap.parse_args()
+    if args.run_status:
+        run_status_main()
+        return
     if args.await_build:
         await_build_main(args.config)
         return

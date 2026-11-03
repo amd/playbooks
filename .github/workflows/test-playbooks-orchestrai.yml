@@ -352,8 +352,14 @@ jobs:
           DEFER_EXIT: "1"  # the job's result is decided after the retry below
         run: python3 .github/scripts/orchestrai_batch_verdict.py
 
-      # Infrastructure only: playbooks that did NOT_RUN or were INTERRUPTED (never a
-      # FAILED test) get one new OrchestrAI run, usually on another machine.
+      # One new OrchestrAI run, usually on another machine, for the playbooks that
+      # provably never executed (orchestrai_verdict.RETRY_CAUSES: no build, or
+      # planned but never started) -- never a failed test, a test cut off
+      # mid-run (a hang looks the same as a lost machine), or results that could
+      # not be read. And only when the first run has certainly ended: its build
+      # was seen to finish (a wait that gave up proves nothing), and the Control
+      # Plane reports the run terminal and not cancelled. Anything less is
+      # reported and left alone, so two runs never hold the same playbooks.
       # Repo variable ORCHESTRAI_RETRY_NOT_RUN=false turns this off. The retry
       # steps use !cancelled(), not always(): a cancelled or timed-out job must
       # never reserve hardware for a new run.
@@ -363,15 +369,36 @@ jobs:
         env:
           BATCHES: ${{ needs.detect-and-trigger.outputs.batches }}
           BATCH_ID: ${{ matrix.batch_id }}
+          FIRST_BUILD_URL: ${{ steps.build.outputs.build_url }}
+          FIRST_WAIT: ${{ steps.wait.outcome }}
+          RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
           # 1440 - a whole attempt (720) - time to resolve, upload and report.
           RETRY_START_LIMIT_MINUTES: 660
         run: |
           retry=$(python3 .github/scripts/orchestrai_batch_verdict.py --retryable test-results/batch.json 2>/dev/null || true)
           if [ -z "$retry" ]; then echo "Nothing to retry"; exit 0; fi
+          names=$(tr "\n" " " <<< "$retry")
+          skip() { echo "::warning::Not retrying ${names}: $1"; echo "> ⚠️ Not retrying ${names}: $1" >> "$GITHUB_STEP_SUMMARY"; exit 0; }
           elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
           if [ "$elapsed" -gt "$RETRY_START_LIMIT_MINUTES" ]; then
-            echo "::warning::Not retrying $(tr "\n" " " <<< "$retry"): ${elapsed} min have passed and a retry can take 720 more"; exit 0
+            skip "${elapsed} min have passed and a retry can take 720 more"
           fi
+          if [ -n "$FIRST_BUILD_URL" ] && [ "$FIRST_WAIT" != "success" ]; then
+            skip "the first build was not seen to finish (${FIRST_BUILD_URL}); it may still be running"
+          fi
+          status_file=$(mktemp)
+          GITHUB_OUTPUT="$status_file" python3 .github/scripts/orchestrai_trigger.py --run-status || true
+          status=$(sed -n 's/^status=//p' "$status_file")
+          case "$status" in
+            never_started|passed|failed|unstable|error) ;;
+            cancelled) skip "the first run was cancelled" ;;
+            "") skip "the first run's state could not be read; it may still be queued or running" ;;
+            *) skip "the first run is still ${status}" ;;
+          esac
           echo "Retrying (did not run): $(tr "\n" " " <<< "$retry")"
           RETRY="$retry" python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os
@@ -525,6 +552,9 @@ jobs:
           pattern: batch-results-*
           path: batch-results
       - name: Each system's result
+        env:
+          # Every batch that should report: one without an artifact is NO RESULTS.
+          EXPECTED_BATCHES: ${{ needs.detect-and-trigger.outputs.batch_matrix }}
         run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
 
   test-gate:

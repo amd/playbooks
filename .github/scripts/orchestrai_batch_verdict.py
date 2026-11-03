@@ -20,8 +20,12 @@ Env:
     JOB_URL      optional link to this batch's GitHub job (the configuration table links to it)
 Exit: 1 when the batch failed as above, else 0.
 
+--retryable FILE lists the playbooks that may be rerun: NOT_RUN/INTERRUPTED
+with a cause in orchestrai_verdict.RETRY_CAUSES (the playbook provably never
+executed). The workflow also requires the first run to have ended.
+
 Retry: with RETRY_OF=<first attempt's batch.json>, BATCH_JSON lists only the
-playbooks being retried (those that did NOT_RUN or were INTERRUPTED); their new
+playbooks being retried; their new
 results replace the first attempt's in batch.json, marked with the attempt and
 the first outcome, and the first attempt's files move to <playbook>-attempt1/.
 DEFER_EXIT=1 records results without failing; orchestrai_batch_verdict.py
@@ -30,7 +34,8 @@ DEFER_EXIT=1 records results without failing; orchestrai_batch_verdict.py
 orchestrai_batch_verdict.py --merge DIR reads every batch.json under DIR (the
 downloaded batch artifacts) and reports each system (device + OS) as PASS, FAIL
 or NOT RUN: a device x OS grid and one annotation per system on the run page,
-then every playbook's row.
+then every playbook's row. With EXPECTED_BATCHES (the batch matrix), a batch
+that uploaded no batch.json is reported as NO RESULTS rather than left out.
 """
 import json
 import os
@@ -40,10 +45,12 @@ import sys
 import tempfile
 from pathlib import Path
 
+from orchestrai_verdict import INFRA_STATUSES, RETRY_CAUSES
+
 VERDICT = Path(__file__).with_name("orchestrai_verdict.py")
 LABEL = {0: "PASSED", 1: "FAILED", 2: "NOT_RUN"}
 ICON = {"PASSED": "✅", "FAILED": "❌", "NOT_RUN": "⚠️", "INTERRUPTED": "⚠️"}
-SYSTEM_ICON = {"PASS": "✅", "FAIL": "❌", "NOT RUN": "⚠️"}
+SYSTEM_ICON = {"PASS": "✅", "FAIL": "❌", "NOT RUN": "⚠️", "NO RESULTS": "⚠️"}
 
 
 def resolve(playbook, batch, out_dir):
@@ -71,7 +78,7 @@ def resolve(playbook, batch, out_dir):
             "batch_id": batch["batch_id"], "label": batch.get("label") or batch["batch_id"],
             "locale": batch.get("locale", ""), "required": playbook in batch["required"],
             "outcome": outcome, "rc": rc, "rp_url": outputs.get("rp_url", ""),
-            "reason": summary.get("infrastructure_reason") or ""}
+            "reason": summary.get("infrastructure_reason") or "", "cause": summary.get("cause") or ""}
 
 
 def retry_note(r):
@@ -80,7 +87,9 @@ def retry_note(r):
     return f" (retry {r['attempt'] - 1}; first: {r.get('first_outcome', '?')})"
 
 
-RETRYABLE = ("NOT_RUN", "INTERRUPTED")
+def retryable(r):
+    """Rerun automatically only a playbook that provably never executed."""
+    return r["outcome"] in INFRA_STATUSES and r.get("cause") in RETRY_CAUSES
 
 
 def batch_failed(rows, batch):
@@ -101,11 +110,12 @@ def table(rows, run_url=""):
 
 
 def system_status(rows):
-    """PASS when every playbook passed, FAIL when any failed, else NOT RUN."""
+    """PASS when every playbook passed; NOT RUN when the rest are infrastructure
+    (NOT_RUN/INTERRUPTED); FAIL for anything else, ERROR or an unknown status too."""
     outcomes = {r["outcome"] for r in rows}
     if outcomes == {"PASSED"}:
         return "PASS"
-    return "FAIL" if "FAILED" in outcomes else "NOT RUN"
+    return "NOT RUN" if outcomes <= {"PASSED", *INFRA_STATUSES} else "FAIL"
 
 
 def by_configuration(rows):
@@ -141,16 +151,23 @@ def merge(root):
     systems = {}
     for r in rows:
         systems.setdefault(r.get("label") or r["batch_id"], []).append(r)
-    platforms = sorted({r["platform"] for r in rows})
+    expected = json.loads(os.environ.get("EXPECTED_BATCHES") or "[]")
+    missing = [b for b in expected if (b.get("label") or b["batch_id"]) not in systems]
+    platforms = sorted({r["platform"] for r in rows} | {b["platform"] for b in missing})
     grid = {}
+    def place(label, platform, cell):
+        grid.setdefault(label.replace(f" · {platform.capitalize()}", ""), {})[platform] = cell
     for label, group in systems.items():
-        platform = group[0]["platform"]
-        device = label.replace(f" · {platform.capitalize()}", "")
         passed = sum(r["outcome"] == "PASSED" for r in group)
         status = system_status(group)
-        grid.setdefault(device, {})[platform] = f"{SYSTEM_ICON[status]} {status} ({passed}/{len(group)})"
+        place(label, group[0]["platform"], f"{SYSTEM_ICON[status]} {status} ({passed}/{len(group)})")
         level = {"PASS": "notice", "FAIL": "error", "NOT RUN": "warning"}[status]
         print(f"::{level} title={label}::{status} — {passed}/{len(group)} playbooks passed")
+    for b in missing:  # its job never uploaded results: never silently absent
+        label = b.get("label") or b["batch_id"]
+        place(label, b["platform"], f"{SYSTEM_ICON['NO RESULTS']} NO RESULTS (0/{len(b['playbooks'])})")
+        print(f"::error title={label}::NO RESULTS — the batch job uploaded no results "
+              f"for its {len(b['playbooks'])} playbooks")
     lines = ["## Results by device", "",
              "| Device | " + " | ".join(p.capitalize() for p in platforms) + " |",
              "|---|" + "---|" * len(platforms)]
@@ -175,7 +192,7 @@ def main():
         return 1 if failed else 0
     if sys.argv[1:2] == ["--retryable"]:  # playbooks to retry, one per line
         rows = json.loads(Path(sys.argv[2]).read_text())
-        print("\n".join(r["playbook"] for r in rows if r["outcome"] in RETRYABLE))
+        print("\n".join(r["playbook"] for r in rows if retryable(r)))
         return 0
     batch = json.loads(os.environ["BATCH_JSON"])
     out_dir = Path("test-results")

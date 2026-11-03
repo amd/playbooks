@@ -225,6 +225,23 @@ class ReportingSwitch(unittest.TestCase):
         self.assertEqual((outputs["playbook_repo"], outputs["playbook_sha"]),
                          ("https://github.com/x/playbooks.git", "b" * 40))
 
+    def run_status(self, rid, api):
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": rid, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(trigger, "api", api), \
+                    mock.patch.object(trigger, "control_plane", return_value={}), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                trigger.run_status_main()
+            return out.read()
+
+    def test_run_status_is_read_for_a_retry_and_never_guessed(self):
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {"status": "queued"}}), "status=queued\n")
+        self.assertEqual(self.run_status("", lambda *a: self.fail("no run, no call")), "status=never_started\n")
+
+        def down(*a):
+            raise ValueError("503")
+        self.assertEqual(self.run_status("r1", down), "")  # unknown: the retry is skipped
+
     def test_reportportal_without_its_credential_fails_before_submitting(self):
         with self.assertRaises(SystemExit):
             self.run_main("reportportal", credential="")
@@ -327,14 +344,16 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_every_job_that_submits_runs_installs_pyyaml_first(self):
         """Each job is a fresh environment: a job that starts runs (the trigger
-        without --await-build reads the YAML config) must install PyYAML itself.
+        without --await-build/--run-status reads the YAML config) must install PyYAML itself.
         The batch job's retry once crashed with No module named 'yaml'."""
         for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
             for job_id, job in self.load(name)["jobs"].items():
                 steps = job.get("steps") or []
                 for i, step in enumerate(steps):
                     run = step.get("run") or ""
-                    if "orchestrai_trigger.py" in run and "--await-build" not in run:
+                    # --await-build and --run-status only read the Control Plane.
+                    if ("orchestrai_trigger.py" in run and "--await-build" not in run
+                            and "--run-status" not in run):
                         before = " ".join(s.get("run") or "" for s in steps[:i])
                         self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
 
