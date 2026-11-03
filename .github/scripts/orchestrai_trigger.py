@@ -624,12 +624,19 @@ def run_status_main():
     rid = os.environ.get("RUN_ID", "")
     status = "never_started"
     if rid:
-        try:
-            run = api(control_plane(), "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
-        except ValueError as exc:
-            print(f"::warning::run {rid} status unavailable: {exc}", file=sys.stderr)
-            return
-        status = run.get("status") or ""
+        # A run whose build has just ended can read "running" for a while
+        # longer while the Control Plane closes it, so wait for it to end.
+        deadline = time.monotonic() + int(os.environ.get("RUN_STATUS_WAIT_SECONDS", "900"))
+        while True:
+            try:
+                run = api(control_plane(), "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
+            except ValueError as exc:
+                print(f"::warning::run {rid} status unavailable: {exc}", file=sys.stderr)
+                return
+            status = run.get("status") or ""
+            if status in TERMINAL or time.monotonic() >= deadline:
+                break
+            time.sleep(POLL_SECONDS)
         print(f"run {rid}: {status or 'no status'}", file=sys.stderr)
     out = os.environ.get("GITHUB_OUTPUT")
     if status and out:
