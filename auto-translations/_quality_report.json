@@ -169,8 +169,8 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 78,
+      "mean": 93.7,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -703,12 +703,6 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 82,
       "issues": "Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/clustering-rccl/playbook.json",
-      "score": 82,
-      "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
     },
     {
       "locale": "zh-TW",

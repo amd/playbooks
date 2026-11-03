@@ -32,10 +32,10 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
 | tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
 | uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
+| zh-CN | 78 | 93.7 | 78 | Claude-Opus-4.8 |
 | zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (91)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -126,7 +126,6 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | tr-TR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Minor grammar: 'ince ayar yapın' should be 'ince ayar yapın modelleri' or 'ince ayarlayın'; slightly awkward phrasing. |
 | tr-TR | playbooks/supplemental/vllm-inference/playbook.json | 82 | Added 'AMD' not in source; otherwise accurate and fluent. |
 | uk-UA | playbooks/supplemental/amd-sync/playbook.json | 82 | Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent. |
-| zh-CN | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method. |
 | zh-TW | playbooks/supplemental/clustering-rpc-server/playbook.json | 82 | Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate. |
 | ro-RO | playbooks/supplemental/pytorch-kernels/playbook.json | 84 | Inconsistent 'kernele' vs 'kernel-uri' plural; otherwise accurate, fluent, terms/brands intact. |
 | sl-SI | playbooks/core/lmstudio-rocm-llms/playbook.json | 84 | "strežba" is awkward for serving LLMs; "strežnik"/"gostovanje" preferred, otherwise accurate. |
