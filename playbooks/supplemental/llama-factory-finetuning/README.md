@@ -43,7 +43,7 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -90,7 +90,7 @@ source llamafactory-env/bin/activate
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -120,7 +120,7 @@ llamafactory-env\Scripts\activate
 <!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv llamafactory-env
@@ -195,7 +195,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 <!-- @test:end --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git

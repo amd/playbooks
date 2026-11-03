@@ -97,11 +97,14 @@ extra_tags: {}
 # SKU. The playbooks below pick a device-appropriate model in their README
 # (gpt-oss-120b on Halo, a small model on the smaller devices — qwen3.5-9b for
 # lmstudio, Qwen3.5-4B for pytorch-rocm, gpt-oss-20b for n8n), so they only need
-# 128 GB for the big Halo run — the small-device runs fit in normal RAM. Tagging
-# ram_128gb ONLY on halo/halo_box lets them run on every device (no tag elsewhere
-# → tags_for() falls back to the empty extra_tags entry) instead of being dropped
-# from the non-128 GB devices by extra_tag_devices. Unsloth uses the same Halo
-# tagging, while its known-OOM STX combination is excluded explicitly below.
+# 128 GB for the big halo-class runs — the small-device runs fit in normal RAM.
+# grgh (Gorgon Halo) is in the same bucket: its @device/@var scopes resolve the
+# same halo-class models, and the fleet is 128 GB or 192 GB, so it carries the
+# same tag. Tagging ram_128gb ONLY on halo/halo_box/grgh lets them run on every
+# device (no tag elsewhere → tags_for() falls back to the empty extra_tags entry)
+# instead of being dropped from the non-128 GB devices by extra_tag_devices.
+# Unsloth uses the same Halo tagging, while its known-OOM STX combination is
+# excluded explicitly below.
 # gaia-agents also belongs here. vscode-qwen3-coder keeps the Halo tag
 # here, but unlike the Lemonade playbooks it loads Qwen3-Coder-30B-A3B through
 # LM Studio with full Vulkan offload (`--gpu max`) and a 32K context; current
@@ -119,32 +122,40 @@ device_extra_tags:
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   lmstudio-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   pytorch-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   n8n-automation-gpt-oss:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   vscode-qwen3-coder:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   gaia-agents:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   openclaw-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
+    grgh:     ["ram_128gb"]
 
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
-  ram_128gb: ["halo", "halo_box"]
+  ram_128gb: ["halo", "halo_box", "grgh"]
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.

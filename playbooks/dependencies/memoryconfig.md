@@ -16,7 +16,7 @@ For the Ryzen AI Halo, the dedicated GPU memory defaults to 64GB, which is suffi
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 
 To change the dedicated GPU memory value, open **AMD Software: Adrenalin Edition™** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Reboot for the changes to take effect.
 
@@ -42,7 +42,7 @@ For the AMD Ryzen™ AI Halo, the default is 96GB shared. To modify this, open t
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 
 Increase the shared memory pool by changing the kernel's Translation Table Manager (TTM) page setting. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB) so the maximum amount is available as shared memory.
 

@@ -39,7 +39,8 @@
       "windows"
     ],
     "grgh": [
-      "linux"
+      "linux",
+      "windows"
     ],
     "stx": [
       "linux",
