@@ -39,6 +39,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -78,6 +79,10 @@ HARNESS_EXCLUDED = frozenset({
 })
 
 RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"
+
+# Devices tested only through OrchestrAI. They have no self-hosted runner on
+# purpose, so their entries, even required ones, are left out of this matrix.
+ORCHESTRAI_ONLY_DEVICES = frozenset({"grgh"})
 
 
 def annotate(level: str, message: str) -> None:
@@ -120,21 +125,32 @@ def _load_runner_catalog() -> list[dict]:
 def drop_entries_without_runners(entries: list[dict]) -> list[dict]:
     """Keep entries whose device has a runner for their OS in runners.json.
 
-    An unreadable runners.json drops nothing (the workflow then fails as before)."""
+    The rest are dropped with a notice: those of ORCHESTRAI_ONLY_DEVICES on purpose,
+    optional ones because they never block. A required entry of any other device
+    means its runner is missing from the catalog; fail, so that required coverage
+    never shrinks silently. An unreadable runners.json drops nothing (the workflow
+    then fails as before)."""
     try:
         data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
         fleet = {(str(r.get("group", "")).lower(), str(r.get("os", "")).lower()) for r in data}
     except (OSError, json.JSONDecodeError, AttributeError):
         return entries
-    kept, dropped = [], {}
+    kept, dropped, lost = [], Counter(), set()
     for e in entries:
-        if (e["arch"].lower(), e["platform"].lower()) in fleet:
+        device, platform = e["arch"].lower(), e["platform"].lower()
+        if (device, platform) in fleet:
             kept.append(e)
+        elif e.get("required") and device not in ORCHESTRAI_ONLY_DEVICES:
+            lost.add(f"{platform}/{device}")
         else:
-            key = f"{e['platform']}/{e['arch']}"
-            dropped[key] = dropped.get(key, 0) + 1
+            dropped[f"{platform}/{device}"] += 1
     for key, n in sorted(dropped.items()):
         annotate("notice", f"{key}: no runner in runners.json; {n} entr{'y' if n == 1 else 'ies'} not scheduled")
+    if lost:
+        print(f"FATAL: required entries for {', '.join(sorted(lost))} have no runner in "
+              f"{RUNNERS_JSON.name}. Restore the runner, or add the device to "
+              "ORCHESTRAI_ONLY_DEVICES if only OrchestrAI tests it.", file=sys.stderr)
+        sys.exit(1)
     return kept
 
 
@@ -391,11 +407,6 @@ def main() -> None:
             else:
                 annotate("warning", f"No trustworthy base {args.base}; running the full matrix")
 
-    # This workflow runs on self-hosted runners: an entry for a device and OS with
-    # no runner in runners.json would queue until it times out (e.g. grgh, which
-    # only OrchestrAI tests). Drop such entries and say so.
-    entries = drop_entries_without_runners(entries)
-
     # Apply workflow_dispatch filters (platform / device) to whatever the mode
     # produced. An empty result after filtering is a user error (e.g. asking for
     # a device the selected playbook doesn't support), so fail loudly.
@@ -409,6 +420,12 @@ def main() -> None:
         )
         print(f"FATAL: no matrix entries match the requested filter(s): {filt}", file=sys.stderr)
         sys.exit(1)
+
+    # This workflow runs on self-hosted runners: an entry for a device and OS with
+    # no runner in runners.json would queue until it times out (e.g. grgh, which
+    # only OrchestrAI tests). Drop such entries and say so. After the filters, so a
+    # missing required runner only fails runs that would schedule it.
+    entries = drop_entries_without_runners(entries)
 
     # Targeting a single runner only makes sense once the OS and device are
     # pinned, because the label is ANDed with them: a halo hostname on an stx
