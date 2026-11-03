@@ -117,6 +117,8 @@ jobs:
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
+      playbook_repo: ${{ steps.trigger.outputs.playbook_repo }}
+      playbook_sha: ${{ steps.trigger.outputs.playbook_sha }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -381,19 +383,25 @@ jobs:
 
       # The trigger reads orchestrai-config.yml (PyYAML); Detect & Trigger's
       # install does not reach this job.
+      # Preparing the retry never fails the job: if it fails, nothing is
+      # submitted and the first attempt's results stand.
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        id: retry_python
+        continue-on-error: true
         if: "!cancelled() && steps.pick.outputs.batches_json != ''"
         with:
           python-version: '3.12'
 
       - name: Install the trigger's dependencies
-        if: "!cancelled() && steps.pick.outputs.batches_json != ''"
+        id: retry_deps
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_python.outcome == 'success'"
         run: pip install --quiet pyyaml
 
       - name: Retry them in a new OrchestrAI run
         id: retry_trigger
         continue-on-error: true
-        if: "!cancelled() && steps.pick.outputs.batches_json != ''"
+        if: "!cancelled() && steps.retry_deps.outcome == 'success'"
         env:
           BATCHES_JSON: ${{ steps.pick.outputs.batches_json }}
           ORCHESTRAI_RETRY: "1"
@@ -408,9 +416,10 @@ jobs:
           ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
           ORCHESTRAI_WINDOWS_DRIVER: ${{ (inputs.windows_driver != 'default' && inputs.windows_driver) || vars.ORCHESTRAI_WINDOWS_DRIVER || '' }}
           ORCHESTRAI_WINDOWS_DRIVER_URL: ${{ vars.ORCHESTRAI_WINDOWS_DRIVER_URL }}
-          ORCHESTRAI_PLAYBOOK_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
-          ORCHESTRAI_PLAYBOOK_SHA: ${{ github.event.pull_request.head.sha }}
-          ORCHESTRAI_PLAYBOOK_REF: ${{ inputs.playbook_ref }}
+          # The repository and commit the first attempt resolved, never the ref
+          # again: on a schedule, main may have moved since.
+          ORCHESTRAI_PLAYBOOK_REPO: ${{ needs.detect-and-trigger.outputs.playbook_repo }}
+          ORCHESTRAI_PLAYBOOK_SHA: ${{ needs.detect-and-trigger.outputs.playbook_sha }}
           ORCHESTRAI_REPORTING: ${{ inputs.reporting || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
           ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
           ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
@@ -420,12 +429,18 @@ jobs:
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
           ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
-        run: python3 .github/scripts/orchestrai_trigger.py
+        run: |
+          if [ -z "$ORCHESTRAI_PLAYBOOK_SHA" ]; then
+            echo "::error::Detect & Trigger recorded no playbook commit; not retrying"; exit 1
+          fi
+          python3 .github/scripts/orchestrai_trigger.py
 
+      # The rest of the retry runs only for an actual retry run of this batch,
+      # and its results replace the first attempt's only when it got a build.
       - name: Wait for the retry's build to start
         id: retry_build
         continue-on-error: true
-        if: "!cancelled() && steps.retry_trigger.outputs.run_ids != ''"
+        if: "!cancelled() && fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id]"
         env:
           RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           BATCH_ID: ${{ matrix.batch_id }}
@@ -438,7 +453,7 @@ jobs:
       - name: Wait for the retry's build
         id: retry_wait
         continue-on-error: true
-        if: "!cancelled() && steps.retry_trigger.outputs.run_ids != ''"
+        if: "!cancelled() && steps.retry_build.outputs.build_url != ''"
         env:
           STARTED_BUILD_URL: ${{ steps.retry_build.outputs.build_url }}
           BATCH_ID: ${{ matrix.batch_id }}
@@ -447,7 +462,9 @@ jobs:
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       - name: Resolve the retried playbooks
-        if: "!cancelled() && steps.retry_trigger.outputs.run_ids != ''"
+        id: retry_resolve
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_build.outputs.build_url != ''"
         env:
           BUILD_URL: ${{ steps.retry_wait.outputs.build_url }}
           BATCH_JSON: ${{ toJson(matrix) }}
@@ -461,6 +478,21 @@ jobs:
           cp test-results/batch.json "$RUNNER_TEMP/attempt1.json"
           BATCH_JSON=$(python3 -c 'import json,os; b=json.loads(os.environ["BATCH_JSON"]); b["playbooks"]=json.loads(os.environ["RETRY_PLAYBOOKS"]); print(json.dumps(b))') \
           RETRY_OF="$RUNNER_TEMP/attempt1.json" python3 .github/scripts/orchestrai_batch_verdict.py
+
+      - name: Record a retry that produced no results
+        if: "!cancelled() && steps.pick.outputs.batches_json != '' && steps.retry_resolve.outcome != 'success'"
+        env:
+          RETRY_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
+          # The first step that did not succeed: preparation, submission, or the build.
+          STAGE: >-
+            ${{ steps.retry_deps.outcome != 'success' && 'could not be prepared'
+            || !fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] && 'was not accepted by OrchestrAI'
+            || steps.retry_build.outputs.build_url == '' && 'got no build'
+            || 'could not be resolved' }}
+        run: |
+          msg="Retry of $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["RETRY_PLAYBOOKS"])))') ${STAGE}; their first attempt's results stand"
+          echo "::warning::${msg}"
+          echo "> ⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Batch result
         if: always()

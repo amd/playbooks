@@ -245,7 +245,8 @@ class Workflows(unittest.TestCase):
     def test_no_wait_fails_the_batch_job_and_no_retry_runs_once_cancelled(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
         steps = {s.get("id"): s for s in job["steps"] if s.get("id")}
-        for sid in ("build", "wait", "retry_trigger", "retry_build", "retry_wait"):
+        for sid in ("build", "wait", "retry_python", "retry_deps", "retry_trigger", "retry_build",
+                    "retry_wait", "retry_resolve"):
             self.assertIs(steps[sid].get("continue-on-error"), True, sid)
         retry = [s for s in job["steps"] if "pick" in str(s.get("if", "")) or "retry" in str(s.get("if", ""))
                  or s.get("id") == "pick"]
@@ -253,6 +254,18 @@ class Workflows(unittest.TestCase):
         for s in retry:
             self.assertTrue(s["if"].startswith("!cancelled()"), s.get("name") or s.get("uses"))
         self.assertLessEqual(job["timeout-minutes"], 1440)  # the GITHUB_TOKEN's lifetime
+        # Each later stage needs the one before it to have produced something.
+        self.assertIn("steps.retry_deps.outcome == 'success'", steps["retry_trigger"]["if"])
+        self.assertIn("[matrix.batch_id]", steps["retry_build"]["if"])
+        self.assertIn("steps.retry_build.outputs.build_url", steps["retry_resolve"]["if"])
+
+    def test_a_retry_tests_the_commit_the_first_attempt_resolved(self):
+        jobs = self.load("test-playbooks-orchestrai.yml")["jobs"]
+        self.assertIn("steps.trigger.outputs.playbook_sha", jobs["detect-and-trigger"]["outputs"]["playbook_sha"])
+        env = next(s for s in jobs["test-batches"]["steps"] if s.get("id") == "retry_trigger")["env"]
+        self.assertEqual(env["ORCHESTRAI_PLAYBOOK_SHA"], "${{ needs.detect-and-trigger.outputs.playbook_sha }}")
+        self.assertEqual(env["ORCHESTRAI_PLAYBOOK_REPO"], "${{ needs.detect-and-trigger.outputs.playbook_repo }}")
+        self.assertNotIn("ORCHESTRAI_PLAYBOOK_REF", env)
 
     def test_orc_runs_the_controller_from_its_own_revision(self):
         jobs = self.load("orchestrai-pr-command.yml")["jobs"]

@@ -237,8 +237,9 @@ jobs:
       contents: read
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
     # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
-    # + 30 min) and then for the build itself (330 min).
-    timeout-minutes: 720
+    # + 30 min) and then for the build itself (330 min): 720 min, plus up to
+    # 60 min for checkout, the verdict, upload and the summary.
+    timeout-minutes: 780
     continue-on-error: ${{ !matrix.required }}
     strategy:
       fail-fast: false
