@@ -133,6 +133,24 @@ class SetupFailureTest(unittest.TestCase):
         self.assertNotIn("test body ran", result.stdout)
         self.assertIn("setup failed", result.stderr)
 
+    def test_a_failed_guard_followed_by_more_setup_stops_the_test(self):
+        result = self.run_block("[ -d missing-env ] && source missing-env/bin/activate\nexport SETUP_OK=1")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+        self.assertIn("setup failed", result.stderr)
+
+    def test_a_failing_command_in_a_setup_pipeline_stops_the_test(self):
+        result = self.run_block("false | cat")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+
+    def test_multi_line_setup_commands_are_not_split(self):
+        """An if block, a continued line and an && at a line end each count as one command."""
+        setup = "if true; then\n  export A=1\nfi\nexport B=\\\n2\ntrue &&\n  export C=3"
+        result = self.run_block(setup, code='echo "test body ran $A$B$C"')
+        self.assertTrue(result.success, result.stderr)
+        self.assertIn("test body ran 123", result.stdout)
+
     def test_a_failed_setup_stops_python_and_unknown_language_tests(self):
         for language, code in (("python", "print('test body ran')"), ("console", "echo test body ran")):
             with self.subTest(language=language):

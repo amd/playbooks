@@ -60,13 +60,14 @@ Setup attribute:
 
     The setup runs in the same shell session as the test, before it:
 
-    - Linux (bash, Python and other tests): bash runs the setup under set -e,
-      checks its final status, then runs the test. Any failing setup command,
-      including a failed guard such as `[ -d env ] && source env/bin/activate`,
-      stops the test. Keep setups to plain commands: set -e does not see failures
-      inside if conditions or functions called from them, and the setup must not
-      rely on setting errexit or an EXIT trap, which the runner resets before the
-      test body.
+    - Linux (bash, Python and other tests): bash runs the setup under set -e and
+      pipefail, checks the status after every top-level command, then runs the
+      test. Any failing setup command, including a failed guard such as
+      `[ -d env ] && source env/bin/activate` followed by more lines, stops the
+      test. Keep setups to plain commands: set -e does not see failures inside if
+      conditions or functions called from them, and the setup must not rely on
+      setting errexit, pipefail or an EXIT trap, which the runner resets before
+      the test body.
     - Windows, PowerShell tests: the setup runs in try/catch with
       $ErrorActionPreference = 'Stop', so a failing cmdlet, a missing or blocked
       script (Activate.ps1) or a native command with a nonzero exit stops the test,
@@ -928,21 +929,46 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
     return unique_tests
 
 
+def _top_level_commands(setup: str) -> list[str]:
+    """Split *setup* into chunks of whole shell commands.
+
+    A chunk grows line by line until ``bash -n`` accepts it, so a multi-line ``if`` or
+    a trailing ``&&`` stays in one chunk; a line ending in a backslash always continues
+    (``bash -n`` accepts a backslash at the end of its input). A trailing chunk that
+    never parses is returned as is; bash then reports the syntax error."""
+    chunks, pending = [], []
+    for line in setup.split("\n"):
+        pending.append(line)
+        if (len(line) - len(line.rstrip("\\"))) % 2:
+            continue
+        text = "\n".join(pending)
+        if subprocess.run(["bash", "-n"], input=text, text=True,
+                          capture_output=True).returncode == 0:
+            chunks.append(text)
+            pending = []
+    if pending:
+        chunks.append("\n".join(pending))
+    return chunks
+
+
 def bash_with_setup(setup: str, body: str) -> str:
     """Run *setup* before *body* in one bash session; any failing setup command stops the test.
 
     A failed setup (e.g. a venv an earlier, skipped step never created) must not let
     the test run on system Python. set -e is ignored on the left of ``||``, so the
     setup runs at top level under set -e, with an EXIT trap that reports the failure.
-    set -e also ignores a failure before the last command of an ``&&`` list, so the
-    setup's final status is checked as well (``[ -d env ] && source env/bin/activate``).
-    Neither catches every failure inside arbitrary shell logic (e.g. in an ``if``
-    condition or a function called from one); keep setups to plain commands.
+    set -e also ignores a failure before the last command of an ``&&`` list, and a
+    failing command before the last one of a pipeline unless pipefail is set. So
+    pipefail is on, and the status is checked after every top-level command
+    (``[ -d env ] && source env/bin/activate``, even when more lines follow).
+    Failures inside an ``if`` condition or a function called from one still go
+    unnoticed; keep setups to plain commands.
 
-    The wrapper owns errexit and the EXIT trap: it turns errexit off and clears the
-    EXIT trap before the body, so a setup must not rely on setting either."""
-    return (f"trap 'echo \"setup failed\" >&2; exit 1' EXIT\nset -e\n{setup}\n"
-            f"[ $? -eq 0 ]\nset +e\ntrap - EXIT\n{body}")
+    The wrapper owns errexit, pipefail and the EXIT trap: it turns the first two off
+    and clears the trap before the body, so a setup must not rely on setting any."""
+    checked = "\n".join(f"{chunk}\n[ $? -eq 0 ]" for chunk in _top_level_commands(setup))
+    return (f"trap 'echo \"setup failed\" >&2; exit 1' EXIT\nset -e -o pipefail\n{checked}\n"
+            f"set +e +o pipefail\ntrap - EXIT\n{body}")
 
 
 def powershell_with_setup(setup: str, body: str) -> str:
