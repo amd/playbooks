@@ -126,6 +126,13 @@ class SetupFailureTest(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertNotIn("test body ran", result.stdout)
 
+    def test_a_failed_guard_in_a_setup_stops_the_test(self):
+        """set -e ignores a failure before the last command of an && list."""
+        result = self.run_block("[ -d missing-env ] && source missing-env/bin/activate")
+        self.assertFalse(result.success)
+        self.assertNotIn("test body ran", result.stdout)
+        self.assertIn("setup failed", result.stderr)
+
     def test_a_failed_setup_stops_python_and_unknown_language_tests(self):
         for language, code in (("python", "print('test body ran')"), ("console", "echo test body ran")):
             with self.subTest(language=language):
@@ -162,8 +169,8 @@ class PowerShellSetupFailureTest(unittest.TestCase):
     NATIVE_FAIL = "cmd /c exit 3" if sys.platform == "win32" else "sh -c 'exit 3'"
     NATIVE_STDERR_OK = 'cmd /c "echo harmless 1>&2"' if sys.platform == "win32" else "sh -c 'echo harmless >&2'"
 
-    def run_setup(self, setup, cwd, *flags):
-        script = rpt.powershell_with_setup(setup, self.BODY)
+    def run_setup(self, setup, cwd, *flags, before=""):
+        script = before + rpt.powershell_with_setup(setup, self.BODY)
         return subprocess.run([POWERSHELL, "-NoProfile", *flags, "-Command", script],
                               cwd=cwd, capture_output=True, text=True, timeout=60)
 
@@ -200,6 +207,25 @@ class PowerShellSetupFailureTest(unittest.TestCase):
             proc = self.run_setup(self.NATIVE_STDERR_OK, d)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertIn("test body ran", proc.stdout)
+
+    def test_an_earlier_native_exit_code_does_not_fail_the_setup(self):
+        """A profile or earlier command can leave $LASTEXITCODE nonzero."""
+        with tempfile.TemporaryDirectory() as d:
+            proc = self.run_setup("$env:SETUP_OK = '1'", d, before=f"{self.NATIVE_FAIL}\n")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("test body ran", proc.stdout)
+
+    @unittest.skipUnless(sys.platform == "win32", "run_test uses powershell.exe on Windows only")
+    def test_run_test_stops_a_powershell_test_whose_setup_fails(self):
+        """The production invocation: powershell -Command, with the profile loaded."""
+        for setup, ok in (("$env:SETUP_OK = '1'", True), ("missing-env\\Scripts\\activate", False)):
+            with self.subTest(setup=setup), tempfile.TemporaryDirectory() as d, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                test = rpt.TestBlock(id="ps-setup", timeout=60, setup=setup, language="powershell",
+                                     code="Write-Output 'test body ran'")
+                result = rpt.run_test(test, Path(d), Path(d))
+            self.assertEqual(result.success, ok, result.stderr)
+            self.assertEqual("test body ran" in result.stdout, ok)
 
     @unittest.skipUnless(sys.platform == "win32", "execution policy is enforced on Windows only")
     def test_an_activation_blocked_by_execution_policy_stops_the_test(self):
