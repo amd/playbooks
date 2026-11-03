@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Copyright Advanced Micro Devices, Inc.
+#
+# SPDX-License-Identifier: MIT
+#
 # Wait until one OrchestrAI pipeline build finishes (STARTED_BUILD_URL, BATCH_ID).
 # Writes build_url to $GITHUB_OUTPUT. Used for a batch's build and for its retry.
 set -e

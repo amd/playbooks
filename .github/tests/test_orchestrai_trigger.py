@@ -15,7 +15,9 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -205,6 +207,24 @@ class ReportingSwitch(unittest.TestCase):
     def test_api_keeps_results_in_orchestrai(self):
         self.assertEqual(self.run_main("api"), "")
 
+    def test_the_tested_commit_is_handed_on_for_retries(self):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/stx": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_REPO": "https://github.com/x/playbooks.git",
+               "ORCHESTRAI_PLAYBOOK_REF": "main", "ORCHESTRAI_REPORTING": "api"}
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                    mock.patch.object(trigger, "start_run", mock.Mock(return_value="r1")), \
+                    mock.patch.object(trigger, "resolve_sha", return_value="b" * 40) as resolve, \
+                    contextlib.redirect_stderr(io.StringIO()):
+                trigger.main()
+            outputs = dict(line.split("=", 1) for line in out.read().splitlines())
+        resolve.assert_called_once_with("https://github.com/x/playbooks.git", "main")
+        self.assertEqual((outputs["playbook_repo"], outputs["playbook_sha"]),
+                         ("https://github.com/x/playbooks.git", "b" * 40))
+
     def test_reportportal_without_its_credential_fails_before_submitting(self):
         with self.assertRaises(SystemExit):
             self.run_main("reportportal", credential="")
@@ -388,15 +408,26 @@ class AcquireTimeoutValidation(unittest.TestCase):
         self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
 
     def test_test_jobs_outlast_the_machine_wait_and_the_build(self):
-        # Each Test job waits for its batch's build (acquire_timeout + margin),
-        # then for the build itself (4.5 h: 1080 polls x 15 s).
-        need = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
-                + 1080 * 15 / 60)
-        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
-                          ("orchestrai-pr-command.yml", "test-playbooks")):
+        # One attempt: the wait for its build to start (acquire_timeout + margin),
+        # then orchestrai_wait_build.sh's poll of the build itself, plus explicit
+        # overhead for checkout, verdicts, upload and summaries.
+        with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
+            build_wait = int(re.search(r"DEADLINE=\$\(\(SECONDS \+ (\d+) \* 60\)\)", f.read()).group(1))
+        attempt = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+                   + build_wait)
+        overhead = 30
+        workflows = {}
+        for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
-                limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
-            self.assertGreater(limit, need, name)
+                workflows[name] = yaml.safe_load(f)
+        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-playbooks"]
+        self.assertGreaterEqual(orc["timeout-minutes"], attempt + overhead)
+        # The batch job: one attempt, then a retry only while a whole one still fits.
+        batch = workflows["test-playbooks-orchestrai.yml"]["jobs"]["test-batches"]
+        pick = next(s for s in batch["steps"] if s.get("id") == "pick")
+        retry_start = int(pick["env"]["RETRY_START_LIMIT_MINUTES"])
+        self.assertGreaterEqual(batch["timeout-minutes"], retry_start + attempt + overhead)
+        self.assertLessEqual(batch["timeout-minutes"], 24 * 60)  # the GITHUB_TOKEN's lifetime
 
     def test_no_overall_limit_means_no_comparison(self):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])

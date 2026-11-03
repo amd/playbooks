@@ -30,6 +30,7 @@ Inputs (env):
 Outputs:
     run_ids={...}     -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run id)
     run_urls={...}    -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run URL)
+    playbook_repo, playbook_sha -> $GITHUB_OUTPUT   (what every batch tests)
     --dry-run prints each plan/builds payload and starts nothing.
     --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
 """
@@ -732,6 +733,10 @@ def main():
         with open(out, "a") as f:
             f.write(f"run_ids={json.dumps(runs)}\n")
             f.write(f"run_urls={json.dumps(run_urls)}\n")
+            # The commit every batch tests; a retry reuses it rather than
+            # resolving a movable ref (main) again hours later.
+            f.write(f"playbook_repo={repo}\n")
+            f.write(f"playbook_sha={sha}\n")
 
     # Surface dropped batches HERE, at the trigger, instead of letting each of
     # their downstream test jobs discover the gap one-by-one as "No build URL".
