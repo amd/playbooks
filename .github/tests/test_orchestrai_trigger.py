@@ -225,10 +225,12 @@ class ReportingSwitch(unittest.TestCase):
         self.assertEqual((outputs["playbook_repo"], outputs["playbook_sha"]),
                          ("https://github.com/x/playbooks.git", "b" * 40))
 
-    def run_status(self, rid, api):
+    def run_status(self, rid, api, wait=0):
         with tempfile.NamedTemporaryFile("r") as out:
-            with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": rid, "GITHUB_OUTPUT": out.name}, clear=True), \
+            with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": rid, "GITHUB_OUTPUT": out.name,
+                                              "RUN_STATUS_WAIT_SECONDS": str(wait)}, clear=True), \
                     mock.patch.object(trigger, "api", api), \
+                    mock.patch.object(trigger.time, "sleep"), \
                     mock.patch.object(trigger, "control_plane", return_value={}), \
                     contextlib.redirect_stderr(io.StringIO()):
                 trigger.run_status_main()
@@ -241,6 +243,13 @@ class ReportingSwitch(unittest.TestCase):
         def down(*a):
             raise ValueError("503")
         self.assertEqual(self.run_status("r1", down), "")  # unknown: the retry is skipped
+
+    def test_run_status_waits_for_a_run_that_is_still_closing(self):
+        # Its build has ended but the run still reads "running" for a moment.
+        api = mock.Mock(side_effect=[{"run": {"status": "running"}}, {"run": {"status": "running"}},
+                                     {"run": {"status": "failed"}}])
+        self.assertEqual(self.run_status("r1", api, wait=900), "status=failed\n")
+        self.assertEqual(api.call_count, 3)
 
     def test_reportportal_without_its_credential_fails_before_submitting(self):
         with self.assertRaises(SystemExit):
