@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 This tutorial provides step-by-step examples for fine-tuning a large language model (LLM) with PyTorch and ROCm. It covers several techniques, from standard fine-tuning to memory-efficient Parameter-Efficient Fine-Tuning (PEFT) strategies, so you can easily adapt models for your needs.
 
-**Model Used**: google/gemma-3-4b-it  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
+**Model Used**: google/gemma-3-4b-it (QLoRA script: openai/gpt-oss-20b)  *(see [Enable HF authentication](#enable-hf-authentication-gated-or-custom--nonpreinstalled-models) if gated)*  
 **Hardware**: AMD Radeon™ GPU with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
@@ -70,6 +70,11 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 <!-- @device:end -->
 
 ## Installing Software Prerequisites
+
+<!-- @prereq:hf-models-gemma-3-4b-it,hf-datasets-databricks-dolly-15k -->
+<!-- @os:linux -->
+<!-- @prereq:hf-datasets-english-quotes -->
+<!-- @os:end -->
 
 #### Create a Virtual Environment
 
@@ -144,7 +149,7 @@ pip install transformers==5.10.1 safetensors==0.6.2 accelerate peft trl bitsandb
 **Windows:** Only core packages are tested and supported here. **bitsandbytes is not well supported on Windows**, so the Windows install omits it; use LoRA or full fine-tuning on Windows (QLoRA requires bitsandbytes and is intended for Linux).
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
+pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.4.0 accelerate peft trl "fsspec[http]>=2023.1.0,<=2025.9.0"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -362,11 +367,11 @@ from transformers import AutoTokenizer
 
 # Load model with LoRA or QLoRA adapters
 model = AutoPeftModelForCausalLM.from_pretrained(
-    "output-gemma-3-4b-it-qlora",   # or "output-gemma-3-4b-lora" depending on your training
+    "output-gpt-oss-20b-qlora",   # or "output-gemma-3-4b-it-lora" depending on your training
     device_map="auto",
     torch_dtype="auto"
 )
-tokenizer = AutoTokenizer.from_pretrained("output-gemma-3-4b-it-qlora")
+tokenizer = AutoTokenizer.from_pretrained("output-gpt-oss-20b-qlora")
 
 # Generate text
 prompt = "Explain quantum computing:"
@@ -385,7 +390,7 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **Note:**  
-- Make sure the model directory name (`output-gemma-3-4b-full`, `output-gemma-3-4b-qlora`) matches your actual output folder from training.  
+- Make sure the model directory name (`output-gemma-3-4b-it-full`, `output-gpt-oss-20b-qlora`) matches your actual output folder from training.  
 - If you used LoRA instead of QLoRA, just substitute the path accordingly.  
 - Some Gemma models require specifying `trust_remote_code=True` in `from_pretrained`; add if you see a related warning.
 

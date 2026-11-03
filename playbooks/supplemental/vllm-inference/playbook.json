@@ -76,5 +76,21 @@
       }
     }
   },
-  "primaryModel": "Qwen3-1.7B"
+  "primaryModel": "Qwen3-1.7B",
+  "authors": [
+    {
+      "name": "Hongxia Yang",
+      "github": "hongxiayang",
+      "github_url": "https://github.com/hongxiayang",
+      "type": "amd"
+    },
+    {
+      "name": "Eddie Richter",
+      "github": "eddierichter-amd",
+      "github_url": "https://github.com/eddierichter-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-02-11",
+  "updated_date": "2026-10-01"
 }

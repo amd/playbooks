@@ -16,34 +16,36 @@ SPDX-License-Identifier: MIT
 
 ## Yleiskatsaus
 
-LM Studio on tehokas graafiseen käyttöliittymään perustuva kääre [llama.cpp](https://github.com/ggml-org/llama.cpp)-projektille, ja se tarjoaa myös [OpenAI-yhteensopivan päätepisteen](https://lmstudio.ai/docs/developer/openai-compat) mallien paikalliseen palvelemiseen. LM Studio tarjoaa yksinkertaisen mutta tehokkaan käyttöliittymän mallien lataamiseen ja käyttöönottoon vaivattomasti. LM Studio tarjoaa AMD-käyttäjille sekä Vulkan- että AMD ROCm™ -ohjelmistotaustajärjestelmiä (kutsutaan ajoympäristöiksi).
+LM Studio on tehokas graafiseen käyttöliittymään perustuva kääre [llama.cpp](https://github.com/ggml-org/llama.cpp) -kirjastolle, ja se tarjoaa myös [OpenAI-yhteensopivan päätepisteen](https://lmstudio.ai/docs/developer/openai-compat) mallien paikalliseen palvelemiseen. LM Studio tarjoaa yksinkertaisen mutta tehokkaan käyttöliittymän mallien lataamiseen ja käyttöönottoon vaivattomasti. LM Studio tarjoaa AMD-käyttäjille sekä Vulkan- että AMD ROCm™ -ohjelmistotaustajärjestelmät (kutsutaan ajoympäristöiksi).
 
 
 ## Mitä opit
-- Miten LM Studio konfiguroidaan ja miten sitä käytetään paikallisen laitteistosi hyödyntämiseen
+- Miten LM Studio määritetään ja otetaan käyttöön oman paikallisen laitteiston hyödyntämiseksi
 - LLM-mallien testaaminen ja hallinta täysin offline-ympäristössä
-- Mallien tarjoaminen OpenAI-yhteensopivan API:n kautta räätälöityjen työnkulkujen ja sovellusten voimanlähteenä
+- Mallien tarjoaminen OpenAI-yhteensopivan API:n kautta räätälöityjen työnkulkujen ja sovellusten tueksi
 
 
-## Muistikonfiguraation asettaminen
+<!-- @device:halo_box,halo,stx,krk -->
+## Muistiasetusten määrittäminen
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Tarkista ohjelmistopäivitykset
 
 <!-- @os:linux -->
-> **Huomio**: Voit asentaa VS Coden AMD Ryzen™ AI Developer Centerin kautta. LM Studion osalta seuraa alla olevia asennusohjeita.
+> **Huomautus**: Voit asentaa VS Coden AMD Ryzen™ AI Developer Centerin kautta. Asenna LM Studio noudattamalla alla olevia asennusohjeita.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Huomio**: Jos VS Code tai LM Studio ei ole asennettuna, voit asentaa ne AMD Ryzen™ AI Developer Centeristä. 
+> **Huomautus**: Jos VS Code tai LM Studio ei ole asennettuna, voit asentaa ne AMD Ryzen™ AI Developer Centeristä. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Ohjelmistoedellytysten asentaminen
+## Ohjelmiston edellytysten asentaminen
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
@@ -66,17 +68,17 @@ LM Studio on tehokas graafiseen käyttöliittymään perustuva kääre [llama.cp
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## Keskustelu LLM:n kanssa
+## LLM:n kanssa keskusteleminen
 Opi aloittamaan keskustelu ChatGPT-tasoisen LLM:n kanssa täysin paikallisesti.  
 
 1. Avaa LMStudio. 
-2. Paina `Ctrl + L` avataksesi mallinlataajan, valitse `Manually choose model load parameters` ja klikkaa kohtaa `${model_name}`
+2. Paina `Ctrl + L` avataksesi mallin latausikkunan, valitse `Manually choose model load parameters` ja napsauta kohtaa `${model_name}`
 3. Varmista, että "show advanced settings" on valittuna.  
-4. Muuta `Context Length` -arvoa haluamallasi tavalla. Suurempi kontekstipituus tarkoittaa enemmän mallin muistinkäyttöä, mutta myös enemmän järjestelmämuistin käyttöä. Suositeltu arvo tälle ohjekirjalle on 4096.
-5. Varmista, että `GPU Offload` on asetettu maksimiin ja `Flash Attention` on päällä (Cache Quantizations voi pysyä pois päältä)
-6. Valitse `Remember settings` ja klikkaa `Load Model`.
-7. Jos et ole keskusteluikkunassa, paina `Ctrl + 1` tai klikkaa 👾-painiketta näytön vasemmassa yläkulmassa.
-8. Lähetä viesti ja ala vuorovaikuttaa mallin kanssa!
+4. Muuta `Context Length` -arvoa haluamallasi tavalla. Suurempi kontekstin pituus tarkoittaa enemmän mallin muistia, mutta myös enemmän käytettyä järjestelmämuistia. Tähän ohjeeseen suositellaan arvoa 4096.
+5. Varmista, että `GPU Offload` on asetettu maksimiin ja `Flash Attention` on käytössä (Cache Quantizations -asetukset voivat pysyä pois päältä)
+6. Valitse `Remember settings` ja napsauta `Load Model`.
+7. Jos et ole chat-ikkunassa, paina `Ctrl + 1` tai napsauta 👾-painiketta näytön vasemmassa yläkulmassa.
+8. Lähetä viesti ja aloita vuorovaikutus mallin kanssa!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **Vinkki**: Kontekstipituus viittaa mallin muistiin. Flash attention parantaa käsittelynopeutta samalla vähentäen muistinkäyttöä. GPU Offload siirtää laskentaa näytönohjaimelle nopeampia vastauksia varten.
+> **Vinkki**: Kontekstin pituus viittaa mallin muistiin. Flash attention parantaa käsittelynopeutta samalla vähentäen muistin käyttöä. GPU Offload siirtää laskennan näytönohjaimelle nopeampien vastausten saavuttamiseksi.
 
 ## LLM-mallien tarjoaminen OpenAI-yhteensopivan päätepisteen kautta
 
-LM Studio tarjoaa myös OpenAI-yhteensopivan päätepisteen LM Studio Serverin muodossa. Tätä on jo esitelty agentti-pohjaisessa koodaustyönkulussa Clinen kanssa [tässä](../playbooks/vscode-qwen3-coder). Toinen yleinen käyttötapaus on LM Studio Serverin yhdistäminen mihin tahansa verkkosovellukseen (React, Node.js, Python) lähettämällä standardeja HTTP-pyyntöjä päättelypäätepisteeseen.
+LM Studio tarjoaa myös OpenAI-yhteensopivan päätepisteen LM Studio Server -toiminnon muodossa. Tätä on jo esitelty agenttipohjaisessa koodaustyönkulussa Clinen kanssa [tässä](../playbooks/vscode-qwen3-coder). Toinen yleinen käyttötapaus on LM Studio Serverin yhdistäminen mihin tahansa verkkosovellukseen (React, Node.js, Python) lähettämällä tavallisia HTTP-pyyntöjä päättelypäätepisteeseen.
 
-LM Studio Serverin määrittämiseksi, käytä seuraavia ohjeita:
+Määritä LM Studio Server seuraavien ohjeiden mukaisesti:
 
-1. Klikkaa vasemmalla puolella `Developer`-välilehteä (komentorivikuvake) tai paina `Ctrl + 2` ja klikkaa sitten kohtaa `Server Settings`.  
-2. (Valinnainen): Jos haluat tarjota mallia lähiverkkosi kautta, valitse `Serve on Local Network`. Jos haluat käyttää sitä verkkosivuston kanssa tai laajemmin VS Coden sisällä kutsuttavaksi, valitse `Enable CORS`. 
-3. Varmista vasemmassa yläkulmassa, että palvelin on käynnissä klikkaamalla vaihtokytkintä `Status`-kohdan edessä.
+1. Napsauta vasemmalla puolella olevaa `Developer`-välilehteä (komentorivikuvake) tai paina `Ctrl + 2` ja napsauta sitten `Server Settings`.  
+2. (Valinnainen): Jos haluat tarjota mallia lähiverkon kautta, valitse `Serve on Local Network`. Jos haluat käyttää sitä verkkosivuston kanssa tai laajamittaisiin kutsuihin VS Codessa, valitse `Enable CORS`. 
+3. Varmista vasemmassa yläkulmassa, että palvelin on käynnissä napsauttamalla `Status`-tekstin edessä olevaa vaihtopainiketta.
 4. OpenAI-yhteensopiva päätepiste on nyt käynnissä. Osoite on tyypillisesti http://127.0.0.1:1234  
-5. Jos mallia ei ole vielä ladattu, voit ladata sen klikkaamalla `Load Model` ja seuraamalla aiemmin mainittuja vaiheita. 
+5. Jos mallia ei ole vielä ladattu, voit ladata sen napsauttamalla `Load Model` ja noudattamalla aiemmin mainittuja vaiheita. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -186,23 +188,23 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @os:end -->
 
 
-Tämä malli on nyt saatavilla LM Studio Server -päätepisteen kautta ja tukee OpenAI-päätepisteitä, mukaan lukien:
+Tämä malli on nyt käytettävissä LM Studio Server -päätepisteen kautta ja tukee OpenAI-päätepisteitä, kuten:
 
-| Päätepiste | Metodi | Dokumentaatio |
+| Päätepiste | Menetelmä | Dokumentaatio |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Esimerkki: Päätepisteen pingaaminen
-Nyt kun olet luonut OpenAI-yhteensopivan päätepisteen, katsotaan, miten tämä integroidaan Python-kehitysympäristöön (kuten VSCode) ja miten järjestelmääsi käytetään paikallisena API-tarjoajana.
+#### Esimerkki: Pingaa päätepistettäsi
+Nyt kun olet luonut OpenAI-yhteensopivan päätepisteen, katsotaan, miten tämä integroidaan Python-kehitysympäristöön (kuten VSCode) ja käytetään järjestelmääsi paikallisena API-tarjoajana.
 
 1. Luo Python-virtuaaliympäristö:
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-    Avaa Linuxissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
+    Avaa Linuxissa pääte haluamaasi hakemistoon ja seuraa komentoja venv-ympäristön luomiseksi.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -212,13 +214,13 @@ Nyt kun olet luonut OpenAI-yhteensopivan päätepisteen, katsotaan, miten tämä
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Myönnä käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta muutos tulee voimaan):
+**Anna käyttäjällesi pääsy GPU-laitteisiin** (kirjaudu ulos ja takaisin sisään, jotta tämä tulee voimaan):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-    Avaa Linuxissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
+    Avaa Linuxissa pääte haluamaasi hakemistoon ja seuraa komentoja venv-ympäristön luomiseksi.
     ```bash
     sudo apt update
     sudo apt install -y python3-venv
@@ -230,26 +232,26 @@ sudo usermod -aG render,video $LOGNAME
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-    Avaa Windowsissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
+    Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja venv-ympäristön luomiseksi.
     ```bash
     python -m venv lmstudio-env --system-site-packages
     lmstudio-env\Scripts\activate
     ```
 
-    > **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suoritustapaa (Execution Policy) (esim.
-    > asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin voivat suorittaa joitakin PowerShell-komentoja.
+    > **Vinkki**: Windows-käyttäjien tulee ehkä muokata PowerShell-suoritusperiaatettaan (Execution Policy) (esim.
+    > asettamalla se muotoon RemoteSigned tai Unrestricted), ennen kuin he suorittavat joitakin PowerShell-komentoja.
 
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-    Avaa Windowsissa pääte haluamaasi hakemistoon ja luo venv seuraavilla komennoilla.
+    Avaa Windowsissa pääte haluamaasi hakemistoon ja seuraa komentoja venv-ympäristön luomiseksi.
     ```bash
     python -m venv lmstudio-env
     lmstudio-env\Scripts\activate
     ```
 
-    > **Vinkki**: Windows-käyttäjien on ehkä muutettava PowerShellin suoritustapaa (Execution Policy) (esim.
-    > asettamalla se arvoon RemoteSigned tai Unrestricted) ennen kuin voivat suorittaa joitakin PowerShell-komentoja.
+    > **Vinkki**: Windows-käyttäjien tulee ehkä muokata PowerShell-suoritusperiaatettaan (Execution Policy) (esim.
+    > asettamalla se muotoon RemoteSigned tai Unrestricted), ennen kuin he suorittavat joitakin PowerShell-komentoja.
 
 <!-- @device:end -->
 <!-- @os:end -->
@@ -362,15 +364,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (Valinnainen): Ajoympäristöjen (Runtime) vaihtaminen
+#### (Valinnainen): Ajoympäristöjen vaihtaminen
 
-1. Paina näppäimistöltä `Ctrl + Shift + R`. Vaihtoehtoisesti napsauta vasemmalla puolella olevaa `Discover`-välilehteä (suurennuslasi) ja napsauta sitten ponnahdusikkunassa kohtaa `Runtime`.   
-2. Sen jälkeen näet kohdan `Runtime Selections`, jossa avattavaa valikkoa voidaan käyttää ajoympäristön vaihtamiseen.
+1. Paina näppäimistöltä `Ctrl + Shift + R`. Vaihtoehtoisesti napsauta vasemmalla puolella olevaa `Discover`-välilehteä (suurennuslasi) ja napsauta sitten ponnahdusikkunassa kohtaa `Runtime`.
+2. Näet tämän jälkeen kohdan `Runtime Selections`, jossa pudotusvalikkoa voidaan käyttää ajoympäristön vaihtamiseen.
 
 
 ## Seuraavat vaiheet
 
 - **Mukautettu sovellusintegraatio**: Integroi omat Python-skriptisi tai sovelluksesi käyttämällä paikallista OpenAI-yhteensopivaa API:a.
-- **Edistyneet käyttöliittymät**: Yhdistä tehokkaita käyttöliittymiä, kuten Open WebUI, palvelimeesi keskusteluhistoriaa ja persoonien hallintaa varten.
+- **Edistyneet käyttöliittymät**: Yhdistä tehokkaita käyttöliittymiä, kuten Open WebUI, palvelimeesi keskusteluhistorian ja persoonahallinnan käyttöä varten.
 
 Lisää dokumentaatiota löydät osoitteesta: https://lmstudio.ai/docs/developer

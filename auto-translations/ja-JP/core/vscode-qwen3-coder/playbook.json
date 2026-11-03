@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "VSCodeとQwen3-Coderによるローカルコーディング",
-  "description": "ローカルで動作するQwen3-CoderをVS Codeで使用し、プライベートなコードアシスタンスを実現。",
+  "title": "VSCodeとQwen3-Coderによるローカルللで LLM コーディング\n\nWait, let me reconsider without introducing extraneous characters.\n\nVSCodeとQwen3-CoderによるローカルLLMコーディング",
+  "description": "VS Code とローカルで実行中の Qwen3-Coder を使用して、プライベートなコード支援を実現します。",
   "auto_translated": true
 }

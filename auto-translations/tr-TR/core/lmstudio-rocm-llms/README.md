@@ -16,28 +16,30 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-LM Studio, [llama.cpp](https://github.com/ggml-org/llama.cpp) için güçlü, GUI tabanlı bir sarmalayıcıdır ve ayrıca yerel model sunumu için [OpenAI uyumlu bir uç nokta](https://lmstudio.ai/docs/developer/openai-compat) sağlar. LM Studio, modelleri kolayca indirmek ve dağıtmak için basit ama güçlü bir arayüz sunar. LM Studio, AMD kullanıcıları için hem Vulkan hem de AMD ROCm™ yazılım arka uçlarını (runtime olarak adlandırılır) sunar.
+LM Studio, [llama.cpp](https://github.com/ggml-org/llama.cpp) için güçlü, GUI tabanlı bir sarmalayıcıdır ve yerel model sunumu için ayrıca bir [OpenAI uyumlu uç nokta](https://lmstudio.ai/docs/developer/openai-compat) sağlar. LM Studio, modelleri kolayca indirmek ve dağıtmak için basit ama güçlü bir arayüz sunar. LM Studio, AMD kullanıcıları için hem Vulkan hem de AMD ROCm™ yazılım arka uçlarını (çalışma zamanları olarak adlandırılır) sunar.
 
 
 ## Neler Öğreneceksiniz
-- LM Studio'yu yerel donanımınızdan yararlanacak şekilde nasıl yapılandıracağınızı ve kullanacağınızı
+- Yerel donanımınızdan yararlanmak için LM Studio'yu nasıl yapılandıracağınızı ve kullanacağınızı
 - LLM'leri tamamen çevrimdışı bir ortamda nasıl test edip yöneteceğinizi
 - Özel iş akışlarını ve uygulamaları desteklemek için modelleri OpenAI Uyumlu API üzerinden nasıl sunacağınızı
 
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Bellek Yapılandırmasını Ayarlama
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Yazılım Güncellemelerini Kontrol Etme
 
 <!-- @os:linux -->
-> **Not**: VS Code'u AMD Ryzen™ AI Developer Center üzerinden yükleyebilirsiniz. LM Studio için aşağıdaki yükleme talimatlarını izleyin.
+> **Not**: VS Code'u AMD Ryzen™ AI Geliştirici Merkezi üzerinden yükleyebilirsiniz. LM Studio için aşağıdaki yükleme talimatlarını izleyin.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Not**: VS Code veya LM Studio yüklü değilse, bunları AMD Ryzen™ AI Developer Center üzerinden yükleyebilirsiniz. 
+> **Not**: VS Code veya LM Studio yüklü değilse, bunları AMD Ryzen™ AI Geliştirici Merkezi üzerinden yükleyebilirsiniz. 
 <!-- @os:end -->
 
 <!-- @require:software-update -->
@@ -51,7 +53,7 @@ LM Studio, [llama.cpp](https://github.com/ggml-org/llama.cpp) için güçlü, GU
 
 <!-- @require:lmstudio -->
 
-## Modellerin İndirilmesi
+## Modelleri İndirme
 
 <!-- @var:id=lms_model device=halo,halo_box value="gpt-oss-120b" -->
 <!-- @var:id=lms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="qwen3.5-9b" -->
@@ -66,17 +68,17 @@ LM Studio, [llama.cpp](https://github.com/ggml-org/llama.cpp) için güçlü, GU
 <!-- @require:lmstudio-models-qwen3-9b -->
 <!-- @device:end -->
 
-## LLM ile Sohbet Etme
-Tamamen yerel olarak ChatGPT düzeyinde bir LLM ile sohbet etmeye nasıl başlayacağınızı öğrenin.  
+## Bir LLM ile Sohbet Etme
+ChatGPT düzeyinde bir LLM ile tamamen yerel olarak nasıl sohbet etmeye başlayacağınızı öğrenin.  
 
 1. LMStudio'yu açın. 
-2. Model Yükleyiciyi açmak için `Ctrl + L` tuşlarına basın, `Manually choose model load parameters` seçeneğini seçin ve `${model_name}` üzerine tıklayın
+2. Model Yükleyici'yi açmak için `Ctrl + L` tuşlarına basın, `Manually choose model load parameters` seçeneğini seçin ve `${model_name}` üzerine tıklayın
 3. "show advanced settings" seçeneğinin işaretli olduğundan emin olun.  
-4. `Context Length` değerini istediğiniz gibi değiştirin. Daha yüksek bağlam uzunluğu, daha fazla model belleği anlamına gelir, ancak daha fazla sistem belleği kullanılır. Bu kılavuz için önerilen değer 4096'dır.
-5. `GPU Offload` değerinin maksimum olarak ayarlandığından ve `Flash Attention` seçeneğinin açık olduğundan emin olun (Cache Quantizations kapalı kalabilir)
+4. `Context Length` değerini istediğiniz gibi değiştirin. Daha yüksek bağlam uzunluğu, daha fazla model belleği anlamına gelir ancak daha fazla sistem belleği kullanılır. Bu senaryo için önerilen değer 4096'dır.
+5. `GPU Offload` seçeneğinin maksimuma ayarlandığından ve `Flash Attention` seçeneğinin açık olduğundan emin olun (Cache Quantizations kapalı kalabilir)
 6. `Remember settings` seçeneğini işaretleyin ve `Load Model` üzerine tıklayın.
-7. Sohbet penceresinde değilseniz, `Ctrl + 1` tuşlarına basın veya ekranın sol üst köşesindeki 👾 düğmesine tıklayın.
-8. Bir mesaj gönderin ve modelle etkileşime başlayın!
+7. Sohbet penceresinde değilseniz, `Ctrl + 1` tuşlarına basın veya ekranın sol üst kısmındaki 👾 düğmesine tıklayın.
+8. Bir mesaj gönderin ve modelle etkileşime geçmeye başlayın!
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -153,19 +155,19 @@ lms chat "$ID" -p "Reply with exactly: OK"
 </p>
 <!-- @device:end -->
 
-> **İpucu**: Bağlam uzunluğu, modelin belleğini ifade eder. Flash attention, bellek kullanımını azaltırken işlem hızını artırır. GPU Offload, daha hızlı yanıtlar için işlemi grafik kartına aktarır.
+> **İpucu**: Bağlam uzunluğu, modelin belleğini ifade eder. Flash attention, bellek kullanımını azaltırken işlem hızını artırır. GPU Offload, daha hızlı yanıtlar için hesaplamayı grafik kartına kaydırır.
 
-## LLM'leri OpenAI Uyumlu Bir Uç Nokta Üzerinden Sunma
+## OpenAI Uyumlu Uç Nokta Üzerinden LLM'leri Sunma
 
-LM Studio ayrıca LM Studio Server şeklinde OpenAI uyumlu bir uç nokta sunar. Bu, Cline ile birlikte bir ajan tabanlı kodlama iş akışında [burada](../playbooks/vscode-qwen3-coder) zaten gösterilmiştir. Bir başka yaygın kullanım örneği, çıkarım uç noktasına standart HTTP istekleri göndererek LM Studio Server'ı herhangi bir web uygulamasına (React, Node.js, Python) bağlamaktır.
+LM Studio ayrıca LM Studio Server şeklinde OpenAI uyumlu bir uç nokta da sunar. Bu, Cline ile agentik kodlama iş akışında [burada](../playbooks/vscode-qwen3-coder) zaten gösterilmiştir. Bir diğer yaygın kullanım durumu ise, çıkarım (inference) uç noktasına standart HTTP istekleri göndererek LM Studio Server'ı herhangi bir web uygulamasına (React, Node.js, Python) bağlamaktır.
 
 LM Studio Server'ı ayarlamak için aşağıdaki talimatları kullanın:
 
-1. Sol tarafta, `Developer` sekmesine (komut satırı simgesi) tıklayın veya `Ctrl + 2` tuşlarına basın, ardından `Server Settings` üzerine tıklayın.  
-2. (İsteğe bağlı): Modeli LAN'ınız üzerinden sunmak istiyorsanız, `Serve on Local Network` seçeneğini işaretleyin. Bir web sitesiyle veya VS Code içinde kapsamlı çağrılarla kullanmak istiyorsanız, `Enable CORS` seçeneğini işaretleyin. 
+1. Sol tarafta, `Developer` sekmesine (komut satırı simgesi) tıklayın veya `Ctrl + 2` tuşlarına basın ve ardından `Server Settings` üzerine tıklayın.  
+2. (İsteğe bağlı): Modeli LAN'ınız üzerinden sunmak istiyorsanız `Serve on Local Network` seçeneğini işaretleyin. Bir web sitesiyle veya VS Code içinde yoğun çağrılarla kullanmak istiyorsanız `Enable CORS` seçeneğini işaretleyin. 
 3. Sol üst köşede, `Status` önündeki geçiş düğmesine tıklayarak sunucunun çalıştığından emin olun.
-4. Artık OpenAI uyumlu bir uç nokta çalışıyor olacak. Adres genellikle http://127.0.0.1:1234 şeklindedir  
-5. Bir model zaten yüklenmemişse, `Load Model` üzerine tıklayıp daha önce bahsedilen adımları izleyerek yükleyebilirsiniz. 
+4. Artık OpenAI uyumlu bir uç nokta çalışıyor olacaktır. Adres genellikle http://127.0.0.1:1234 şeklindedir  
+5. Bir model henüz yüklenmemişse, daha önce belirtilen adımları izleyerek `Load Model` üzerine tıklayarak yükleyebilirsiniz. 
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -188,15 +190,15 @@ curl -s http://127.0.0.1:1234/v1/models
 
 Bu model artık LM Studio Server uç noktası üzerinden erişilebilir olacak ve aşağıdakiler dahil OpenAI uç noktalarını destekleyecektir:
 
-| Endpoint | Method | Docs |
+| Uç Nokta | Yöntem | Dokümanlar |
 |------------|----------|----------|
 | /v1/models | GET | [Models](https://lmstudio.ai/docs/developer/openai-compat/models) |
 | /v1/responses | POST | [Responses](https://lmstudio.ai/docs/developer/openai-compat/responses) |
 | /v1/chat/completions | POST |	[Chat Completions](https://lmstudio.ai/docs/developer/openai-compat/chat-completions) |
 | /v1/embeddings | POST | [Embeddings](https://lmstudio.ai/docs/developer/openai-compat/embeddings) |
 | /v1/completions | POST | [Completions](https://lmstudio.ai/docs/developer/openai-compat/completions) |
-#### Örnek: Uç Noktanızı Ping Etme
-OpenAI Uyumlu uç noktayı oluşturduktan sonra, bunu bir Python geliştirici ortamına (VSCode gibi) nasıl entegre edeceğinizi ve sisteminizi yerel bir API Sağlayıcı olarak nasıl kullanacağınızı inceleyelim.
+#### Örnek: Uç Noktanızı Ping ile Test Etme
+OpenAI Uyumlu uç noktayı yeni oluşturduğumuza göre, bunu bir Python geliştirici ortamına (VSCode gibi) nasıl entegre edeceğimize ve sisteminizi yerel bir API Sağlayıcısı olarak nasıl kullanacağımıza bakalım.
 
 1. Bir Python sanal ortamı oluşturun:
 
@@ -236,8 +238,7 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **İpucu**: Windows kullanıcılarının, bazı Powershell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmesi gerekebilir (örneğin,
-    > RemoteSigned veya Unrestricted olarak ayarlamak gibi).
+    > **İpucu**: Windows kullanıcılarının bazı Powershell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini (örneğin RemoteSigned veya Unrestricted olarak ayarlayarak) değiştirmeleri gerekebilir.
 
 <!-- @device:end -->
 
@@ -248,18 +249,17 @@ sudo usermod -aG render,video $LOGNAME
     lmstudio-env\Scripts\activate
     ```
 
-    > **İpucu**: Windows kullanıcılarının, bazı Powershell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini değiştirmesi gerekebilir (örneğin,
-    > RemoteSigned veya Unrestricted olarak ayarlamak gibi).
+    > **İpucu**: Windows kullanıcılarının bazı Powershell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini (örneğin RemoteSigned veya Unrestricted olarak ayarlayarak) değiştirmeleri gerekebilir.
 
 <!-- @device:end -->
 <!-- @os:end -->
 
-2. OpenAI paketini kurun
+2. OpenAI paketini yükleyin
     ```bash
     pip install openai
     ```
 
-3. Az önce oluşturduğumuz uç noktayı ping etmek için aşağıdaki betiği çalıştırın.
+3. Az önce oluşturduğumuz uç noktayı ping ile test etmek için aşağıdaki betiği çalıştırın.
     ```python
     from openai import OpenAI
 
@@ -362,15 +362,15 @@ lms server stop
 <!-- @test:end --> 
 <!-- @os:end -->
 
-#### (İsteğe Bağlı): Çalışma Zamanları Arasında Geçiş Yapma
+#### (İsteğe Bağlı): Çalışma Zamanları (Runtimes) Arasında Geçiş Yapma
 
-1. Klavyenizde `Ctrl + Shift + R` tuşlarına basın. Alternatif olarak sol taraftaki `Discover` sekmesine (Büyüteç) tıklayın ve ardından açılan pencerede `Runtime` seçeneğine tıklayın.
+1. Klavyenizde `Ctrl + Shift + R` tuşlarına basın. Alternatif olarak sol taraftaki `Discover` sekmesine (Büyüteç simgesi) tıklayın ve ardından açılan pencerede `Runtime` seçeneğine tıklayın.
 2. Ardından, açılır menü kullanılarak çalışma zamanının değiştirilebileceği `Runtime Selections` bölümünü görmelisiniz.
 
 
 ## Sonraki Adımlar
 
 - **Özel Uygulama Entegrasyonu**: Yerel OpenAI uyumlu API'yi kullanarak kendi Python betiklerinizi veya uygulamalarınızı entegre edin.
-- **Gelişmiş Ön Yüzler**: Sohbet geçmişi ve persona yönetimi için sunucunuza Open WebUI gibi güçlü arayüzler bağlayın.
+- **Gelişmiş Ön Yüzler**: Sohbet geçmişi ve persona yönetimi için Open WebUI gibi güçlü arayüzleri sunucunuza bağlayın.
 
 Daha fazla belge için lütfen şu adresi ziyaret edin: https://lmstudio.ai/docs/developer

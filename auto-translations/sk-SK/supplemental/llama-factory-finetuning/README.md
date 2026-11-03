@@ -11,54 +11,56 @@ SPDX-License-Identifier: MIT
 
 ## Prehľad
 
-Efektívne dolaďovanie je nevyhnutné na prispôsobenie veľkých jazykových modelov (LLM) pre nadväzujúce úlohy. LLaMA Factory je open-source a používateľsky prívetivá platforma, ktorá zjednodušuje trénovanie a dolaďovanie veľkých jazykových modelov a multimodálnych modelov. Umožňuje používateľom lokálne prispôsobiť stovky predtrénovaných modelov s minimálnym kódovaním.
+Efektívne doladenie (fine-tuning) je kľúčové pre prispôsobenie veľkých jazykových modelov (LLM) konkrétnym úlohám. LLaMA Factory je open-source a používateľsky prívetivá platforma, ktorá zjednodušuje trénovanie a doladenie veľkých jazykových modelov a multimodálnych modelov. Umožňuje používateľom lokálne prispôsobiť stovky predtrénovaných modelov s minimálnym množstvom kódovania.
 
-Táto príručka vás naučí, ako doladiť LLM pomocou LLaMA Factory na lokálnom hardvéri AMD.
+Táto príručka vás naučí, ako doladiť LLM pomocou LLaMA Factory na vašom lokálnom hardvéri AMD.
 
 <!-- @device:stx,krk -->
-> **Poznámka:** Techniky dolaďovania v tejto príručke vyžadujú aspoň **32 GB systémovej RAM**, pričom aspoň **16 GB z nej musí byť k dispozícii pre GPU** (týchto 16 GB je súčasťou 32 GB, nie navyše k nim).
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň **32 GB systémovej RAM**, pričom aspoň **16 GB z toho musí byť dostupných pre GPU** (týchto 16 GB je súčasťou 32 GB, nie navyše).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Poznámka:** Techniky dolaďovania v tejto príručke vyžadujú aspoň **16 GB celkovej pamäte GPU** a **32 GB systémovej RAM**.
-> - V systéme Windows celková pamäť GPU kombinuje vyhradenú VRAM grafickej karty so zdieľanou pamäťou GPU (vypožičanou zo systémovej RAM).
-> - Preto karty s menej ako 16 GB vyhradenej VRAM môžu túto príručku stále spustiť pomocou zdieľanej pamäte GPU na doplnenie rozdielu.
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú aspoň **16 GB celkovej pamäte GPU** a **32 GB systémovej RAM**.
+> - V systéme Windows sa celková pamäť GPU skladá z vyhradenej VRAM grafickej karty a zdieľanej pamäte GPU (vypožičanej zo systémovej RAM).
+> - Preto karty s menej ako 16 GB vyhradenej VRAM môžu túto príručku stále spustiť pomocou zdieľanej pamäte GPU, ktorá doplní rozdiel.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Poznámka:** Techniky dolaďovania v tejto príručke vyžadujú grafickú kartu s aspoň **16 GB vyhradenej pamäte GPU** a **32 GB systémovej RAM**.
-> - V systéme Linux prebieha trénovanie výlučne vo vyhradenej VRAM grafickej karty.
-> - Nepoužíva sa prechod na zdieľanú pamäť GPU (systémovú RAM), keď dôjde VRAM.
-> - Kartám s menej ako 16 GB vyhradenej VRAM dôjde pamäť počas trénovania na Linuxe, aj keď má systém veľa RAM.
+> **Poznámka:** Techniky doladenia v tejto príručke vyžadujú grafickú kartu s aspoň **16 GB vyhradenej pamäte GPU** a **32 GB systémovej RAM**.
+> - V systéme Linux prebieha trénovanie výhradne vo vyhradenej VRAM grafickej karty.
+> - Pri vyčerpaní VRAM sa nevykonáva prechod na zdieľanú pamäť GPU (systémovú RAM).
+> - Kartám s menej ako 16 GB vyhradenej VRAM dôjde počas trénovania na Linuxe pamäť, aj keď má systém dostatok RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## Čo sa naučíte
 
 - Ako nastaviť LLaMA Factory so softvérom AMD ROCm™
-- Ako nakonfigurovať parametre dolaďovania LLM (na príklade Qwen/Qwen3-4B-Instruct-2507)
-- Ako spustiť dolaďovanie pomocou LLaMA Factory
-- Ako spustiť inferenciu s doladeným modelom
+- Ako konfigurovať parametre doladenia LLM (na príklade Qwen/Qwen3-4B-Instruct-2507)
+- Ako spustiť doladenie pomocou LLaMA Factory
+- Ako vykonávať inferenciu s doladeným modelom
 - Ako exportovať doladený model
 
 ## Odhadovaný čas
 
 - Trvanie: Spustenie tejto príručky bude trvať približne 60 minút (v závislosti od veľkosti vášho modelu/datasetu a rýchlosti siete).
-- Ďalšie informácie nájdete na [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory).
+- Ďalšie informácie nájdete na stránke [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory).
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Nastavenie konfigurácie pamäte
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Kontrola softvérových aktualizácií
+## Kontrola aktualizácií softvéru
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
-## Inštalácia predpokladov softvéru
+## Inštalácia softvérových predpokladov
 
 <!-- @os:linux -->
 <!-- @test:id=python-prereqs-check timeout=120 hidden=True -->
@@ -82,7 +84,7 @@ pip --version
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -100,7 +102,7 @@ source llamafactory-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -137,7 +139,23 @@ llamafactory-env\Scripts\activate
 ### Inštalácia základných závislostí
 
 <!-- @require:pytorch,driver -->
- 
+
+<!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
+```python
+import sys
+import torch
+
+print(f"Python executable: {sys.executable}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"torch.cuda.is_available(): {torch.cuda.is_available()}")
+
+if not torch.cuda.is_available():
+    raise SystemExit("FAIL: ROCm-enabled PyTorch is not visible in this venv")
+
+print("PASS: ROCm-enabled PyTorch is visible")
+```
+<!-- @test:end -->
+
 ### Inštalácia ďalších závislostí
 
 > **Poznámka**: Uistite sa, že máte verziu Python 3.11, 3.12 alebo 3.13
@@ -166,7 +184,7 @@ python -m pip install huggingface_hub
 
 ### Inštalácia LLaMA Factory
 
-LLaMA Factory závisí od PyTorch. Podľa vyššie uvedených požiadaviek by ste ho mali mať už nainštalovaný.
+LLaMA Factory je závislá od PyTorch. Podľa vyššie uvedených požiadaviek by ste ho už mali mať nainštalovaný.
 
 Stiahnite si zdrojový kód z [oficiálneho GitHub repozitára LLaMA Factory](https://github.com/hiyouga/LlamaFactory) a nainštalujte jeho závislosti.
 
@@ -226,26 +244,26 @@ Príklad výstupu:
   <img src="assets/LlamaFactory-version.png" alt="LlaMaFactory version" width="600"/>
 </p>
 
-Po úspešnej inštalácii LLaMA Factory si na nej spustime dolaďovanie.
+Po úspešnej inštalácii LLaMA Factory si na ňom teraz spustíme doladenie.
 
-## Použitie LLaMA Factory CLI na dolaďovanie
+## Použitie LLaMA Factory CLI na doladenie 
 
-Táto časť sa bude zaoberať prípravou datasetov na dolaďovanie, konfiguráciou parametrov LoRA/QLoRA a spustením dolaďovania LoRA.
+Táto časť sa zaoberá tým, ako pripraviť datasety na doladenie, nakonfigurovať parametre LoRA/QLoRA a spustiť doladenie LoRA.
 
 ### Príprava datasetu
 
-LLaMA Factory podporuje dolaďovacie datasety vo formáte Alpaca a formáte ShareGPT. Všetky dostupné datasety sú definované v súbore [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Ak používate vlastný dataset, uistite sa, že v súbore `dataset_info.json` pridáte popis datasetu a pred trénovaním uvediete názov datasetu. Podrobnosti nájdete v ich dokumentácii [tu](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
+LLaMA Factory podporuje doladenie datasetov vo formáte Alpaca a formáte ShareGPT. Všetky dostupné datasety sú definované v súbore [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json). Ak používate vlastný dataset, uistite sa, že ste pridali popis datasetu do súboru `dataset_info.json` a pred trénovaním ste zadali jeho názov. Podrobnosti nájdete v ich dokumentácii [tu](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html).
 
-V tejto príručke použijeme ako príklad datasety identity a alpaca_en_demo a informácie o datasete nakonfigurujeme v ďalšom kroku.
-### Konfigurácia parametrov jemného doladenia
+V tejto príručke ako príklad použijeme datasety identity a alpaca_en_demo a informácie o datasete nakonfigurujeme v ďalšom kroku.
+### Konfigurácia parametrov jemného dolaďovania
 
-LLaMA Factory podporuje viacero schém jemného doladenia.
+LLaMA Factory podporuje viacero schém jemného dolaďovania.
 
-| Schémy jemného doladenia | Príklady LLaMA Factory |
+| Schémy jemného dolaďovania | Príklady LLaMA Factory |
 |-----------|------|
 | Full-Parameter    | [examples/train_full](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_full) |
-| Jemné doladenie LoRA  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
-| Jemné doladenie QLoRA | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
+| LoRA jemné dolaďovanie  | [examples/train_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_lora) |
+| QLoRA jemné dolaďovanie | [examples/train_qlora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/train_qlora) |
 
 <!-- @test:id=verify-llamafactory-files timeout=60 hidden=True setup=activate-venv -->
 ```python
@@ -268,39 +286,39 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-Tieto ukážkové konfiguračné súbory majú špecifikované parametre modelu, parametre metódy jemného doladenia, parametre množiny údajov, parametre hodnotenia a ďalšie. Môžete si ich nakonfigurovať podľa vlastných potrieb. V tomto sprievodcovi použijeme súbor [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
+Tieto príkladové konfiguračné súbory obsahujú definované parametre modelu, parametre metódy jemného dolaďovania, parametre datasetu, parametre vyhodnotenia a ďalšie. Môžete ich nakonfigurovať podľa vlastných potrieb. V tejto príručke použijeme súbor [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml). 
 
 **Vysvetlenie kľúčových parametrov:**
-- `model_name_or_path` - Názov modelu Hugging Face alebo cesta k lokálnemu súboru modelu.
-- `stage` - Fáza trénovania. Možnosti: rm (odmeňovacie modelovanie), pt (predtrénovanie), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
-- `do_train` - true pre trénovanie, false pre hodnotenie
-- `finetuning_type` - Metóda jemného doladenia. Možnosti: freeze, lora, full
-- `lora_rank` - Dimenzionalita nízkohodnostnej matice použitej v LoRA, typické hodnoty: 4, 6, 8, 16 (nižšie hodnoty = menej parametrov = rýchlejšie jemné doladenie; vyššie hodnoty = lepšia adaptácia na úlohu, ale vyššie nároky na zdroje).
-- `lora_target` - Cieľové moduly pre metódu LoRA. Predvolené: all.
-- `dataset` - Množina(y) údajov, ktoré sa majú použiť. Na oddelenie viacerých množín údajov použite „,“
-- `output_dir` - Výstupná cesta jemného doladenia
-- `logging_steps` - Interval zaznamenávania v krokoch
-- `save_steps` - Interval ukladania kontrolného bodu modelu.
-- `overwrite_output_dir` - Či povoliť prepísanie výstupného adresára.
-- `per_device_train_batch_size` - Veľkosť dávky trénovania na zariadenie.
+- `model_name_or_path` - Názov modelu z Hugging Face alebo cesta k lokálnemu súboru modelu.
+- `stage` - Fáza tréningu. Možnosti: rm (reward modeling), pt (pretrain), sft (Supervised Fine-Tuning), PPO, DPO, KTO, ORPO.
+- `do_train` - true pre tréning, false pre vyhodnotenie
+- `finetuning_type` - Metóda jemného dolaďovania. Možnosti: freeze, lora, full
+- `lora_rank` - Dimenzionalita matice s nízkou hodnosťou (low-rank) použitej v metóde LoRA, typické hodnoty: 4, 6, 8, 16 (nižšie hodnoty = menej parametrov = rýchlejšie jemné dolaďovanie; vyššie hodnoty = lepšia adaptácia na úlohu, ale vyššie nároky na zdroje).
+- `lora_target` - Cieľové moduly pre metódu LoRA. Predvolená hodnota: all.
+- `dataset` - Dataset(y), ktoré sa majú použiť. Viacero datasetov oddeľte čiarkou „,“
+- `output_dir` - Výstupná cesta jemného dolaďovania
+- `logging_steps` - Interval logovania v krokoch
+- `save_steps` - Interval ukladania kontrolných bodov modelu.
+- `overwrite_output_dir` - Či je povolené prepísanie výstupného adresára.
+- `per_device_train_batch_size` - Veľkosť tréningovej dávky (batch) na jedno zariadenie.
 - `gradient_accumulation_steps` - Počet krokov akumulácie gradientu.
 - `learning_rate` - Rýchlosť učenia
-- `num_train_epochs` - Počet epoch trénovania
-- `lr_scheduler_type` - Plán rýchlosti učenia. Možnosti: linear, cosine, polynomial, constant atď.
-- `warmup_ratio` - Pomer zahrievania rýchlosti učenia
+- `num_train_epochs` - Počet tréningových epoch
+- `lr_scheduler_type` - Harmonogram rýchlosti učenia. Možnosti: linear, cosine, polynomial, constant, atď.
+- `warmup_ratio` - Pomer zahrievania (warmup) rýchlosti učenia
 
 <!-- @os:linux -->
-Zmeníme predvolenú hodnotu `lora_rank`, aby sme spustili jemné doladenie na GPU AMD Ryzen™ a AMD Radeon™.
+Upravíme predvolenú hodnotu parametra `lora_rank`, aby sme spustili jemné dolaďovanie na GPU AMD Ryzen™ & AMD Radeon™.
 ```bash
 sed -i.bak 's/lora_rank: 8/lora_rank: 6/g' examples/train_lora/qwen3_lora_sft.yaml
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Aktualizujeme predvolenú konfiguráciu jemného doladenia LoRA pre lepšiu kompatibilitu s GPU AMD Ryzen™ a AMD Radeon™:
-- Nastavíme `lora_rank` z `8` na `6` na zníženie spotreby pamäte počas jemného doladenia.
+Aktualizujeme predvolenú konfiguráciu LoRA jemného dolaďovania pre lepšiu kompatibilitu s GPU AMD Ryzen™ a AMD Radeon™:
+- Nastavíme `lora_rank` z hodnoty `8` na `6`, aby sa znížila spotreba pamäte počas jemného dolaďovania.
 - Použijeme `fp16` namiesto `bf16` pre širšiu kompatibilitu s GPU AMD a nižšiu spotrebu pamäte.
-- Nastavíme `dataloader_num_workers` na `0` v systéme Windows, aby sme predišli chybám typu `"Can't pickle local object<>"` spôsobeným viacprocesovým načítavaním údajov.
+- Nastavíme `dataloader_num_workers` na `0` v systéme Windows, aby sme predišli chybám `"Can't pickle local object<>"` spôsobeným viacprocesovým načítavaním dát.
 
 ```powershell
 $filePath = "examples/train_lora/qwen3_lora_sft.yaml"
@@ -320,13 +338,13 @@ Set-Content -Path $filePath -Value $newContent
 ```
 <!-- @os:end -->
 
-### Spustenie jemného doladenia LLaMA Factory 
+### Spustenie jemného dolaďovania pomocou LLaMA Factory
 
-**llamafactory-cli** je oficiálny nástroj rozhrania príkazového riadka (CLI) pre LLaMA Factory, vyvinutý na zjednodušenie kompletných pracovných postupov LLM (príprava údajov → jemné doladenie → hodnotenie → nasadenie) bez písania zložitého kódu.
+**llamafactory-cli** je oficiálny nástroj s rozhraním príkazového riadka (CLI) pre LLaMA Factory, vyvinutý na zjednodušenie kompletných pracovných postupov pre LLM (príprava dát → jemné dolaďovanie → vyhodnotenie → nasadenie) bez nutnosti písať zložitý kód.
 
-Na trénovanie/jemné doladenie je **llamafactory-cli train** kľúčovým podpríkazom CLI nástroja LLaMA Factory. Abstrahuje pracovné postupy jemného doladenia (predspracovanie údajov, ladenie hyperparametrov, hardvérovú optimalizáciu) do jediného CLI príkazu, podporuje viacero paradigiem jemného doladenia (LoRA/QLoRA/Full Fine-Tuning) a je optimalizovaný pre GPU s nízkymi zdrojmi (napr. QLoRA na 16 GB VRAM).
+Pre tréning/jemné dolaďovanie je **llamafactory-cli train** hlavným subprikazom rozhrania CLI pre LLaMA Factory. Abstrahuje pracovné postupy jemného dolaďovania (predspracovanie dát, ladenie hyperparametrov, hardvérovú optimalizáciu) do jediného CLI príkazu, podporuje viacero paradigiem jemného dolaďovania (LoRA/QLoRA/Full Fine-Tuning) a je optimalizovaný pre GPU s nízkymi zdrojmi (napr. QLoRA na 16 GB VRAM).
 
-Jemné doladenie LLaMA Factory môžete spustiť pomocou nasledujúceho príkazu, ktorý je založený na upravenom konfiguračnom súbore jemného doladenia Qwen3 LoRA.
+Jemné dolaďovanie pomocou LLaMA Factory môžete spustiť nasledujúcim príkazom, ktorý vychádza z upraveného konfiguračného súboru pre jemné dolaďovanie Qwen3 LoRA.
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -397,12 +415,19 @@ if (Select-String -Path $filePath -Pattern '^save_total_limit:' -Quiet) {
     Add-Content -Path $filePath -Value "save_total_limit: 1"
 }
 
+# Single-process dataset preprocessing to avoid Windows multiprocessing errors.
+if (Select-String -Path $filePath -Pattern '^preprocessing_num_workers:' -Quiet) {
+    (Get-Content -Path $filePath) -replace '^preprocessing_num_workers:.*', 'preprocessing_num_workers: 1' | Set-Content -Path $filePath
+} else {
+    Add-Content -Path $filePath -Value "preprocessing_num_workers: 1"
+}
+
 llamafactory-cli train examples/train_lora/qwen3_lora_sft_ci.yaml
 ```
 <!-- @test:end --> 
 <!-- @os:end -->
 
-Po spustení jemného doladenia LLM sa všetky vygenerované výstupy ukladajú do adresára "output_dir", vrátane súborov kontrolných bodov modelu, konfiguračných súborov a metrík trénovania.
+Po spustení jemného dolaďovania LLM sa všetky vygenerované výstupy uložia v priečinku "output_dir", vrátane súborov kontrolných bodov modelu, konfiguračných súborov a metrík tréningu.
 
 <p align="center">
   <img src="assets/qwen3_lora.png" alt="Qwen3 LoRA Fine-tuning" width="600"/>
@@ -439,9 +464,9 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end --> 
 
-### Otestovanie jemne doladeného modelu 
+### Otestovanie jemne doladeného modelu
 
-**llamafactory-cli chat** je určený na interaktívny chat/inferenciu s LLM (základnými aj LoRA jemne doladenými modelmi). LLaMA Factory poskytuje ukážkovú konfiguráciu na spustenie inferencie jemne doladených modelov v [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Túto ukážkovú konfiguráciu môžete tiež upraviť a zmeniť nastavenia, napríklad inferenčný backend.
+**llamafactory-cli chat** je určený na interaktívny chat/inferenciu s LLM (základnými aj LoRA jemne doladenými modelmi). LLaMA Factory poskytuje príkladovú konfiguráciu na spustenie inferencie jemne doladených modelov v [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference). Túto príkladovú konfiguráciu môžete tiež upraviť, aby ste zmenili nastavenia, napríklad inferenčný backend.
 
 Na otestovanie jemne doladeného modelu Qwen3 použite nasledujúci príkaz:
 
@@ -457,7 +482,7 @@ Nižšie je zobrazený príklad chatu s použitím jemne doladeného modelu:
 
 ### Export jemne doladeného modelu
 
-Pre produkčné prípady použitia je potrebné zlúčiť predtrénovaný model a LoRA adaptér a exportovať ich do jedného modelu. Tento zlúčený model sa dá použiť ako bežný súbor modelu Hugging Face. LLaMA Factory poskytuje ukážkové konfigurácie v [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
+Pre produkčné použitie je potrebné zlúčiť predtrénovaný model a LoRA adaptér a exportovať ich do jedného modelu. Tento zlúčený model je možné použiť ako bežný súbor modelu Hugging Face. LLaMA Factory poskytuje príkladové konfigurácie v [examples/merge_lora](https://github.com/hiyouga/LlamaFactory/tree/main/examples/merge_lora).
 
 Na export jemne doladeného modelu Qwen3 použite nasledujúci príkaz:
 
@@ -565,7 +590,7 @@ if not model_files:
 
 print("PASS: Exported merged model output looks correct")
 ```
-<!-- @test:end --> 
+<!-- @test:end -->
 ## Používanie LLaMA Factory GUI
 
 `LLaMA-Factory` tiež podporuje bezkódové doladenie LLM prostredníctvom webového rozhrania v prehliadači.
@@ -575,17 +600,17 @@ Na jeho otvorenie použite nasledujúci príkaz:
 ```bash
 llamafactory-cli webui
 ```
-`LlamaFactory Web UI` ponúka prehľadné rozhranie na správu pracovných postupov strojového učenia vrátane trénovania, vyhodnocovania, predikcie, chatovania a exportu modelov. Tu je krátky prehľad jednotlivých kariet:
+Rozhranie `LlamaFactory Web UI` ponúka prehľadné rozhranie na správu pracovných postupov strojového učenia, vrátane trénovania, hodnotenia, predikcie, chatovania a exportovania modelov. Tu je stručný úvod ku každej karte:
 
-* **Train**: Táto karta umožňuje vybrať model a dataset, nakonfigurovať parametre trénovania a spustiť proces trénovania. Je dôležité porozumieť povinným aj voliteľným parametrom, aby ste optimalizovali nastavenie trénovania.
-* **Evaluate & Predict**: Po dokončení trénovania môžete pomocou tejto karty vyhodnotiť výkon modelu a vykonať predikcie. Poskytuje prehľad o presnosti a efektivite modelu na nových dátach.
-* **Chat**: Po dokončení trénovania načítajte model na karte Chat, aby ste s ním mohli komunikovať a vidieť výsledky svojej práce. Táto funkcia umožňuje komunikáciu s natrénovaným modelom v reálnom čase.
-* **Export**: Táto karta uľahčuje export natrénovaných modelov na nasadenie alebo ďalšie použitie. Modely môžete uložiť v rôznych formátoch vhodných pre rôzne aplikácie.
+* **Train**: Táto karta vám umožňuje vybrať model a dataset, nakonfigurovať parametre trénovania a spustiť proces trénovania. Je dôležité rozumieť povinným a voliteľným parametrom, aby ste optimalizovali nastavenie trénovania.
+* **Evaluate & Predict**: Po trénovaní môžete pomocou tejto karty vyhodnotiť výkon modelu a robiť predikcie. Poskytuje prehľad o presnosti a efektívnosti modelu na nových dátach.
+* **Chat**: Po dokončení trénovania načítajte model na karte Chat, aby ste s ním mohli komunikovať a videli výsledky svojej práce. Táto funkcia umožňuje komunikáciu s natrénovaným modelom v reálnom čase.
+* **Export**: Táto karta umožňuje export natrénovaných modelov na nasadenie alebo ďalšie použitie. Modely môžete uložiť v rôznych formátoch vhodných pre rôzne aplikácie.
 
-Pre podrobné informácie vám odporúčame pozrieť si oficiálnu dokumentáciu v [LlamaFactory GitHub repository](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) a [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Okrem toho [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) poskytuje cenné informácie o rozhraní a jeho funkciách.
+Pre podrobné pokyny vám odporúčame pozrieť si oficiálnu dokumentáciu v [repozitári LlamaFactory na GitHub](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio) a na [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest). Okrem toho [Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) poskytuje cenné informácie o rozhraní a jeho funkciách.
 
 ## Ďalšie kroky
-- Vyskúšajte rôzne modely, ako napríklad `gpt-oss` a ďalšie najmodernejšie modely.
+- Vyskúšajte rôzne modely, ako napríklad `gpt-oss` a ďalšie modely na najvyššej úrovni.
 - Experimentujte s rôznymi backendmi na doladenom modeli
- 
+
 Ďalšiu dokumentáciu nájdete na: https://llamafactory.readthedocs.io/en/latest/

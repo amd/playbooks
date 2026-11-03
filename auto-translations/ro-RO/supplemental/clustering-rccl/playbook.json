@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "Clusterizarea a două sisteme Ryzen™ AI Halo cu RCCL",
-  "description": "Configurați un cluster multi-nod folosind două dispozitive Ryzen™ AI Halo cu RCCL pentru sarcini de lucru distribuite",
+  "title": "Gruparea a două Ryzen™ AI Halos cu RCCL",
+  "description": "Configurați un cluster multi-nod utilizând două dispozitive Ryzen™ AI Halo cu RCCL pentru sarcini de lucru distribuite",
   "auto_translated": true
 }

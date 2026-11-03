@@ -6,11 +6,9 @@ SPDX-License-Identifier: MIT
 
 ### Node.js
 
-Node.js 22.22.1 LTS er den anbefalte versjonen for denne plattformen.
-
 <!-- @os:windows -->
 
-1. Last ned Windows 64-bit-installasjonsprogrammet fra [nodejs.org](https://nodejs.org/dist/v20.19.2/node-v20.19.2-x64.msi)
+1. Last ned Windows 64-bit-installasjonsprogrammet fra [nodejs.org](https://nodejs.org/en/download/)
 2. Kjør installasjonsprogrammet og følg instruksjonene
 3. Bekreft installasjonen:
 ```cmd
@@ -38,4 +36,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **Merk**: Se [Node.js-nedlastinger](https://nodejs.org/en/download/) for flere installasjonsalternativer og plattformer.
+> **Merk**: Se [Node.js Downloads](https://nodejs.org/en/download/) for flere installasjonsalternativer og plattformer.

@@ -113,13 +113,41 @@ Instructions for discrete Radeon GPUs
 |-----------|----------|--------------|
 | `halo_box` | STX Halo | AMD Ryzen™ AI Halo Developer Platform |
 | `halo` | STX Halo | AMD Ryzen™ AI Max+ |
+| `grgh_box` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series (Gorgon Halo Box) |
+| `grgh` | Gorgon Halo | AMD Ryzen™ AI Max+ 400 Series |
+| `mdsh_box` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series (Medusa Halo Box) |
+| `mdsh` | Medusa Halo | AMD Ryzen™ AI Max+ 500 Series |
 | `stx` | STX Point | AMD Ryzen™ AI 300 HX |
 | `krk` | Krackan Point | AMD Ryzen™ AI 300 |
+| `grgp` | Gorgon Point | AMD Ryzen™ AI 400 HX |
+| `mdsp` | Medusa Point | AMD Ryzen™ AI 500 HX |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 | `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
 
 Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
+
+> **Note — device tags vs. actual runners.** Some device IDs above are declared
+> for upcoming hardware (e.g. the Gorgon `grgh_box`/`grgp` and Medusa
+> `mdsh_box`/`mdsh`/`mdsp` tags) but do **not** yet have physical CI runners. A
+> tag can be *recognized* everywhere without being *tested*, so these are wired
+> only in the declarative places and deliberately left out of the two files that
+> actually schedule jobs. When the hardware arrives, wire a new tag up in this
+> order:
+>
+> 1. **Recognition / display (already done for the tags above):**
+>    - `playbooks/README.md` — this device table
+>    - `.github/scripts/run_playbook_tests.py` — `VALID_DEVICES`
+>    - `.github/workflows/test-playbooks.yml` and `restart-runners.yml` — the `device` / `group` dropdown choices
+>    - `.github/orchestrai-config.yml` — `device_families` (and `device_to_gfx` once the gfx target is known)
+>    - `.github/ISSUE_TEMPLATE/*.yml` — the hardware dropdowns
+>    - `website/src/types/playbook.ts` and the dashboard route/label files — internal preview only
+> 2. **Only once a real runner exists — this is what schedules CI jobs:**
+>    - `.github/runners.json` — register the machine (name, os, group = the device tag)
+>    - each playbook's `playbook.json` — add the tag under `tested_platforms` (and `required_platforms` if it should gate merges)
+>
+> Adding a tag to step 2 before a runner is registered queues jobs that never
+> run, so hold those two edits until the hardware is online.
 
 ### Shared Content Tags
 
@@ -192,6 +220,14 @@ To edit an existing playbook:
   "title": "My Playbook Title",
   "description": "Brief description for the card (100-150 chars)",
   "time": 45,
+  "authors": [
+    {
+      "name": "First Last",
+      "github": "your-handle",
+      "github_url": "https://github.com/your-handle",
+      "type": "amd"
+    }
+  ],
   "supported_platforms": { "halo": ["windows", "linux"] },
   "difficulty": "intermediate",
   "published": true,
@@ -205,14 +241,42 @@ To edit an existing playbook:
 | `title` | Yes | Display title |
 | `description` | Yes | Card description (100–150 characters) |
 | `time` | Yes | Completion time in minutes |
+| `authors` | Yes | List of credited authors (see below). Use the anonymous placeholder if unknown |
 | `supported_platforms` | Yes | Device → OS map controlling which platforms/devices appear in the UI, e.g. `{ "halo": ["windows", "linux"] }` |
 | `tested_platforms` | No | Device → OS map of CI-tested combinations, e.g. `{ "halo": ["windows", "linux"], "krk": ["linux"] }` |
 | `required_platforms` | No | Subset of `tested_platforms` where CI failure blocks merges |
 | `published` | Yes | Set `true` to show on website |
+| `published_date` | Auto | `YYYY-MM-DD`, stamped by CI from git history. **Do not hand-edit** |
+| `updated_date` | Auto | `YYYY-MM-DD`, refreshed by CI on each change. **Do not hand-edit** |
 | `difficulty` | No | `"beginner"`, `"intermediate"`, or `"advanced"` |
-| `isNew` | No | Shows "New" badge |
+| `isNew` | Auto | `true` on the 3 most recently published playbooks, else `false`; set by CI. **Do not hand-edit** |
 | `isFeatured` | No | Displays prominently at top |
 | `tags` | No | Keywords for filtering |
+
+### Authors
+
+`authors` is a list so a playbook can credit co-authors. Each entry has:
+
+| Key | Description |
+|-----|-------------|
+| `name` | Author's display name, e.g. `"Daniel Holanda"` |
+| `github` | GitHub handle, or `null` if unknown |
+| `github_url` | Full profile URL, e.g. `"https://github.com/your-handle"`, or `null`. Must match `github` (both set or both null) |
+| `type` | `"amd"` for AMD authors, `"community"` for external contributors |
+
+If you don't know the author, use the anonymous placeholder:
+
+```json
+"authors": [{ "name": "Anonymous", "github": null, "github_url": null, "type": "community" }]
+```
+
+**Dates and the New tag are automatic.** The Playbook Metadata workflow stamps
+`published_date` / `updated_date` from git history (`published_date` is set once
+from the first commit and never changed; `updated_date` tracks the latest change),
+then sets `isNew` on the 3 most recently published playbooks and clears it on the
+rest. Leave all three out of new playbooks — CI fills them in via a PR after
+merge. A brand-new playbook ranks newest even before its date is stamped, so it
+is marked New immediately.
 
 ---
 

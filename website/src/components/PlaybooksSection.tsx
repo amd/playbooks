@@ -125,7 +125,7 @@ export default function PlaybooksSection({ activeDevice, selectedDevice, onSelec
             </svg>
           </div>
           <div className="flex items-center gap-1.5">
-            {isHaloSelected && playbook.category === "core" && !(platformFilter === "linux" && (playbook.id === "lmstudio-rocm-llms" || playbook.id === "vscode-qwen3-coder")) && (
+            {isHaloSelected && playbook.category === "core" && playbook.id !== "lmstudio-rocm-llms" && !(platformFilter === "linux" && playbook.id === "vscode-qwen3-coder") && (
               <PreinstalledBadge />
             )}
             {playbook.isNew && (

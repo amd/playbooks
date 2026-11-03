@@ -16,17 +16,20 @@ SPDX-License-Identifier: MIT
 
 ## סקירה כללית
 
-רוצים להריץ מודלים חזקים של בינה מלאכותית לשפה על החומרה שלכם? מדריך זה יראה לכם כיצד.
-מדריך זה משתמש ב-PyTorch המופעל על ידי תוכנת AMD ROCm™ כדי להריץ מודלים שיכולים לסכם מסמכים, לענות על שאלות, ליצור טקסט ועוד, הכל באופן מקומי.
+
+רוצים להריץ מודלי שפה עוצמתיים של AI על החומרה שלכם? המדריך הזה מראה לכם איך.
+מדריך זה משתמש ב-PyTorch, המופעל על ידי תוכנת AMD ROCm™, כדי להריץ מודלים שיכולים לסכם מסמכים, לענות על שאלות, לייצר טקסט ועוד, הכול ריצה מקומית.
 
 ## מה תלמדו
 
 - הרצת מודלי LLM כמו gpt-oss-20b ו-qwen3.5-4B באופן מקומי באמצעות PyTorch ו-ROCm
 - יצירת כלי לסיכום מסמכים באמצעות מודלי LLM
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## הגדרת תצורת הזיכרון
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## בדיקת עדכוני תוכנה
@@ -41,8 +44,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-במערכת Linux, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv עם ROCm+Pytorch מותקנים מראש.
-<!-- @test:id=create-venv timeout=120 -->
+במערכת Linux, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv עם ROCm+Pytorch כבר מותקנים.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -60,8 +63,8 @@ source pytorch-env/bin/activate
 sudo usermod -aG render,video $LOGNAME
 ```
 
-במערכת Linux, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
-<!-- @test:id=create-venv timeout=120 -->
+במערכת Linux, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -76,8 +79,8 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-במערכת Windows, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv עם ROCm+Pytorch מותקנים מראש.
-<!-- @test:id=create-venv timeout=60 -->
+במערכת Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv עם ROCm+Pytorch כבר מותקנים.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
 pytorch-env\Scripts\activate
@@ -87,8 +90,8 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-במערכת Windows, פתחו מסוף בתיקייה לבחירתכם ובצעו את הפקודות ליצירת venv.
-<!-- @test:id=create-venv timeout=60 -->
+במערכת Windows, פתחו טרמינל בתיקייה לבחירתכם ופעלו לפי הפקודות ליצירת venv.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
 pytorch-env\Scripts\activate
@@ -98,7 +101,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 > **טיפ**: ייתכן שמשתמשי Windows יצטרכו לשנות את מדיניות ההרצה (Execution Policy) של PowerShell שלהם (למשל,
-> להגדיר אותה כ-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות ה-Powershell.
+> להגדיר אותה ל-RemoteSigned או Unrestricted) לפני הרצת חלק מפקודות ה-Powershell.
 
 <!-- @os:end -->
 
@@ -114,7 +117,7 @@ pytorch-env\Scripts\activate
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -122,10 +125,17 @@ pip install transformers==4.57.1 safetensors==0.6.2 accelerate sentencepiece pro
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+> **הערה:** אם טעינת המודל נכשלת או אוזל הזיכרון, נסו להתקין את חבילת ה-`kernels` כדי לטעון את המודל עם קוונטיזציה מותאמת.
+>
+> ```bash
+> # Use this version which is compatible with the Transformers version
+> pip install "kernels==0.14.1" 
+> ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
@@ -140,7 +150,7 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
+pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -148,12 +158,12 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf
 
 ## התחלה מהירה עם סקריפטים לדוגמה
 
-מדריך זה כולל סקריפטים מוכנים לשימוש. לחצו עליהם כדי לצפות בהם ולהוריד אותם לאותה תיקייה של הסביבה שיצרתם.
+מדריך זה כולל סקריפטים מוכנים לשימוש. לחצו עליהם כדי לצפות ולהוריד אותם לאותה תיקייה כמו הסביבה שיצרתם.
 
 | סקריפט | תיאור | שימוש |
 |--------|-------------|-------|
-| [run_llm.py](assets/run_llm.py) | יצירת טקסט בסיסית עם LLM | `python run_llm.py` |
-| [summarizer.py](assets/summarizer.py) | כלי לסיכום מסמכים עם תמיכת Harmony | `python summarizer.py --file document.txt` |
+| [run_llm.py](assets/run_llm.py) | יצירת טקסט בסיסית באמצעות LLM | `python run_llm.py` |
+| [summarizer.py](assets/summarizer.py) | מסכם מסמכים עם תמיכת Harmony | `python summarizer.py --file document.txt` |
 
 <!-- @test:id=verify-scripts timeout=30 hidden=True -->
 ```python
@@ -179,18 +189,18 @@ for script in ['run_llm.py', 'summarizer.py']:
 <!-- @test:end -->
 
 שני הסקריפטים תומכים ב:
-- בחירת מודל באמצעות דגל `--model`
-- עיצוב תבנית שיחה (chat template) עבור הנחיה תקינה של המודל, שימושי במיוחד לסיכום מסמכים
+- בחירת מודל באמצעות הדגל `--model`
+- עיצוב תבנית שיחה (chat template) לניסוח הנחיות מדויק למודל, שימושי במיוחד לסיכום מסמכים
 
-## טעינה והרצה של מודל ה-LLM הראשון שלכם
+## טעינה והרצה של ה-LLM הראשון שלכם
 
-הסקריפט המצורף [run_llm.py](assets/run_llm.py) מדגים כיצד ליצור טקסט באמצעות מודלי LLM תוך שימוש ב-PyTorch ו-AMD ROCm.
+הסקריפט המצורף [run_llm.py](assets/run_llm.py) מדגים כיצד ליצור טקסט עם מודלי LLM באמצעות PyTorch ו-AMD ROCm.
 
-> **הערה:** כאשר אתם טוענים מודל, Hugging Face Transformers בודקת תחילה את המטמון המקומי שלה (`~/.cache/huggingface/hub` במערכת Linux, `C:\Users\<user>\.cache\huggingface\hub` במערכת Windows). אם המודל אינו שמור במטמון, הוא יורד אוטומטית מ-huggingface.co. ההרצה הראשונה עשויה לקחת מספר דקות, בהתאם לגודל המודל ומהירות הרשת.
+> **הערה:** כאשר אתם טוענים מודל, Hugging Face Transformers בודקת תחילה את המטמון המקומי שלה (`~/.cache/huggingface/hub` במערכת Linux, `C:\Users\<user>\.cache\huggingface\hub` במערכת Windows). אם המודל אינו נמצא במטמון, הוא מורד באופן אוטומטי מ-huggingface.co. הריצה הראשונה עשויה לקחת מספר דקות, בהתאם לגודל המודל ומהירות הרשת.
 
-הקטע שלהלן מדגים כיצד להשתמש במודל ולהתאים אישית את השאלות הנשאלות.
+הקטע שלהלן מראה כיצד להשתמש במודל ולהתאים אישית את השאלות הנשאלות.
 
-<!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
+<!-- @test:id=verify-imports timeout=300 hidden=True setup=activate-venv -->
 ```python
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -212,7 +222,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    disable_mmap=True
 )
 ```
 <!-- @test:end -->
@@ -263,11 +274,11 @@ python run_llm.py --model ${hf_model}
 <!-- @test:end -->
 
 
-## בניית כלי לסיכום מסמכים
+## בניית מסכם מסמכים
 
-לאחר שיצרתם פלט מקומי ממודל LLM, תוכלו להמשיך משם ולבנות כלי מעשי לסיכום מסמכים. בסעיף זה תשתמשו בסקריפט [summarizer.py](assets/summarizer.py) כדי להזין קובץ txt. ולייצר באופן אוטומטי סיכום תמציתי, הכל תוך הרצה מקומית על ה-GPU שלכם.
+עכשיו כשכבר יצרתם פלט LLM מקומי, תוכלו להמשיך משם על ידי בניית מסכם מסמכים מעשי. בסעיף זה תשתמשו בסקריפט [summarizer.py](assets/summarizer.py) כדי להזין קובץ txt. ולייצר באופן אוטומטי סיכום תמציתי, הכול ריצה מקומית על ה-GPU שלכם.
 
-הסקריפט מתוכנן לעבוד ישר מהקופסה. פתחו את הסקריפט בעורך כדי לחקור את הקוד, להתאים אישית את ההנחיות (prompts) ולכוונן פרמטרים כמו אורך וטמפרטורה.
+הסקריפט מיועד לעבוד מיד לאחר ההתקנה. פתחו את הסקריפט בעורך כדי לחקור את הקוד, להתאים אישית את ההנחיות (prompts), ולכוונן פרמטרים כמו אורך וטמפרטורה.
 
 <!-- @test:id=run-summarizer timeout=1000 hidden=True setup=activate-venv -->
 ```bash
@@ -291,28 +302,27 @@ python summarizer.py --file document.txt --temperature 0.5
 python summarizer.py --file document.txt --max-length 400
 ```
 
-## הכירו את פרמטרי היצירה
+## מידע על פרמטרי יצירה
 
-| פרמטר | מה הוא שולט בו | ערכים טיפוסיים |
+| פרמטר | מה הוא שולט | ערכים אופייניים |
 |-----------|------------------|----------------|
-| `max_new_tokens` | האורך המקסימלי של הפלט של ה-LLM | השתמשו ב-50–500 טוקנים עבור סיכומים. (טוקן אחד שווה בערך ל-0.75 מילים באנגלית) |
-| `temperature` | יצירתיות. ערכים נמוכים הופכים אותה למרוכזת, בעוד שערכים גבוהים מגיעים עם יותר בלתי-צפיות | - **0.1–0.3**: ממוקד, דטרמיניסטי (טוב לסיכומים) <br> **0.5–0.7**: מאוזן (לשימוש כללי) <br> **0.8–1.0**: יצירתי, מגוון (סיעור מוחות) |
-| `top_p` | דגימת גרעין (Nucleus Sampling) - ערכים נמוכים מגבילים את המודל לפלטים צרים יותר | **0.1-0.5**: קפדני, צפוי <br> **0.9-0.95**: (סטנדרטי, טבעי, שיחתי) |
+| `max_new_tokens` | האורך המקסימלי של פלט ה-LLM | השתמשו ב-50–500 טוקנים לסיכומים. (טוקן אחד שווה בערך ל-0.75 מילים באנגלית) |
+| `temperature` | יצירתיות. ערכים נמוכים הופכים אותו למרוכז, בעוד ערכים גבוהים מביאים ליותר חוסר צפיות | - **0.1–0.3**: ממוקד, דטרמיניסטי (טוב לסיכומים) <br> **0.5–0.7**: מאוזן (שימוש כללי) <br> **0.8–1.0**: יצירתי, מגוון (סיעור מוחות) |
+| `top_p` | דגימת גרעין (Nucleus Sampling) - ערכים נמוכים מגבילים את המודל לפלטים צרים יותר | **0.1-0.5**: מחמיר, צפוי <br> **0.9-0.95**: (סטנדרטי, טבעי, שיחתי) |
 
 
 ## יישומים בעולם האמיתי
 
-- **ניתוח מאמרי מחקר**: חילוץ ממצאים מרכזיים מפרסומים מורכבים לסקירה מהירה
-- **איסוף חדשות**: סיכום כתבות חדשותיות לתמציות או הדגשות יומיות קצרות
-- **פרוטוקולי פגישות**: צמצום תמלולים לפריטי פעולה וסיכומים תמציתיים
+- **ניתוח מאמרים אקדמיים**: חילוץ ממצאים מרכזיים מפרסומים מורכבים לסקירה מהירה
+- **ריכוז חדשות**: סיכום כתבות חדשותיות לתקצירים או הדגשות יומיות קצרות
+- **הערות פגישות**: תמצות תמלולים לפעולות נדרשות וסיכומים תמציתיים
 - **סקירת מסמכים משפטיים**: חילוץ סעיפים או התחייבויות רלוונטיים מטקסטים משפטיים ארוכים במהירות
-- **תיעוד קוד**: יצירת סקירות תמציתיות של מאגרי קוד והסברי פונקציות
+- **תיעוד קוד**: יצירת סקירות מאגר תמציתיות והסברי פונקציות
+## הצעדים הבאים
 
-## השלבים הבאים
-
-- **כוונון עדין (Fine-tuning)**: התאמת מודלים לתחום או לעגה הספציפיים שלכם לדיוק טוב יותר (ראו מדריכי Fine-tuning)
-- **מערכות RAG**: שילוב מודלי LLM עם אחזור מסמכים לתשובות וחיפוש מודעי-הקשר
+- **Fine-tuning**: התאמת מודלים לתחום או לז'רגון הספציפי שלכם לצורך דיוק טוב יותר (ראו Fine-tuning Playbooks)
+- **מערכות RAG**: שילוב LLMs עם אחזור מסמכים לקבלת תשובות וחיפוש מודעי-הקשר
 - **חקר מודלים**: התנסות במודלים חדשים כמו Llama 3, Phi-3 או Qwen לתוצאות טובות יותר
-- **פריסה בסביבת ייצור**: שימוש בכלים כמו vLLM להגשת LLM בקנה מידה גדול בארגונים
+- **פריסה בסביבת ייצור**: שימוש בכלים כמו vLLM לשירות LLM ניתן להרחבה בארגונים
 
-המערכת שלכם מעניקה לכם את היכולת להריץ מודלי שפה מתוחכמים באופן מקומי. התנסו במודלים, הנחיות ופרמטרים שונים כדי לגלות מה עובד הכי טוב עבור היישומים שלכם.
+המערכת שלכם מעניקה לכם את היכולת להריץ מודלי שפה מתוחכמים באופן מקומי. התנסו במודלים, פרומפטים ופרמטרים שונים כדי לגלות מה עובד הכי טוב עבור היישומים שלכם.

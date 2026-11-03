@@ -16,35 +16,35 @@ SPDX-License-Identifier: MIT
 
 ## Áttekintés
 
-Ez a playbook bemutatja, hogyan lehet egy nyelvi modellt lokálisan finomhangolni Unsloth segítségével AMD hardveren.
+Ez a playbook bemutatja, hogyan lehet egy nyelvi modellt helyben finomhangolni az Unsloth segítségével AMD hardveren.
 
-Egy rövid felügyelt finomhangolási (Supervised Fine-Tuning, SFT) példát használ LoRA adapterekkel a `unsloth/gemma-4-E4B-it` modellen, a `mlabonne/FineTome-100k` adathalmaz egy részhalmazát felhasználva. A cél egy egyszerű, végponttól végpontig tartó munkafolyamat bemutatása, amely lefedi a beállítást, a betanítást, a következtetést (inference) és a finomhangolt eredmény mentését.
+Egy rövid, felügyelt finomhangolási (SFT) példát használ LoRA adapterekkel a `unsloth/gemma-4-E4B-it` modellen, a `mlabonne/FineTome-100k` adatkészlet egy részhalmazát felhasználva. A cél, hogy egy egyszerű, végponttól végpontig tartó munkafolyamatot mutasson be, amely lefedi a beállítást, a betanítást, a következtetést és a finomhangolt eredmény mentését.
 
-A példa gyakorlati és könnyen módosítható, így kiindulópontként használhatja saját adathalmazaihoz és modelljeihez.
+A példa gyakorlati és könnyen módosítható, így kiindulópontként használható a saját adatkészleteidhez és modelljeidhez.
 
-## Amit meg fog tanulni
+## Mit fogsz megtanulni
 
-- Hogyan állítsa be az Unsloth környezetet
-- Hogyan finomhangoljon egy LLM-et SFT segítségével Unsloth használatával
-- Hogyan mentse el a finomhangolt eredményt helyi tárhelyre
+- Hogyan állítsd be az Unsloth környezetet
+- Hogyan finomhangolj egy LLM-et SFT segítségével az Unsloth használatával
+- Hogyan mentsd el a finomhangolt eredményt helyi tárolóba
 
 <!-- @device:halo,stx,krk -->
-> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **64 GB rendszer RAM-ot** igényelnek, amelyből legalább **24 GB-nak elérhetőnek kell lennie a GPU számára** (a 24 GB a 64 GB részét képezi, nem azon felül értendő).
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikákhoz legalább **64 GB rendszer RAM** szükséges, amelyből legalább **24 GB elérhető legyen a GPU számára** (a 24 GB a 64 GB részét képezi, nem azon felül értendő).
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **24 GB teljes GPU memóriát** és **32 GB rendszer RAM-ot** igényelnek.
-> - Windows rendszeren a teljes GPU memória a videokártya dedikált VRAM-ját és a megosztott GPU memóriát (amelyet a rendszer RAM-jából kölcsönöz) is tartalmazza.
-> - Ezért a 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is képesek futtatni ezt a playbookot, mivel a megosztott GPU memóriával pótolják a különbséget.
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikákhoz legalább **24 GB teljes GPU memória** és **32 GB rendszer RAM** szükséges.
+> - Windows rendszeren a teljes GPU memória a grafikus kártya dedikált VRAM-jából és a megosztott GPU memóriából (a rendszer RAM-jából kölcsönzött) tevődik össze.
+> - Ezért a 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák is futtathatják ezt a playbookot, ha a megosztott GPU memória kiegészíti a különbséget.
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikák legalább **24 GB dedikált GPU memóriával** és **32 GB rendszer RAM-mal** rendelkező videokártyát igényelnek.
-> - Linux rendszeren a betanítás teljes egészében a videokártya dedikált VRAM-jában fut.
-> - Nem áll át megosztott GPU memóriára (rendszer RAM-ra), ha a VRAM elfogy.
-> - A 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák a betanítás során kifogynak a memóriából Linux rendszeren, még akkor is, ha a rendszerben bőven van RAM.
+> **Megjegyzés:** Az ebben a playbookban szereplő finomhangolási technikákhoz legalább **24 GB dedikált GPU memóriával** és **32 GB rendszer RAM-mal** rendelkező grafikus kártya szükséges.
+> - Linux rendszeren a betanítás teljes egészében a grafikus kártya dedikált VRAM-jában fut.
+> - Nem esik vissza megosztott GPU memóriára (rendszer RAM), amikor elfogy a VRAM.
+> - A 24 GB-nál kevesebb dedikált VRAM-mal rendelkező kártyák Linuxon kifogynak a memóriából a betanítás során, még akkor is, ha a rendszerben bőven van RAM.
 <!-- @os:end -->
 <!-- @device:end -->
 
@@ -52,17 +52,19 @@ A példa gyakorlati és könnyen módosítható, így kiindulópontként haszná
 
 Az Unsloth megkönnyíti az LLM-ek finomhangolásának futtatását helyi hardveren azáltal, hogy csökkenti a memóriahasználatot és felgyorsítja a betanítást egy szabványos beállításhoz képest.
 
-Ebben a playbookban az Unslothot **LoRA-alapú SFT**-vel együtt használjuk. Ez azt jelenti, hogy az alapmodell nagyrészt befagyasztott marad, miközben egy sokkal kisebb adapter-súlykészletet tanítunk. Ez jól illeszkedik a helyi fejlesztéshez, mivel könnyebb, mint a teljes finomhangolás, és gyorsabban lehet vele iterálni.
+Ebben a playbookban az Unslotht **LoRA-alapú SFT-vel** együtt használjuk. Ez azt jelenti, hogy az alapmodell nagyrészt fagyasztva marad, miközben egy sokkal kisebb adapter-súlykészlet kerül betanításra. Ez jól illeszkedik a helyi fejlesztéshez, mivel könnyebb, mint a teljes finomhangolás, és gyorsabb az iterálás.
 
 Az Unsloth más betanítási megközelítéseket is támogat, beleértve a QLoRA-t és a megerősítéses tanulási munkafolyamatokat. Ez a playbook a legegyszerűbb útra összpontosít elsőként: egy kis LoRA finomhangolási példára, amelyet a felhasználók futtathatnak, megérthetnek és bővíthetnek.
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## A memóriakonfiguráció beállítása
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## Szoftverfrissítések ellenőrzése
-> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheti a Ryzen AI Developer Center segítségével.
+> **Megjegyzés**: Ha a VS Code nincs telepítve, telepítheted a Ryzen AI Developer Center segítségével.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -73,7 +75,7 @@ Az Unsloth más betanítási megközelítéseket is támogat, beleértve a QLoRA
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Nyisson meg egy terminált, és hozzon létre egy venv-et, amelyben már telepítve van az AMD ROCm™ szoftver és a PyTorch:
+Nyiss meg egy terminált, és hozz létre egy venv-et, amelyben már telepítve van az AMD ROCm™ szoftver és a PyTorch:
 <!-- @test:id=create-venv timeout=120 -->
 ```bash
 sudo apt update
@@ -85,14 +87,14 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Adjon felhasználójának hozzáférést a GPU-eszközökhöz** (a hatás érvényesítéséhez jelentkezzen ki, majd vissza):
+**Add meg a felhasználódnak a hozzáférést a GPU eszközökhöz** (jelentkezz ki és vissza, hogy ez érvénybe lépjen):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Nyisson meg egy terminált, és hozzon létre egy venv-et:
-<!-- @test:id=create-venv timeout=120 -->
+Nyiss meg egy terminált, és hozz létre egy venv-et:
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -105,10 +107,10 @@ source unsloth-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Megjegyzés:** Windows rendszeren a Python 3.13 szükséges.
+> **Megjegyzés:** Windows esetén a Python 3.13 szükséges.
 
 <!-- @device:halo_box -->
-Nyisson meg egy PowerShell terminált, és hozzon létre egy virtuális környezetet:
+Nyiss meg egy PowerShell terminált, és hozz létre egy virtuális környezetet:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env --system-site-packages
@@ -119,7 +121,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-Nyisson meg egy PowerShell terminált, és hozzon létre egy virtuális környezetet:
+Nyiss meg egy PowerShell terminált, és hozz létre egy virtuális környezetet:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv unsloth-env
@@ -131,7 +133,53 @@ python -m venv unsloth-env
 <!-- @os:end -->
 
 ### Alapvető függőségek telepítése
-<!-- @require:pytorch,driver -->
+<!-- @require:driver -->
+
+> **Fontos:** Az Unsloth még nem támogatja a ROCm 10-zel érkező PyTorch 2.13 buildet. Ehhez a playbookhoz telepítsd a **ROCm 7.14-et a PyTorch 2.12-vel** az alábbi parancsok segítségével. Ne használd a ROCm 10 / PyTorch 2.13 csomagokat.
+
+**Telepítsd a PyTorch-ot AMD ROCm™ szoftvertámogatással** a létrehozott virtuális környezetben:
+
+<!-- @device:halo,halo_box -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1151]==2.12.0+rocm7.14.0" "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:stx -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1150]==2.12.0+rocm7.14.0" "torchvision[device-gfx1150]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:krk -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1152]==2.12.0+rocm7.14.0" "torchvision[device-gfx1152]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx7900xt -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1100]==2.12.0+rocm7.14.0" "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx9070xt,r9700 -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1201]==2.12.0+rocm7.14.0" "torchvision[device-gfx1201]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+Más eszközök esetén a teljes útmutatóért lásd a [ROCm 7.14 dokumentációját](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html).
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -162,16 +210,15 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
-pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
-pip install triton-windows
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton-windows
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Megjegyzés:** Az importálás során az Unsloth opcionálisan próbálhatja a `bitsandbytes` gyorsítási útvonalakat. Egyes ROCm verziók esetén megjelenhet egy olyan üzenet, mint a `bitsandbytes library load error: Configured ROCm binary not found`. Ez a playbook szabványos LoRA finomhangolást használ `optim="adamw_torch"` beállítással, így nem támaszkodunk a `bitsandbytes` optimalizálóra vagy a 4 bites QLoRA-ra. Ez az üzenet nyugodtan figyelmen kívül hagyható.
+> **Megjegyzés:** Az importálás során az Unsloth megvizsgálhatja az opcionális `bitsandbytes` gyorsítási útvonalakat. Egyes ROCm verziók esetén megjelenhet egy olyan üzenet, mint például: `bitsandbytes library load error: Configured ROCm binary not found`. Ez a playbook szabványos LoRA finomhangolást használ `optim="adamw_torch"` beállítással, így nem támaszkodunk a `bitsandbytes` optimalizálóra vagy a 4 bites QLoRA-ra. Ez az üzenet nyugodtan figyelmen kívül hagyható.
 
 <!-- @os:windows -->
-> **Megjegyzés:** Windows ROCm alatt az Unsloth indításkor több figyelmeztetést is kiír — lásd az alábbi [Ismert figyelmeztetések](#known-warnings) részt. Ezek mindegyike nyugodtan figyelmen kívül hagyható; a betanítás megfelelően működik.
+> **Megjegyzés:** Windows ROCm rendszeren az Unsloth több figyelmeztetést is kiír induláskor — lásd az alábbi [Ismert figyelmeztetések](#known-warnings) részt. Ezek mind biztonságosan figyelmen kívül hagyhatók; a betanítás megfelelően működik.
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -196,9 +243,9 @@ print("PASS: All required imports succeeded")
 
 ## Az Unsloth finomhangoló szkript letöltése
 
-Ahelyett, hogy minden lépést manuálisan hajtana végre, ez a playbook egy tiszta, végponttól végpontig tartó szkriptet biztosít itt: [test_unsloth.py](assets/test_unsloth.py).
+Ahelyett, hogy minden lépést manuálisan hajtanál végre, ez a playbook egy tiszta, végponttól végpontig tartó szkriptet biztosít itt: [test_unsloth.py](assets/test_unsloth.py).
 
-A szkript futtatásához hajtsa végre a következő kódot:
+Futtasd a következő kódot a szkript végrehajtásához:
 
 ```bash
 python test_unsloth.py
@@ -231,18 +278,17 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-A playbook hátralévő része koncepcionálisan végigmegy a szkript minden fő lépésén.
+A playbook további része koncepcionálisan végigmegy a szkript minden főbb lépésén.
 
 ## Hogyan működik
 
 A test_unsloth.py szkript a következő lépéseket hajtja végre:
-* **Modell betöltése**: Betölti a unsloth/gemma-4-E4B-it modellt a FastModel segítségével.
-* **Adatok előkészítése**: Szabványosítja az adathalmazt (pl. FineTome-100k), és alkalmazza a Gemma-4 chat sablont.
-* **LoRA alkalmazása**: Adaptereket ad hozzá a nyelvi, figyelmi (attention) és MLP modulokhoz a hatékony betanítás érdekében.
-* **Betanítás**: SFTTrainer-t használ, válasz-only veszteségmaszkolással.
-* **Következtetés (Inference)**: Egy gyors generálási tesztet futtat a teljesítmény ellenőrzésére.
-* **Mentés**: Exportálja a LoRA adaptereket helyi tárhelyre.
-
+* **Modell betöltése**: Betölti az unsloth/gemma-4-E4B-it modellt a FastModel segítségével.
+* **Adatok előkészítése**: Szabványosítja az adatkészletet (pl. FineTome-100k), és alkalmazza a Gemma-4 csevegősablont.
+* **LoRA alkalmazása**: Adaptereket ad hozzá a nyelvi, figyelmi és MLP modulokhoz a hatékony betanítás érdekében.
+* **Betanítás**: Az SFTTrainer-t használja válasz-only veszteségmaszkolással.
+* **Következtetés**: Egy gyors generálási tesztet futtat a teljesítmény ellenőrzésére.
+* **Mentés**: Exportálja a LoRA adaptereket helyben.
 ## Kulcskonfiguráció
 
 A futtatás testreszabásához a következő konstansokat módosíthatja:
@@ -260,28 +306,29 @@ Példa az Unsloth üdvözlő üzenetére és a modellsúlyok betöltésekor megj
 
 ## Adathalmaz előkészítése
 
-A következő adathalmaz egy részhalmazát használjuk:
+A következő egy részhalmazát használjuk:
 ```text
 mlabonne/FineTome-100k
 ```
 Az adathalmaz:
-* Chat formátumba konvertálva
+* Chat formátumba van konvertálva
 * A Gemma-4 chat sablon segítségével feldolgozva
-* Megtisztítva a duplikált BOS tokenektől
+* Megtisztítva az ismétlődő BOS tokenektől
 
 ## A modell betanítása
 
 A szkript egy rövid betanítási demót futtat, a következő paraméterekkel:
 - ~50 lépés
-- Kis kötegméret (batch size)
+- Kis kötegméret
 - Gradiens akkumuláció
 
-A betanítás során az alábbihoz hasonló naplókat fog látni:
+A betanítás során a következőhöz hasonló naplókat láthat:
 
 ![alt text](assets/training.png)
 
 
 ## Mentés és üzembe helyezés
+
 ### Helyi mentés (LoRA)
 
 A szkript automatikusan elmenti a LoRA adaptereket az OUTPUT_DIR könyvtárba.
@@ -323,10 +370,10 @@ print(f"Found adapter weights: {adapter_weights}")
 ```
 <!-- @test:end -->
 
-### Egyesített modell mentése (vLLM-hez) 
+### Egyesített modell mentése (vLLM-hez)
 
 <!-- @os:windows -->
-> **Megjegyzés:** A vLLM nem támogatja a Windows rendszert. Ha a finomhangolt modellt Windows alatt szeretné üzembe helyezni, használja a llama.cpp-t (lásd az alábbi [GGUF exportálása](#export-gguf-for-llamacpp) szakaszt), vagy vigye át az egyesített modellt egy vLLM-et futtató Linux gépre.
+> **Megjegyzés:** A vLLM nem támogatja a Windows rendszert. Ha a finomhangolt modellt Windows rendszeren szeretné üzembe helyezni, használja a llama.cpp-t (lásd az [Exportálás GGUF formátumba](#export-gguf-for-llamacpp) részt lentebb), vagy vigye át az egyesített modellt egy vLLM-et futtató Linux gépre.
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -378,28 +425,28 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 <!-- @os:windows -->
 ## Ismert figyelmeztetések
 
-Ezeket a figyelmeztetéseket az Unsloth jeleníti meg indításkor Windows ROCm rendszeren, és mindegyik biztonságosan figyelmen kívül hagyható:
+Ezeket a figyelmeztetéseket az Unsloth írja ki indításkor Windows ROCm rendszeren, és mindegyik biztonságosan figyelmen kívül hagyható:
 
 | Figyelmeztetés | Ok | Biztonságosan figyelmen kívül hagyható? |
 |---|---|---|
-| `bitsandbytes library load error` | A bitsandbytes-hoz nincs Windows ROCm build | Igen — ez a playbook az `adamw_torch`-ot használja, nem a bnb-t |
-| `No ROCm platform found for torch.distributed` | A ROCm Windowson nem támogatja az elosztott tanítást | Igen — az egy GPU-s tanítást ez nem érinti |
-| `Unsloth: WARNING! You are using an unsupported platform` | Az Unsloth jelzi a nem Linux buildeket | Igen — a Windows ROCm működik egy GPU-s SFT esetén |
-| `triton is not available` | A Tritonhoz nincs Windows build | Igen — az Unsloth ilyenkor a PyTorch kerneleket használja |
+| `bitsandbytes library load error` | A bitsandbytes-nak nincs Windows ROCm buildje | Igen — ez a playbook az `adamw_torch`-ot használja, nem a bnb-t |
+| `No ROCm platform found for torch.distributed` | A Windows-on futó ROCm nem támogatja az elosztott betanítást | Igen — az egy-GPU-s betanítást ez nem érinti |
+| `Unsloth: WARNING! You are using an unsupported platform` | Az Unsloth jelzi a nem Linux buildeket | Igen — a Windows ROCm működik egy-GPU-s SFT esetén |
+| `triton is not available` | A Tritonnak nincs Windows buildje | Igen — az Unsloth visszaáll a PyTorch kernelekre |
 
-A tanítás ezen figyelmeztetések ellenére is helyesen zajlik le.
+A betanítás ezen figyelmeztetések ellenére is helyesen fog lezajlani.
 <!-- @os:end -->
 
 ## Következő lépések
-- Próbálja ki az [Unsloth Studio](https://unsloth.ai/docs/new/studio) eszközt, egy intuitív felhasználói felületet az Unslothhoz
-- Tanítson saját, egyedi adathalmazokon
+- Próbálja ki a [Unsloth Studio](https://unsloth.ai/docs/new/studio) eszközt, amely egy intuitív grafikus felület az Unslothhoz
+- Végezzen betanítást saját, egyedi adathalmazokon
 - Próbálkozzon a finomhangolással különböző hiperparaméterekkel
-- Helyezze üzembe vLLM-mel vagy llama.cpp-vel
+- Helyezze üzembe vLLM vagy llama.cpp segítségével
 - Próbálja ki a QLoRA-t egy alacsonyabb memóriaigényű beállításhoz
 
 ## Erőforrások
 
-Az alábbiakban további erőforrásokat talál, ha többet szeretne megtudni az Unslothról és a finomhangolásról:
+Az alábbiakban további forrásokat talál, ha többet szeretne megtudni az Unslothról és a finomhangolásról:
 
 * [Unsloth dokumentáció](https://docs.unsloth.ai)
 

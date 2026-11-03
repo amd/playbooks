@@ -16,28 +16,30 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> คู่มือนี้ต้องการหน่วยความจำระบบขั้นต่ำ **32GB**
+> เพลย์บุ๊กนี้ต้องการหน่วยความจำระบบขั้นต่ำ **32GB**
 <!-- @device:end -->
 
 ## ภาพรวม
 
-Coding agent เป็นเครื่องมือที่ทรงพลังซึ่งช่วยให้นักพัฒนาทำงานร่วมกับ AI agent ที่ขับเคลื่อนด้วย Large Language Models (LLMs) ได้ โดยสามารถฝังเข้าไปในสภาพแวดล้อมการพัฒนา เช่น เทอร์มินัลหรือ VS Code ทำให้สามารถผสานเข้ากับขั้นตอนการทำงานของนักพัฒนาได้อย่างราบรื่น
+Coding agents เป็นเครื่องมือทรงพลังที่ช่วยเสริมศักยภาพให้กับนักพัฒนา ผ่านการทำงานร่วมกับ AI agents ที่ขับเคลื่อนด้วย Large Language Models (LLMs) โดยสามารถฝังเข้าไปในสภาพแวดล้อมการพัฒนา เช่น เทอร์มินัลหรือ VS Code ทำให้สามารถผสานเข้ากับเวิร์กโฟลว์ของนักพัฒนาได้อย่างราบรื่น
 
-บทช่วยสอนนี้สาธิตวิธีการใช้ Cline, VS Code และ LM Studio เพื่อรัน coding agent ทั้งหมดบนเครื่องของคุณเอง
+บทช่วยสอนนี้สาธิตวิธีการใช้ Cline, VS Code และ LM Studio เพื่อรัน coding agent บนเครื่องของคุณเองทั้งหมด
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
-* วิธีการรัน VS Code ร่วมกับ coding agent Cline เพื่อช่วยในงานวิศวกรรมซอฟต์แวร์
-* วิธีการกำหนดค่า Cline ให้สื่อสารกับ LM Studio สำหรับการอนุมาน (inference) แบบโลคัลของ coding agent
-* วิธีการใช้ coding agent แบบโลคัลเพื่อแก้ปัญหางานวิศวกรรมซอฟต์แวร์ในโลกจริง
+* วิธีการรัน VS Code ร่วมกับ coding agent ของ Cline เพื่อช่วยในงานด้านวิศวกรรมซอฟต์แวร์
+* วิธีการกำหนดค่า Cline ให้สื่อสารกับ LM Studio สำหรับการอนุมาน (inference) แบบโลคัลของ coding agents
+* วิธีการใช้ local coding agents เพื่อแก้ปัญหางานด้านวิศวกรรมซอฟต์แวร์ในโลกความเป็นจริง
 
-## การตั้งค่าหน่วยความจำ
+<!-- @device:halo_box,halo,stx,krk -->
+## การตั้งค่าการกำหนดค่าหน่วยความจำ
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ตรวจสอบการอัปเดตซอฟต์แวร์
-> **หมายเหตุ**: หากยังไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้ผ่าน Ryzen AI Developer Center
+> **หมายเหตุ**: หากยังไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้จาก Ryzen AI Developer Center
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -50,21 +52,21 @@ Coding agent เป็นเครื่องมือที่ทรงพล�
 
 เราจะใช้ LM Studio เพื่อให้บริการ LLM ที่ขับเคลื่อน coding agent
 
-- ในแถบค้นหา ค้นหา `LM Studio` และเปิดใช้งานแอปพลิเคชัน คุณจะเห็นหน้าจอต่อไปนี้
+- ในแถบค้นหา ให้ค้นหา `LM Studio` แล้วเปิดใช้งานแอปพลิเคชัน คุณจะพบกับหน้าจอต่อไปนี้
 
-![LM Studio Initial Screen](assets/initial-lm-studio.png)
+![หน้าจอเริ่มต้นของ LM Studio](assets/initial-lm-studio.png)
 
-ต่อไป เราต้องโหลด LLM ลงในระบบ เราจะใช้โมเดล `Qwen3-Coder-30B-A3B` ที่มีความยาวบริบท (context length) ขนาดใหญ่ (ใช้แท็บ Model เพื่อติดตั้งหากยังไม่ได้ติดตั้ง)
-- คลิกที่แถบค้นหาด้านบนของหน้าต่าง LM Studio หรือกดปุ่ม `CTRL+L` คลิกสวิตช์ `Manually choose model load parameters` จากนั้นคลิกที่โมเดล Qwen3-Coder-30B-A3B
-- เปลี่ยนความยาวบริบทจาก `4096` เป็น `32768` และตรวจสอบให้แน่ใจว่า `GPU Offload` อยู่ที่ค่าสูงสุด จากนั้นคลิก `Load Model`
+ถัดไป เราต้องโหลด LLM ลงในระบบ เราจะใช้โมเดล `Qwen3-Coder-30B-A3B` ที่มีความยาวบริบท (context length) ขนาดใหญ่ (ใช้แท็บ Model เพื่อติดตั้งหากคุณยังไม่ได้ติดตั้ง)
+- คลิกที่แถบค้นหาด้านบนของหน้าต่าง LM Studio หรือกด `CTRL+L` คลิกสวิตช์ `Manually choose model load parameters` จากนั้นคลิกที่โมเดล Qwen3-Coder-30B-A3B
+- เปลี่ยนความยาวบริบทจาก `4096` เป็น `32768` และตรวจสอบให้แน่ใจว่า `GPU Offload` อยู่ที่ระดับสูงสุด จากนั้นคลิก `Load Model`
 
-![Selecting Model](assets/model-list-zoomed.png)
+![การเลือกโมเดล](assets/model-list-zoomed.png)
 
 เราใช้ความยาวบริบทขนาดใหญ่เพื่อให้ agent สามารถประมวลผลโค้ดเบสขนาดใหญ่และจดจำการเปลี่ยนแปลงที่เกิดขึ้นได้
 
-![Configuring Model](assets/selecting-model-zoomed.png)
+![การกำหนดค่าโมเดล](assets/selecting-model-zoomed.png)
 
-ต่อไป เราต้องเปิดใช้งาน LM Studio Server
+ถัดไป เราจำเป็นต้องเปิดใช้งาน LM Studio Server
 - คลิกที่แท็บ Developer หรือกด `CTRL+2` ใน LM Studio ทางด้านซ้าย
 - ตรวจสอบสวิตช์สถานะและให้แน่ใจว่าตั้งค่าเป็น `Running`
 
@@ -86,7 +88,7 @@ curl -s http://127.0.0.1:1234/v1/models
 <!-- @test:end -->
 <!-- @os:end -->
 
-![Server Status](assets/lm-studio-server-status.png)
+![สถานะเซิร์ฟเวอร์](assets/lm-studio-server-status.png)
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-select-gpu-runtime-windows timeout=120 hidden=True -->
@@ -153,13 +155,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## เปิดใช้งานและกำหนดค่า VS Code
 
-เราจะติดตั้งส่วนขยาย Cline ใน VS Code และเชื่อมต่อกับ LM Studio server ที่เราเพิ่งสร้างขึ้น
-- ในแถบค้นหา ค้นหา `VS Code` และเปิดใช้งานแอปพลิเคชัน
-- คลิกที่ไอคอน `Extensions` ในคอลัมน์ด้านซ้ายของ VS Code และค้นหา `Cline` จากนั้นคลิกปุ่ม `Install`
+เราจะติดตั้งส่วนขยาย Cline ใน VS Code และเชื่อมต่อกับเซิร์ฟเวอร์ LM Studio ที่เราเพิ่งสร้างขึ้น
+- ในแถบค้นหา ให้ค้นหา `VS Code` แล้วเปิดใช้งานแอปพลิเคชัน
+- คลิกที่ไอคอน `Extensions` ทางคอลัมน์ซ้ายของ VS Code แล้วค้นหา `Cline` จากนั้นคลิกปุ่ม `Install`
 
-![Installing Cline Extension](assets/installing-cline-vscode-extension.png)
+![การติดตั้งส่วนขยาย Cline](assets/installing-cline-vscode-extension.png)
 
-- ไอคอน Cline ควรปรากฏขึ้นทางด้านซ้าย คลิกที่ไอคอนนั้นเพื่อเปิด Cline จะมีหน้าต่างถามว่า `How will you use Cline?` เนื่องจากเราจะใช้ LLM แบบโลคัลที่รันผ่าน LM Studio ให้เลือก `Bring my own API Key` แล้วกด `Continue`
+- จะมีไอคอน Cline ปรากฏขึ้นทางด้านซ้าย คลิกที่ไอคอนนั้นเพื่อเปิด Cline จะมีหน้าต่างถามว่า `How will you use Cline?` เนื่องจากเราจะใช้ local LLM ที่รันผ่าน LM Studio ให้เลือก `Bring my own API Key` แล้วกด `Continue`
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -179,34 +181,34 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 <!-- @test:end -->
 <!-- @os:end -->
 
-![Account Creation](assets/cline-how-will-you-use-cline-zoomed.png)
+![การสร้างบัญชี](assets/cline-how-will-you-use-cline-zoomed.png)
 
-ต่อไป เราต้องกำหนดค่า Cline ให้สื่อสารกับ LM Studio server ที่เราตั้งค่าไว้
+ถัดไป เราจำเป็นต้องกำหนดค่า Cline ให้สื่อสารกับเซิร์ฟเวอร์ LM Studio ที่เราตั้งค่าไว้
 - ตั้งค่า API Provider เป็น `LM Studio` และโมเดลเป็น `Qwen3-Coder-30B-A3B-GGUF`
 
->**เคล็ดลับ**: อาจมีโมเดลใหม่กว่าให้เลือกใช้ พิจารณาดาวน์โหลดและเปลี่ยนไปใช้โมเดล Qwen3.6 หากต้องการ
+>**เคล็ดลับ**: อาจมีโมเดลใหม่ๆ ให้ใช้งาน พิจารณาดาวน์โหลดและเปลี่ยนไปใช้โมเดล Qwen3.6 หากต้องการ
 
 
-![Model Configuration](assets/cline-model-configuration-zoomed.png)
+![การกำหนดค่าโมเดล](assets/cline-model-configuration-zoomed.png)
 
 ## การสร้างโปรเจกต์แรกของคุณ
 
-มาใช้ agent แบบโลคัลของเราสร้างเว็บไซต์กัน! เปิด VSCode ไปยังไดเรกทอรีที่คุณเลือกไว้ ซึ่ง Cline จะสร้างไฟล์ที่นั่น
-- ในการทำเช่นนี้ ให้ไปที่ `File -> Open Folder` ที่มุมซ้ายบนของ VS Code และเลือกโฟลเดอร์ เช่น `Documents`
+มาลองใช้ local agent ของเราสร้างเว็บไซต์กันเถอะ! เปิด VSCode ไปยังไดเรกทอรีที่คุณเลือกเพื่อให้ Cline สร้างไฟล์ต่างๆ
+- ในการทำเช่นนี้ ให้ไปที่ `File -> Open Folder` ที่มุมซ้ายบนของ VS Code แล้วเลือกโฟลเดอร์ เช่น `Documents`
 
-![VS Code Empty Folder](assets/open-cline-test.png)
+![โฟลเดอร์ว่างเปล่าใน VS Code](assets/open-cline-test.png)
 
-ตอนนี้เราพร้อมที่จะป้อนคำสั่งให้ coding agent แบบโลคัลแล้ว
-- คลิกที่ส่วนขยาย Cline ในคอลัมน์ด้านซ้ายและป้อนพรอมป์ต์เพื่อเริ่มการทำงานของ agent ตัวอย่างเช่น ลองใช้พรอมป์ต์ต่อไปนี้:
+ตอนนี้เราพร้อมที่จะป้อนพรอมต์ให้กับ local coding agent แล้ว
+- คลิกที่ส่วนขยาย Cline ทางคอลัมน์ซ้ายแล้วป้อนพรอมต์เพื่อเริ่มการทำงานของ agent ตัวอย่างเช่น ลองใช้พรอมต์ต่อไปนี้:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-จากนั้น agent จะเริ่มสร้างไฟล์ตามพรอมป์ต์ ในฐานะผู้ใช้ คุณสามารถดูโค้ดที่ถูกสร้างขึ้นใน VS Code ได้ดังภาพด้านล่าง คุณอาจต้องคลิก `Save` ทุกครั้งที่ Cline ต้องการสร้างไฟล์
+จากนั้น agent จะเริ่มสร้างไฟล์ต่างๆ ตามพรอมต์ ในฐานะผู้ใช้ คุณสามารถดูโค้ดที่ถูกสร้างขึ้นใน VS Code ได้ดังที่แสดงด้านล่าง คุณอาจต้องคลิก `Save` ทุกครั้งที่ Cline ต้องการสร้างไฟล์
 
-![Cline Code Generation](assets/cline-code-generation.png)
+![การสร้างโค้ดด้วย Cline](assets/cline-code-generation.png)
 
-หลังจากสร้างซอฟต์แวร์เสร็จแล้ว agent ก็เสร็จสิ้นการทำงาน และคุณสามารถรันแอปพลิเคชันได้ ในกรณีนี้ agent เขียนไฟล์สามไฟล์ ได้แก่ `index.html`, `script.js`, และ `styles.css` เพียงแค่ดับเบิลคลิกที่ไฟล์ HTML เราก็สามารถโหลดและโต้ตอบกับเว็บไซต์ที่สร้างขึ้นได้
+หลังจากสร้างซอฟต์แวร์เสร็จแล้ว agent ก็ทำงานเสร็จสมบูรณ์ และคุณสามารถรันแอปพลิเคชันได้ ในกรณีนี้ agent ได้เขียนไฟล์สามไฟล์คือ `index.html`, `script.js` และ `styles.css` เพียงแค่ดับเบิลคลิกที่ไฟล์ HTML เราก็สามารถโหลดและโต้ตอบกับเว็บไซต์ที่สร้างขึ้นได้
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,31 +281,32 @@ lms server stop
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
 ## ขั้นตอนถัดไป
 
-หลังจากสร้างเว็บไซต์แล้ว คุณสามารถทำงานร่วมกับ Cline ต่อไปเพื่อปรับปรุงเว็บไซต์ให้ดียิ่งขึ้น การปรับปรุงที่เป็นไปได้สองอย่าง ได้แก่
+หลังจากสร้างเว็บไซต์แล้ว คุณสามารถทำงานร่วมกับ Cline ต่อไปเพื่อปรับปรุงเว็บไซต์ให้ดียิ่งขึ้นได้ การปรับปรุงที่เป็นไปได้สองแบบมีดังนี้:
 
-- **เอกสารประกอบ**: การป้อนคำสั่งให้เอเจนต์ด้วย `Add a README` ก็เพียงพอแล้วที่จะทำให้เอเจนต์สร้างไฟล์ `README.md` ที่บันทึกรายละเอียดของเว็บไซต์
-- **แอนิเมชัน**: ป้อนคำสั่งให้โมเดลด้วย `Add an animation that visually represents a large language model running on a laptop.` เพื่อสร้างแอนิเมชันลงในเว็บไซต์
+- **เอกสารประกอบ**: เพียงป้อนพรอมต์ให้ agent ด้วย `Add a README` ก็เพียงพอที่จะทำให้ agent สร้างไฟล์ `README.md` ที่บันทึกรายละเอียดเกี่ยวกับเว็บไซต์
+- **แอนิเมชัน**: ป้อนพรอมต์ให้โมเดลด้วย `Add an animation that visually represents a large language model running on a laptop.` เพื่อสร้างแอนิเมชันเพิ่มลงในเว็บไซต์
 
-เราขอสนับสนุนให้ผู้อ่านลองสร้างแอปพลิเคชันอื่น ๆ โดยใช้การตั้งค่านี้ ด้านล่างนี้คือตัวอย่างสนุก ๆ บางส่วนที่เราได้ลองทำ
+เราขอสนับสนุนให้ผู้อ่านลองสร้างแอปพลิเคชันอื่นๆ โดยใช้การตั้งค่านี้ ด้านล่างนี้คือตัวอย่างสนุกๆ ที่เราได้ลองทำ:
 
-- **เกมอาร์เคดย้อนยุค**: ลองใช้คำสั่งอื่น ๆ ดู นอกจากนี้ยังสนุกไม่น้อยหากให้เอเจนต์สร้างเกมสไตล์ย้อนยุคด้วยภาษา Python โดยใช้แพ็กเกจ `PyGame` ด้วยคำสั่งดังต่อไปนี้:
+- **เกมอาร์เคดย้อนยุค**: ลองใช้พรอมต์อื่นๆ ดู นอกจากนี้ยังสามารถให้ agent สร้างเกมสไตล์เรโทรด้วยภาษา Python โดยใช้แพ็กเกจ `PyGame` ได้อย่างสนุกสนาน ด้วยพรอมต์ต่อไปนี้:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **การวิเคราะห์ข้อมูล**: หนึ่งในด้านที่เอเจนต์เขียนโค้ดมีประโยชน์อย่างมากคือการเขียนสคริปต์และการวิเคราะห์ข้อมูล นี่คือคำสั่งที่แสดงให้เห็นถึงความสามารถของโมเดลท้องถิ่นในการสร้างซอฟต์แวร์วิเคราะห์ข้อมูลสำหรับการแสดงผลราคาหุ้น:
+- **การวิเคราะห์ข้อมูล**: หนึ่งในด้านที่ coding agents มีประโยชน์อย่างยิ่งคือการเขียนสคริปต์และการวิเคราะห์ข้อมูล นี่คือพรอมต์ที่ใช้แสดงความสามารถของโมเดลโลคัลในการสร้างซอฟต์แวร์วิเคราะห์ข้อมูลสำหรับการแสดงผลราคาหุ้น:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
 ```
 
-## แหล่งข้อมูลอ้างอิง
+## แหล่งข้อมูล
 
-ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมเพื่อเรียนรู้เกี่ยวกับ Coding Agents, Cline และการรันเวิร์กโหลดบน 
+ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมสำหรับเรียนรู้เกี่ยวกับ Coding Agents, Cline และการรันเวิร์กโหลดบน 
 
 * ข้อมูลเพิ่มเติมเกี่ยวกับความร่วมมือและการผสานรวมระหว่าง AMD กับ LM Studio: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* บล็อกของ AMD ที่พาไปทำความรู้จักกับการรัน Cline บนการ์ด AMD Ryzen™ AI และ Radeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* บล็อกของ Cline เกี่ยวกับการรันเอเจนต์เขียนโค้ดในเครื่องบน AI PC: https://cline.bot/blog/local-models-amd
+* บล็อกของ AMD ที่แนะนำวิธีการรัน Cline บนการ์ด AMD Ryzen™ AI และ Radeon™ Graphics: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* บล็อกของ Cline เกี่ยวกับการรัน coding agents บนเครื่อง AI PC แบบโลคัล: https://cline.bot/blog/local-models-amd

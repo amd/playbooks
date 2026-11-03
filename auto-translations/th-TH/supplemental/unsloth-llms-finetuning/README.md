@@ -16,60 +16,62 @@ SPDX-License-Identifier: MIT
 
 ## ภาพรวม
 
-เอกสารนี้แสดงวิธีการปรับแต่งโมเดลภาษาในเครื่องด้วย Unsloth บนฮาร์ดแวร์ AMD
+คู่มือนี้แสดงวิธีการปรับแต่งโมเดลภาษาในเครื่องด้วย Unsloth บนฮาร์ดแวร์ AMD
 
-โดยใช้ตัวอย่าง Supervised Fine-Tuning (SFT) แบบสั้นด้วย LoRA adapters บน `unsloth/gemma-4-E4B-it` โดยใช้ชุดข้อมูลย่อยของ `mlabonne/FineTome-100k` เป้าหมายคือให้เวิร์กโฟลว์แบบครบวงจรที่เรียบง่าย ครอบคลุมการตั้งค่า การฝึกโมเดล การอนุมาน และการบันทึกผลลัพธ์ที่ปรับแต่งแล้ว
+โดยใช้ตัวอย่าง Supervised Fine-Tuning (SFT) แบบสั้น ๆ ร่วมกับ LoRA adapters บน `unsloth/gemma-4-E4B-it` โดยใช้ชุดข้อมูลย่อยจาก `mlabonne/FineTome-100k` เป้าหมายคือเพื่อให้คุณมีเวิร์กโฟลว์แบบครบวงจรที่เรียบง่าย ครอบคลุมการติดตั้ง การฝึกโมเดล การอนุมาน (inference) และการบันทึกผลลัพธ์ที่ปรับแต่งแล้ว
 
-ตัวอย่างนี้ถูกออกแบบให้ใช้งานได้จริงและปรับเปลี่ยนได้ง่าย ดังนั้นคุณสามารถใช้เป็นจุดเริ่มต้นสำหรับชุดข้อมูลและโมเดลของคุณเองได้
+ตัวอย่างนี้ถูกออกแบบมาให้ใช้งานได้จริงและปรับเปลี่ยนได้ง่าย เพื่อให้คุณสามารถใช้เป็นจุดเริ่มต้นสำหรับชุดข้อมูลและโมเดลของคุณเองได้
 
 ## สิ่งที่คุณจะได้เรียนรู้
 
 - วิธีตั้งค่าสภาพแวดล้อม Unsloth
 - วิธีปรับแต่ง LLM โดยใช้ SFT ร่วมกับ Unsloth
-- วิธีบันทึกผลลัพธ์ที่ปรับแต่งแล้วในที่จัดเก็บข้อมูลภายในเครื่อง
+- วิธีบันทึกผลลัพธ์ที่ปรับแต่งแล้วไว้ในที่จัดเก็บข้อมูลในเครื่อง
 
 <!-- @device:halo,stx,krk -->
-> **หมายเหตุ:** เทคนิคการปรับแต่งในเอกสารนี้ต้องการ **RAM ระบบอย่างน้อย 64 GB** โดยต้องมีอย่างน้อย **24 GB ที่ใช้ได้กับ GPU** (24 GB นี้เป็นส่วนหนึ่งของ 64 GB ไม่ใช่เพิ่มเติมจาก 64 GB)
+> **หมายเหตุ:** เทคนิคการปรับแต่งโมเดลในคู่มือนี้ต้องการ **หน่วยความจำระบบ (RAM) อย่างน้อย 64 GB** โดยต้องมีอย่างน้อย **24 GB ที่พร้อมใช้งานสำหรับ GPU** (24 GB นี้เป็นส่วนหนึ่งของ 64 GB ไม่ใช่ส่วนเพิ่มเติม)
 <!-- @device:end -->
 
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-> **หมายเหตุ:** เทคนิคการปรับแต่งในเอกสารนี้ต้องการ **หน่วยความจำ GPU รวมอย่างน้อย 24 GB** และ **RAM ระบบ 32 GB**
-> - บน Windows หน่วยความจำ GPU รวมประกอบด้วย VRAM เฉพาะของการ์ดจอรวมกับหน่วยความจำ GPU ที่ใช้ร่วมกัน (ยืมมาจาก RAM ระบบ)
-> - ดังนั้น การ์ดที่มี VRAM เฉพาะน้อยกว่า 24 GB ก็ยังสามารถใช้งานเอกสารนี้ได้โดยใช้หน่วยความจำ GPU ที่ใช้ร่วมกันเพื่อชดเชยส่วนต่าง
+> **หมายเหตุ:** เทคนิคการปรับแต่งโมเดลในคู่มือนี้ต้องการ **หน่วยความจำ GPU รวมอย่างน้อย 24 GB** และ **หน่วยความจำระบบ (RAM) 32 GB**
+> - บน Windows หน่วยความจำ GPU รวมประกอบด้วย VRAM เฉพาะของการ์ดจอ รวมกับหน่วยความจำ GPU ที่ใช้ร่วมกัน (ยืมมาจากหน่วยความจำระบบ)
+> - ดังนั้น การ์ดที่มี VRAM เฉพาะน้อยกว่า 24 GB ก็ยังสามารถรันคู่มือนี้ได้ โดยใช้หน่วยความจำ GPU ที่ใช้ร่วมกันเพื่อชดเชยส่วนที่ขาด
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> **หมายเหตุ:** เทคนิคการปรับแต่งในเอกสารนี้ต้องการการ์ดจอที่มี **หน่วยความจำ GPU เฉพาะอย่างน้อย 24 GB** และ **RAM ระบบ 32 GB**
+> **หมายเหตุ:** เทคนิคการปรับแต่งโมเดลในคู่มือนี้ต้องการการ์ดจอที่มี **หน่วยความจำ GPU เฉพาะอย่างน้อย 24 GB** และ **หน่วยความจำระบบ (RAM) 32 GB**
 > - บน Linux การฝึกโมเดลจะทำงานทั้งหมดใน VRAM เฉพาะของการ์ดจอ
-> - ระบบจะไม่ใช้หน่วยความจำ GPU ที่ใช้ร่วมกัน (RAM ระบบ) เมื่อ VRAM หมด
-> - การ์ดที่มี VRAM เฉพาะน้อยกว่า 24 GB จะเกิดปัญหาหน่วยความจำไม่พอระหว่างการฝึกบน Linux แม้ว่าระบบจะมี RAM เหลือเฟือก็ตาม
+> - ระบบจะไม่ลดระดับไปใช้หน่วยความจำ GPU ที่ใช้ร่วมกัน (หน่วยความจำระบบ) เมื่อ VRAM หมด
+> - การ์ดที่มี VRAM เฉพาะน้อยกว่า 24 GB จะเกิดปัญหาหน่วยความจำไม่พอระหว่างการฝึกโมเดลบน Linux แม้ว่าระบบจะมี RAM เหลือเฟือก็ตาม
 <!-- @os:end -->
 <!-- @device:end -->
 
 ## ทำไมต้อง Unsloth?
 
-Unsloth ช่วยให้การปรับแต่ง LLM ทำงานบนฮาร์ดแวร์ในเครื่องได้ง่ายขึ้น โดยลดการใช้หน่วยความจำและเพิ่มความเร็วในการฝึกโมเดลเมื่อเทียบกับการตั้งค่ามาตรฐาน
+Unsloth ช่วยให้การปรับแต่ง LLM รันบนฮาร์ดแวร์ในเครื่องได้ง่ายขึ้น โดยลดการใช้หน่วยความจำและเพิ่มความเร็วในการฝึกโมเดลเมื่อเทียบกับการตั้งค่าแบบมาตรฐาน
 
-ในเอกสารนี้ เราใช้ Unsloth ร่วมกับ **SFT แบบใช้ LoRA** ซึ่งหมายความว่าโมเดลฐานจะยังคงถูกล็อกไว้เป็นส่วนใหญ่ ในขณะที่มีการฝึกชุดน้ำหนัก adapter ที่มีขนาดเล็กกว่ามาก วิธีนี้เหมาะสำหรับการพัฒนาในเครื่องเนื่องจากใช้ทรัพยากรน้อยกว่าการปรับแต่งแบบเต็มรูปแบบ และทำการทดลองซ้ำได้เร็วกว่า
+ในคู่มือนี้ เราใช้ Unsloth ร่วมกับ **SFT ที่ใช้ LoRA เป็นฐาน** นั่นหมายความว่าโมเดลฐานจะยังคงถูกล็อกไว้เป็นส่วนใหญ่ ในขณะที่ชุดน้ำหนัก adapter ที่เล็กกว่ามากจะถูกฝึก วิธีนี้เหมาะสำหรับการพัฒนาในเครื่อง เพราะเบากว่าการปรับแต่งแบบเต็มรูปแบบ (full fine-tuning) และทำการทดลองซ้ำได้เร็วกว่า
 
-Unsloth ยังรองรับแนวทางการฝึกอื่นๆ ด้วย รวมถึง QLoRA และเวิร์กโฟลว์การเรียนรู้แบบเสริมกำลัง (reinforcement learning) เอกสารนี้เน้นที่แนวทางที่ง่ายที่สุดก่อน นั่นคือตัวอย่างการปรับแต่งด้วย LoRA ขนาดเล็กที่ผู้ใช้สามารถรัน ทำความเข้าใจ และต่อยอดได้
+Unsloth ยังรองรับแนวทางการฝึกโมเดลอื่น ๆ ด้วย รวมถึง QLoRA และเวิร์กโฟลว์การเรียนรู้แบบเสริมกำลัง (reinforcement learning) คู่มือนี้เน้นที่แนวทางที่เรียบง่ายที่สุดก่อน คือตัวอย่างการปรับแต่งด้วย LoRA ขนาดเล็กที่ผู้ใช้สามารถรัน ทำความเข้าใจ และต่อยอดได้
 
-## การตั้งค่าหน่วยความจำ
+<!-- @device:halo_box,halo,stx,krk -->
+## การตั้งค่าการกำหนดค่าหน่วยความจำ
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## ตรวจสอบการอัปเดตซอฟต์แวร์
-> **หมายเหตุ**: หากยังไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้ด้วย Ryzen AI Developer Center
+> **หมายเหตุ**: หากไม่ได้ติดตั้ง VS Code คุณสามารถติดตั้งได้ด้วย Ryzen AI Developer Center
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## การติดตั้งซอฟต์แวร์ที่จำเป็น
 
-### สร้างสภาพแวดล้อมเสมือน
+### สร้างสภาพแวดล้อมเสมือน (Virtual Environment)
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
@@ -85,14 +87,14 @@ source unsloth-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**ให้สิทธิ์ผู้ใช้ของคุณเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
+**ให้สิทธิ์ผู้ใช้ของคุณในการเข้าถึงอุปกรณ์ GPU** (ออกจากระบบและเข้าสู่ระบบใหม่เพื่อให้มีผล):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 เปิดเทอร์มินัลและสร้าง venv:
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -130,8 +132,54 @@ python -m venv unsloth-env
 <!-- @device:end -->
 <!-- @os:end -->
 
-### ติดตั้ง Dependency พื้นฐาน
-<!-- @require:pytorch,driver -->
+### การติดตั้งการพึ่งพาพื้นฐาน (Dependencies)
+<!-- @require:driver -->
+
+> **สำคัญ:** Unsloth ยังไม่รองรับ PyTorch 2.13 build ที่มาพร้อมกับ ROCm 10 สำหรับคู่มือนี้ ให้ติดตั้ง **ROCm 7.14 พร้อม PyTorch 2.12** โดยใช้คำสั่งด้านล่างนี้ อย่าใช้แพ็กเกจ ROCm 10 / PyTorch 2.13
+
+**ติดตั้ง PyTorch พร้อมการรองรับ AMD ROCm™ software** ในสภาพแวดล้อมเสมือนที่สร้างไว้:
+
+<!-- @device:halo,halo_box -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1151]==2.12.0+rocm7.14.0" "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:stx -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1150]==2.12.0+rocm7.14.0" "torchvision[device-gfx1150]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:krk -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1152]==2.12.0+rocm7.14.0" "torchvision[device-gfx1152]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx7900xt -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1100]==2.12.0+rocm7.14.0" "torchvision[device-gfx1100]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+<!-- @device:rx9070xt,r9700 -->
+<!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
+```bash
+python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1201]==2.12.0+rocm7.14.0" "torchvision[device-gfx1201]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"
+```
+<!-- @test:end -->
+<!-- @device:end -->
+
+สำหรับอุปกรณ์อื่น ๆ โปรดดูที่ [เอกสาร ROCm 7.14](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html) เพื่อดูคำแนะนำแบบเต็ม
 
 <!-- @test:id=verify-torch-env timeout=300 hidden=True setup=activate-venv -->
 ```python
@@ -149,7 +197,7 @@ print("PASS: ROCm-enabled PyTorch is visible")
 ```
 <!-- @test:end -->
 
-### Dependency เพิ่มเติม
+### การพึ่งพาเพิ่มเติม (Additional Dependencies)
 
 <!-- @os:linux -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
@@ -162,16 +210,15 @@ pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
 <!-- @os:windows -->
 <!-- @test:id=install-deps timeout=600 setup=activate-venv -->
 ```powershell
-pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git"
-pip install triton-windows
+pip install "unsloth[amd] @ git+https://github.com/unslothai/unsloth.git" triton-windows
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **หมายเหตุ:** ระหว่างการ import Unsloth อาจตรวจสอบเส้นทางการเร่งความเร็วแบบเสริมของ `bitsandbytes` บน ROCm บางเวอร์ชัน คุณอาจเห็นข้อความเช่น `bitsandbytes library load error: Configured ROCm binary not found` เอกสารนี้ใช้การปรับแต่งแบบ LoRA มาตรฐานด้วย `optim="adamw_torch"` ดังนั้นเราจึงไม่ต้องพึ่งพา optimizer ของ `bitsandbytes` หรือ QLoRA แบบ 4-bit ข้อความนี้สามารถละเว้นได้อย่างปลอดภัย
+> **หมายเหตุ:** ระหว่างการนำเข้า (import) Unsloth อาจตรวจสอบเส้นทางการเร่งความเร็วเสริม (optional) ของ `bitsandbytes` บน ROCm บางเวอร์ชัน คุณอาจเห็นข้อความเช่น `bitsandbytes library load error: Configured ROCm binary not found` คู่มือนี้ใช้การปรับแต่ง LoRA แบบมาตรฐานด้วย `optim="adamw_torch"` ดังนั้นเราจึงไม่ได้พึ่งพา optimizer ของ `bitsandbytes` หรือ QLoRA แบบ 4-bit ข้อความนี้สามารถละเลยได้อย่างปลอดภัย
 
 <!-- @os:windows -->
-> **หมายเหตุ:** บน Windows ROCm Unsloth จะแสดงคำเตือนหลายรายการเมื่อเริ่มทำงาน — ดู [Known Warnings](#known-warnings) ด้านล่าง คำเตือนเหล่านี้สามารถละเว้นได้อย่างปลอดภัยทั้งหมด การฝึกโมเดลยังคงทำงานได้อย่างถูกต้อง
+> **หมายเหตุ:** บน Windows ROCm Unsloth จะแสดงคำเตือนหลายรายการเมื่อเริ่มทำงาน — ดู [คำเตือนที่ทราบแล้ว](#known-warnings) ด้านล่าง คำเตือนเหล่านี้ปลอดภัยที่จะละเลยได้ทั้งหมด การฝึกโมเดลทำงานได้อย่างถูกต้อง
 <!-- @os:end -->
 
 <!-- @test:id=verify-imports timeout=120 hidden=True setup=activate-venv -->
@@ -196,9 +243,9 @@ print("PASS: All required imports succeeded")
 
 ## ดาวน์โหลดสคริปต์การปรับแต่ง Unsloth
 
-แทนที่จะรันแต่ละขั้นตอนด้วยตนเอง เอกสารนี้มีสคริปต์แบบครบวงจรที่ชัดเจนให้ที่นี่: [test_unsloth.py](assets/test_unsloth.py)
+แทนที่จะดำเนินการแต่ละขั้นตอนด้วยตนเอง คู่มือนี้มีสคริปต์แบบครบวงจรที่ชัดเจนไว้ที่นี่: [test_unsloth.py](assets/test_unsloth.py)
 
-รันโค้ดต่อไปนี้เพื่อรันสคริปต์:
+รันโค้ดต่อไปนี้เพื่อดำเนินการสคริปต์:
 
 ```bash
 python test_unsloth.py
@@ -231,21 +278,20 @@ python test_unsloth_ci.py
 ```
 <!-- @test:end -->
 
-ส่วนที่เหลือของเอกสารนี้จะอธิบายแนวคิดของแต่ละขั้นตอนหลักในสคริปต์
+ส่วนที่เหลือของคู่มือนี้จะอธิบายในเชิงแนวคิดผ่านแต่ละขั้นตอนหลักของสคริปต์
 
-## หลักการทำงาน
+## วิธีการทำงาน
 
 สคริปต์ test_unsloth.py ดำเนินการตามขั้นตอนต่อไปนี้:
 * **โหลดโมเดล**: โหลด unsloth/gemma-4-E4B-it โดยใช้ FastModel
-* **เตรียมข้อมูล**: ทำให้ชุดข้อมูล (เช่น FineTome-100k) เป็นมาตรฐาน และใช้เทมเพลตแชทของ Gemma-4
-* **ใช้ LoRA**: เพิ่ม adapter ให้กับโมดูลภาษา, attention และ MLP เพื่อการฝึกที่มีประสิทธิภาพ
+* **เตรียมข้อมูล**: ปรับมาตรฐานชุดข้อมูล (เช่น FineTome-100k) และใช้เทมเพลตแชทของ Gemma-4
+* **ใช้ LoRA**: เพิ่ม adapters ให้กับโมดูลภาษา, attention และ MLP เพื่อการฝึกที่มีประสิทธิภาพ
 * **ฝึกโมเดล**: ใช้ SFTTrainer พร้อมการปิดบัง loss เฉพาะส่วนคำตอบ (response-only loss masking)
-* **อนุมาน**: รันการทดสอบสร้างข้อความอย่างรวดเร็วเพื่อตรวจสอบประสิทธิภาพ
-* **บันทึก**: ส่งออก LoRA adapter ในเครื่อง
+* **อนุมาน (Inference)**: รันการทดสอบสร้างข้อความอย่างรวดเร็วเพื่อตรวจสอบประสิทธิภาพ
+* **บันทึก**: ส่งออก LoRA adapters ไปยังที่จัดเก็บในเครื่อง
+## การกำหนดค่าหลัก
 
-## การตั้งค่าที่สำคัญ
-
-คุณสามารถปรับเปลี่ยนค่าคงที่ต่อไปนี้เพื่อปรับแต่งการรันของคุณ:
+คุณสามารถแก้ไขค่าคงที่ต่อไปนี้เพื่อปรับแต่งการรันของคุณ:
 
 ```python
 MODEL_NAME = "unsloth/gemma-4-E4B-it"
@@ -254,35 +300,36 @@ DATASET_NAME = "mlabonne/FineTome-100k"
 OUTPUT_DIR = "gemma_4_lora"
 ```
 
-ตัวอย่างข้อความต้อนรับของ Unsloth และผลลัพธ์เมื่อโหลดน้ำหนักโมเดล:
+ตัวอย่างข้อความต้อนรับของ Unsloth และผลลัพธ์เมื่อโหลดน้ำหนักของโมเดล:
 
 ![alt text](assets/welcome.png)
 
 ## เตรียมชุดข้อมูล
 
-เราใช้ชุดข้อมูลย่อยของ:
+เราใช้ชุดย่อยของ:
 ```text
 mlabonne/FineTome-100k
 ```
-ชุดข้อมูลนี้ถูก:
-* แปลงเป็นรูปแบบแชท
-* ประมวลผลโดยใช้เทมเพลตแชทของ Gemma-4
-* ทำความสะอาดเพื่อลบโทเคน BOS ที่ซ้ำกัน
+ชุดข้อมูลนี้:
+* ถูกแปลงเป็นรูปแบบแชท
+* ถูกประมวลผลโดยใช้เทมเพลตแชท Gemma-4
+* ถูกทำความสะอาดเพื่อลบโทเคน BOS ที่ซ้ำกัน
 
 ## ฝึกโมเดล
 
-สคริปต์จะรันการสาธิตการฝึกแบบสั้น ด้วยพารามิเตอร์ต่อไปนี้:
+สคริปต์นี้จะรันการสาธิตการฝึกแบบสั้น ๆ โดยมีพารามิเตอร์ดังนี้:
 - ประมาณ 50 ขั้นตอน
-- ขนาด batch เล็ก
-- การสะสม gradient (gradient accumulation)
+- ขนาดแบตช์เล็ก
+- การสะสมเกรเดียนต์
 
-ระหว่างการฝึก คุณจะเห็นบันทึก log เช่น:
+ระหว่างการฝึก คุณจะเห็นบันทึกดังนี้:
 
 ![alt text](assets/training.png)
 
 
-## การบันทึกและการปรับใช้งาน
-### บันทึกในเครื่อง (LoRA)
+## การบันทึกและการนำไปใช้งาน
+
+### การบันทึกในเครื่อง (LoRA)
 
 สคริปต์จะบันทึกอะแดปเตอร์ LoRA ไปยัง OUTPUT_DIR โดยอัตโนมัติ
 ```python
@@ -326,11 +373,11 @@ print(f"Found adapter weights: {adapter_weights}")
 ### บันทึกโมเดลที่ผสานรวมแล้ว (สำหรับ vLLM)
 
 <!-- @os:windows -->
-> **หมายเหตุ:** vLLM ไม่รองรับ Windows หากต้องการนำโมเดลที่ปรับแต่งเพิ่มเติมมาใช้งานบน Windows ให้ใช้ llama.cpp (ดู [ส่งออก GGUF](#export-gguf-for-llamacpp) ด้านล่าง) หรือย้ายโมเดลที่ผสานรวมแล้วไปยังเครื่อง Linux ที่รัน vLLM
+> **หมายเหตุ:** vLLM ไม่รองรับ Windows หากต้องการนำโมเดลที่ปรับแต่งของคุณไปใช้งานบน Windows ให้ใช้ llama.cpp (ดู [ส่งออก GGUF](#export-gguf-for-llamacpp) ด้านล่าง) หรือย้ายโมเดลที่ผสานรวมแล้วไปยังเครื่อง Linux ที่รัน vLLM
 <!-- @os:end -->
 
 <!-- @os:linux -->
-สำหรับการนำไปใช้งานกับ vLLM ให้ผสานอะแดปเตอร์เข้ากับโมเดลเต็มรูปแบบ:
+สำหรับการนำไปใช้งานด้วย vLLM ให้ผสานอะแดปเตอร์เข้ากับโมเดลแบบเต็ม:
 ```python
 model.save_pretrained_merged("gemma-4-finetune", tokenizer)
 ```
@@ -370,22 +417,22 @@ print("PASS: Merged model output looks correct")
 
 ### ส่งออก GGUF (สำหรับ llama.cpp)
 
-แปลงเป็น GGUF โดยตรงสำหรับการอนุมานในเครื่อง:
+แปลงโดยตรงเป็น GGUF สำหรับการอนุมานในเครื่อง:
 ```python
 model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q8_0")
 ```
 
 <!-- @os:windows -->
-## คำเตือนที่ทราบอยู่แล้ว
+## คำเตือนที่ทราบ
 
-คำเตือนเหล่านี้จะถูกแสดงโดย Unsloth เมื่อเริ่มทำงานบน Windows ROCm และสามารถเพิกเฉยได้อย่างปลอดภัยทั้งหมด:
+คำเตือนเหล่านี้ถูกพิมพ์โดย Unsloth เมื่อเริ่มทำงานบน Windows ROCm และสามารถละเว้นได้อย่างปลอดภัยทั้งหมด:
 
-| คำเตือน | สาเหตุ | สามารถเพิกเฉยได้หรือไม่ |
+| คำเตือน | เหตุผล | ปลอดภัยที่จะละเว้นหรือไม่ |
 |---|---|---|
-| `bitsandbytes library load error` | bitsandbytes ไม่มีบิลด์สำหรับ Windows ROCm | ได้ — คู่มือนี้ใช้ `adamw_torch` ไม่ใช่ bnb |
-| `No ROCm platform found for torch.distributed` | ROCm บน Windows ไม่รองรับการฝึกแบบกระจาย | ได้ — ไม่มีผลต่อการฝึกแบบ GPU เดียว |
-| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth แจ้งเตือนบิลด์ที่ไม่ใช่ Linux | ได้ — Windows ROCm ใช้งานได้กับ SFT แบบ GPU เดียว |
-| `triton is not available` | Triton ไม่มีบิลด์สำหรับ Windows | ได้ — Unsloth จะใช้ PyTorch kernel แทน |
+| `bitsandbytes library load error` | bitsandbytes ไม่มีบิลด์สำหรับ Windows ROCm | ใช่ — playbook นี้ใช้ `adamw_torch` ไม่ใช่ bnb |
+| `No ROCm platform found for torch.distributed` | ROCm บน Windows ไม่รองรับการฝึกแบบกระจาย | ใช่ — การฝึกด้วย GPU เดียวไม่ได้รับผลกระทบ |
+| `Unsloth: WARNING! You are using an unsupported platform` | Unsloth แจ้งเตือนบิลด์ที่ไม่ใช่ Linux | ใช่ — Windows ROCm ใช้งานได้กับการทำ SFT แบบ GPU เดียว |
+| `triton is not available` | Triton ไม่มีบิลด์สำหรับ Windows | ใช่ — Unsloth จะย้อนกลับไปใช้ kernel ของ PyTorch แทน |
 
 การฝึกจะดำเนินต่อไปได้อย่างถูกต้องแม้จะมีคำเตือนเหล่านี้
 <!-- @os:end -->
@@ -393,16 +440,16 @@ model.save_pretrained_gguf("gemma_4_finetune", tokenizer, quantization_method="Q
 ## ขั้นตอนถัดไป
 - ลองใช้ [Unsloth Studio](https://unsloth.ai/docs/new/studio) ซึ่งเป็น GUI ที่ใช้งานง่ายสำหรับ Unsloth
 - ฝึกด้วยชุดข้อมูลเฉพาะของคุณเอง
-- ลองปรับแต่งด้วยไฮเปอร์พารามิเตอร์ที่แตกต่างกัน
+- ลองปรับแต่งไฮเปอร์พารามิเตอร์ที่แตกต่างกัน
 - นำไปใช้งานด้วย vLLM หรือ llama.cpp
 - ลองใช้ QLoRA สำหรับการตั้งค่าที่ใช้หน่วยความจำน้อยลง
 
 ## แหล่งข้อมูล
 
-ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมเพื่อเรียนรู้เกี่ยวกับ Unsloth และการปรับแต่งเพิ่มเติมมากขึ้น:
+ด้านล่างนี้คือแหล่งข้อมูลเพิ่มเติมเพื่อเรียนรู้เกี่ยวกับ Unsloth และการปรับแต่งโมเดลเพิ่มเติม:
 
-* [เอกสาร Unsloth](https://docs.unsloth.ai)
+* [Unsloth Docs](https://docs.unsloth.ai)
 
 * [Unsloth GitHub](https://github.com/unslothai/unsloth)
 
-* [คู่มือการปรับแต่งเพิ่มเติมของ Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)
+* [คู่มือการปรับแต่งโมเดลของ Unsloth](https://docs.unsloth.ai/get-started/fine-tuning-llms-guide)

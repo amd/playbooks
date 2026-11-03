@@ -16,93 +16,93 @@ SPDX-License-Identifier: MIT
 
 ## Genel Bakış
 
-Sıfırdan bir GPU çekirdeği yazın, derleyin, bir AMD GPU üzerinde başlatın ve kullanımın yükseldiğini görün. Bu kılavuz, GPU hesaplamasının gerçekte nasıl çalıştığını gösterir: çekirdek kodunu yazın ve binlerce iş parçacığı üzerinde paralel olarak çalıştırın.
+Sıfırdan bir GPU kernel'i yazın, derleyin, bir AMD GPU üzerinde başlatın ve kullanım oranının yükselişini izleyin. Bu playbook, GPU hesaplamasının gerçekte nasıl çalıştığını gösterir: kernel kodunu yazın ve binlerce iş parçacığı (thread) üzerinde paralel olarak çalıştırın.
 
-> **Not**: Bu, ek hata ayıklama ve değişiklikler gerektirebilecek oldukça karmaşık bir kılavuzdur.
+> **Not**: Bu, ek hata ayıklama ve değişiklikler gerektirebilecek oldukça karmaşık bir playbook'tur.
 
 ## Neler Öğreneceksiniz
 
 <!-- @os:windows -->
-- GPU çekirdeklerinin nasıl çalıştığı: gridler, bloklar, iş parçacıkları ve bunları veriye eşleyen indeksleme modeli
-- AMD ROCm/HIP yığınının, CUDA tarzı kodun değiştirilmeden AMD GPU'larda çalışmasına nasıl olanak sağladığı
-- `torch.cuda._compile_kernel` kullanarak bir çekirdeğin çalışma zamanında (runtime) nasıl derleneceği
-- Python'dan içe aktarılabilen, `CUDAExtension` + pybind11 ile bir yerel C++ çekirdek uzantısının nasıl oluşturulacağı
+- GPU kernel'lerinin nasıl çalıştığı: grid'ler, blok'lar, thread'ler ve bunları veriye eşleyen indeksleme modeli
+- AMD ROCm/HIP yığınının, CUDA tarzı kodun herhangi bir değişiklik yapılmadan AMD GPU'larda çalışmasına nasıl izin verdiği
+- `torch.cuda._compile_kernel` kullanarak bir kernel'in çalışma zamanında (runtime) nasıl derleneceği
+- `CUDAExtension` + pybind11 ile Python'dan içe aktarılabilen yerel bir C++ kernel uzantısının nasıl oluşturulacağı
 <!-- @os:end -->
 <!-- @os:linux -->
-- GPU çekirdeklerinin nasıl çalıştığı: gridler, bloklar, iş parçacıkları ve bunları veriye eşleyen indeksleme modeli
-- AMD ROCm/HIP yığınının, CUDA tarzı kodun değiştirilmeden AMD GPU'larda çalışmasına nasıl olanak sağladığı
-- `torch.cuda._compile_kernel` kullanarak bir çekirdeğin çalışma zamanında (runtime) nasıl derleneceği
-- Python'dan içe aktarılabilen, `CUDAExtension` + pybind11 ile bir yerel C++ çekirdek uzantısının nasıl oluşturulacağı
-- Çekirdek yürütme süresinin nasıl ölçüleceği ve `amd-smi` ile canlı GPU kullanımının nasıl izleneceği
+- GPU kernel'lerinin nasıl çalıştığı: grid'ler, blok'lar, thread'ler ve bunları veriye eşleyen indeksleme modeli
+- AMD ROCm/HIP yığınının, CUDA tarzı kodun herhangi bir değişiklik yapılmadan AMD GPU'larda çalışmasına nasıl izin verdiği
+- `torch.cuda._compile_kernel` kullanarak bir kernel'in çalışma zamanında (runtime) nasıl derleneceği
+- `CUDAExtension` + pybind11 ile Python'dan içe aktarılabilen yerel bir C++ kernel uzantısının nasıl oluşturulacağı
+- Kernel çalıştırma süresinin nasıl ölçüleceği ve `amd-smi` ile canlı GPU kullanımının nasıl izleneceği
 <!-- @os:end -->
 
 ---
 
-Bu kılavuz, çekirdek geliştirme için iki yaklaşımı ele almaktadır:
+Bu playbook, kernel geliştirmeye yönelik iki yaklaşımı ele alır:
 
 <!-- @os:windows -->
 | Yaklaşım | Giriş noktası |
 |---|---|
-| **JIT Derleme** | `torch.cuda._compile_kernel`, çekirdeği bir Python dizesi olarak yazın, herhangi bir derleme adımı olmadan |
-| **C++ Uzantısı** | `CUDAExtension` + pybind11: bir `.cu` dosyasını yerel bir `.pyd` dosyasına derleyin ve içe aktarın |
+| **JIT Derleme** | `torch.cuda._compile_kernel`, bir kernel'i Python dizesi olarak yazma, herhangi bir derleme adımı olmadan |
+| **C++ Uzantısı** | `CUDAExtension` + pybind11: bir `.cu` dosyasını yerel bir `.pyd` dosyasına derleyip içe aktarma |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Yaklaşım | Giriş noktası |
 |---|---|
-| **JIT Derleme** | `torch.cuda._compile_kernel`, çekirdeği bir Python dizesi olarak yazın, herhangi bir derleme adımı olmadan |
-| **C++ Uzantısı** | `CUDAExtension` + pybind11: bir `.cu` dosyasını yerel bir `.so` dosyasına derleyin ve içe aktarın |
+| **JIT Derleme** | `torch.cuda._compile_kernel`, bir kernel'i Python dizesi olarak yazma, herhangi bir derleme adımı olmadan |
+| **C++ Uzantısı** | `CUDAExtension` + pybind11: bir `.cu` dosyasını yerel bir `.so` dosyasına derleyip içe aktarma |
 <!-- @os:end -->
 
-Her iki yaklaşım da AMD GPU'lar üzerinde çalışır. Bu, PyTorch'un ROCm derlemesinin tüm CUDA API yüzeyini HIP'e eşlemesi sayesinde mümkündür. Bu, `torch.cuda`, `CUDAExtension` ve CUDA çekirdek sözdiziminin AMD donanımında şeffaf bir şekilde çalışması anlamına gelir.
+Her iki yaklaşım da AMD GPU'larda çalışır. Bunun nedeni, PyTorch'un ROCm derlemesinin tüm CUDA API yüzeyini HIP'e eşlemesidir. Bu, `torch.cuda`, `CUDAExtension` ve CUDA kernel sözdiziminin tümünün AMD donanımında şeffaf bir şekilde çalışması anlamına gelir.
 
 ---
 
 ## Arka Plan
 
-### GPU Çekirdeği Nedir?
+### GPU Kernel Nedir?
 
-GPU çekirdeği, binlerce GPU iş parçacığı üzerinde aynı anda paralel olarak çalışan bir fonksiyondur. Her çağrıda bir kez çalışan bir CPU fonksiyonunun aksine, bir çekirdek, her biri çok sayıda **iş parçacığı (thread)** içeren bir **blok (block)** **gridi** ile başlatılır ve hepsi farklı veriler üzerinde aynı kodu çalıştırır.
+Bir GPU kernel'i, binlerce GPU thread'i üzerinde aynı anda paralel olarak çalışan bir fonksiyondur. Her çağrıda bir kez çalışan bir CPU fonksiyonunun aksine, bir kernel; her biri çok sayıda **thread** içeren bir **block** **grid**'i ile başlatılır ve tüm thread'ler aynı kodu farklı veriler üzerinde çalıştırır.
 
 <p align="center">
   <img src="assets/grid_threads.png" width="900"/>
 </p>
 
-### İş Parçacığı İndeksleme Modeli
+### Thread İndeksleme Modeli
 
-Bir çekirdeği başlatırken iki boyut belirtirsiniz:
-
-| Değişken | Anlamı |
-|---|---|
-| `gridDim` | Griddeki blok sayısı |
-| `blockDim` | Blok başına iş parçacığı sayısı |
-
-Her iş parçacığının erişebildiği üç yerleşik salt okunur değişken vardır:
+Bir kernel başlatırken iki boyut belirtirsiniz:
 
 | Değişken | Anlamı |
 |---|---|
-| `blockIdx.x` | Bu iş parçacığının ait olduğu blok |
-| `blockDim.x` | Bir bloktaki iş parçacığı sayısı |
-| `threadIdx.x` | İş parçacığının kendi bloğu içindeki indeksi |
+| `gridDim` | Grid'deki blok sayısı |
+| `blockDim` | Blok başına thread sayısı |
 
-### Global İş Parçacığı Kimliği
+Her thread, üç yerleşik salt okunur değişkene erişebilir:
 
-Bu değişkenler birleştirilerek küresel olarak benzersiz bir iş parçacığı indeksi hesaplanır:
+| Değişken | Anlamı |
+|---|---|
+| `blockIdx.x` | Bu thread'in ait olduğu blok |
+| `blockDim.x` | Bir bloktaki thread sayısı |
+| `threadIdx.x` | Bloğu içindeki thread indeksi |
+
+### Global Thread Kimliği
+
+Bu değişkenler, global olarak benzersiz bir thread indeksi hesaplamak için birleştirilir:
 
 ```c
 int idx = blockIdx.x * blockDim.x + threadIdx.x;
 ```
 
-Toplam iş parçacığı sayısı = `gridDim.x * blockDim.x`. Her iş parçacığı bir öğeyi bağımsız olarak işler. Bu, **veri paralelliğinin (data parallelism)** temelidir. Aynı işlem, iş parçacıkları arasında herhangi bir bağımlılık olmadan birçok öğe üzerinde aynı anda çalışır.
+Toplam thread sayısı = `gridDim.x * blockDim.x`. Her thread bir öğeyi bağımsız olarak işler. Bu, **veri paralelliği**nin temelidir. Aynı işlem, thread'ler arası bağımlılık olmadan aynı anda birçok öğe üzerinde çalışır.
 
 ---
 
-### GPU Yürütme Modeli: Dalga Cepheleri (Wavefronts)
+### GPU Çalıştırma Modeli: Wavefront'lar
 
-AMD GPU'lar, iş parçacıklarını **wavefront** adı verilen **32**'lik gruplar halinde yürütür. Bir wavefront'taki tüm iş parçacıkları aynı komutu aynı anda çalıştırır. Bu durum, en uygun blok boyutu seçimlerini etkiler (256 iş parçacığı = 8 wavefront = iyi zamanlama verimliliği).
+AMD GPU'lar, thread'leri **wavefront** adı verilen **32**'lik gruplar halinde çalıştırır. Bir wavefront içindeki tüm thread'ler aynı anda aynı komutu çalıştırır. Bu durum, en uygun blok boyutu seçimlerini etkiler (256 thread = 8 wavefront = iyi zamanlama verimliliği).
 
 ### AMD GPU Programlama: HIP + ROCm
 
-**ROCm**, AMD'nin açık kaynaklı GPU hesaplama yığınıdır (sürücüler, derleyiciler, kütüphaneler, çalışma zamanı). **HIP** bunun üzerinde yer alır ve sözdizimsel olarak CUDA ile aynı olacak şekilde tasarlanmıştır. PyTorch'un ROCm derlemesi, `torch.cuda.*`'ı şeffaf bir şekilde HIP'e eşler, böylece aynı kod AMD GPU'larda çalışır.
+**ROCm**, AMD'nin açık kaynaklı GPU hesaplama yığınıdır (sürücüler, derleyiciler, kütüphaneler, çalışma zamanı). **HIP**, bunun üzerinde yer alır ve sözdizimsel olarak CUDA ile aynı olacak şekilde tasarlanmıştır. PyTorch'un ROCm derlemesi, `torch.cuda.*`'ı şeffaf bir şekilde HIP'e eşler, böylece aynı kod AMD GPU'larda çalışır.
 
 ---
 
@@ -112,9 +112,9 @@ PyTorch, CUDA API yüzeyinin (`torch.cuda.*`) şeffaf bir şekilde HIP tarafınd
 
 - `torch.cuda.is_available()`, ROCm ile AMD GPU'larda çalışır
 - `tensor.to("cuda")`, AMD GPU üzerinde ayırma yapar
-- `torch.version.hip`, HIP sürümünü gösterir
+- `torch.version.hip`, HIP sürümünü açığa çıkarır
 
-PyTorch ayrıca, ayrı bir derleme adımına gerek kalmadan ham bir çekirdek dizesini JIT olarak derleyip çağrılabilir bir nesne elde etmek için üst düzey bir kısayol olan `torch.cuda._compile_kernel()` fonksiyonunu sunar.
+PyTorch ayrıca, ayrı bir derleme adımına gerek kalmadan ham bir kernel dizesini JIT olarak derlemek ve geriye çağrılabilir bir nesne almak için üst düzey bir kısayol olan `torch.cuda._compile_kernel()`'i sunar.
 
 ---
 
@@ -128,7 +128,7 @@ PyTorch ayrıca, ayrı bir derleme adımına gerek kalmadan ham bir çekirdek di
 <!-- @os:windows -->
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Ön Koşullar - Windows
-- En son sürümü yükleyin: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
+- En son sürümü kurun: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -136,8 +136,8 @@ PyTorch ayrıca, ayrı bir derleme adımına gerek kalmadan ham bir çekirdek di
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Linux'ta, seçtiğiniz dizinde bir terminal açın ve ROCm+Pytorch'un önceden kurulu olduğu bir venv oluşturmak için aşağıdaki komutları izleyin.
-<!-- @test:id=create-venv timeout=60 -->
+Linux'ta, seçtiğiniz dizinde bir terminal açın ve ROCm+Pytorch önceden kurulmuş bir venv oluşturmak için komutları izleyin.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -149,14 +149,14 @@ source kernel-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**Kullanıcınıza GPU cihazlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp tekrar açın):
+**Kullanıcınıza GPU aygıtlarına erişim izni verin** (bunun etkili olması için oturumu kapatıp tekrar açın):
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
-<!-- @test:id=create-venv timeout=60 -->
+Linux'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -169,8 +169,8 @@ source kernel-env/bin/activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için aşağıdaki komutları izleyin.
-<!-- @test:id=create-venv timeout=60 -->
+Windows'ta, seçtiğiniz dizinde bir terminal açın ve bir venv oluşturmak için komutları izleyin.
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv kernel-env
 kernel-env\Scripts\activate
@@ -178,10 +178,12 @@ kernel-env\Scripts\activate
 <!-- @test:end -->
 <!-- @setup:id=activate-venv command="kernel-env\Scripts\activate" -->
 
-> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce PowerShell Yürütme İlkesini (Execution Policy) değiştirmesi gerekebilir (örneğin,
-> RemoteSigned veya Unrestricted olarak ayarlamak).
+> **İpucu**: Windows kullanıcılarının bazı PowerShell komutlarını çalıştırmadan önce
+> PowerShell Yürütme İlkesi'ni (örneğin RemoteSigned veya Unrestricted olarak ayarlayarak) değiştirmesi gerekebilir.
 
 <!-- @os:end -->
+
+
 ### Temel Bağımlılıkların Kurulumu
 <!-- @os:linux -->
 <!-- @device:halo_box,halo,stx,krk -->
@@ -198,7 +200,7 @@ kernel-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
-> **Not:** Bu playbook için, özel çekirdek derlemesi tam geliştirme başlıklarını gerektirdiğinden, ROCm ve PyTorch'un Ryzen AI Halo üzerinde bile sanal ortama kurulması gerekir.
+> **Not:** Bu playbook için, özel kernel derlemesi tam geliştirme başlıklarını (headers) gerektirdiğinden, ROCm ve PyTorch'un Ryzen AI Halo üzerinde bile sanal ortama kurulması gerekir.
 
 ROCm'yi kurun:
 ```powershell
@@ -228,13 +230,12 @@ python -m pip list | Select-String "rocm|torch|torchvision|torchaudio"
 <!-- @test:end -->
 <!-- @os:end -->
 ---
-
 ### Ek Bağımlılıkların Kurulumu
 
 <!-- @os:linux -->
-Linux C/C++ derleme araç zincirini kurun. Bu, sistem düzeyinde bir bağımlılıktır ve `CUDAExtension`, `.cu` dosyalarından yerel `.so` modülleri oluşturduğu için C++ eklenti (extension) örnekleri için gereklidir.
+Linux C/C++ derleme araç zincirini kurun. Bu, sistem düzeyinde bir bağımlılıktır ve `CUDAExtension`'ın `.cu` dosyalarından yerel `.so` modülleri derlemesi nedeniyle C++ uzantı adım adım anlatımları için gereklidir.
 
-Bunu Linux makinesinde, oluşturulan Python sanal ortamının dışında, bir kez çalıştırın:
+Bunu Linux makinesinde, oluşturulan Python sanal ortamının dışında bir kez çalıştırın:
 
 ```bash
 sudo apt update
@@ -265,13 +266,13 @@ echo "OK: Linux C/C++ build toolchain is available."
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Lütfen [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) veya [daha yeni bir sürümün](https://visualstudio.microsoft.com/vs/community/) **Desktop development with C++** iş yüküyle birlikte kurulu olduğundan emin olun.
+Lütfen [Visual Studio 2022](https://aka.ms/vs/17/release/vs_community.exe) veya [daha yenisinin](https://visualstudio.microsoft.com/vs/community/) **Desktop development with C++** iş yükü ile birlikte kurulu olduğundan emin olun.
 
 > **Not**: Bu Visual Studio C++ ortam kurulumu yalnızca **C++ Extension** yaklaşımı için gereklidir. JIT Compilation yaklaşımı için gerekli değildir.
 
-Bir PowerShell terminali açın ve C++ eklentisini oluşturmadan önce aşağıdaki komutları çalıştırın.
+Bir PowerShell terminali açın ve C++ uzantısını derlemeden önce aşağıdaki komutları çalıştırın.
 
-**Adım 1: Kurulu Visual Studio C++ ortamını bulma**
+**Adım 1: Kurulu Visual Studio C++ ortamını bulun**
 
 **(A) Visual Studio Installer ile birlikte kurulan `vswhere.exe` dosyasını bulun**
 ```powershell
@@ -280,7 +281,7 @@ $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 if (-not (Test-Path $VsWhere)) {throw "vswhere.exe was not found. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(B) C++ derleme araçlarına sahip Visual Studio 2022 veya daha yeni bir sürümden `vcvars64.bat` dosyasını bulun**
+**(B) C++ derleme araçlarına sahip Visual Studio 2022 veya daha yenisinden `vcvars64.bat` dosyasını bulun**
 
 ```powershell
 $Vcvars = & $VsWhere `
@@ -293,17 +294,17 @@ $Vcvars = & $VsWhere `
 if (-not $Vcvars) {throw "Could not find vcvars64.bat. Install Visual Studio 2022 or newer with the Desktop development with C++ workload."}
 ```
 
-**(C) Kullanılan Visual Studio C++ Ortamını yazdırın**
+**(C) Kullanılmakta olan Visual Studio C++ Ortamını yazdırın**
 
 ```powershell
 Write-Host "Using Visual Studio C++ environment: $Vcvars"
 ```
 
-**Adım 2: Visual Studio C++ derleme ortamını etkinleştirme**
+**Adım 2: Visual Studio C++ derleme ortamını etkinleştirin**
 
 **(A) `vcvars64.bat` dosyasını çalıştırın ve ayarladığı ortamı yakalayın**
 
-Bu, `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` ve Windows SDK yollarının kullanılabilir olmasını sağlar.
+Bu, `cl.exe`, `INCLUDE`, `LIB`, `LIBPATH` ve Windows SDK yollarını kullanılabilir hale getirir.
 
 ```powershell
 $VsEnv = cmd /c "`"$Vcvars`" && where cl && set" 2>&1
@@ -371,7 +372,7 @@ Write-Host "OK: Visual Studio C++ build environment is available."
 <!-- @test:end -->
 <!-- @os:end -->
 
-#### Ortam Değişkenlerini Ayarlama
+#### Ortam Değişkenlerini Ayarlayın
 <!-- @os:linux -->
 <!-- @test:id=set-env-variables-linux timeout=300 setup=activate-venv -->
 ```bash
@@ -557,29 +558,27 @@ $code | python -
 
 ## Gerekli Dosyaları İndirin
 
-Aşağıdaki dizin yapısını oluşturmak için **2 yeni klasör** oluşturun ve ilgili dosyaları indirin:
+**2 yeni klasör** oluşturup ilgili dosyaları indirerek aşağıdaki dizin yapısını oluşturun:
 
 | Dizin | İndirilecek Dosyalar | Açıklama |
 |-----------|-------------------|-------------|
-| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Vektör toplama çekirdeği için JIT ve C++ eklenti dosyaları |
-| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Matris çarpımı çekirdeği için JIT ve C++ eklenti dosyaları |
+| **Vector_Addition/** | [add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py)<br>[add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)<br>[setup.py](assets/Vector_Addition/setup.py)<br>[run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)| Vektör toplama çekirdeği için JIT ve C++ uzantı dosyaları |
+| **Matrix_Multiplication/** | [matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py)<br>[matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)<br>[setup.py](assets/Matrix_Multiplication/setup.py)<br>[run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Matris çarpımı çekirdeği için JIT ve C++ uzantı dosyaları |
 
 
-## Uygulamalı Örnekler
-
-### Uygulamalı Örnek 1: Vektör Toplama
+## Adım Adım Anlatım 1: Vektör Toplama
 
 #### Yaklaşım A: JIT Derleme
 
-JIT (Just-In-Time) derleme, çekirdeğin Python içinde ham bir C++ dizesi olarak yazılması ve ekstra derleme adımlarına gerek kalmadan çalışma zamanında derlenmesi anlamına gelir.
+JIT (Just-In-Time) derleme, çekirdeğin Python içinde ham bir C++ dizesi olarak yazıldığı ve ekstra derleme adımlarına gerek kalmadan çalışma zamanında derlendiği anlamına gelir.
 
-[add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py) dosyasını kullanmak için, dosyanın indirildiğinden emin olun ve şunu çalıştırın:
+[add_one_kernel.py](assets/Vector_Addition/add_one_kernel.py) dosyasını kullanmak için, indirildiğinden emin olun ve çalıştırın:
 ```bash
 cd Vector_Addition # if not already inside the directory
 python add_one_kernel.py
 ```
 
-**Önemli Kod Parçaları**
+**Anahtar Kod Parçaları**
 ```python
 import torch
 
@@ -619,31 +618,31 @@ print("First 5 elements:", x[:5].cpu())
 #Expected output: tensor([200001., 200001., 200001., 200001., 200001.])
 ```
 <!-- @os:linux -->
-> **İpucu**: Betik ayrıca, çekirdek çalışması sırasında tepe ve ortalama GPU kullanımını kaydetmek için her 100ms'de bir `amd-smi`'yi sorgulayan bir arka plan iş parçacığı (thread) da başlatır.
+> **İpucu**: Betik ayrıca, çekirdek çalışması sırasında en yüksek ve ortalama GPU kullanımını kaydetmek için her 100 ms'de bir `amd-smi`'yi sorgulayan bir arka plan iş parçacığı oluşturur.
 <!-- @os:end -->
 
 > **Not**: **Blok Boyutu Neden 256?** <br>
-> - Çekirdek, **blok başına 256 iş parçacığı** kullanır çünkü bu, **AMD GPU'ların wavefront yürütme modeliyle** iyi uyum sağlar.
-> - AMD donanımının iş parçacıklarını 32'lik gruplar halinde yürüttüğünü ve bunun sonucunda blok başına 8 wavefront oluştuğunu hatırlayın. (8 wavefront x 32 iş parçacığı = 1 blok)
+> - Çekirdek, **blok başına 256 iş parçacığı** kullanır çünkü bu, **AMD GPU'ların dalga cephesi (wavefront) yürütme modeliyle** iyi uyum sağlar.
+> - AMD donanımının iş parçacıklarını 32'lik gruplar halinde yürüttüğünü ve bunun sonucunda blok başına 8 dalga cephesi (wavefront) oluştuğunu hatırlayın. (8 dalga cephesi x 32 iş parçacığı = 1 blok)
 
 
-**İş yükünün yaptığı şey:**
+**İş yükü ne yapar:**
 
 Çekirdek, GPU kullanımını göstermek için yapay olarak ekstra iş ekler:
 
 - Tensörde **100.000.000 eleman**
-- Her çekirdek çalıştırmasında eleman başına **iç döngü 1.000 kez** çalışır  
+- Her çekirdek çalıştırması başına eleman başına **iç döngü 1.000 kez** çalışır  
 - Toplam **200 çekirdek çalıştırması**
 
 **Matematik:**  
-- Her eleman: 1 × 1.000 iterasyon × 200 çalıştırma = 200.000 kadar artırılır  
-- Nihai sonuç: 1.0 (başlangıç değeri) + 200.000 (eklemeler) = 200.001,0
+- Her eleman: 1 × 1.000 yineleme × 200 çalıştırma ile 1 artırılır = 200.000  
+- Sonuç: 1.0 (başlangıç değeri) + 200.000 (toplamalar) = 200.001,0
 
 **İç döngü neden var?**  
-- `for (int i = 0; i < 1000; i++)` döngüsü olmadan, 200 çalıştırma anında tamamlanır ve izleme araçları anlamlı bir GPU kullanımı yakalayamaz. Yapay iş, her çekirdek çalıştırmasının izleme araçlarının performansı ölçebilmesi için yeterince uzun sürmesini sağlar.
+- `for (int i = 0; i < 1000; i++)` döngüsü olmadan, 200 çalıştırma anında tamamlanır ve izleme araçları anlamlı bir GPU kullanımı yakalayamaz. Yapay iş, izleme araçlarının performansı ölçebilmesi için her çekirdek çalışmasının yeterince uzun sürmesini sağlar.
 
 <!-- @os:linux -->
-**Beklenen çıktı:**[Performans sayıları değişiklik gösterebilir]
+**Beklenen çıktı:**[Performans rakamları değişkenlik gösterecektir]
 ```
 First 5 elements: tensor([200001., 200001., 200001., 200001., 200001.])
 Elapsed time: 2.753s
@@ -653,7 +652,7 @@ Average GPU Utilization: 65.94%
 <!-- @os:end -->
 
 <!-- @os:windows -->
-> **Not**: Windows üzerinde `amd-smi` desteklenmemektedir. GPU kullanımını izlemek için, programı çalıştırdığınızda kısa bir kullanım artışı görmeniz gereken Görev Yöneticisi'ni kullanabilirsiniz.
+> **Not**: Windows'ta `amd-smi` desteklenmez. GPU kullanımını izlemek için, programı çalıştırdığınızda kısa bir kullanım artışı görmeniz gereken Görev Yöneticisi'ni kullanabilirsiniz.
 
 **Beklenen çıktı:**
 ```
@@ -662,7 +661,7 @@ Elapsed time: 2.753s
 No GPU Usage captured.
 ```
 <!-- @os:end -->
-**Aferin! İlk GPU çekirdeğinizi az önce çalıştırdınız.**
+**Aferin! Az önce ilk GPU çekirdeğinizi çalıştırdınız.**
 
 <!-- @os:linux -->
 <!-- @test:id=vector-addition-jit-linux timeout=300 hidden=True setup=activate-venv -->
@@ -805,10 +804,10 @@ $code | python -
 ---
 #### Yaklaşım B: C++ Uzantısı
 
-İkinci yaklaşım daha manueldir: çekirdeği ve Python bağlamasını tek bir `.cu` dosyasına yazın, PyTorch'un derleme sistemini kullanarak yerel olarak derleyin ve Python'a aktarın.
+İkinci yaklaşım daha manueldir: çekirdeği ve Python bağlamasını tek bir `.cu` dosyasına yazın, bunu PyTorch'un derleme sistemini kullanarak doğal olarak derleyin ve Python'a aktarın.
 
 <!-- @os:windows -->
-> **Not**: C++ Uzantısı yaklaşımı, PyTorch `.cu` kaynak dosyasını yerel bir `.pyd` uzantı modülüne derlediğinden Visual Studio C++ derleme ortamını gerektirir. Bu yerel uzantının derlenmesi, Visual Studio tarafından sağlanan Microsoft C++ araç zincirine (derleyici, bağlayıcı ve derleme araçları) bağlıdır. Uzantıyı derlemeden önce kurulum bölümündeki Visual Studio etkinleştirme komutlarını çalıştırın.
+> **Not**: C++ Uzantısı yaklaşımı, PyTorch'un `.cu` kaynağını doğal bir `.pyd` uzantı modülüne derlemesi nedeniyle Visual Studio C++ derleme ortamını gerektirir. Bu doğal uzantının derlenmesi, Visual Studio tarafından sağlanan Microsoft C++ araç zincirine (derleyici, bağlayıcı ve derleme araçları) bağlıdır. Uzantıyı derlemeden önce kurulum bölümündeki Visual Studio etkinleştirme komutlarını çalıştırın.
 <!-- @os:end -->
 
 Henüz indirmediyseniz aşağıdaki dosyaları indirin:
@@ -816,16 +815,16 @@ Henüz indirmediyseniz aşağıdaki dosyaları indirin:
 | Dosya | Rol |
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Çekirdek + başlatıcı + pybind11 bağlaması, hepsi tek bir dosyada |
-| [setup.py](assets/Vector_Addition/setup.py) | `.cu` dosyasını bir `.pyd` dosyasına derlemek için `CUDAExtension` kullanan derleme betiği |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Derlenmiş yapıları çalıştıran Python betiği |
+| [setup.py](assets/Vector_Addition/setup.py) | Derleme betiği, `.cu` dosyasını bir `.pyd` dosyasına derlemek için `CUDAExtension` kullanır |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Derlenmiş yapıtları çalıştıran Python betiği |
 <!-- @os:end -->
 
 <!-- @os:linux -->
 | Dosya | Rol |
 |---|---|
 | [add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu) | Çekirdek + başlatıcı + pybind11 bağlaması, hepsi tek bir dosyada |
-| [setup.py](assets/Vector_Addition/setup.py) | `.cu` dosyasını bir `.so` dosyasına derlemek için `CUDAExtension` kullanan derleme betiği |
-| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Derlenmiş yapıları çalıştıran Python betiği |
+| [setup.py](assets/Vector_Addition/setup.py) | Derleme betiği, `.cu` dosyasını bir `.so` dosyasına derlemek için `CUDAExtension` kullanır |
+| [run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py) | Derlenmiş yapıtları çalıştıran Python betiği |
 <!-- @os:end -->
 
 #### **Adım 1: Çekirdek, başlatıcı ve bağlama** ([add_one_kernel.cu](assets/Vector_Addition/add_one_kernel.cu)):
@@ -855,26 +854,25 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 >**İpucu**: Neden `hipDeviceSynchronize()` kullanılır? <br>
-> - GPU çekirdek başlatmaları asenkrondur. CPU `add_one<<<grid_size, block_size>>>(data, n);` çalıştırdığında, GPU'nun beklemesini beklemeden bir sonraki komutu hemen yürütür. `hipDeviceSynchronize()`, CPU'yu GPU çekirdeği tamamlanana kadar beklemeye zorlar.
+> - GPU çekirdek başlatmaları asenkrondur. CPU, `add_one<<<grid_size, block_size>>>(data, n);` komutunu çalıştırdığında, GPU'yu beklemeden bir sonraki komutu hemen yürütür. `hipDeviceSynchronize()`, CPU'yu GPU çekirdeği tamamlanana kadar beklemeye zorlar.
 
 #### **Adım 2: Derleme**
 ```bash
 pip install --no-build-isolation -v .
 ```
->**Not**: Bu komut, oluşturduğumuz .cu dosyasını derlemek için geçerli dizinde `setup.py` dosyasını arar.
+>**Not**: Bu komut, oluşturduğumuz .cu dosyasını derlemek için mevcut dizinde `setup.py` dosyasını arar.
 
 
-`CUDAExtension`, `torch.utils.cpp_extension` içinden bir CUDA derleme yardımcısıdır. ROCm ile PyTorch, **`CUDAExtension`'ı `nvcc` yerine `hipcc` kullanacak şekilde yeniden yönlendirir**. ROCm, derleme yolunu ele geçirir ve HIP derleyicisi üzerinden yönlendirerek CUDA kodunu AMD'ye taşır.
+`CUDAExtension`, `torch.utils.cpp_extension` içinden gelen bir CUDA derleme yardımcısıdır. ROCm ile PyTorch, **`CUDAExtension`'ı `nvcc` yerine `hipcc` kullanacak şekilde yeniden eşler**. ROCm, derleme yolunu ele geçirir ve bunu HIP derleyicisi üzerinden yönlendirerek CUDA kodunu AMD'ye taşır.
 
-Bu işlem aşağıdaki dosyaları üretir:
+Bu, aşağıdaki dosyaları üretir:
 <!-- @os:windows -->
 - `build/`: `.pyd` dosyalarını içeren dizin
-- `add_one_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin fiilen derlediği şey budur
+- `add_one_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin aslında derlediği şey budur
 <!-- @os:end -->
-
 <!-- @os:linux -->
 - `build/`: `.so` dosyalarını içeren dizin
-- `add_one_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin fiilen derlediği şey budur
+- `add_one_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin aslında derlediği şey budur
 <!-- @os:end -->
 
 #### **Adım 3: Python'dan kullanma** ([run_compiled_addition.py](assets/Vector_Addition/run_compiled_addition.py)):
@@ -1028,40 +1026,40 @@ finally {
 
 ---
 
-### İnceleme 2: Matris Çarpımı
+## Kılavuz 2: Matris Çarpımı
 
-Matris çarpımı **C = A × B** işlemini hesaplar; burada:
-- **A** M×N boyutlarındadır (satır × sütun)
-- **B** N×K boyutlarındadır
-- **C** M×K boyutlarındadır (sonuç)
+Matris çarpımı, aşağıdaki gibi olan **A** ve **B**'nin çarpımı olan **C = A × B**'yi hesaplar:
+- **A**, M×N boyutundadır (satır × sütun)
+- **B**, N×K boyutundadır
+- **C**, M×K boyutundadır (sonuç)
 
 Her çıktı elemanı şu şekilde tanımlanır:
 $$C[row, col] = \sum_{n=0}^{N-1} A[row, n] \cdot B[n, col]$$
 
-C'nin her bir elemanı bağımsız olarak hesaplanır, bu da işlemi GPU paralelliği için mükemmel hale getirir.
+C'nin her elemanı bağımsız olarak hesaplanır, bu da bunu GPU paralelliği için mükemmel hale getirir.
 
 #### GPU İş Parçacıklarına Nasıl Eşlenir
 
-Vektör toplamanın (1D) aksine, matris çarpımı **2D bir çıktı** üretir, bu nedenle **2D bir iş parçacığı ızgarası** kullanırız:
+Vektör toplamanın (1B) aksine, matris çarpımı **2B bir çıktı** üretir, bu nedenle bir **2B iş parçacığı ızgarası** kullanırız:
 
 | | Vektör Toplama | Matris Çarpımı |
 |---|---|---|
-| **Çıktı şekli** | 1D dizi | 2D matris (M×K) |
+| **Çıktı şekli** | 1B dizi | 2B matris (M×K) |
 | **İş parçacığı eşlemesi** | 1 iş parçacığı → 1 eleman | 1 iş parçacığı → 1 çıktı elemanı |
-| **Başlatma deseni** | 1D ızgara: `(grid_x, 1, 1)` | 2D ızgara: `(grid_x, grid_y, 1)` |
+| **Başlatma deseni** | 1B ızgara: `(grid_x, 1, 1)` | 2B ızgara: `(grid_x, grid_y, 1)` |
 | **Blok boyutu** | `(256, 1, 1)` | `(16, 16, 1)` = 256 iş parçacığı |
 
-Her iş parçacığı, çıktı matrisi C'nin bir elemanını hesaplar. `(row, col)` konumundaki iş parçacığı, A'nın karşılık gelen satırını B'nin karşılık gelen sütunuyla çarparak `C[row][col]`'u hesaplar.
+Her iş parçacığı, C çıktı matrisinin bir elemanını hesaplar. `(row, col)` konumundaki iş parçacığı, A'nın karşılık gelen satırını B'nin karşılık gelen sütunuyla çarparak `C[row][col]`'u hesaplar.
 
-**Bellek Düzeni**: GPU belleği düz (1D) yapıdadır, ancak matrisler satır satır saklanır. `A[row][col]`'a erişmek için çekirdek `A[row * N + col]` kullanır.
-
-
-#### Yaklaşım A: JIT Derlemesi:
-
-İnceleme 1'de olduğu gibi, çekirdek Python içinde ham bir C++ dizesi olarak yazılır ve PyTorch'un yerleşik JIT'i aracılığıyla çalışma zamanında derlenir.
+**Bellek Düzeni**: GPU belleği düzdür (1B), ancak matrisler satır satır saklanır. `A[row][col]`'a erişmek için çekirdek `A[row * N + col]` kullanır.
 
 
-[matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) dosyasını kullanmak için, indirildiğinden emin olun ve çalıştırın:
+#### Yaklaşım A: JIT Derleme:
+
+Kılavuz 1'de olduğu gibi, çekirdek Python içinde ham bir C++ dizesi olarak yazılır ve PyTorch'un yerleşik JIT'i aracılığıyla çalışma zamanında derlenir.
+
+
+[matmul_kernel.py](assets/Matrix_Multiplication/matmul_kernel.py) dosyasını kullanmak için indirildiğinden emin olun ve şunu çalıştırın:
 ```bash
 cd Matrix_Multiplication # if not already inside the directory
 python matmul_kernel.py
@@ -1308,29 +1306,29 @@ $code | python -
 ---
 #### Yaklaşım B: C++ Uzantısı
 
-İkinci yaklaşım daha manueldir: kernel ve Python bağlamasını tek bir `.cu` dosyasına yazın, bunu PyTorch'un derleme sistemini kullanarak yerel olarak derleyin ve Python'a aktarın.
+İkinci yaklaşım daha manueldir: çekirdeği ve Python bağlayıcısını tek bir `.cu` dosyasına yazın, bunu PyTorch'un derleme sistemini kullanarak yerel olarak derleyin ve Python'a aktarın.
 
 <!-- @os:windows -->
-> **Not**: C++ Uzantısı yaklaşımı, PyTorch'un `.cu` kaynak dosyasını yerel bir `.pyd` uzantı modülüne derlemesi nedeniyle Visual Studio C++ derleme ortamını gerektirir. Bu yerel uzantının derlenmesi, Visual Studio tarafından sağlanan Microsoft C++ araç zincirine (derleyici, bağlayıcı ve derleme araçları) bağlıdır. Uzantıyı derlemeden önce kurulum bölümündeki Visual Studio etkinleştirme komutlarını çalıştırın.
+> **Not**: C++ Uzantısı yaklaşımı, Visual Studio C++ derleme ortamını gerektirir çünkü PyTorch, `.cu` kaynak dosyasını yerel bir `.pyd` uzantı modülüne derler. Bu yerel uzantının derlenmesi, Visual Studio tarafından sağlanan Microsoft C++ araç zincirine (derleyici, bağlayıcı ve derleme araçları) bağlıdır. Uzantıyı derlemeden önce kurulum bölümündeki Visual Studio etkinleştirme komutlarını çalıştırın.
 <!-- @os:end -->
 
 Henüz indirmediyseniz aşağıdaki dosyaları indirin:
 <!-- @os:windows -->
 | Dosya | Rol |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + başlatıcı + pybind11 bağlaması |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | `.cu` dosyasını bir `.pyd` dosyasına derlemek için `CUDAExtension` kullanan derleme betiği |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Oluşturulan yapıtları çalıştıran Python betiği |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Çekirdek + başlatıcı + pybind11 bağlayıcısı |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | `.cu` dosyasını bir `.pyd` içine derlemek için `CUDAExtension` kullanan derleme betiği |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Derlenmiş yapıtları çalıştıran Python betiği |
 <!-- @os:end -->
 <!-- @os:linux -->
 | Dosya | Rol |
 |---|---|
-| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Kernel + başlatıcı + pybind11 bağlaması |
-| [setup.py](assets/Matrix_Multiplication/setup.py) | `.cu` dosyasını bir `.so` dosyasına derlemek için `CUDAExtension` kullanan derleme betiği |
-| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Oluşturulan yapıtları çalıştıran Python betiği |
+| [matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu) | Çekirdek + başlatıcı + pybind11 bağlayıcısı |
+| [setup.py](assets/Matrix_Multiplication/setup.py) | `.cu` dosyasını bir `.so` içine derlemek için `CUDAExtension` kullanan derleme betiği |
+| [run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py) | Derlenmiş yapıtları çalıştıran Python betiği |
 <!-- @os:end -->
 
-#### **Adım 1: Kernel, başlatıcı ve bağlama** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
+#### **Adım 1: Çekirdek, başlatıcı ve bağlayıcı** ([matmul_kernel.cu](assets/Matrix_Multiplication/matmul_kernel.cu)):
 ```cpp
 #include <torch/extension.h>
 #include <hip/hip_runtime.h>
@@ -1371,10 +1369,10 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 ```
 
 Yürüyüş 1'deki `add_one_launcher` ile karşılaştırıldığında, buradaki başlatıcı:
-- Bir yerine iki girdi tensörü alır
-- Python'dan manuel boyut aktarımı olmadan üç boyutun tümünü (M, N, K) tensör şekillerinden türetir
-- Yerinde değiştirmek yerine çıktı tensörü C'yi tahsis eder ve döndürür
-- 2D başlatma şeklini ifade etmek için hem grid hem de blok için `dim3` kullanır
+- Bir yerine iki giriş tensörü alır
+- Üç boyutu da (M, N, K) tensör şekillerinden türetir, Python'dan manuel boyut aktarımı yapılmaz
+- Çıktı tensörü C'yi yerinde değiştirmek yerine tahsis edip döndürür
+- 2B başlatma şeklini ifade etmek için hem ızgara hem de blok için `dim3` kullanır
 
 #### **Adım 2: Derleme**
 ```bash
@@ -1383,18 +1381,18 @@ pip install --no-build-isolation -v .
 >**Not**: Bu komut, oluşturduğumuz .cu dosyasını derlemek için mevcut dizinde `setup.py` dosyasını arar.
 
 
-Bu, aşağıdaki dosyaları üretir:
+Bu işlem aşağıdaki dosyaları üretir:
 <!-- @os:windows -->
-- `build/`: `.pyd` dosyalarını içeren dizin
-- `matmul_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin gerçekte derlediği şey budur
+- `build/`:  `.pyd` dosyalarını içeren dizin
+- `matmul_kernel.hip`:  `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin gerçekte derlediği dosya budur
 <!-- @os:end -->
 <!-- @os:linux -->
-- `build/`: `.so` dosyalarını içeren dizin
-- `matmul_kernel.hip`: `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin gerçekte derlediği şey budur
+- `build/`:  `.so` dosyalarını içeren dizin
+- `matmul_kernel.hip`:  `.cu` dosyasının hipify edilmesiyle oluşturulan HIP kaynağı; `hipcc`'nin gerçekte derlediği dosya budur
 <!-- @os:end -->
 
 #### **Adım 3: Python'dan kullanma** ([run_compiled_multiply.py](assets/Matrix_Multiplication/run_compiled_multiply.py)):
-Kernel'i çalışırken görmek için bu betiği çalıştırın:
+Çekirdeği çalışırken görmek için bu betiği çalıştırın:
 ```bash
 cd Matrix_Multiplication # if not already in directory
 python run_compiled_multiply.py
@@ -1406,10 +1404,10 @@ Result: tensor([[19., 22.],
         [43., 50.]])
 ```
 
-**Harika! Az önce GPU üzerinde matris çarpımı gerçekleştirdiniz.** Bu önemli bir kilometre taşıdır çünkü matris çarpımı, aşağıdakiler gibi modern makine öğrenimi işlemlerinin temelini oluşturur:
+**Harika! GPU'da matris çarpımını başarıyla uyguladınız.** Bu önemli bir dönüm noktasıdır çünkü matris çarpımı, aşağıdakiler gibi modern makine öğrenmesi işlemlerinin temelidir:
 - Sinir ağı katmanları
-- Dikkat (attention) mekanizmaları
-- Gömme (embedding) katmanları
+- Dikkat mekanizmaları
+- Gömme (embedding) işlemleri
 - Transformer'lar
 
 <!-- @os:linux -->
@@ -1560,16 +1558,16 @@ finally {
 
 ## Sonraki Adımlar
 
-Temel paralel işlemler için hem JIT derlemesi hem de C++ uzantılarını kullanarak GPU kernellerini yazmayı, derlemeyi ve başlatmayı öğrendiniz.
+Temel paralel işlemler için hem JIT derlemesini hem de C++ uzantılarını kullanarak GPU çekirdekleri yazmayı, derlemeyi ve başlatmayı öğrendiniz.
 
 **Performans optimizasyonları:**
-- **Paylaşımlı bellek döşemesi (tiling)** - Global bellek erişimini azaltmak için veri bloklarını önbelleğe alma
-- **Bellek birleştirme (coalescing)** - Bant genişliği için bellek erişim kalıplarını optimize etme
+- **Paylaşımlı bellek karolama (tiling)** - Genel bellek erişimini azaltmak için veri bloklarını önbelleğe alma
+- **Bellek birleştirme (coalescing)** - Bant genişliği için bellek erişim modellerini optimize etme
 
 **Gerçek dünya algoritmaları:**
-- **2D Evrişim (Convolution)** - Küçük bir filtre (kernel) bir görüntü üzerinde kaydırılarak her çıktı pikselini komşu piksellerin ağırlıklı toplamından hesaplar. Bu, threadlerin global bellek erişimini azaltmak için örtüşen görüntü bölgelerini yeniden kullandığı stencil hesaplamalarını ve paylaşımlı bellek döşemesini tanıtır.
-- **Softmax Fonksiyonu**: Softmax, bir sayı vektörünü toplamı 1 olan olasılıklara dönüştürür ve genellikle sinir ağı çıktılarında kullanılır. Bunu GPU üzerinde verimli bir şekilde uygulamak, büyük vektörleri işlerken paralel indirgemeleri (reduction) ve sayısal kararlılık tekniklerini tanıtır.
+- **2B Evrişim (Convolution)** - Küçük bir filtre (çekirdek), bir görüntü üzerinde kayarak her çıktı pikselini komşu piksellerin ağırlıklı toplamından hesaplar. Bu, izleyen (stencil) hesaplamaları ve paylaşımlı bellek karolamayı tanıtır; burada iş parçacıkları genel bellek erişimini azaltmak için çakışan görüntü bölgelerini yeniden kullanır.
+- **Softmax Fonksiyonu**: Softmax, bir sayı vektörünü toplamı 1 olan olasılıklara dönüştürür ve genellikle sinir ağı çıktılarında kullanılır. Bunu GPU üzerinde verimli bir şekilde uygulamak, büyük vektörleri işlerken paralel indirgemeleri ve sayısal kararlılık tekniklerini tanıtır.
 
 **Üretim değerlendirmeleri:**
-- **Hata işleme** - Sınır kontrolü ve cihaz yönetimi
+- **Hata yönetimi** - Sınır kontrolü ve cihaz yönetimi
 - **PyTorch entegrasyonu** - Autograd desteğine sahip özel operatörler

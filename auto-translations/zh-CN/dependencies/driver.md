@@ -8,11 +8,11 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 ### AMD GPU 驱动程序
 
-使用 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html) 更新到最新的 AMD GPU 驱动程序。
+请使用 [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html) 更新到最新的 AMD GPU 驱动程序。
 
-1. 从开始菜单或系统托盘打开 `AMD Software: Adrenalin Edition`。
-2. 导航到**驱动程序和软件**，点击**管理更新**。
-3. 如果有可用的更新，请按照提示下载并安装。
+1. 从开始菜单或系统托盘中打开 `AMD Software: Adrenalin Edition`。
+2. 导航到 **Driver and Software**，点击 **Manage Updates**。
+3. 如果有可用更新，请按照提示下载并安装。
 
 <!-- @test:id=amd-gpu-visible-windows timeout=60 hidden=True -->
 ```powershell
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU 驱动程序
 
-使用适用于 Linux 的 Radeon 软件（RSL）流程安装 AMD GPU 驱动程序（amdgpu）。有关适用于您所使用发行版的说明，请参阅[安装内核驱动程序](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html)。
+使用适用于 Linux 的 Radeon Software (RSL) 流程安装 AMD GPU 驱动程序 (amdgpu)。有关适用于您的发行版的说明，请参阅 ROCm 安装：[安装内核驱动程序](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install)。
+
+有关驱动程序本身，请参阅 [适用于 AMD Radeon™ 的 Linux® 驱动程序](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

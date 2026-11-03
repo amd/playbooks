@@ -35,13 +35,15 @@ from pathlib import Path
 
 import yaml
 
+from run_playbook_tests import load_merged_metadata
+
 
 def load_config(path):
     with open(path) as f:
         return yaml.safe_load(f)
 
 
-def build(playbooks, cfg, devices=None, platforms=None):
+def build(playbooks, cfg, devices=None, platforms=None, locale=""):
     device_to_tags = cfg["device_to_tags"]
     device_to_gfx = cfg["device_to_gfx"]
     extra_tags = cfg.get("extra_tags", {})
@@ -52,19 +54,33 @@ def build(playbooks, cfg, devices=None, platforms=None):
     skip_playbook_devices = cfg.get("skip_playbook_devices", {}) or {}
 
     matrix = []
+    localized_only_by_playbook = {}
 
     def tags_for(playbook, device):
         """Return device-specific tags when configured, else playbook defaults."""
         overrides = device_extra_tags.get(playbook, {})
         return overrides.get(device, extra_tags.get(playbook, []))
 
+    def batch_id_for(platform, device, extra):
+        batch_id = f"{platform}/{device}" + (
+            f"+{'_'.join(extra)}" if extra else ""
+        )
+        return f"localized/{locale}/{batch_id}" if locale else batch_id
+
     # 1) Declared platforms from each playbook's playbook.json
     for pb_id in playbooks:
         for cat in ("core", "supplemental"):
-            pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
-            if not pb_file.exists():
-                continue
-            meta = json.loads(pb_file.read_text())
+            if locale:
+                pb_dir = Path(f"localized-playbooks/{locale}/{cat}/{pb_id}")
+                if not pb_dir.is_dir():
+                    continue
+                meta = load_merged_metadata(locale, cat, pb_id)
+                localized_only_by_playbook[pb_id] = meta["localized_only"]
+            else:
+                pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")
+                if not pb_file.exists():
+                    continue
+                meta = json.loads(pb_file.read_text())
             tested = meta.get("tested_platforms", {})
             if not tested:
                 break
@@ -73,16 +89,20 @@ def build(playbooks, cfg, devices=None, platforms=None):
                 required_platforms = set(required.get(device, []))
                 for platform in platform_list:
                     extra = tags_for(pb_id, device)
-                    batch_id = f"{platform}/{device}" + (
-                        f"+{'_'.join(extra)}" if extra else ""
-                    )
-                    matrix.append({
+                    batch_id = batch_id_for(platform, device, extra)
+                    entry = {
                         "playbook": pb_id,
                         "platform": platform,
                         "arch": device,
                         "batch_id": batch_id,
                         "required": platform in required_platforms,
-                    })
+                    }
+                    if locale:
+                        entry.update({
+                            "locale": locale,
+                            "localized_only": meta["localized_only"],
+                        })
+                    matrix.append(entry)
             break
 
     # 2) Extra (device, platforms) entries beyond playbook.json (always optional)
@@ -95,11 +115,14 @@ def build(playbooks, cfg, devices=None, platforms=None):
                     "playbook": pb_id,
                     "platform": platform,
                     "arch": device,
-                    "batch_id": f"{platform}/{device}" + (
-                        f"+{'_'.join(extra)}" if extra else ""
-                    ),
+                    "batch_id": batch_id_for(platform, device, extra),
                     "required": False,
                 }
+                if locale:
+                    entry.update({
+                        "locale": locale,
+                        "localized_only": localized_only_by_playbook.get(pb_id, True),
+                    })
                 if entry not in matrix:
                     matrix.append(entry)
 
@@ -171,10 +194,51 @@ def build(playbooks, cfg, devices=None, platforms=None):
                 "tags": tags,
                 "playbooks": [],
             }
+            if locale:
+                batches[bid].update({
+                    "locale": locale,
+                    "localized_only": {},
+                })
         if e["playbook"] not in batches[bid]["playbooks"]:
             batches[bid]["playbooks"].append(e["playbook"])
+        if locale:
+            batches[bid]["localized_only"][e["playbook"]] = e["localized_only"]
+
+    # 6) A machine with more of a capacity (ram_128gb) also runs the device's
+    #    untagged playbooks, so fold the untagged batch into it: one machine for
+    #    the device instead of two. Only superset_tags qualify, and only when
+    #    the device has exactly one such batch on that platform.
+    fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for)
 
     return matrix, batches
+
+
+def fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for):
+    superset = set(cfg.get("superset_tags") or [])
+    if not superset:
+        return
+    extras = {}  # batch id -> its extra tags
+    for e in matrix:
+        extras.setdefault(e["batch_id"], tuple(tags_for(e["playbook"], e["arch"])))
+    targets = {}  # (platform, device) -> capacity batch ids
+    for bid, b in batches.items():
+        if extras.get(bid) and set(extras[bid]) <= superset:
+            targets.setdefault((b["platform"], b["arch"]), []).append(bid)
+    moved = {}
+    for (platform, device), found in targets.items():
+        base = batch_id_for(platform, device, [])
+        if len(found) != 1 or base not in batches:
+            continue
+        target = batches[found[0]]
+        for pb in batches[base]["playbooks"]:
+            if pb not in target["playbooks"]:
+                target["playbooks"].append(pb)
+        if "localized_only" in target:
+            target["localized_only"].update(batches[base].get("localized_only", {}))
+        del batches[base]
+        moved[base] = found[0]
+    for e in matrix:
+        e["batch_id"] = moved.get(e["batch_id"], e["batch_id"])
 
 
 def main():
@@ -187,6 +251,11 @@ def main():
     ap.add_argument("--platforms", default=os.environ.get("PLATFORMS", ""),
                     help='comma-separated platform list (empty/"all" = linux+windows)')
     ap.add_argument("--print", action="store_true", dest="do_print")
+    ap.add_argument(
+        "--locale",
+        default=os.environ.get("LOCALE", ""),
+        help="Locale under localized-playbooks; empty selects canonical English",
+    )
     args = ap.parse_args()
 
     def parse_csv(s):
@@ -214,7 +283,7 @@ def main():
             except json.JSONDecodeError:
                 print("::warning::ORCHESTRAI_DEVICE_TAGS is not valid JSON — falling back to config",
                       file=sys.stderr)
-        matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms)
+        matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms, locale=args.locale)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:

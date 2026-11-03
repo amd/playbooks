@@ -14,44 +14,46 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-## Überblick
+## Übersicht
 
-Der AMD ROCm™-Software- und PyTorch-Stack bilden ein einheitliches Ökosystem für KI auf dem Gerät. Er funktioniert sowohl unter Windows als auch unter Linux mit offizieller Unterstützung für eine Vielzahl von Geräten, einschließlich Ryzen™ AI APUs und Radeon™ GPUs.
+Der AMD ROCm™ Software-Stack und PyTorch bilden zusammen ein einheitliches Ökosystem für KI auf dem Endgerät. Er funktioniert sowohl unter Windows als auch unter Linux mit offizieller Unterstützung für eine Vielzahl von Geräten, einschließlich Ryzen™ AI APUs und Radeon™ GPUs.
 
-Dieses Playbook zeigt Ihnen, wie Sie eine latenzarme, ausdrucksstarke und private Sprache-zu-Sprache-Übersetzung vollständig lokal auf dem Gerät ausführen.
+Dieses Playbook zeigt Ihnen, wie Sie latenzarme, ausdrucksstarke und private Sprache-zu-Sprache-Übersetzung vollständig auf dem Endgerät ausführen.
 
 ## Was Sie lernen werden
 
-- Wie Sie eine Sprache-zu-Sprache-Umgebung einrichten
+- Wie Sie die Sprache-zu-Sprache-Umgebung einrichten
 - Wie Sie Python-Code schreiben, um Sprache-zu-Sprache-Modelle zu laden und zu verwenden
-- Wie Sie die Gradio-UI ausführen und damit experimentieren
+- Wie Sie die Gradio-Benutzeroberfläche ausführen und damit experimentieren
 
-## Warum Echtzeit-Sprache-zu-Sprache-Übersetzung verwenden?
+## Warum Echtzeit-Sprache-zu-Sprache-Übersetzung nutzen?
 
-- Beseitigt Reibungspunkte zwischen Übersetzungs- und Sprachbarrieren
+- Beseitigt Reibungsverluste zwischen Übersetzungs- und Sprachbarrieren
 - Vermittelt Tonfall, Emotion und Absicht ohne unangenehme Pausen
 - Ermöglicht globale Zusammenarbeit und schnellere Entscheidungsfindung
 
+<!-- @device:halo_box,halo,stx,krk -->
 ## Festlegen der Speicherkonfiguration
 
 <!-- @require:memory-config -->
+<!-- @device:end -->
 
 <!-- @device:halo_box -->
-## Nach Software-Updates suchen
-> **Hinweis**: Wenn VS Code nicht installiert ist, können Sie es über das Ryzen AI Developer Center installieren.
+## Auf Software-Updates prüfen
+> **Hinweis**: Falls VS Code nicht installiert ist, können Sie es über das Ryzen AI Developer Center installieren.
 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
 ## Installation der Software-Voraussetzungen
 
-### Eine virtuelle Umgebung erstellen
+### Erstellen einer virtuellen Umgebung
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-Öffnen Sie unter Linux ein Terminal und führen Sie den folgenden Befehl aus, um eine venv mit bereits installiertem ROCm+PyTorch zu erstellen:
+Öffnen Sie unter Linux ein Terminal und führen Sie den folgenden Befehl aus, um eine venv mit bereits installiertem ROCm+Pytorch zu erstellen:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -71,7 +73,7 @@ sudo usermod -aG render,video $LOGNAME
 
 Öffnen Sie unter Linux ein Terminal und führen Sie den folgenden Befehl aus, um eine venv zu erstellen:
 
-<!-- @test:id=create-venv timeout=120 -->
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -85,9 +87,9 @@ source s2st-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv mit bereits installiertem ROCm+PyTorch zu erstellen:
+Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv mit bereits installiertem ROCm+Pytorch zu erstellen:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env --system-site-packages
 s2st-env\Scripts\activate
@@ -103,7 +105,7 @@ s2st-env\Scripts\activate
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 Öffnen Sie unter Windows ein Terminal im Verzeichnis Ihrer Wahl und folgen Sie den Befehlen, um eine venv zu erstellen:
 
-<!-- @test:id=create-venv timeout=60 -->
+<!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv s2st-env
 s2st-env\Scripts\activate
@@ -130,7 +132,7 @@ s2st-env\Scripts\activate
 Installieren Sie die m4t-Abhängigkeiten mit pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==4.57.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
 ```
 <!-- @test:end -->
 
@@ -204,7 +206,7 @@ for script in ["infer.py", "gradio_demo.py", "lang_list.py"]:
 
 #### Mehr über seamless-m4t-v2 erfahren
 
-Weitere Informationen finden Sie in der [Modellkarte](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) auf Hugging Face.
+Werfen Sie einen Blick auf die [Model Card](https://huggingface.co/facebook/seamless-m4t-v2-large/tree/main) auf Hugging Face für weitere Informationen.
 Dies ist die technische Architektur der Sprache-zu-Sprache-Modelle:
 <p align="center">
   <img src="assets/seamlessm4t_arch.svg" alt="m4t arch" width="600"/>
@@ -219,20 +221,20 @@ Dieses Playbook enthält einsatzbereite Skripte. Bitte laden Sie alle in dasselb
 | [infer.py](assets/infer.py) | Grundlegende LLM-Textgenerierung | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Beispiel-Audiodatei | N/A |
 | [lang_list.py](assets/lang_list.py) | Sprachunterstützungsdatei | N/A |
-| [gradio_demo.py](assets/gradio_demo.py) | Intuitive UI für Sprachübersetzung | `python gradio_demo.py --no-share` |
+| [gradio_demo.py](assets/gradio_demo.py) | Intuitive Benutzeroberfläche für Sprachübersetzung | `python gradio_demo.py --no-share` |
 
 
-### Erste Schritte mit infer.py
+### Einstieg mit infer.py
 
 Um das Skript auszuführen, führen Sie 
 ```bash
 python infer.py
 ```
-> **Hinweis**: Es können einige Warnungen angezeigt werden. Dies ist zu erwarten.
+> **Hinweis**: Sie werden möglicherweise einige Warnungen sehen. Das ist zu erwarten.
  
   
-#### Erläuterung des Codes
-**Snippet 1: Import der erforderlichen Abhängigkeiten**
+#### Erklärung des Codes
+**Snippet 1: Importieren der erforderlichen Abhängigkeiten**
 
 ```python 
 import os
@@ -261,7 +263,7 @@ TARGET_SAMPLE_RATE = 16_000
 
 **Snippet 2: Laden der Modelle von HuggingFace**
 
-Diese Funktion nimmt eine Modell-ID entgegen und lädt das Modell herunter, falls es noch nicht heruntergeladen wurde. Anschließend gibt sie den Processor und das Modell für die nächste Funktion zurück.
+Diese Funktion nimmt eine Modell-ID entgegen und lädt das Modell herunter, falls es noch nicht heruntergeladen wurde. Anschließend gibt sie den Prozessor und das Modell für die Verwendung durch die nächste Funktion zurück.
 ```python
 def load_model(model_id: str, device: torch.device):
     start = time.time()
@@ -280,9 +282,9 @@ def load_model(model_id: str, device: torch.device):
     return processor, model
 ```
 
-**Snippet 3: Audiodatei (.wav) einlesen und vorverarbeiten**
+**Snippet 3: Eingabe-Audioclip .wav-Datei einlesen und vorverarbeiten**
 
-Diese Funktion lädt den Audioclip und resampled ihn auf die Zielrate.
+Diese Funktion lädt den Audioclip und tastet ihn auf die Zielrate um.
 ```python
 def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> torch.Tensor:
 
@@ -304,7 +306,7 @@ def preprocess_audio(audio_path: str, target_sr: int = TARGET_SAMPLE_RATE) -> to
 
 **Snippet 4: Inferenz ausführen**
 
-Diese Funktion führt die Inferenz mit dem Modell aus und gibt die generierte Ausgabe zurück.
+Diese Funktion führt die Inferenz mit dem Modell aus und gibt die erzeugte Ausgabe zurück.
 ```python
 def run_inference(model, processor, audio: torch.Tensor, device: torch.device, target_lang: str = DEFAULT_TARGET_LANGUAGE):
 
@@ -334,7 +336,7 @@ def run_inference(model, processor, audio: torch.Tensor, device: torch.device, t
 
 **Snippet 5: Die übersetzte Datei speichern**
 
-Diese Funktion speichert das Audio-Array als .WAV-Datei. 
+Diese Funktion speichert das Audio-Array in einer .WAV-Datei. 
 ```python
 def save_audio(audio_array: np.ndarray, output_path: str, sample_rate: int):
     if np.issubdtype(audio_array.dtype, np.floating):
@@ -399,17 +401,17 @@ echo "PASS: infer.py created out1.wav successfully"
 
 ### Ausführen der Gradio-UI-Demo:
 
-Nachdem Sie nun ein grundlegendes Beispielskript ausgeführt haben, bieten die folgenden Anweisungen eine hilfreiche UI, die auf dem geschriebenen Code aufbaut und Live-Sprache-zu-Sprache-Übersetzung einfach macht.
+Nachdem Sie nun ein grundlegendes Beispielskript ausgeführt haben, bieten die folgenden Anweisungen eine hilfreiche Benutzeroberfläche, die auf dem geschriebenen Code aufbaut und die Live-Sprache-zu-Sprache-Übersetzung vereinfacht.
 
 #### Gradio lokal ausführen
 
 ```bash
 python ./gradio_demo.py --no-share
 ```
-Öffnen Sie anschließend Ihren Webbrowser unter `http://127.0.0.1:7860`, um auf die UI zuzugreifen.
+Öffnen Sie anschließend Ihren Webbrowser unter `http://127.0.0.1:7860`, um auf die Benutzeroberfläche zuzugreifen.
 
 
-### Beispiel für die Gradio-UI:
+### Beispiel der Gradio-Benutzeroberfläche:
 
 <p align="center">
   <img src="assets/gradio.png" alt="gradio UI" width="600"/>
@@ -528,12 +530,12 @@ PY
 
 ## Nächste Schritte
 
-- Kombinieren Sie Dutzende von Sprachen für schnelle Übersetzungen. 
+- Mischen und kombinieren Sie Dutzende von Sprachen für eine schnelle Übersetzung. 
 - Teilen Sie Ihre Demo mit anderen: Fügen Sie --share hinzu, um einen öffentlichen Link zu erstellen, auf den jeder remote zugreifen kann, oder stellen Sie sie dauerhaft über Hugging Face Spaces bereit
 
 ## Ressourcen
 
 Nachfolgend finden Sie einige zusätzliche Ressourcen, um mehr über Sprache-zu-Sprache-Übersetzung zu erfahren:  
-* Das Repository finden Sie hier https://huggingface.co/facebook/seamless-m4t-v2-large 
-* Wissenschaftliche Forschung zu „Seamless: Multilingual Expressive and Streaming Speech Translation“
-* Gradio-Sharing und -Deployment: [Leitfaden zum Teilen Ihrer App](https://www.gradio.app/guides/sharing-your-app) und [Deployment auf Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)
+* Das Repo finden Sie hier https://huggingface.co/facebook/seamless-m4t-v2-large 
+* Wissenschaftliche Forschung im Zusammenhang mit „Seamless: Multilingual Expressive and Streaming Speech Translation“
+* Gradio-Freigabe und -Bereitstellung: [Leitfaden zur Freigabe Ihrer App](https://www.gradio.app/guides/sharing-your-app) und [Bereitstellung auf Hugging Face Spaces](https://shafiqulai.github.io/blogs/blog_5.html)

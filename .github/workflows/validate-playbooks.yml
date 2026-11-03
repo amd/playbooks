@@ -25,7 +25,10 @@ jobs:
       - name: Validate playbooks
         run: python .github/scripts/validate_playbooks.py
 
-      - name: Check issue-form playbook and hardware dropdowns are up to date
+      - name: Check issue-form playbook and hardware dropdowns are up to date (advisory)
+        # Advisory only, per #1062: a stale playbook list is regenerated on main
+        # by regen-issue-template.yml rather than blocking the PR that caused it.
+        continue-on-error: true
         run: python .github/scripts/gen_issue_template_playbooks.py --check
 
       - name: Display summary

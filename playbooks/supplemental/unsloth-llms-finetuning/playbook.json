@@ -129,28 +129,47 @@
   "validatedVersions": {
     "reference": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "0.1.524"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "0.1.524"
       }
     },
     "apu": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       }
     },
     "gpu": {
       "linux": {
+        "ROCm": "7.14",
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       },
       "windows": {
+        "PyTorch": "2.12",
         "Unsloth": "Latest"
       }
     }
   },
-  "primaryModel": "Gemma-4-E4B-it"
+  "primaryModel": "Gemma-4-E4B-it",
+  "authors": [
+    {
+      "name": "Charles Yang",
+      "github": "charyang-ai",
+      "github_url": "https://github.com/charyang-ai",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-03-24",
+  "updated_date": "2026-10-01"
 }

@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 ### AMD GPU -ajuri
 
-Päivitä uusimpaan AMD GPU -ajuriin käyttämällä [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html)-ohjelmistoa.
+Päivitä AMD GPU -ajuri uusimpaan versioon käyttämällä [`AMD Software: Adrenalin Edition™`](https://www.amd.com/en/products/software/adrenalin.html) -sovellusta.
 
-1. Avaa `AMD Software: Adrenalin Edition` Käynnistä-valikosta tai järjestelmän ilmaisinalueelta.
+1. Avaa `AMD Software: Adrenalin Edition` Käynnistä-valikosta tai ilmaisinalueelta.
 2. Siirry kohtaan **Driver and Software** ja napsauta **Manage Updates**.
 3. Jos päivitys on saatavilla, seuraa ohjeita sen lataamiseksi ja asentamiseksi.
 
@@ -26,7 +26,9 @@ Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 ### AMD GPU -ajuri
 
-Asenna AMD GPU -ajuri (amdgpu) käyttämällä Radeon Software for Linux (RSL) -menettelyä. Ohjeet omalle jakelullesi löydät kohdasta [Install the kernel driver](https://rocm.docs.amd.com/en/7.13.0-preview/install/rocm.html).
+Asenna AMD GPU -ajuri (amdgpu) käyttämällä Radeon Software for Linux (RSL) -menetelmää. Katso jakelullesi sopivat ohjeet ROCm-asennuksesta: [Asenna ytimen ajuri](https://rocm.docs.amd.com/en/latest/install/rocm.html?fam=radeon&w=graphics&os=ubuntu&ubuntu-ver=26.04&i=amdgpu-install). 
+
+Itse ajurin löydät osoitteesta [Linux® Drivers for AMD Radeon™](https://www.amd.com/en/support/download/linux-drivers.html)
 
 <!-- @device:end -->
 <!-- @os:end -->

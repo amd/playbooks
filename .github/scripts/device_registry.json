@@ -3,8 +3,14 @@
   "devices": [
     { "tag": "halo_box",  "name": "AMD Ryzen AI Halo Developer Platform" },
     { "tag": "halo",      "name": "AMD Ryzen AI Max+" },
+    { "tag": "grgh_box",  "name": "AMD Gorgon Halo Box" },
+    { "tag": "grgh",      "name": "AMD Gorgon Halo" },
+    { "tag": "mdsh_box",  "name": "AMD Medusa Halo Box" },
+    { "tag": "mdsh",      "name": "AMD Medusa Halo" },
     { "tag": "stx",       "name": "AMD Ryzen AI 300 HX" },
     { "tag": "krk",       "name": "AMD Ryzen AI 300" },
+    { "tag": "grgp",      "name": "AMD Gorgon Point" },
+    { "tag": "mdsp",      "name": "AMD Medusa Point" },
     { "tag": "rx7900xt",  "name": "AMD Radeon RX 7900 XT" },
     { "tag": "rx9070xt",  "name": "AMD Radeon RX 9070 XT" },
     { "tag": "r9700",     "name": "AMD Radeon AI PRO R9700" }

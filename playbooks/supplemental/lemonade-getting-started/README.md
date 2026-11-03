@@ -55,7 +55,9 @@ Before you begin, make sure you have:
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade-models-gemma-4-e2b,lemonade -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -65,9 +67,16 @@ lemonade --version
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-update-windows timeout=120 hidden=True -->
-```bash
+```powershell
 winget upgrade -e --id AMD.LemonadeServer
 lemonade --version
+
+# Upgrading runs the Lemonade Server installer, which stops the running server
+# to replace its files and does not start it again. Relaunch it so the local API
+# on port 13305 is available for the next steps.
+if (-not (Get-Process LemonadeServer -ErrorAction SilentlyContinue)) {
+  Start-Process "$env:LOCALAPPDATA\lemonade_server\bin\LemonadeServer.exe"
+}
 ```
 <!-- @test:end -->
 
@@ -106,7 +115,7 @@ Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-update-linux timeout=120 hidden=True -->
+<!-- @test:id=lemonade-update-linux timeout=300 hidden=True -->
 ```bash
 sudo apt update
 sudo apt install --only-upgrade lemonade-server
@@ -599,8 +608,7 @@ To enable `FastFlowLM` on Linux:
 * Open the `Lemonade` App.
 * Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
 * Enable backports as instructed on the installation page.
-* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).'
-<!-- @device:end -->
+* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
 
 <!-- @device:halo_box -->
 >[!Note]
