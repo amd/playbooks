@@ -783,7 +783,10 @@ def main():
                 unconfirmed.append(bid)
             print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
             continue
-        run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
+        # The run's Tests tab as a full page: the result tables link here when
+        # there is no ReportPortal launch (reporting=api).
+        run_urls[bid] = (f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
+                         "?tab=tests&presentation=page")
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
     # Each Test job waits for its own batch's build (--await-build), so a batch
     # still queued for machines never holds back the batches that have started.
