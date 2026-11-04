@@ -92,6 +92,7 @@ CAUSE_NOT_IN_PLAN = "not_in_plan"        # the batch plan does not list it
 CAUSE_DID_NOT_FINISH = "did_not_finish"  # started, cut off: a hang or a lost machine
 CAUSE_NO_TESTS_RECORDED = "no_tests_recorded"
 CAUSE_INTERRUPTED = "interrupted"        # the pipeline said INTERRUPTED, no detail
+CAUSE_PARTLY_RAN = "partly_ran"          # some tests ran, others never did
 CAUSE_VERDICT_ERROR = "verdict_error"
 RETRY_CAUSES = (CAUSE_NO_BUILD, CAUSE_NEVER_RAN)
 FETCH_ATTEMPTS = 3
@@ -284,6 +285,10 @@ def infra_cause(status, summary, grp, group_key):
             return CAUSE_DID_NOT_FINISH
         if status == "INTERRUPTED":
             return CAUSE_NO_TESTS_RECORDED if not sum(group_counts(grp).values()) else CAUSE_INTERRUPTED
+        # An unrun test is also counted as skipped; any other count executed.
+        c = group_counts(grp)
+        if c["passed"] + c["failed"] + c["errors"] + max(0, c["skipped"] - not_run_count(grp)):
+            return CAUSE_PARTLY_RAN
         return CAUSE_NEVER_RAN
     expected = summary.get("expected_groups") if isinstance(summary, dict) else None
     if isinstance(expected, list) and expected and group_key not in expected:

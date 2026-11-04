@@ -324,6 +324,16 @@ class Workflows(unittest.TestCase):
         self.assertIn('[ "$FIRST_WAIT" != "success" ]', pick["run"])  # a gave-up wait proves nothing
         self.assertIn("--run-status", pick["run"])
         self.assertIn("never_started|passed|failed|unstable|error) ;;", pick["run"])  # not cancelled, not unknown
+        # A start with no definite answer may have made a run: never retry it.
+        self.assertIn("needs.detect-and-trigger.outputs.unconfirmed", pick["env"]["FIRST_UNCONFIRMED"])
+        self.assertIn('[ "$FIRST_UNCONFIRMED" = "true" ]', pick["run"])
+
+    def test_a_cancelled_job_cancels_its_first_and_retry_runs(self):
+        job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
+        step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
+        self.assertEqual(step["if"], "cancelled()")
+        self.assertIn("needs.detect-and-trigger.outputs.run_ids", step["env"]["RUN_IDS"])
+        self.assertIn("steps.retry_trigger.outputs.run_ids", step["env"]["RUN_IDS"])
 
     def test_results_by_device_knows_every_expected_batch(self):
         step = next(s for s in self.load("test-playbooks-orchestrai.yml")["jobs"]["playbook-results"]["steps"]

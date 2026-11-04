@@ -117,6 +117,7 @@ jobs:
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
+      unconfirmed: ${{ steps.trigger.outputs.unconfirmed }}
       playbook_repo: ${{ steps.trigger.outputs.playbook_repo }}
       playbook_sha: ${{ steps.trigger.outputs.playbook_sha }}
     steps:
@@ -371,6 +372,7 @@ jobs:
           BATCH_ID: ${{ matrix.batch_id }}
           FIRST_BUILD_URL: ${{ steps.build.outputs.build_url }}
           FIRST_WAIT: ${{ steps.wait.outcome }}
+          FIRST_UNCONFIRMED: ${{ contains(fromJson(needs.detect-and-trigger.outputs.unconfirmed || '[]'), matrix.batch_id) }}
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
@@ -386,6 +388,9 @@ jobs:
           elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
           if [ "$elapsed" -gt "$RETRY_START_LIMIT_MINUTES" ]; then
             skip "${elapsed} min have passed and a retry can take 720 more"
+          fi
+          if [ "$FIRST_UNCONFIRMED" = "true" ]; then
+            skip "the first run's start got no definite answer; it may have started"
           fi
           if [ -n "$FIRST_BUILD_URL" ] && [ "$FIRST_WAIT" != "success" ]; then
             skip "the first build was not seen to finish (${FIRST_BUILD_URL}); it may still be running"
@@ -520,6 +525,19 @@ jobs:
           msg="Retry of $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["RETRY_PLAYBOOKS"])))') ${STAGE}; their first attempt's results stand"
           echo "::warning::${msg}"
           echo "> ⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
+
+      # A cancelled or timed-out job stops its runs: nothing else would, and a
+      # queued run would still take machines hours later.
+      - name: Cancel this batch's OrchestrAI runs
+        if: cancelled()
+        timeout-minutes: 5
+        env:
+          RUN_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
       - name: Batch result
         if: always()

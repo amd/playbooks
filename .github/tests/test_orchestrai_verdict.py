@@ -425,6 +425,8 @@ class TestCancelledOrSkippedNeverPass(unittest.TestCase):
                                          "not_run": 1, "status": "PASSED"})
         self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
         self.assertIn("1 of its tests were cancelled or never ran", doc["infrastructure_reason"])
+        # Three tests ran: rerunning the playbook would repeat them.
+        self.assertEqual(doc["cause"], "partly_ran")
 
     def test_the_same_counts_without_a_status_are_not_passed(self):
         group = {k: v for k, v in self.RECORDED.items() if k != "status"}

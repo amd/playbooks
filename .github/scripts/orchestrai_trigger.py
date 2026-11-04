@@ -464,13 +464,17 @@ def oidc_token(audience):
     return token
 
 
-def api(cp, method, path, body=None, key=None):
+class Refused(ValueError):
+    """The CI API answered with a definite refusal: nothing was started."""
+
+
+def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=False):
     """Call the CI API and return its JSON body, retrying transient failures.
 
     A start is retried with the same Idempotency-Key, so a lost response can
     never start a second run. A fresh OIDC token is used for every call.
     """
-    deadline, delay = time.monotonic() + API_RETRY_SECONDS, 2
+    deadline, delay = time.monotonic() + (retry_seconds or API_RETRY_SECONDS), 2
     while True:
         headers = {"Authorization": "Bearer " + oidc_token(cp["oidc_audience"]),
                    "Accept": "application/json", "Content-Type": "application/json",
@@ -483,6 +487,8 @@ def api(cp, method, path, body=None, key=None):
             status, payload = None, {"error": {"message": f"network error ({type(exc).__name__})"}}
         if status and 200 <= status < 300 and isinstance(payload, dict):
             return payload
+        if status and 200 <= status < 300 and payload is None and empty_ok:
+            return {}  # e.g. a cancel answered 202/204 with no body
         err = payload.get("error") if isinstance(payload, dict) else None
         err = err if isinstance(err, dict) else {}
         code = err.get("code", "")
@@ -492,7 +498,10 @@ def api(cp, method, path, body=None, key=None):
             delay = min(delay * 2, 30)
             continue
         request_id = payload.get("request_id", "") if isinstance(payload, dict) else ""
-        raise ValueError(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
+        # Only a 4xx that is not "try again" proves nothing started; a 2xx
+        # without a readable body may have started a run.
+        refused = status and 400 <= status < 500 and status not in (408, 429) and code != "idempotency_in_progress"
+        raise (Refused if refused else ValueError)(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
                          + (f" (request_id={request_id})" if request_id else ""))
 
 
@@ -644,6 +653,18 @@ def run_status_main():
             f.write(f"status={status}\n")
 
 
+def cancel_main():
+    """--cancel: ask the Control Plane to cancel each run in RUN_IDS (space
+    separated). Best effort: a refusal is a warning, never a failure. Each run
+    gets 60 s of retries so all fit in the step's 5 min."""
+    for rid in os.environ.get("RUN_IDS", "").split():
+        try:
+            api(control_plane(), "POST", f"/runs/{urllib.parse.quote(rid, safe='')}/cancel", {}, retry_seconds=60, empty_ok=True)
+            print(f"run {rid}: cancel requested", file=sys.stderr)
+        except ValueError as exc:
+            print(f"::warning::run {rid} was not cancelled: {exc}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
@@ -652,7 +673,12 @@ def main():
                     help="wait for one batch's build (Test jobs); see await_build_main")
     ap.add_argument("--run-status", action="store_true",
                     help="write one run's Control Plane status (RUN_ID); see run_status_main")
+    ap.add_argument("--cancel", action="store_true",
+                    help="cancel the runs in RUN_IDS (a cancelled Test job); see cancel_main")
     args = ap.parse_args()
+    if args.cancel:
+        cancel_main()
+        return
     if args.run_status:
         run_status_main()
         return
@@ -746,11 +772,15 @@ def main():
     except ValueError as exc:
         print(f"::error::{exc}", file=sys.stderr)
         sys.exit(1)
-    runs, run_urls = {}, {}
+    runs, run_urls, unconfirmed = {}, {}, []
     for bid, batch, plan, builds in prepared:
         try:
             runs[bid] = start_run(cp, bid, plan, builds, batch["platform"], publisher, sha)
         except ValueError as exc:
+            if not isinstance(exc, Refused):
+                # Anything short of a refusal (a lost answer, a token that could
+                # not be refreshed) may have left a run: never retry such a batch.
+                unconfirmed.append(bid)
             print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
             continue
         run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
@@ -767,6 +797,7 @@ def main():
         with open(out, "a") as f:
             f.write(f"run_ids={json.dumps(runs)}\n")
             f.write(f"run_urls={json.dumps(run_urls)}\n")
+            f.write(f"unconfirmed={json.dumps(unconfirmed)}\n")
             # The commit every batch tests; a retry reuses it rather than
             # resolving a movable ref (main) again hours later.
             f.write(f"playbook_repo={repo}\n")

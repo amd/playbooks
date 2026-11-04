@@ -164,6 +164,47 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertEqual(len(fake.calls), 3)
         self.assertEqual(len(keys), 1)
 
+    def test_only_a_definite_answer_is_a_refusal(self):
+        with mock.patch.object(trigger, "API_RETRY_SECONDS", 0):
+            with self.assertRaises(ValueError) as lost:
+                self.start(FakeApi((503, None)))
+            with self.assertRaises(trigger.Refused):
+                self.start(FakeApi((403, {"error": {"code": "no_matching_rule"}})))
+            with self.assertRaises(ValueError) as unreadable:
+                self.start(FakeApi((201, None)))  # it may have started
+        self.assertNotIsInstance(lost.exception, trigger.Refused)
+        self.assertNotIsInstance(unreadable.exception, trigger.Refused)
+
+    def test_cancel_gives_up_on_one_run_in_time_to_cancel_the_next(self):
+        clock = iter(range(0, 10_000, 30))
+        fake = FakeApi(*[(503, None)] * 3, (202, {"run": {"id": "r2"}}))
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake), \
+                mock.patch.object(trigger, "API_RETRY_SECONDS", 600), \
+                mock.patch.object(trigger.time, "monotonic", lambda: next(clock)):
+            trigger.cancel_main()
+        self.assertEqual(fake.calls[-1][1], "https://cp.example/api/ci/v1/runs/r2/cancel")
+
+    def test_cancel_with_an_empty_2xx_body_is_a_success(self):
+        # The cancel endpoint may answer 202/204 with no body: that is a cancel.
+        fake = FakeApi((202, None), (204, None))
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
+            trigger.cancel_main()
+        self.assertEqual(len(fake.calls), 2)
+        self.assertNotIn("not cancelled", err.getvalue())
+        self.assertIn("run r1: cancel requested", err.getvalue())
+
+    def test_cancel_asks_for_every_run_and_a_refusal_only_warns(self):
+        fake = FakeApi((403, {"error": {"code": "forbidden"}}), (202, {"run": {"id": "r2"}}))
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake):
+            trigger.cancel_main()
+        self.assertEqual([(c[0], c[1]) for c in fake.calls],
+                         [("POST", "https://cp.example/api/ci/v1/runs/r1/cancel"),
+                          ("POST", "https://cp.example/api/ci/v1/runs/r2/cancel")])
+
     def test_a_refusal_is_not_retried_and_reports_code_and_request_id(self):
         fake = FakeApi((403, {"error": {"code": "no_matching_rule", "message": "no rule"},
                               "request_id": "abc"}))
@@ -224,6 +265,28 @@ class ReportingSwitch(unittest.TestCase):
         resolve.assert_called_once_with("https://github.com/x/playbooks.git", "main")
         self.assertEqual((outputs["playbook_repo"], outputs["playbook_sha"]),
                          ("https://github.com/x/playbooks.git", "b" * 40))
+
+    def test_a_batch_whose_start_may_have_happened_is_unconfirmed(self):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/ok": BATCH, "linux/no": BATCH, "linux/lost": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        answers = {"linux/ok": "r1", "linux/no": trigger.Refused("HTTP 403"),
+                   # e.g. the OIDC token could not be refreshed to replay a lost POST
+                   "linux/lost": ValueError("OIDC token request failed")}
+        def start(cp, bid, *_):
+            if isinstance(answers[bid], Exception):
+                raise answers[bid]
+            return answers[bid]
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                    mock.patch.object(trigger, "start_run", start), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                trigger.main()
+            outputs = dict(line.split("=", 1) for line in out.read().splitlines())
+        self.assertEqual(json.loads(outputs["run_ids"]), {"linux/ok": "r1"})
+        self.assertEqual(json.loads(outputs["unconfirmed"]), ["linux/lost"])
 
     def run_status(self, rid, api, wait=0):
         with tempfile.NamedTemporaryFile("r") as out:
