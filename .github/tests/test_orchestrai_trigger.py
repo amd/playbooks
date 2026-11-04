@@ -353,6 +353,12 @@ class MachinesPerBatch(unittest.TestCase):
         self.assertEqual(requested, {"linux/stx": 1})
         self.assertIn("1 batch(es), 1 machine(s) requested", log)
 
+    def test_the_run_link_opens_its_tests_tab_as_a_page(self):
+        # With reporting=api there is no ReportPortal link: the result table
+        # links the run, so open it on its tests.
+        _, log = self.run_main(1, {"linux/stx": BATCH})
+        self.assertIn("/#/runs/r1?tab=tests&presentation=page", log)
+
     def test_detect_and_trigger_does_not_wait_for_builds(self):
         # Each Test job waits for its own batch (--await-build).
         self.run_main(1, {"linux/stx": BATCH})
