@@ -75,10 +75,10 @@ on:
       reporting:
         description: 'Results: reportportal (also export to ReportPortal) or api (OrchestrAI only)'
         type: choice
-        default: reportportal
+        default: api
         options:
-          - reportportal
           - api
+          - reportportal
       playbook_ref:
         description: 'amd/playbooks branch, tag or commit to test'
         type: string
