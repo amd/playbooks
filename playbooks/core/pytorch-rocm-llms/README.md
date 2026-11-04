@@ -86,6 +86,17 @@ pytorch-env\Scripts\activate
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv.
+
+> [!IMPORTANT]
+> **Use a short path, close to the drive root (for example `C:\pt`).** The PyTorch wheel contains
+> third-party license files nested about 186 characters deep. Windows limits paths to 260
+> characters by default, so creating the environment inside a deep project folder fails the
+> install with `[WinError 206] The filename or extension is too long`.
+>
+> To lift the limit instead, set
+> `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled` to `1` and reboot
+> (requires administrator).
+
 <!-- @test:id=create-venv timeout=180 -->
 ```bash
 python -m venv pytorch-env
