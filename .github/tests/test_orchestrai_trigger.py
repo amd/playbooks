@@ -413,7 +413,7 @@ class WorkflowWiring(unittest.TestCase):
         self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
                                             "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
-        self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
+        self.assertEqual((reporting["default"], reporting["options"]), ("api", ["api", "reportportal"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
         step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if s.get("id") == "trigger")
         self.assertIn("inputs.reporting", step["env"]["ORCHESTRAI_REPORTING"])
