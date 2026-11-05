@@ -207,8 +207,16 @@ def count_protected(text):
 # ---------------------------------------------------------------------------
 # Model client (OpenAI-compatible /chat/completions)
 # ---------------------------------------------------------------------------
+# Per-locale preferred renderings, populated by load_glossary(). Keyed by locale
+# so build_system_prompt() can look them up without threading another argument
+# through every translate/produce/process call.
+_PREFERRED_TERMS = {}
+
+
 def load_glossary():
     data = json.loads(GLOSSARY_PATH.read_text(encoding="utf-8"))
+    _PREFERRED_TERMS.clear()
+    _PREFERRED_TERMS.update(data.get("preferred_terms", {}))
     return data.get("do_not_translate", []), str(data.get("prompt_version", "1"))
 
 
@@ -273,6 +281,23 @@ def build_system_prompt(locale, glossary_terms):
         "(the part in parentheses) unchanged.\n"
         "6. Do not add explanations, notes, or extra content. Return only the translated "
         "document."
+        + _preferred_terms_rule(locale)
+    )
+
+
+def _preferred_terms_rule(locale):
+    """Rule 7: locale-specific renderings that reviewers have already corrected.
+
+    Without this the model keeps re-introducing terms the regional team has
+    rejected (zh-CN 'agent' -> 代理 rather than 智能体), so every new playbook
+    needs the same manual fix again."""
+    prefs = _PREFERRED_TERMS.get(locale)
+    if not prefs:
+        return ""
+    pairs = "; ".join(f'"{en}" -> {tgt}' for en, tgt in prefs.items())
+    return (
+        "\n7. Use these established renderings for the following terms, in preference "
+        f"to any other translation: {pairs}."
     )
 
 
