@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-高效微调对于将大语言模型（LLM）适配到下游任务至关重要。LLaMA Factory 是一个开源且用户友好的平台，可简化大语言模型和多模态模型的训练与微调流程。它允许用户在本地以少量的代码定制数百个预训练模型。
+高效微调对于将大语言模型（LLM）适配到下游任务至关重要。LLaMA Factory 是一个开源且用户友好的平台，可简化大语言模型和多模态模型的训练与微调流程。它允许用户在本地以最少的代码定制数百个预训练模型。
 
 本手册将教您如何在本地 AMD 硬件上使用 LLaMA Factory 微调 LLM。
 
@@ -610,7 +610,7 @@ llamafactory-cli webui
 有关详细指导，我们建议您参考 [LlamaFactory GitHub 仓库](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio)和 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) 上的官方文档。此外，[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) 也提供了有关该界面及其功能的宝贵信息。
 
 ## 后续步骤
-- 尝试不同的模型，例如 `gpt-oss` 以及其他先进的模型。
+- 尝试不同的模型，例如 `gpt-oss` 以及其他最先进的模型。
 - 在微调后的模型上尝试不同的后端
 
 如需更多文档，请访问：https://llamafactory.readthedocs.io/en/latest/

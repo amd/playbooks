@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 
 [DeepSeek V4 Flash](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash) 是 DeepSeek V4 系列中专注于效率的变体——这是一个拥有 2840 亿参数的混合专家（Mixture of Experts）模型，激活参数为 130 亿。根据 [DeepSeek 的技术报告](https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash)，该模型在 SWE-bench Verified 上得分为 79%，在 LiveCodeBench 上得分为 91.6%。
 
-[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) 是专为该模型架构打造的专用推理引擎。与通用运行时不同，ds4 直接针对 DeepSeek V4 系列，为 AMD ROCm™ 软件提供了架构特定的内核优化。目前，它是在 Strix Halo 上表现卓越的 DeepSeek V4 Flash 实现之一。
+[ds4 (Dwarf Star 4)](https://github.com/antirez/ds4) 是专为该模型架构打造的专用推理引擎。与通用运行时不同，ds4 直接针对 DeepSeek V4 系列，为 AMD ROCm™ 软件提供了架构特定的内核优化。目前，它是在 Strix Halo 上表现最佳的 DeepSeek V4 Flash 实现之一。
 
 本教程展示了如何使用终端 UI `ai-toolbox-cockpit` 来设置 ds4、下载模型权重，并在 AMD Ryzen™ AI Halo 开发者平台上本地启动 DeepSeek V4 Flash 服务。
 

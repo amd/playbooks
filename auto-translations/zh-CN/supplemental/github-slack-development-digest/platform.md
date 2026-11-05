@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
   [Lemonade 安装指南](https://lemonade-server.ai/docs/guide/install/)进行安装。
 - **Node.js 22.12 或更高版本**及 `npm`，供 `agent-canvas` CLI 和通过 `npx` 启动的 MCP
   服务器使用。
-- **uv**，Agent Canvas 用于管理 Agent Server 环境的 Python 包管理器。请从
+- **uv**，Agent Canvas 用于管理智能体服务器环境的 Python 包管理器。请从
   [uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)进行安装。
 
 ## 所需模型
