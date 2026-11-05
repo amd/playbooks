@@ -95,7 +95,7 @@ def main():
 
     tokenizer, model = load_model(model_name)
 
-    print("✓ Model loaded successfully!\n")
+    print("[OK] Model loaded successfully!\n")
 
     # Create a simple prompt
     prompt = "Explain what a large language model is in 2 brief sentences."
