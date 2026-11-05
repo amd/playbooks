@@ -16,10 +16,10 @@ sudo usermod -a -G render,video $LOGNAME
 sudo reboot
 ```
 
-**在创建的虚拟环境中安装 ROCm。**
-> **注意**：请确保在继续操作前虚拟环境已处于激活状态。
+**在已创建的虚拟环境中安装 ROCm。**
+> **注意**：请在继续之前确保虚拟环境已激活。
 
-<!-- @device:halo_box,halo -->
+<!-- @device:halo_box,halo,grgh -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1151]==10.0.0"
@@ -59,4 +59,4 @@ python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "ro
 <!-- @test:end -->
 <!-- @device:end -->
 
-如需更多安装帮助，请参阅 [ROCm 10.0.0 文档](https://rocm.docs.amd.com/en/latest/install/rocm.html)。
+如需进一步的安装帮助，请参阅 [ROCm 10.0.0 文档](https://rocm.docs.amd.com/en/latest/install/rocm.html)。
