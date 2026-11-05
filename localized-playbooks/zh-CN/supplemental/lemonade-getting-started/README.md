@@ -36,15 +36,15 @@ SPDX-License-Identifier: MIT
 <!-- @device:end -->
 ## 安装软件先决条件
 
-在开始之前，请确保您已具备：
+在开始之前，请确保你已具备：
 
 - 运行 **Windows 11** 或受支持的 **Linux** 发行版（Ubuntu 24.04+、Fedora、Debian）的 PC。
-- 建议为步骤 1–7 中使用的运行时模型（`Gemma-4-E2B-it-GGUF`，约 3 GB）配备 **16 GB 内存**。如果您想在步骤 6 中使用更大的代码生成模型（`Qwen3.5-35B-A3B-GGUF`，约 20 GB），建议配备 **32 GB 以上**内存。
+- 建议为步骤 1–7 中使用的运行时模型（`Gemma-4-E2B-it-GGUF`，约 3 GB）配备 **16 GB 内存**。如果你想在步骤 6 中使用更大的代码生成模型（`Qwen3.5-35B-A3B-GGUF`，约 20 GB），建议配备 **32 GB 以上**内存。
 - **约 4–30 GB 的可用磁盘空间**，具体取决于下载的模型。本教程使用的代码生成模型 `Qwen3.5-35B-A3B-GGUF` 约为 20 GB。
 - **Python 3.10–3.13**（用于 Python 应用部分）
 - 网络连接（有线或无线）
 <!-- @device:halo_box,halo,stx,krk -->
-- [可选] 如果您想在 NPU 上运行模型，需要一块 AMD XDNA 2 NPU（Ryzen AI 300/400/Max 300 系列或 Z2 Extreme），并从 [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) 安装最新驱动程序。
+- [可选] 如果你想在 NPU 上运行模型，需要一块 AMD XDNA 2 NPU（Ryzen AI 300/400/Max 300 系列或 Z2 Extreme），并从 [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) 安装最新驱动程序。
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -225,7 +225,7 @@ lemonade run Gemma-4-E2B-it-GGUF
 2. **启动** Lemonade Server 进程，端口为 13305。
 3. **打开 Lemonade App**，即可开始与模型进行聊天。
 <!-- @os:windows -->
-在 Windows 上,Lemonade App 会自动启动,您可以立即开始聊天，如果您安装的是 `minimal.msi` 软件包,则该应用不包含在内，要开始聊天,请打开您的网页浏览器并访问 `http://localhost:13305`。
+在 Windows 上,Lemonade App 会自动启动,你可以立即开始聊天，如果你安装的是 `minimal.msi` 软件包,则该应用不包含在内，要开始聊天,请打开你的网页浏览器并访问 `http://localhost:13305`。
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -237,11 +237,11 @@ lemonade run Gemma-4-E2B-it-GGUF
 What are three fun facts about lemons?
 ```
 
-模型将直接在聊天窗口中回复：**恭喜！您正在本地运行一个大型语言模型。**
+模型将直接在聊天窗口中回复：**恭喜！你正在本地运行一个大型语言模型。**
 
 ![显示日志的 Lemonade App](../../dependencies/assets/ChatwithLogs.png)
 
-在 Lemonade App 的服务器日志面板中，每次回复后您都可以找到关于模型性能的遥测数据，例如：
+在 Lemonade App 的服务器日志面板中，每次回复后你都可以找到关于模型性能的遥测数据，例如：
 
 ```
  === Telemetry ===
@@ -395,7 +395,7 @@ lemonade run Qwen3.5-35B-A3B-GGUF
 
 将以下提示词输入 Lemonade Chat UI,以生成一个简单闪卡应用的代码。
 
-我们将使用 Qwen3.5-35B-A3B-GGUF(一个更擅长编写代码的大型模型)来生成我们的 Python 应用,该应用本身在运行时会调用 Gemma-4-E2B-it-GGUF(您已下载的较小模型)，之后你可以将生成的代码复制到你选择的文件中,并在 Python 运行。
+我们将使用 Qwen3.5-35B-A3B-GGUF(一个更擅长编写代码的大型模型)来生成我们的 Python 应用,该应用本身在运行时会调用 Gemma-4-E2B-it-GGUF(你已下载的较小模型)，之后你可以将生成的代码复制到你选择的文件中,并在 Python 运行。
 
 ```
 Generate a Python script that uses the OpenAI Python library to call a local LLM and create an interactive flashcard study tool.
@@ -430,7 +430,7 @@ Structure:
 
 > **提示**:我们通过精心设计的提示词编写,并采用双模型系统来优化资源和速度,遵循了标准的工程实践。
 
-为方便起见,我们提供了示例输出 [`flashcards.py`](assets/flashcards.py)，您可以将其下载到你的目录中，无论采用哪种方式,您现在都应该有一个可以运行的 Python 文件。
+为方便起见,我们提供了示例输出 [`flashcards.py`](assets/flashcards.py)，你可以将其下载到你的目录中，无论采用哪种方式,你现在都应该有一个可以运行的 Python 文件。
 
 <!-- @os:windows -->
 <!-- @test:id=lemonade-python-smoke-windows timeout=900 hidden=True -->
@@ -520,7 +520,7 @@ Did you get it right? (y/n): y
 🏆 Score: 4/5
 ```
 
-用大约 150 行代码,您就已经构建出了一个由本地 LLM 驱动的功能完整的学习工具，无需管理 API 密钥,没有使用费用,而且数据永远不会离开您的计算机。
+用大约 150 行代码,你就已经构建出了一个由本地 LLM 驱动的功能完整的学习工具，无需管理 API 密钥,没有使用费用,而且数据永远不会离开你的计算机。
 
 > **关键点:** 请注意,`client = OpenAI(base_url=...) ` 这一行是将这个应用与 Lemonade(而非 OpenAI 的云服务)联系起来的*唯一*内容，其余代码与你为任何兼容 OpenAI 的服务编写的代码完全相同；如果你曾经使用过 OpenAI 的 Python 库,那么你已经知道如何使用 Lemonade 构建应用了。
 
@@ -662,7 +662,7 @@ response = client.chat.completions.create(
 
 ## 后续步骤
 
-您现在已经在自己的硬件上运行着一个本地 AI 服务器,接下来可以尝试以下内容:
+你现在已经在自己的硬件上运行着一个本地 AI 服务器,接下来可以尝试以下内容:
 
 1. **连接你喜爱的应用程序**:Lemonade 开箱即用,支持 [VS Code Copilot](https://marketplace.visualstudio.com/items?itemName=lemonade-sdk.lemonade-sdk)、[Open WebUI](https://lemonade-server.ai/docs/server/apps/open-webui/)、[Continue](https://lemonade-server.ai/docs/server/apps/continue/)、[n8n](https://n8n.io/integrations/lemonade-model/)以及[更多应用](https://lemonade-server.ai/marketplace)。
 

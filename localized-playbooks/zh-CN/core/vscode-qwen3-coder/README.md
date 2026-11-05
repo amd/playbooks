@@ -20,7 +20,7 @@ SPDX-License-Identifier: MIT
 
 本教程演示了如何使用 Cline、VS Code 和 LM Studio，完全在本机运行编程智能体。
 
-## 您将学到什么
+## 你将学到什么
 
 * 如何运行带有 Cline 编程智能体的 VS Code，以辅助软件工程任务。
 * 如何配置 Cline，使其与 LM Studio 通信，以本地推理编程智能体。
@@ -34,7 +34,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 ## 检查软件更新
-> **注意**：如果尚未安装 VS Code，您可以通过 Ryzen AI Developer Center 进行安装。
+> **注意**：如果尚未安装 VS Code，你可以通过 Ryzen AI Developer Center 进行安装。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -47,7 +47,7 @@ SPDX-License-Identifier: MIT
 
 我们将使用 LM Studio 来提供支撑编程智能体的 LLM。
 
-- 在搜索栏中搜索 `LM Studio` 并启动该应用程序。您将看到如下页面。
+- 在搜索栏中搜索 `LM Studio` 并启动该应用程序。你将看到如下页面。
 
 ![LM Studio 初始屏幕](assets/initial-lm-studio.png)
 
@@ -156,7 +156,7 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ![安装 Cline 扩展](assets/installing-cline-vscode-extension.png)
 
-- 左侧应该会出现一个 Cline 图标。点击该图标以打开 Cline。将会出现一个窗口，询问 `How will you use Cline?`（您将如何使用 Cline？）。由于我们将使用通过 LM Studio 运行的本地 LLM，请选择 `Bring my own API Key`（使用我自己的 API 密钥）并点击 `Continue`。
+- 左侧应该会出现一个 Cline 图标。点击该图标以打开 Cline。将会出现一个窗口，询问 `How will you use Cline?`（你将如何使用 Cline？）。由于我们将使用通过 LM Studio 运行的本地 LLM，请选择 `Bring my own API Key`（使用我自己的 API 密钥）并点击 `Continue`。
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -186,9 +186,9 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![模型配置](assets/cline-model-configuration-zoomed.png)
 
-## 创建您的第一个项目
+## 创建你的第一个项目
 
-让我们使用本地智能体来创建一个网站！打开 VS Code，选择一个您希望 Cline 创建文件的目录。
+让我们使用本地智能体来创建一个网站！打开 VS Code，选择一个你希望 Cline 创建文件的目录。
 - 为此，请点击 VS Code 左上角的 `File -> Open Folder`，然后选择一个文件夹，例如 `Documents`。
 
 ![VS Code 空文件夹](assets/open-cline-test.png)
@@ -199,11 +199,11 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-随后，智能体将开始根据提示词创建文件。作为用户，您可以在 VS Code 中观看代码生成的过程，如下所示。每次 Cline 想要创建文件时，您可能需要点击 `Save`。
+随后，智能体将开始根据提示词创建文件。作为用户，你可以在 VS Code 中观看代码生成的过程，如下所示。每次 Cline 想要创建文件时，你可能需要点击 `Save`。
 
 ![Cline 代码生成](assets/cline-code-generation.png)
 
-生成软件后，智能体任务完成，您可以运行该应用程序。在此示例中，智能体编写了三个文件：`index.html`、`script.js` 和 `styles.css`。只需双击该 HTML 文件，即可加载并与生成的网站进行交互。
+生成软件后，智能体任务完成，你可以运行该应用程序。在此示例中，智能体编写了三个文件：`index.html`、`script.js` 和 `styles.css`。只需双击该 HTML 文件，即可加载并与生成的网站进行交互。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -279,7 +279,7 @@ lms server stop
 
 ## 后续步骤
 
-生成网站后，您可以继续与 Cline 合作以改进该网站。以下是两个可能的改进方向：
+生成网站后，你可以继续与 Cline 合作以改进该网站。以下是两个可能的改进方向：
 
 - **文档**：只需向智能体提示 `Add a README`，智能体即可生成一份 `README.md` 文件，用于记录该网站的相关文档。
 - **动画**：向模型提示 `Add an animation that visually represents a large language model running on a laptop.`（添加一个动画，直观展示大语言模型在笔记本电脑上运行的过程），即可为网站生成一个动画。

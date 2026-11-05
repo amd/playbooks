@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 高效微调对于将大语言模型（LLM）适配到下游任务至关重要。LLaMA Factory 是一个开源且用户友好的平台，可简化大语言模型和多模态模型的训练与微调流程。它允许用户在本地以少量的代码定制数百个预训练模型。
 
-本手册将教您如何在本地 AMD 硬件上使用 LLaMA Factory 微调 LLM。
+本手册将教你如何在本地 AMD 硬件上使用 LLaMA Factory 微调 LLM。
 
 <!-- @device:stx,krk -->
 > **注意：** 本手册中的微调技术至少需要 **32 GB 系统内存**，且其中至少 **16 GB 可供 GPU 使用**（这 16 GB 是 32 GB 的一部分，而不是额外增加的）。
@@ -30,7 +30,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 您将学到什么
+## 你将学到什么
 
 - 如何使用 AMD ROCm™ 软件设置 LLaMA Factory
 - 如何配置 LLM 微调参数（以 Qwen/Qwen3-4B-Instruct-2507 为例）
@@ -40,7 +40,7 @@ SPDX-License-Identifier: MIT
 
 ## 预计时间
 
-- 时长：运行本手册大约需要 60 分钟（具体取决于您的模型/数据集大小以及网络速度）。
+- 时长：运行本手册大约需要 60 分钟（具体取决于你的模型/数据集大小以及网络速度）。
 - 有关更多信息，请参阅 [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory)。
 
 <!-- @device:halo_box,halo,stx,krk -->
@@ -91,7 +91,7 @@ source llamafactory-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
+**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
@@ -179,7 +179,7 @@ python -m pip install huggingface_hub
 
 ### 安装 LLaMA Factory
 
-LLaMA Factory 依赖于 PyTorch。根据上述要求，您应该已经安装了它。
+LLaMA Factory 依赖于 PyTorch。根据上述要求，你应该已经安装了它。
 
 从 [LLaMA Factory 官方 GitHub 仓库](https://github.com/hiyouga/LlamaFactory)下载源代码，并安装其依赖项。
 
@@ -247,7 +247,7 @@ if (Get-Command llamafactory-cli -ErrorAction SilentlyContinue) {
 
 ### 数据集准备
 
-LLaMA Factory 支持 Alpaca 格式和 ShareGPT 格式的微调数据集。所有可用的数据集都已在 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) 中定义。如果您使用自定义数据集，请确保在 `dataset_info.json` 中添加数据集描述，并在训练前指定数据集名称。详情可参阅[此处](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)的文档。
+LLaMA Factory 支持 Alpaca 格式和 ShareGPT 格式的微调数据集。所有可用的数据集都已在 [dataset_info.json](https://github.com/hiyouga/LlamaFactory/blob/main/data/dataset_info.json) 中定义。如果你使用自定义数据集，请确保在 `dataset_info.json` 中添加数据集描述，并在训练前指定数据集名称。详情可参阅[此处](https://llamafactory.readthedocs.io/en/latest/getting_started/data_preparation.html)的文档。
 
 在本手册中，我们将以 identity 和 alpaca_en_demo 数据集为例，并在下一步中配置数据集信息。
 ### 微调参数配置
@@ -281,7 +281,7 @@ print("PASS: Required LLaMA Factory example files exist")
 ```
 <!-- @test:end -->
 
-这些示例配置文件已经指定了模型参数、微调方法参数、数据集参数、评估参数等内容。您可以根据自己的需求进行配置。在本手册中，我们将使用 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)。
+这些示例配置文件已经指定了模型参数、微调方法参数、数据集参数、评估参数等内容。你可以根据自己的需求进行配置。在本手册中，我们将使用 [qwen3_lora_sft.yaml](https://github.com/hiyouga/LlamaFactory/blob/main/examples/train_lora/qwen3_lora_sft.yaml)。
 
 **关键参数说明：**
 - `model_name_or_path` - Hugging Face 模型名称或本地模型文件路径。
@@ -339,7 +339,7 @@ Set-Content -Path $filePath -Value $newContent
 
 对于训练/微调而言，**llamafactory-cli train** 是 LLaMA Factory CLI 的核心子命令。它将微调工作流程（数据预处理、超参数调优、硬件优化）抽象为一条 CLI 命令，支持多种微调范式（LoRA/QLoRA/全参数微调），并针对低资源 GPU（例如在 16GB 显存上运行 QLoRA）进行了优化。
 
-您可以使用以下命令运行 LLaMA Factory 微调，该命令基于修改后的 Qwen3 LoRA 微调配置文件。
+你可以使用以下命令运行 LLaMA Factory 微调，该命令基于修改后的 Qwen3 LoRA 微调配置文件。
 
 ```bash
 llamafactory-cli train examples/train_lora/qwen3_lora_sft.yaml
@@ -461,7 +461,7 @@ print(f"Found adapter weights: {adapter_weights}")
 
 ### 测试微调后的模型
 
-**llamafactory-cli chat** 专为 LLM（基础模型和经过 LoRA 微调的模型）的交互式对话/推理而设计。LLaMA Factory 在 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) 中提供了运行微调模型推理的示例配置。您也可以修改此示例配置以更改设置，例如推理后端。
+**llamafactory-cli chat** 专为 LLM（基础模型和经过 LoRA 微调的模型）的交互式对话/推理而设计。LLaMA Factory 在 [examples/inference](https://github.com/hiyouga/LlamaFactory/tree/main/examples/inference) 中提供了运行微调模型推理的示例配置。你也可以修改此示例配置以更改设置，例如推理后端。
 
 使用以下命令测试 Qwen3 微调模型：
 
@@ -597,12 +597,12 @@ llamafactory-cli webui
 ```
 `LlamaFactory Web UI` 提供了一个简化的界面，用于管理机器学习工作流程，包括训练、评估、预测、对话以及导出模型。以下是各个标签页的简要介绍：
 
-* **训练（Train）**：此标签页允许您选择模型和数据集、配置训练参数，并启动训练过程。理解必填和可选参数对于优化训练设置至关重要。
-* **评估与预测（Evaluate & Predict）**：训练完成后，您可以使用此标签页评估模型的性能并进行预测。它可以让您深入了解模型在新数据上的准确性和有效性。
-* **对话（Chat）**：训练完成后，在对话标签页中加载模型即可与其交互，查看您的工作成果。此功能支持与训练好的模型进行实时交流。
-* **导出（Export）**：此标签页便于导出经过训练的模型，以用于部署或进一步使用。您可以将模型保存为适合不同应用场景的各种格式。
+* **训练（Train）**：此标签页允许你选择模型和数据集、配置训练参数，并启动训练过程。理解必填和可选参数对于优化训练设置至关重要。
+* **评估与预测（Evaluate & Predict）**：训练完成后，你可以使用此标签页评估模型的性能并进行预测。它可以让你深入了解模型在新数据上的准确性和有效性。
+* **对话（Chat）**：训练完成后，在对话标签页中加载模型即可与其交互，查看你的工作成果。此功能支持与训练好的模型进行实时交流。
+* **导出（Export）**：此标签页便于导出经过训练的模型，以用于部署或进一步使用。你可以将模型保存为适合不同应用场景的各种格式。
 
-有关详细指导，我们建议您参考 [LlamaFactory GitHub 仓库](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio)和 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) 上的官方文档。此外，[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) 也提供了有关该界面及其功能的宝贵信息。
+有关详细指导，我们建议你参考 [LlamaFactory GitHub 仓库](https://github.com/hiyouga/LlamaFactory#fine-tuning-with-llama-board-gui-powered-by-gradio)和 [LlamaFactory ReadTheDocs](https://llamafactory.readthedocs.io/en/latest) 上的官方文档。此外，[Wiki LLaMA Board Web UI](https://deepwiki.com/xtong-zhang/Chain-of-Focus/3.2-llama-board-web-ui) 也提供了有关该界面及其功能的宝贵信息。
 
 ## 后续步骤
 - 尝试不同的模型，例如 `gpt-oss` 以及其他先进的模型。

@@ -11,17 +11,17 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-[Ryzen AI CVML 库](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是一款 AMD C++ 计算机视觉与机器学习工具包，提供强大的本地感知能力——包括深度估计、人脸检测和人脸网格跟踪。该库基于 Ryzen AI 驱动程序构建，能够自动为推理选择绝佳可用硬件（GPU 或 NPU），让您无需担心模型训练或框架集成即可为 C++ 应用程序添加 AI 功能。所有处理均在本地系统上完成，非常适合对隐私敏感、低延迟的应用场景。
+[Ryzen AI CVML 库](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是一款 AMD C++ 计算机视觉与机器学习工具包，提供强大的本地感知能力——包括深度估计、人脸检测和人脸网格跟踪。该库基于 Ryzen AI 驱动程序构建，能够自动为推理选择绝佳可用硬件（GPU 或 NPU），让你无需担心模型训练或框架集成即可为 C++ 应用程序添加 AI 功能。所有处理均在本地系统上完成，非常适合对隐私敏感、低延迟的应用场景。
 
-本手册将指导您完成 Ryzen AI CVML 库的搭建、构建随附的示例应用程序，并在示例图像上运行人脸检测。
+本手册将指导你完成 Ryzen AI CVML 库的搭建、构建随附的示例应用程序，并在示例图像上运行人脸检测。
 
-## 您将学到什么
+## 你将学到什么
 
 - 如何安装先决条件并在系统上设置 Ryzen AI CVML 库
 - CVML C++ API 的工作原理：上下文（context）、功能对象（feature object）和图像缓冲区（image buffer）
 - 如何使用 CMake 和 OpenCV 构建并运行随附的示例应用程序
 - 如何在图像上运行人脸检测，并显示边界框和特征点
-- 如何将 CVML 功能集成到您自己的 C++ 应用程序中
+- 如何将 CVML 功能集成到你自己的 C++ 应用程序中
 
 <!-- @device:halo_box -->
 ## 检查软件更新
@@ -34,7 +34,7 @@ SPDX-License-Identifier: MIT
 
 ## 其他依赖项
 
-在开始之前，请确保您具备以下条件：
+在开始之前，请确保你具备以下条件：
 
 <!-- @os:windows -->
 - [OpenCV 4.11](https://github.com/opencv/opencv/releases/tag/4.11.0) — 下载 `opencv-4.11.0-windows.exe`，运行它，并解压到本地文件夹（例如 `C:\opencv`）
@@ -152,7 +152,7 @@ fi
 
 ## 设置 CVML 库
 
-如果您还没有 AMD 账户，请在 [account.amd.com](https://account.amd.com) 创建一个，然后登录并通过以下门户链接下载 Ryzen AI CVML 库：
+如果你还没有 AMD 账户，请在 [account.amd.com](https://account.amd.com) 创建一个，然后登录并通过以下门户链接下载 Ryzen AI CVML 库：
 
 ```
 https://account.amd.com/en/forms/downloads/xef.html?filename=72293_Ryzen_AI_Library_26.05.20.zip
@@ -227,7 +227,7 @@ sudo apt update
 sudo apt install vulkan-sdk
 ```
 
-如果您运行的是 Ubuntu 22.04，还需要更新 MESA Vulkan 驱动程序：
+如果你运行的是 Ubuntu 22.04，还需要更新 MESA Vulkan 驱动程序：
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -238,7 +238,7 @@ sudo apt upgrade
 
 #### 其他 Ubuntu 24.04 依赖项
 
-如果您运行的是 Ubuntu 24.04，请安装其他必需的软件包：
+如果你运行的是 Ubuntu 24.04，请安装其他必需的软件包：
 
 ```bash
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libnsl2 gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly -y
@@ -266,7 +266,7 @@ done
 
 ## 核心概念
 
-CVML 库提供了一个简单的 C++ API，其中每个感知功能（深度估计、人脸检测、人脸网格）都有自己的头文件和功能对象。您无需处理原始模型——该库会自动处理模型加载、预处理和推理。
+CVML 库提供了一个简单的 C++ API，其中每个感知功能（深度估计、人脸检测、人脸网格）都有自己的头文件和功能对象。你无需处理原始模型——该库会自动处理模型加载、预处理和推理。
 
 ### 可用功能
 
@@ -282,7 +282,7 @@ CVML 库提供了一个简单的 C++ API，其中每个感知功能（深度估�
 
 1. **创建上下文** — `amd::cvml::Context` 管理共享资源，例如日志记录和推理后端选择。
 2. **创建功能对象** — 针对上下文实例化特定功能（例如 `amd::cvml::DepthEstimation`）。
-3. **封装输入数据** — 使用 `amd::cvml::Image` 封装您的 RGB 图像缓冲区，而无需复制数据。
+3. **封装输入数据** — 使用 `amd::cvml::Image` 封装你的 RGB 图像缓冲区，而无需复制数据。
 4. **执行** — 调用功能的处理方法并读取结果。
 
 ```cpp
@@ -309,7 +309,7 @@ context->Release();
 
 ### 推理后端
 
-该库会自动为每个操作选择绝佳硬件（GPU 或 NPU）。您也可以显式设置后端：
+该库会自动为每个操作选择绝佳硬件（GPU 或 NPU）。你也可以显式设置后端：
 
 ```cpp
 // Let the library choose the best hardware (default)
@@ -324,7 +324,7 @@ context->SetInferenceBackend(amd::cvml::Context::InferenceBackend::AUTO);
 
 CVML 库为每个功能都提供了可直接构建的示例应用程序。让我们一次性将它们全部构建出来。
 
-1. 设置 `OPENCV_INSTALL_ROOT` 环境变量，使其指向您的 OpenCV 安装位置：
+1. 设置 `OPENCV_INSTALL_ROOT` 环境变量，使其指向你的 OpenCV 安装位置：
 
    <!-- @os:windows -->
    ```cmd
@@ -742,9 +742,9 @@ done
 <!-- @test:end --> 
 <!-- @os:end -->
 
-## 将 CVML 集成到您自己的应用程序中
+## 将 CVML 集成到你自己的应用程序中
 
-要在您自己的 C++ 项目中使用 CVML 库，请通过 CMake 的 `find_package` 添加它：
+要在你自己的 C++ 项目中使用 CVML 库，请通过 CMake 的 `find_package` 添加它：
 
 ```cmake
 # Find the Ryzen AI CVML Library
@@ -754,7 +754,7 @@ find_package(RyzenAILibrary REQUIRED PATHS ${AMD_CVML_SDK_ROOT})
 target_link_libraries(${PROJECT_NAME} ${RyzenAILibrary_LIBS})
 ```
 
-其中 `AMD_CVML_SDK_ROOT` 指向 Ryzen AI CVML 库文件夹的根目录。然后包含您所需功能对应的头文件：
+其中 `AMD_CVML_SDK_ROOT` 指向 Ryzen AI CVML 库文件夹的根目录。然后包含你所需功能对应的头文件：
 
 ```cpp
 #include <cvml-face-detector.h>   // for face detection

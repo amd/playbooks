@@ -13,13 +13,13 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-**AMD Sync** 可将您的笔记本电脑变为 AMD Ryzen™ AI Halo 的远程控制台，无需手动进行 SSH、密钥和 IDE 设置——只需安装 AMD Sync，即可一键访问远程终端、VS Code、JupyterLab，并在 Ryzen AI Halo 上查看实时 GPU/CPU/内存仪表板。
+**AMD Sync** 可将你的笔记本电脑变为 AMD Ryzen™ AI Halo 的远程控制台，无需手动进行 SSH、密钥和 IDE 设置——只需安装 AMD Sync，即可一键访问远程终端、VS Code、JupyterLab，并在 Ryzen AI Halo 上查看实时 GPU/CPU/内存仪表板。
 
-您的本地设备体验保持不变；每个命令、笔记本和模型都在 Ryzen AI Halo 上运行。
+你的本地设备体验保持不变；每个命令、笔记本和模型都在 Ryzen AI Halo 上运行。
 
 > **提示**：此页面将包含 AMDSync 的所有最新更新。
 
-## 您将学到什么
+## 你将学到什么
 
 - 在 Ryzen AI Halo 上启用 SSH，并通过 AMD Sync 连接到它
 - 一键针对 Ryzen AI Halo 启动 VS Code、终端、JupyterLab 和针对 Ryzen AI Halo 的实时指标
@@ -29,7 +29,7 @@ SPDX-License-Identifier: MIT
 
 ## 核心概念
 
-AMD Sync 分为两端：**客户端**（运行 AMD Sync 应用的笔记本电脑）和**服务器**（运行 SSH 服务器的 Ryzen AI Halo，AMD Sync 通过该服务器建立连接），您通过 AMD Sync 启动的所有程序——例如 VS Code、终端或笔记本——都在本地打开，但实际在 Ryzen AI Halo 上执行。
+AMD Sync 分为两端：**客户端**（运行 AMD Sync 应用的笔记本电脑）和**服务器**（运行 SSH 服务器的 Ryzen AI Halo，AMD Sync 通过该服务器建立连接），你通过 AMD Sync 启动的所有程序——例如 VS Code、终端或笔记本——都在本地打开，但实际在 Ryzen AI Halo 上执行。
 
 > **支持的客户端：** Windows 11 和 Linux，不支持 macOS。
 
@@ -43,7 +43,7 @@ AMD Sync 分为两端：**客户端**（运行 AMD Sync 应用的笔记本电脑
 1. 在 Ryzen AI Halo 上，打开 **AMD Ryzen™ AI 开发者中心**。
 2. 转到**远程**选项卡。
 3. 打开 **SSH 服务器**开关。
-4. 记下**服务器信息**下显示的 **IP 地址**、**端口**和**用户名**——稍后您需要将它们粘贴到 AMD Sync 中。
+4. 记下**服务器信息**下显示的 **IP 地址**、**端口**和**用户名**——稍后你需要将它们粘贴到 AMD Sync 中。
 
 <div align="center" style="max-width: 450px; margin: 1.5rem auto;">
   <img src="assets/halobox_remote_tab.png" alt="AMD Ryzen AI Developer Center Remote tab showing SSH Server toggle and Server Information"/>
@@ -55,9 +55,9 @@ AMD Sync 分为两端：**客户端**（运行 AMD Sync 应用的笔记本电脑
 
 ---
 
-## 步骤 2 — 在您的客户端上安装 AMD Sync
+## 步骤 2 — 在你的客户端上安装 AMD Sync
 
-AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于您操作系统的安装程序，然后按照以下步骤操作，安装完成后，在**开始使用**屏幕上点击**接受并安装**——安装完成后 AMD Sync 会自动启动。
+AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于你操作系统的安装程序，然后按照以下步骤操作，安装完成后，在**开始使用**屏幕上点击**接受并安装**——安装完成后 AMD Sync 会自动启动。
 
 ### Windows
 
@@ -70,7 +70,7 @@ AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于您操作系�
 
 ### Linux
 
-点击链接下载您偏好的格式：
+点击链接下载你偏好的格式：
 
 | 格式 | 下载 | 安装命令 |
 |--------|----------|-----------------|
@@ -82,7 +82,7 @@ AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于您操作系�
 
 ---
 
-## 步骤 3 — 连接到您的 Ryzen AI Halo
+## 步骤 3 — 连接到你的 Ryzen AI Halo
 
 首次启动时，AMD Sync 会显示**添加远程设备**表单，请使用开发者中心**远程**选项卡中的值来填写该表单。
 
@@ -95,16 +95,16 @@ AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于您操作系�
 | **设备名称**（可选） | 一个便于识别的标签，例如 `Ryzen AI Halo`。默认值为 `Device 1`、`Device 2`……|
 | **主机名或 IP** | 来自“远程”选项卡 |
 | **SSH 端口** | 来自“远程”选项卡（仅限数字）|
-| **用户名** | 您在 Ryzen AI Halo 上的操作系统账户名 |
-| **密码** | 您的操作系统登录密码——输入时会被隐藏 |
+| **用户名** | 你在 Ryzen AI Halo 上的操作系统账户名 |
+| **密码** | 你的操作系统登录密码——输入时会被隐藏 |
 
-点击**添加设备**，短暂加载画面后，您将看到**“连接成功”**，并进入位于系统托盘中的主视图，点击窗口外部即可关闭它；AMD Sync 仍会继续运行，只需一键即可再次打开。
+点击**添加设备**，短暂加载画面后，你将看到**“连接成功”**，并进入位于系统托盘中的主视图，点击窗口外部即可关闭它；AMD Sync 仍会继续运行，只需一键即可再次打开。
 
-> **如果连接失败，** AMD Sync 会恢复到初始状态，但会保留您的设置，常见原因包括 Ryzen AI Halo 上未启用 SSH、密码错误，或两台设备处于不同网络。
+> **如果连接失败，** AMD Sync 会恢复到初始状态，但会保留你的设置，常见原因包括 Ryzen AI Halo 上未启用 SSH、密码错误，或两台设备处于不同网络。
 
 ---
 
-## 步骤 4 — 启动您的第一个远程工具
+## 步骤 4 — 启动你的第一个远程工具
 
 主视图提供五个一键组件——无论客户端和 Ryzen AI Halo 运行的是哪一个操作系统，所有这些组件均可用。
 
@@ -128,13 +128,13 @@ AMD Sync 可在 Windows 11 和 Linux 上运行，请下载适用于您操作系�
 2. 点击 **VS Code**。
 3. AMD Sync 会在 Ryzen AI Halo 上创建 `Documents/AMD_Sync/Project_1`，并在本地打开 VS Code，通过隧道连接到该文件夹。
 
-现在您正在使用本地的 VS Code 编辑存储在 Ryzen AI Halo 上的文件。创建 `helloworld.py`，添加 `print("hello world")`，打开集成终端（`` Ctrl + ` ``），然后运行它：
+现在你正在使用本地的 VS Code 编辑存储在 Ryzen AI Halo 上的文件。创建 `helloworld.py`，添加 `print("hello world")`，打开集成终端（`` Ctrl + ` ``），然后运行它：
 
 <div align="center" style="max-width: 620px; margin: 1.5rem auto;">
   <img src="assets/vscode.png" alt="VS Code SSH-tunneled into Project_1 on the Ryzen AI Halo, running helloworld.py"/>
 </div>
 
-状态栏显示 **SSH: Linux**——这证明您的代码正在 Ryzen AI Halo 上运行，而不是在您的笔记本电脑上。
+状态栏显示 **SSH: Linux**——这证明你的代码正在 Ryzen AI Halo 上运行，而不是在你的笔记本电脑上。
 ### 试用终端
 
 点击 **Terminal**，即可通过 SSH 直接进入同一文件夹，无需离开键盘。

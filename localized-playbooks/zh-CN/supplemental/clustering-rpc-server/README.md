@@ -13,11 +13,11 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-您的 Ryzen™ AI Halo 已经能够在本地运行大语言模型，集群技术通过本地网络将多个系统的 GPU 内存合并，从而进一步提升了这一能力，让您能够访问更大规模的模型，获得更强的推理能力、更好的代码生成能力和更深入的多语言理解能力，而这一切都完全在您自己的硬件上完成。
+你的 Ryzen™ AI Halo 已经能够在本地运行大语言模型，集群技术通过本地网络将多个系统的 GPU 内存合并，从而进一步提升了这一能力，让你能够访问更大规模的模型，获得更强的推理能力、更好的代码生成能力和更深入的多语言理解能力，而这一切都完全在你自己的硬件上完成。
 
-本手册将教您如何使用llama.cpp的RPC引擎对两个Ryzen AI Halo系统进行集群，并在两台具有AMD ROCm™加速的机器上运行GLM 4.7，这是一个358B参数模型。
+本手册将教你如何使用llama.cpp的RPC引擎对两个Ryzen AI Halo系统进行集群，并在两台具有AMD ROCm™加速的机器上运行GLM 4.7，这是一个358B参数模型。
 
-## 您将学到什么
+## 你将学到什么
 
 - 如何在 Ryzen AI Halo 系统上扩展 VRAM 分配
 - 安装带有 ROCm 和 RPC 支持的 llama.cpp
@@ -31,7 +31,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 在 Windows 上，要运行需要更高内存的更大模型，我们需要使用 AMD 可变显存 (Variable Graphics Memory)（iGPU VRAM）分配功能。
 
-您可以通过打开 AMD 软件: Adrenalin Edition 控制面板并导航至：`性能 > 调优 > AMD 可变显存` 来完成此操作，将值设置为 **96 GB**，请重启系统以使更改生效。
+你可以通过打开 AMD 软件: Adrenalin Edition 控制面板并导航至：`性能 > 调优 > AMD 可变显存` 来完成此操作，将值设置为 **96 GB**，请重启系统以使更改生效。
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -87,7 +87,7 @@ SPDX-License-Identifier: MIT
 | 10Gbps 以太网交换机 | 1 | 支持多节点 Ryzen AI Halo 通信的中央交换机（至少 2 个端口） |
 | 以太网线缆 | 2 | 将每台 Halo 设备连接到交换机（建议使用 Cat 7 或更高规格线缆） |
 
-> **注意**：连接两台 Ryzen AI Halo 设备需要两个以太网交换机端口，如果您是从单独的客户端机器而不是从其中一台 Halo 设备访问模型，则需要第三个端口。
+> **注意**：连接两台 Ryzen AI Halo 设备需要两个以太网交换机端口，如果你是从单独的客户端机器而不是从其中一台 Halo 设备访问模型，则需要第三个端口。
 
 ### 软件
 <!-- @os:windows -->
@@ -137,13 +137,13 @@ sudo ethtool <IFNAME> | grep Speed
 
 > **注意**：将 `<IFNAME>` 替换为 [1. 确定网络接口](#1-determine-network-interfaces) 中输出的接口名称
 
-您应该看到速度为 `10000Mb/s`：
+你应该看到速度为 `10000Mb/s`：
 
 ```bash
 	Speed: 10000Mb/s
 ```
 
-> **注意**：如果速度低于 `10000Mb/s` 或链路无法建立，请检查网线连接并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商功能并手动设置链路速度；请参阅您的交换机文档。
+> **注意**：如果速度低于 `10000Mb/s` 或链路无法建立，请检查网线连接并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商功能并手动设置链路速度；请参阅你的交换机文档。
 
 <!-- @os:end -->
 
@@ -156,7 +156,7 @@ sudo ethtool <IFNAME> | grep Speed
 Get-NetAdapter | Select-Object Name, Status, LinkSpeed
 ```
 
-您的以太网接口应处于 `Up` 状态，并以 `10 Gbps` 的速度运行：
+你的以太网接口应处于 `Up` 状态，并以 `10 Gbps` 的速度运行：
 
 ```powershell
 Name      Status  LinkSpeed
@@ -164,7 +164,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **注意**：如果速度低于 `10 Gbps` 或链路未能建立，请检查网线连接，并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商并手动设置链路速度；请参阅您的交换机文档。
+> **注意**：如果速度低于 `10 Gbps` 或链路未能建立，请检查网线连接，并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商并手动设置链路速度；请参阅你的交换机文档。
 
 <!-- @os:end -->
 
@@ -184,7 +184,7 @@ Lemonade SDK 提供带有 AMD ROCm 7 加速的 llama.cpp 每日构建版本，�
 <!-- @os:windows -->
 #### 步骤 1：下载预编译二进制文件
 
-访问最新版本页面并下载与您的平台和 GPU 目标相匹配的压缩包：
+访问最新版本页面并下载与你的平台和 GPU 目标相匹配的压缩包：
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -198,7 +198,7 @@ Lemonade SDK 提供带有 AMD ROCm 7 加速的 llama.cpp 每日构建版本，�
 llama-bxxxx-windows-rocm-gfx1151-x64.zip
 ```
 
-该目录现在包含针对您的 Ryzen AI Halo 系统预编译的、支持 ROCm 的 `llama-cli.exe`、`llama-server.exe` 和 `rpc-server.exe` 构建版本。
+该目录现在包含针对你的 Ryzen AI Halo 系统预编译的、支持 ROCm 的 `llama-cli.exe`、`llama-server.exe` 和 `rpc-server.exe` 构建版本。
 
 #### 步骤 3：验证 GPU 检测
 
@@ -219,7 +219,7 @@ Available devices:
 <!-- @os:linux -->
 #### 步骤 1：下载预编译二进制文件
 
-访问最新发布页面，下载与您的平台和 GPU 目标相匹配的压缩包：
+访问最新发布页面，下载与你的平台和 GPU 目标相匹配的压缩包：
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -233,7 +233,7 @@ cd llama-bxxxx-ubuntu-rocm-gfx1151-x64
 chmod +x llama-cli llama-server rpc-server
 ```
 
-该目录现在包含针对您的 Ryzen AI Halo 系统预编译的、支持 ROCm 的 `llama-cli`、`llama-server` 和 `rpc-server` 构建版本。
+该目录现在包含针对你的 Ryzen AI Halo 系统预编译的、支持 ROCm 的 `llama-cli`、`llama-server` 和 `rpc-server` 构建版本。
 
 #### 步骤 3：验证 GPU 检测
 
@@ -445,7 +445,7 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 
 <!-- @os:end -->
 
-运行后，`llama-cli` 会显示模型加载进度，并进入一个交互式提示界面，您可以在其中直接与模型进行对话：
+运行后，`llama-cli` 会显示模型加载进度，并进入一个交互式提示界面，你可以在其中直接与模型进行对话：
 
 ![llama-cli 在两个节点上运行 GLM 4.7](assets/llama-cli-example.png)
 #### llama-server
