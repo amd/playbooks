@@ -169,7 +169,7 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
+      "files_scored": 78,
       "mean": 93.5,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"

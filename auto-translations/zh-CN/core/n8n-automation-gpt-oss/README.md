@@ -13,56 +13,74 @@ SPDX-License-Identifier: MIT
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
+
 ## 概述
+
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 此指南要求系统内存至少为 **32GB**。
+> 本教程需要至少 **32GB** 的系统内存。
 <!-- @device:end -->
-n8n 是一个工作流自动化平台，可让你使用可视化的节点式编辑器连接各种应用和服务。
 
-本手册将教你如何搭建一个由 AI 驱动的财经新闻摘要工具，该工具会从新闻 RSS 源中提取最新的商业头条新闻，并使用运行在你系统上的本地 LLM 生成面向投资者的摘要。
+n8n 是一个工作流自动化平台，允许您使用可视化的基于节点的编辑器连接各种应用和服务。
 
-## 你将学到什么
+本教程将教您如何搭建一个由 AI 驱动的财经新闻摘要生成器，它会从新闻 RSS 源中获取最新的商业头条，并使用运行在您本地系统上的 LLM 生成面向投资者的摘要。
 
-- 如何安装和启动 n8n
-- 导入并配置预构建工作流
-- 使用原生 n8n 集成连接到 Lemonade
+<!-- @device:halo_box -->
+> **注意：** 部分 AMD Ryzen AI Halo 系统已预装了本教程所需的模型，而其他系统则没有。两种情况均受支持。当您进入 **启动 Lemonade** 部分时，请检查该模型是否已在 Lemonade 中可用——如果已有，您可以直接加载；如果没有，请先在那里下载。
+<!-- @device:end -->
+
+## 您将学到的内容
+
+- 如何安装并启动 n8n
+- 导入和配置预构建的工作流
+- 使用原生 n8n 集成连接 Lemonade
 - 理解工作流节点和数据流
 
 ## 什么是 Lemonade？
 
-[Lemonade](https://lemonade-server.ai) 是一个专为 AMD 硬件打造的本地 LLM 服务平台。它提供了与 OpenAI 兼容的 API，完全在你的机器上运行——你的数据永远不会离开你的设备。
+[Lemonade](https://lemonade-server.ai) 是一个为 AMD 硬件打造的本地 LLM 服务平台。它提供了一个兼容 OpenAI 的 API，完全在本地运行——您的数据不会离开您的设备。
 
-在本手册中，我们使用 Lemonade 来提供本地 LLM，供 n8n 连接以执行 AI 驱动的任务。
+在本教程中，我们使用 Lemonade 来提供一个本地 LLM，供 n8n 连接以执行 AI 驱动的任务。
 
-n8n 内置了**原生 Lemonade 节点**（`Lemonade Chat Model`），可提供一流的集成体验——无需手动配置。这使得将本地 LLM 连接到自动化工作流变得非常简单。
+n8n 包含一个**原生 Lemonade 节点**（`Lemonade Chat Model`），它提供了一流的集成体验——无需手动配置。这使得将本地 LLM 连接到自动化工作流变得非常简单。
+
 <!-- @device:halo_box,halo,stx,krk -->
 ## 设置内存配置
+
 <!-- @require:memory-config -->
 <!-- @device:end -->
 
 <!-- @device:halo_box -->
 ## 检查软件更新
+
 <!-- @require:software-update -->
 <!-- @device:end -->
-## 安装软件先决条件
+
+## 安装软件前置依赖
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
 <!-- @device:halo,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -183,20 +201,39 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
+
 ## 安装 n8n
 <!-- @os:windows -->
-使用 npm 全局安装 n8n。
+> [!IMPORTANT]
+> **n8n 仅支持 Node.js 20.19 至 24.x 版本**
+> （参见 [n8n 安装文档](https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm)）。
+> nodejs.org 上的当前发布版本比此范围更新。在 Node 26 上安装 n8n 会在
+> Windows 上失败，并出现 `EBADPLATFORM` 或本机构建错误，安装结果会抛出
+> `MODULE_NOT_FOUND`。请在继续之前确认您的版本：
+>
+> ```cmd
+> node --version
+> ```
+>
+> 如果版本不在 20.19&ndash;24.x 范围内，请使用
+> [nvm-windows](https://github.com/coreybutler/nvm-windows) 安装受支持的版本（`nvm install 24.10.0 && nvm use 24.10.0`）。
 
-> **注意**：您可能会看到一些 npm 警告，这是正常现象。
+使用 npm 全局安装 n8n。请固定版本号&mdash;在撰写本文时，n8n 的最新发行版本
+将仅限 Linux 的二进制文件声明为硬性依赖，导致在 Windows 上的所有受支持
+Node 版本下安装都会失败，并提示 `EBADPLATFORM`：
+
+> **注意**：您可能会看到一些 npm 警告。这是预期行为。
 
 ```bash
-npm install -g n8n
+npm install -g n8n@2.45.6
 ```
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
@@ -206,39 +243,31 @@ n8n --version
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
 <!-- @os:windows -->
-> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改其 PowerShell 执行策略（例如
-> 将其设置为 RemoteSigned 或 Unrestricted）。
+> **提示**：Windows 用户在运行某些 PowerShell 命令之前，可能需要修改其 PowerShell 执行策略
+> （例如将其设置为 RemoteSigned 或 Unrestricted）。
 <!-- @os:end -->
 
 
 <!-- @os:windows -->
-> **PATH 问题**：如果 `n8n --version` 提示命令未找到，请确保你的 npm 全局 bin 目录已添加到用户 `PATH` 中。常见的安装路径为 `C:\Users\<username>\AppData\Roaming\npm`。
-> 将其添加到用户 path 中（编辑系统环境变量 > 环境变量 > 编辑用户 Path），然后重新加载终端。
+> **PATH 问题**：如果 `n8n --version` 提示命令未找到，请确保您的 npm 全局 bin 目录已添加到用户 `PATH` 中。常见的安装路径为 `C:\Users\<username>\AppData\Roaming\npm`。
+> 将其添加到用户路径中（编辑系统环境变量 > 环境变量 > 编辑用户路径），然后重新加载终端。
+
 <!-- @os:end -->
 
 <!-- @os:linux -->
-我们现在将使用 Podman 服务将我们的 n8n 安装容器化。
+现在我们将使用 Podman 服务来容器化我们的 n8n 安装。
 
-请将以下内容下载到您选择的目录中:[compose.yml](assets/compose.yml)
+请将以下文件下载到您选择的目录中：[compose.yml](assets/compose.yml)
 
-在该目录中,运行以下命令:
+在该目录中，运行以下命令：
 ```bash
 podman compose up -d
 ```
 
-这将安装 n8n 并写入持久化存储。
+这应该会安装 n8n 并写入持久化存储。
 
-在浏览器地址栏中输入 `localhost:5678` 以启动 n8n。
+在浏览器地址栏中输入 `localhost:5678` 启动 n8n。
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -280,19 +309,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -306,6 +330,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -315,23 +341,28 @@ echo "OK: n8n server is responding"
 <!-- @os:end -->
 
 <!-- @os:windows -->
-n8n 会启动一个本地网络服务器。按 `'o'` 或打开浏览器访问 `http://localhost:5678` 即可进入编辑器。
+n8n 会启动一个本地 Web 服务器。按下 `'o'` 或在浏览器中打开 `http://localhost:5678` 即可访问编辑器。
 <!-- @os:end -->
-> **提示**：使用 n8n 时请保持终端窗口处于打开状态。关闭它可能会导致服务器停止运行。
 
-## 启动 Lemonade
 
-Lemonade 是本地服务器，用于运行模型并与 n8n 连接。
+> **提示**：在使用 n8n 时请保持终端窗口打开。关闭它可能会停止服务器。
+
+## 使用 Lemonade 启动模型
+
+Lemonade 是将运行模型并连接到 n8n 的本地服务器。
+
 <!-- @os:linux -->
-通过点击任务栏中的 Lemonade 图标来打开 Lemonade GUI。在这里，您可以浏览模型、后端，并加载预安装的模型。
+点击任务栏中的 Lemonade 图标，打开 Lemonade GUI。在此处，您可以浏览模型和后端，下载任何尚未安装的模型，并加载它。出厂时已预装该模型的系统可以直接加载。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-点击 Lemonade 图标即可打开 Lemonade GUI。右键单击托盘图标以打开应用。之后，您可以添加模型、后端，并加载预安装的模型。
+点击 Lemonade 图标，打开 Lemonade GUI。右键单击托盘图标以打开该应用。在此处，您可以浏览模型和后端，下载任何尚未安装的模型，并加载它。出厂时已预装该模型的系统可以直接加载。
 <!-- @os:end -->
->**提示**：启动后，也可以通过 http://localhost:13305 访问 Lemonade GUI
 
-或者，你也可以打开终端并运行 `lemonade list` 查看已安装的模型。然后运行：
+>**提示**：启动后，Lemonade GUI 也可通过 http://localhost:13305 访问
+
+或者，您也可以打开终端并运行 `lemonade list` 查看已安装的模型。然后运行：
+
 <!-- @device:halo_box -->
 <!-- @os:linux -->
 ```bash
@@ -357,30 +388,33 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 ```
 <!-- @device:end -->
+
+
 ## 设置工作流
 
-### 步骤 1：注册或登录 n8n
+### 第 1 步：注册或登录 n8n
 
-首次打开 n8n 时，系统会提示你创建账户或登录：
+当您首次打开 n8n 时，系统会提示您创建账户或登录：
 
 1. 在浏览器中打开 `http://localhost:5678`
-2. 使用你的电子邮箱创建一个新的本地账户，如果已有账户则直接登录
-3. 登录后，你将看到 n8n 仪表盘
+2. 使用您的邮箱创建一个新的本地账户，或者如果您已有账户，请直接登录
+3. 登录后，您将看到 n8n 仪表板
 
-> **提示**：如果账户被锁定，可以尝试执行 `n8n user-management:reset`
+> **提示**：如果账户被锁定，请尝试运行 `n8n user-management:reset`
+### 第 2 步：导入工作流
 
-### 步骤 2：导入工作流
-
-我们提供了一个预先构建好的工作流，你可以直接导入：
+我们提供了一个预构建的工作流，您可以直接导入：
 
 1. 下载以下工作流文件：[financial-news-workflow.json](assets/financial-news-workflow.json)
-2. 点击 **Start from Scratch** 打开工作流编辑器。或者，点击左上角的 + 按钮，然后点击 **Add workflow**。
-3. 点击右上角栏中的 **...** 菜单（三个点），选择 **Import from file**
+2. 点击 **Start from Scratch** 打开工作流编辑器。或者，点击左上角的 **+** 按钮，选择 **New workflow**，然后选择 **Build workflow**。
+3. 点击右上角的 **...** 菜单（三个点），选择 **Import from file**
 4. 选择下载的 `financial-news-workflow.json` 文件
-5. 该工作流将出现在画布上
-### 步骤 3：了解工作流
+5. 工作流将显示在画布上
 
-导入的工作流包含 8 个相连的节点：
+
+### 第 3 步：了解工作流
+
+导入的工作流包含 8 个相互连接的节点：
 
 <p align="center">
   <img src="assets/workflow-overview.png" alt="n8n Financial News Workflow" width="800"/>
@@ -388,47 +422,47 @@ lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
 
 | 节点 | 用途 |
 |------|---------|
-| **When clicking 'Execute workflow'** | 手动触发以启动工作流 |
-| **Fetch Financial News Feed** | RSS Read 节点，从 RSS 源获取最新的商业头条新闻（默认使用 NYT Business 源，无需 API 密钥） |
-| **Aggregate Headlines** | Aggregate 节点，将每个订阅项中的标题和摘要收集到一个列表中 |
-| **Clean Extracted News Data** | Set 节点，将所有标题合并到一个文本字段中 |
-| **AI Financial News Summarizer** | AI Agent，使用金融分析师系统提示词处理新闻 |
+| **When clicking 'Execute workflow'** | 用于启动工作流的手动触发器 |
+| **Fetch Financial News Feed** | RSS Read 节点，从 RSS 订阅源拉取最新的商业头条新闻（默认使用纽约时报商业版订阅源，无需 API 密钥） |
+| **Aggregate Headlines** | Aggregate 节点，将每个订阅源条目中的标题和摘要收集到一个列表中 |
+| **Clean Extracted News Data** | Set 节点，将所有标题合并为一个单一的文本字段 |
+| **AI Financial News Summarizer** | 使用金融分析师系统提示处理新闻的 AI Agent |
 | **Lemonade Chat Model** | 连接到运行 LLM 的本地 Lemonade 服务器 |
 | **Structured Output Parser** | 将 AI 输出格式化为结构化 JSON |
 | **Convert to File** | 将摘要转换为可下载的文件 |
 
-> **提示**：要使用其他新闻源，请双击 **Fetch Financial News Feed** 节点，并将 URL 替换为你偏好的任何商业或市场类 RSS 源。
+> **提示**：要使用其他新闻来源，请双击 **Fetch Financial News Feed** 节点，并将 URL 替换为您偏好的任何商业或市场类 RSS 订阅源。
 
-### 步骤 4：配置 Lemonade 凭据
+### 第 4 步：配置 Lemonade 凭据
 
-在运行工作流之前，你需要将其连接到本地 Lemonade 服务器：
+在运行工作流之前，您需要将其连接到本地 Lemonade 服务器：
 
 1. 在 n8n 中双击 **Lemonade Chat Model** 节点
 2. 在下拉菜单 **Credential to connect with** 中选择 **Create New Credential**
-3. 在下表中输入相应的值，然后点击保存。
-4. 选择你在 Lemonade Server 中已加载的相关模型。
+3. 在下表中输入对应的值，然后点击保存。
+4. 选择您已在 Lemonade Server 中加载的相应模型。
 
   | 字段 | 值 |
   |-------|-------|
   | **Base URL** | `http://localhost:13305/api/v1` |
   | **API Key** | `lemonade` |
 
-> **注意**：在测试之前，请在终端中运行 `lemonade status`，以确认 Lemonade 服务器正在运行。
+> **注意**：在测试之前，请在终端中运行 `lemonade status` 以确认 Lemonade 服务器正在运行。
 <!-- @device:halo_box -->
-> 此工作流使用 GPT-OSS-120B，该模型已预装在 Lemonade 中。你可以在 Lemonade Chat Model 节点设置中将其更改为其他已加载的模型。
+> 此工作流使用 GPT-OSS-120B，该模型已预装在 Lemonade 中。您可以在 Lemonade Chat Model 节点设置中将其更改为其他已加载的模型。
 <!-- @device:end -->
 
-### 步骤 5：测试工作流
+### 第 5 步：测试工作流
 
 1. 确保 Lemonade 正在运行并已加载模型
-2. 点击画布底部中央的 **Execute workflow**
-3. 观察每个节点从左到右依次执行——完成后会变为绿色
+2. 点击画布底部中间的 **Execute workflow**
+3. 观察每个节点从左到右依次执行——完成后节点会变为绿色
 4. 双击 **AI Financial News Summarizer** 节点，在底部面板中查看生成的摘要。
-5. 双击 **Convert to File** 节点，在底部面板中下载相应的文本文件。
+5. 双击 **Convert to File** 节点，在底部面板中下载对应的文本文件。
 
 ## 了解 AI Agent
 
-AI Financial News Summarizer 使用专为金融分析设计的系统提示词：
+AI Financial News Summarizer 使用专为金融分析设计的系统提示：
 
 ```
 You are an AI financial analyst. Your role is to read, understand, and
@@ -440,29 +474,29 @@ Today's news points to [bullish/bearish/neutral] sentiment. Watch for
 [economic event/earnings report] tomorrow, which could influence market direction.
 ```
 
-该 Agent 接收清理后的新闻数据，并输出包含市场情绪的结构化摘要。
+该 Agent 接收经过清理的新闻数据，并输出带有市场情绪的结构化摘要。
 
-### 保存你的工作流
+### 保存您的工作流
 
-点击顶部的工作流名称，可根据需要重命名。工作流会在你操作时自动保存。
+点击顶部的工作流名称以在需要时重命名。工作流在您操作时会自动保存。
 
 ## 后续步骤
 
-- **计划自动化**：将 Manual Trigger 替换为 **Schedule Trigger**，以实现每日运行
+- **安排自动化**：将 Manual Trigger 替换为 **Schedule Trigger**，以实现每日运行
 - **发送通知**：添加 **Discord**、**Slack** 或 **Email** 节点以接收摘要
-- **尝试不同模型**：在 Lemonade Chat Model 节点中更改模型，以体验不同的 LLM
-- **更改新闻源**：将 **Fetch Financial News Feed** 节点指向其他 RSS 源，以关注其他版块或出版物
-- **尝试不同的后端**：n8n 还支持 [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)、LM Studio 及其他本地 LLM 后端
+- **尝试不同模型**：在 Lemonade Chat Model 节点中更改模型，以试验不同的 LLM
+- **更改新闻来源**：将 **Fetch Financial News Feed** 节点指向不同的 RSS 订阅源，以关注其他板块或出版物
+- **尝试不同的后端**：n8n 还支持 [Ollama](https://n8n.io/workflows/?integrations=Ollama+Chat+Model)、LM Studio 以及其他本地 LLM 后端
 
 ### 探索 n8n 模板
 
-n8n 提供了数百个预构建的工作流模板。可在官方模板库中浏览：
+n8n 拥有数百个预构建的工作流模板。请浏览官方模板库：
 
 **[https://n8n.io/workflows/](https://n8n.io/workflows/)**
 
-搜索 “AI”、“LLM” 或 “automation” 以查找可导入和自定义的工作流。
+搜索 "AI"、"LLM" 或 "automation" 以查找可导入和自定义的工作流。
 
-如需了解更多信息，请查阅 [n8n 文档](https://docs.n8n.io/)。
+有关更多信息，请查阅 [n8n Documentation](https://docs.n8n.io/)。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
