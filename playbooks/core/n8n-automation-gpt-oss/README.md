@@ -39,7 +39,7 @@ In this playbook, we use Lemonade to serve a local LLM that n8n connects to for 
 
 n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -69,7 +69,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @prereq:podman -->
 <!-- @os:end -->
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
@@ -372,7 +372,7 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo -->
+<!-- @device:halo,grgh -->
 ```bash
 lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
