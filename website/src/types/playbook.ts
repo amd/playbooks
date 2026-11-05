@@ -170,6 +170,31 @@ export interface Author {
   type: "amd" | "community";
 }
 
+/** One selectable option within a content-toggle group. */
+export interface ToggleOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * A constraint on a toggle group: when this group holds `when`, restrict the
+ * named dimensions to the allowed value list. A dimension key is another toggle
+ * group's id or the built-in "os" selector.
+ */
+export interface ToggleConstraint {
+  when: string;
+  restrict: Record<string, string[]>;
+}
+
+/** A content-toggle (variant) group declared by a playbook. */
+export interface ToggleGroupDef {
+  id: string;
+  label: string;
+  options: ToggleOption[];
+  default: string;
+  constraints?: ToggleConstraint[];
+}
+
 export interface PlaybookMeta {
   /** Unique identifier matching the folder name */
   id: string;
@@ -268,6 +293,28 @@ export interface PlaybookMeta {
    *   }
    */
   validatedVersions?: Partial<Record<DeviceCategory, Partial<Record<Platform, Record<string, string>>>>>;
+
+  /**
+   * Optional content toggles (variant switches) shown as button groups above the
+   * playbook, like a generic version of the OS selector. Each group filters
+   * content wrapped in `<!-- @toggle:<id>=<value> --> ... <!-- @toggle:end -->`.
+   *
+   * A group may declare `constraints`: when the group's value is `when`, the
+   * listed dimensions are restricted to the allowed values. A restricted
+   * dimension may be another toggle group's id OR the built-in `os` selector
+   * (values "windows"/"linux"). Restricted options are disabled in the UI and
+   * the active selection snaps to an allowed value.
+   *
+   * Example (clustering RPC):
+   *   "toggles": [
+   *     { "id": "link", "label": "Interconnect", "default": "ethernet",
+   *       "options": [ {"value":"ethernet","label":"Ethernet"}, {"value":"usb4","label":"USB4"} ],
+   *       "constraints": [ { "when": "usb4", "restrict": { "nodes": ["2"], "os": ["linux"] } } ] },
+   *     { "id": "nodes", "label": "Nodes", "default": "2",
+   *       "options": [ {"value":"2","label":"2 Nodes"}, {"value":"4","label":"4 Nodes"} ] }
+   *   ]
+   */
+  toggles?: ToggleGroupDef[];
 
   /** Month/year this playbook was validated, e.g. "2026-07". Falls back to dependency-versions.json defaultDate. */
   validatedDate?: string;

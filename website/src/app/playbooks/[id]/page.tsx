@@ -20,7 +20,7 @@ import Footer from "@/components/Footer";
 import ImageLightbox from "@/components/ImageLightbox";
 import CodeLightbox from "@/components/CodeLightbox";
 import PlaybookHelpBox from "@/components/PlaybookHelpBox";
-import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo } from "@/types/playbook";
+import type { Playbook, Platform, Device, DeviceCategory, TestCoverageInfo, TestResultInfo, ToggleOption, ToggleGroupDef } from "@/types/playbook";
 import { formatTime, formatValidationDate, DEVICE_IDS, deviceNames, extractPlatforms, extractDevices, extractCategories, extractCategoryDevices, DEVICE_CATEGORY_MAP, categoryForDevice } from "@/types/playbook";
 
 // Global store for dropdown states - persists across re-renders without causing them
@@ -662,6 +662,41 @@ function filterContentByDevice(content: string, devices: string[]): string {
 }
 
 /**
+ * Filters content wrapped in `<!-- @toggle:<id>=<value> --> ... <!-- @toggle:end -->`
+ * against the active toggle selections. Handles nested blocks innermost-first,
+ * mirroring filterContentByDevice/filterContentByOS.
+ *
+ * A block matches when its group id isn't an active group (unknown toggle → keep),
+ * or the active value for that group is listed (comma-separated values allowed,
+ * e.g. `@toggle:nodes=2,4`).
+ *
+ * Tags supported:
+ *   <!-- @toggle:nodes=4 --> ... <!-- @toggle:end -->
+ *   <!-- @toggle:link=usb4 --> ... <!-- @toggle:end -->
+ *   <!-- @toggle:nodes=2,4 --> ... <!-- @toggle:end -->
+ */
+function filterContentByToggles(content: string, selections: Record<string, string>): string {
+  if (!content) return "";
+  if (Object.keys(selections).length === 0) return content;
+
+  const innerTogglePattern = /<!-- @toggle:([\w-]+)=([\w,-]+) -->((?:(?!<!-- @toggle:[\w-]+=[\w,-]+ -->|<!-- @toggle:end -->)[\s\S])*?)<!-- @toggle:end -->/g;
+
+  let result = content;
+  let prev: string;
+  do {
+    prev = result;
+    result = result.replace(innerTogglePattern, (_full, groupId: string, values: string, blockContent: string) => {
+      const active = selections[groupId];
+      // Unknown group (not declared/selected) → leave content as-is rather than drop it.
+      if (active === undefined) return blockContent;
+      return values.split(",").map(v => v.trim()).includes(active) ? blockContent : "";
+    });
+  } while (result !== prev);
+
+  return result;
+}
+
+/**
  * Parses `key=value` / `key="value with spaces"` attribute strings, mirroring
  * the parser used by the test runner (run_playbook_tests.py).
  */
@@ -1155,25 +1190,33 @@ function TestCoverageStatsBar({
   );
 }
 
-function PlatformToggle({ 
-  platforms, 
-  selected, 
-  onChange 
-}: { 
-  platforms: Platform[]; 
-  selected: Platform; 
+function PlatformToggle({
+  platforms,
+  selected,
+  onChange,
+  disabledPlatforms,
+}: {
+  platforms: Platform[];
+  selected: Platform;
   onChange: (p: Platform) => void;
+  disabledPlatforms?: Platform[];
 }) {
   const hasWindows = platforms.includes("windows");
   const hasLinux = platforms.includes("linux");
+  const winDisabled = disabledPlatforms?.includes("windows") ?? false;
+  const linuxDisabled = disabledPlatforms?.includes("linux") ?? false;
 
   return (
     <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333]">
       {hasWindows && (
         <button
-          onClick={() => onChange("windows")}
+          onClick={() => { if (!winDisabled) onChange("windows"); }}
+          disabled={winDisabled}
+          title={winDisabled ? "Not available with the current selection" : undefined}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-            selected === "windows"
+            winDisabled
+              ? "text-[#555] cursor-not-allowed opacity-50"
+              : selected === "windows"
               ? "bg-[#D4915D] text-black"
               : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
           }`}
@@ -1186,9 +1229,13 @@ function PlatformToggle({
       )}
       {hasLinux && (
         <button
-          onClick={() => onChange("linux")}
+          onClick={() => { if (!linuxDisabled) onChange("linux"); }}
+          disabled={linuxDisabled}
+          title={linuxDisabled ? "Not available with the current selection" : undefined}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 ${
-            selected === "linux"
+            linuxDisabled
+              ? "text-[#555] cursor-not-allowed opacity-50"
+              : selected === "linux"
               ? "bg-[#D4915D] text-black"
               : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
           }`}
@@ -1199,6 +1246,49 @@ function PlatformToggle({
           Linux
         </button>
       )}
+    </div>
+  );
+}
+
+/**
+ * A generic content-toggle button group (e.g. Nodes: 2/4, Interconnect: Ethernet/USB4).
+ * `disabledValues` are rendered greyed-out and non-clickable (driven by constraints,
+ * e.g. USB4 disables the 4-node option).
+ */
+function ToggleGroup({
+  options,
+  selected,
+  onChange,
+  disabledValues,
+}: {
+  options: ToggleOption[];
+  selected: string;
+  onChange: (v: string) => void;
+  disabledValues?: string[];
+}) {
+  if (options.length === 0) return null;
+  return (
+    <div className="flex items-center gap-2 p-1 bg-[#1a1a1a] rounded-lg border border-[#333] flex-wrap">
+      {options.map((opt) => {
+        const isDisabled = disabledValues?.includes(opt.value) ?? false;
+        return (
+          <button
+            key={opt.value}
+            onClick={() => { if (!isDisabled) onChange(opt.value); }}
+            disabled={isDisabled}
+            title={isDisabled ? "Not available with the current selection" : undefined}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+              isDisabled
+                ? "text-[#555] cursor-not-allowed opacity-50"
+                : selected === opt.value
+                  ? "bg-[#D4915D] text-black"
+                  : "text-[#a0a0a0] hover:text-white hover:bg-[#333]"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -1399,6 +1489,8 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
     if (categoryParam === "reference") return "halo_box";
     return deviceFromHash(deviceHash) ?? "halo";
   });
+  // Active value per content-toggle group id (e.g. { nodes: "2", link: "ethernet" }).
+  const [selectedToggles, setSelectedToggles] = useState<Record<string, string>>({});
   const [activeHeading, setActiveHeading] = useState<string>("");
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const [codeLightbox, setCodeLightbox] = useState<{ filename: string; code: string } | null>(null);
@@ -1542,7 +1634,61 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
 
   const activeDevices: string[] = effectiveDevice ? [effectiveDevice] : [];
 
-  // Transform relative image paths to API routes, filter by OS/device, substitute
+  // ── Content toggles (variant switches) ───────────────────────────────────
+  const toggleDefs: ToggleGroupDef[] = playbook?.toggles ?? [];
+
+  // Dimensions restricted by the current toggle selections. A dimension key is
+  // another toggle group id or the built-in "os" selector; value is the allowed list.
+  const restrictedDims = useMemo(() => {
+    const r: Record<string, string[]> = {};
+    for (const g of toggleDefs) {
+      const val = selectedToggles[g.id];
+      for (const c of g.constraints ?? []) {
+        if (c.when === val) {
+          for (const [dim, allowed] of Object.entries(c.restrict)) {
+            r[dim] = r[dim] ? r[dim].filter((x) => allowed.includes(x)) : [...allowed];
+          }
+        }
+      }
+    }
+    return r;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbook?.id, JSON.stringify(selectedToggles)]);
+
+  // Seed toggle selections from each group's default once the playbook loads.
+  useEffect(() => {
+    if (!playbook?.toggles) return;
+    setSelectedToggles((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const g of playbook.toggles!) {
+        if (next[g.id] === undefined) { next[g.id] = g.default; changed = true; }
+      }
+      return changed ? next : prev;
+    });
+  }, [playbook]);
+
+  // Enforce constraints: snap any restricted toggle/os selection to an allowed value.
+  useEffect(() => {
+    const osAllowed = restrictedDims["os"];
+    if (osAllowed && osAllowed.length > 0 && !osAllowed.includes(selectedPlatform)) {
+      setSelectedPlatform(osAllowed[0] as Platform);
+    }
+    setSelectedToggles((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const [dim, allowed] of Object.entries(restrictedDims)) {
+        if (dim === "os") continue;
+        if (next[dim] !== undefined && allowed.length > 0 && !allowed.includes(next[dim])) {
+          next[dim] = allowed[0]; changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(restrictedDims), selectedPlatform]);
+
+  // Transform relative image paths to API routes, filter by toggles/OS/device, substitute
   // device-aware @var values, and transform preinstalled/setup blocks.
   const varDefs = playbook?.content ? extractVarDefs(playbook.content) : {};
   const filteredContent = playbook?.content
@@ -1550,7 +1696,10 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
         transformPreinstalledBlocks(
           substituteVars(
             filterContentByDevice(
-              filterContentByOS(playbook.content, selectedPlatform),
+              filterContentByOS(
+                filterContentByToggles(playbook.content, selectedToggles),
+                selectedPlatform
+              ),
               activeDevices
             ),
             varDefs,
@@ -2067,9 +2216,29 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                               platforms={devicePlatforms}
                               selected={selectedPlatform}
                               onChange={setSelectedPlatform}
+                              disabledPlatforms={
+                                restrictedDims["os"]
+                                  ? (["windows", "linux"] as Platform[]).filter((p) => !restrictedDims["os"].includes(p))
+                                  : []
+                              }
                             />
                           </div>
                         )}
+                        {toggleDefs.map((g) => (
+                          <div key={g.id} className="px-3 py-2">
+                            <div className="text-[10px] text-[#555] mb-1">{g.label}</div>
+                            <ToggleGroup
+                              options={g.options}
+                              selected={selectedToggles[g.id] ?? g.default}
+                              onChange={(v) => setSelectedToggles((prev) => ({ ...prev, [g.id]: v }))}
+                              disabledValues={
+                                restrictedDims[g.id]
+                                  ? g.options.map((o) => o.value).filter((v) => !restrictedDims[g.id].includes(v))
+                                  : []
+                              }
+                            />
+                          </div>
+                        ))}
                       </>
                     );
                   })()}

@@ -1,7 +1,7 @@
 {
   "id": "clustering-rccl",
-  "title": "Clustering Two Ryzen™ AI Halos with RCCL",
-  "description": "Set up a multi-node cluster using two Ryzen™ AI Halo devices with RCCL for distributed workloads",
+  "title": "Clustering Ryzen™ AI Halos with RCCL",
+  "description": "Set up a multi-node cluster of Ryzen™ AI Halo devices with RCCL for distributed workloads (2 or 4 nodes)",
   "time": 90,
   "unsupported_platforms": {
     "halo_box": [
@@ -118,5 +118,22 @@
     }
   ],
   "published_date": "2026-02-03",
-  "updated_date": "2026-10-01"
+  "updated_date": "2026-10-01",
+  "toggles": [
+    {
+      "id": "nodes",
+      "label": "Nodes",
+      "default": "2",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 Nodes"
+        },
+        {
+          "value": "4",
+          "label": "4 Nodes"
+        }
+      ]
+    }
+  ]
 }
