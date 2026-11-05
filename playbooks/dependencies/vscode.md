@@ -19,15 +19,15 @@ VS Code can be installed from the **AMD Ryzen™ AI Developer Center**. Go to th
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
-1. Download the Windows installation executable from: https://update.code.visualstudio.com/1.108.2/win32-x64-user/stable.
-2. Click on the downloaded file `VSCodeUserSetup-x64-1.108.2.exe` to install VS Code.
+1. Download the Windows installation executable from: https://update.code.visualstudio.com/latest/win32-x64-user/stable.
+2. Run the downloaded `VSCodeUserSetup-x64-<version>.exe` to install VS Code.
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
-1. Download the Debian installation package from: https://update.code.visualstudio.com/1.108.2/linux-deb-x64/stable.
-2. Click on the downloaded file `code_1.108.2-1769004815_amd64.deb` to install VS Code.
+1. Download the Debian installation package from: https://update.code.visualstudio.com/latest/linux-deb-x64/stable.
+2. Install the downloaded `code_<version>_amd64.deb` package.
 
 <!-- @os:end -->
 <!-- @device:end -->
