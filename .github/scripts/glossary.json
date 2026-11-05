@@ -11,6 +11,11 @@
       "prompts": "提示词"
     }
   },
+  "style_rules": {
+    "zh-CN": [
+      "Address the reader as 你, never 您 - this applies to 你的 as well; do not use the polite form anywhere in the document."
+    ]
+  },
   "do_not_translate": [
     "AMD",
     "AMD Ryzen",
@@ -53,5 +58,6 @@
     "AuraFlow",
     "safetensors"
   ],
-  "_preferred_terms_comment": "Locale-specific renderings that regional reviewers have already corrected by hand. Applied as an extra rule in the system prompt so the model stops re-introducing a rejected term in every new playbook. Bump prompt_version when editing this, or cached translations will not pick the change up."
+  "_preferred_terms_comment": "Locale-specific renderings that regional reviewers have already corrected by hand. Applied as an extra rule in the system prompt so the model stops re-introducing a rejected term in every new playbook. Bump prompt_version when editing this, or cached translations will not pick the change up.",
+  "_style_rules_comment": "Per-locale register/style conventions the regional team has settled on, for whole-document choices that a term mapping cannot express. Bump prompt_version when editing this."
 }
