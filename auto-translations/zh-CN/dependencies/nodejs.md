@@ -16,6 +16,15 @@ node --version
 npm --version
 ```
 
+> **请检查您所使用工具所支持的版本范围。** nodejs.org 上的当前发行版通常比某个工具所支持的
+> 版本范围更新，若安装超出该范围的版本，可能会出现原生构建错误或 `EBADPLATFORM` 错误。请使用
+> [nvm-windows](https://github.com/coreybutler/nvm-windows) 来安装并选择特定版本：
+>
+> ```cmd
+> nvm install 24.10.0
+> nvm use 24.10.0
+> ```
+
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -36,4 +45,4 @@ npm -v # Should print "10.9.4".
 
 <!-- @os:end -->
 
-> **注意**：有关其他安装选项和平台，请参阅 [Node.js Downloads](https://nodejs.org/en/download/)。
+> **注意**：有关其他安装选项和平台，请参阅 [Node.js 下载](https://nodejs.org/en/download/)。

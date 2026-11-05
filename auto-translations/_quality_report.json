@@ -169,9 +169,9 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
-      "min": 78,
+      "files_scored": 78,
+      "mean": 93.1,
+      "min": 75,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
@@ -241,6 +241,12 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 72,
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 75,
+      "issues": "Title line left untranslated in English, otherwise accurate and fluent."
     },
     {
       "locale": "cs-CZ",
@@ -385,12 +391,6 @@
       "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 78,
       "issues": "Trademark ™ misplaced (belongs to LLMs term); inconsistent terminology 'тонке'/'точне налаштування'; slightly awkward phrasing."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
-      "score": 78,
-      "issues": "Trademark symbol misplaced onto LLM instead of Unsloth; slight rephrasing but adequate."
     },
     {
       "locale": "zh-TW",
@@ -706,9 +706,21 @@
     },
     {
       "locale": "zh-CN",
+      "file": "playbooks/core/pytorch-rocm-llms/playbook.json",
+      "score": 82,
+      "issues": "Title mistranslates structure: 'LLMs on PyTorch with ROCm' became 'ROCm上运行PyTorch LLM', altering meaning."
+    },
+    {
+      "locale": "zh-CN",
       "file": "playbooks/supplemental/clustering-rccl/playbook.json",
       "score": 82,
       "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/gaia-agents/playbook.json",
+      "score": 82,
+      "issues": "Inconsistent 智能体/代理 for agent; '基于' slightly off from 'Build'; otherwise accurate and fluent."
     },
     {
       "locale": "zh-TW",
