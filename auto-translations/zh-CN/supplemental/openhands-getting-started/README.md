@@ -18,11 +18,11 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-[OpenHands](https://github.com/All-Hands-AI/OpenHands) 是一款 AI 软件代理，能够在真实的工作区中编写代码、运行命令、浏览网页并编辑文件。您无需从聊天窗口中复制建议，只需将代理指向一个项目文件夹，让它完成实际工作：实现新功能、修复错误、编写测试或解释代码库。
+[OpenHands](https://github.com/All-Hands-AI/OpenHands) 是一款 AI 软件智能体，能够在真实的工作区中编写代码、运行命令、浏览网页并编辑文件。您无需从聊天窗口中复制建议，只需将智能体指向一个项目文件夹，让它完成实际工作：实现新功能、修复错误、编写测试或解释代码库。
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是运行 OpenHands 的推荐浏览器界面。一条 `agent-canvas` 命令即可同时启动代理服务器、自动化后端和 Web 前端，让您可以在浏览器中与代理进行对话。
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是运行 OpenHands 的推荐浏览器界面。一条 `agent-canvas` 命令即可同时启动 Agent Server、自动化后端和 Web 前端，让您可以在浏览器中与智能体进行对话。
 
-为了让一切都保留在您的 AMD 系统本地，代理会与由 Lemonade Server 提供服务的本地模型进行通信。Lemonade 通过与 OpenAI 兼容的 API 公开该模型，因此 Agent Canvas 可以像配置任何其他 OpenAI 风格的端点一样对其进行配置，同时模型、您的代码以及对话上下文都会保留在您的本地设备上。
+为了让一切都保留在您的 AMD 系统本地，智能体会与由 Lemonade Server 提供服务的本地模型进行通信。Lemonade 通过与 OpenAI 兼容的 API 公开该模型，因此 Agent Canvas 可以像配置任何其他 OpenAI 兼容端点一样对其进行配置，同时模型、您的代码以及对话上下文都会保留在您的本地设备上。
 
 在本手册中，您将启动一个本地模型、运行 Agent Canvas、将其指向该模型，并针对一个真实的项目文件夹运行您的第一个编码任务。
 
@@ -31,22 +31,22 @@ SPDX-License-Identifier: MIT
 - 如何启动 Lemonade Server，并确认本地模型能够响应聊天请求
 - 如何从 npm 软件包安装并启动 Agent Canvas
 - 如何配置 Agent Canvas，使其将本地 Lemonade 模型用作 LLM
-- 如何启动一个 OpenHands 对话，并观察代理在工作区中编辑文件和运行
+- 如何启动一个 OpenHands 对话，并观察智能体在工作区中编辑文件和运行
   命令
-- 如何查看代理所做的更改，并通过后续消息引导它
+- 如何查看智能体所做的更改，并通过后续消息引导它
 
 ## 核心概念
 
 | 概念 | 是什么 | 在本手册中的作用 |
 | --- | --- | --- |
-| Lemonade Server | 一个专为 AMD 硬件构建的本地 LLM 服务平台，公开与 OpenAI 兼容的 API。您的数据永远不会离开本地设备。 | 运行为代理提供支持的模型。 |
-| OpenHands | 一款 AI 软件代理，能够在工作区中读取和编辑文件、运行 shell 命令并浏览网页。 | 您在聊天中驱动的代理。 |
+| Lemonade Server | 一个专为 AMD 硬件构建的本地 LLM 服务平台，公开与 OpenAI 兼容的 API。您的数据永远不会离开本地设备。 | 运行为智能体提供支持的模型。 |
+| OpenHands | 一款 AI 软件智能体，能够在工作区中读取和编辑文件、运行 shell 命令并浏览网页。 | 您在聊天中驱动的智能体。 |
 | Agent Canvas | 用于运行 OpenHands 对话并显示工具调用和文件更改的浏览器界面和后端。 | 启动整个技术栈并承载您的对话。 |
-| Workspace | 允许代理读取和修改的项目文件夹。 | 代理编辑和命令的操作对象。 |
+| Workspace | 允许智能体读取和修改的项目文件夹。 | 智能体编辑和命令的操作对象。 |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 编码代理工作流受益于更大的模型和上下文窗口。请至少使用
+> 编程智能体工作流受益于更大的模型和上下文窗口。请至少使用
 > 32 GB 系统内存，对于较大的 GGUF 模型，建议使用 64 GB 或更多内存。
 <!-- @device:end -->
 
@@ -77,7 +77,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 - Node.js 22.12 或更高版本以及 `npm`（`agent-canvas` CLI 使用）。
-- `uv`，Agent Canvas 用于管理代理服务器环境的 Python 包管理器。如果您的系统尚未安装它，请在启动 Agent Canvas 之前，从[uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)进行安装。
+- `uv`，Agent Canvas 用于管理 Agent Server 环境的 Python 包管理器。如果您的系统尚未安装它，请在启动 Agent Canvas 之前，从[uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)进行安装。
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -87,7 +87,7 @@ SPDX-License-Identifier: MIT
   `@openhands/agent-canvas` 软件包，因此您无需在主机上安装这些内容。
 <!-- @os:end -->
 
-- 一个用于工作的项目文件夹。这可以是您希望代理处理的任何本地 git 仓库或代码目录。
+- 一个用于工作的项目文件夹。这可以是您希望智能体处理的任何本地 git 仓库或代码目录。
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -338,7 +338,7 @@ agent-canvas --port 3000
 
 然后改为打开 `http://localhost:3000`。默认的本地后端应在主屏幕上显示为健康状态。
 
-`agent-canvas` 命令会一起启动 agent 服务器、自动化后端和 Web 前端。您只需
+`agent-canvas` 命令会一起启动 Agent Server、自动化后端和 Web 前端。您只需
 运行这一个命令即可在本地运行 OpenHands。
 
 <!-- @test:id=agent-canvas-server-linux timeout=1200 hidden=True -->
@@ -482,39 +482,39 @@ finally {
 
 首次启动时，Agent Canvas 会打开一个引导流程。在该流程中：
 
-1. 保持 **OpenHands** 作为所选 agent，然后点击 **Next**。
+1. 保持 **OpenHands** 作为所选智能体，然后点击 **Next**。
 2. 在 **Set up your LLM** 页面，选择 **Advanced**。
 3. 保持 **Authentication** 设置为 **API key**。
 4. 将 **Custom Model** 设置为 `openai/Qwen3.6-35B-A3B-GGUF`。
 5. 将 **Base URL** 设置为 `http://127.0.0.1:13305/api/v1`。
    <!-- @os:windows -->
    > 在 Windows 上，堆栈运行于容器中，无法通过 `127.0.0.1` 访问主机。请改为
-   > 使用 `http://host.docker.internal:13305/api/v1`，以便容器化的 agent 能够
+   > 使用 `http://host.docker.internal:13305/api/v1`，以便容器化的智能体能够
    > 访问在 Windows 主机上运行的 Lemonade。
    <!-- @os:end -->
 6. 对于 **API Key**，输入任意非空的占位符，例如 `lemonade-local`。
    Lemonade 不需要真实的密钥，但 OpenHands 客户端需要发送一个值。
 7. 点击 **Next**。
 
-完成后的 Advanced 设置应如下所示。API 密钥字段会被界面遮蔽显示。
+完成后的 Advanced 设置应如下所示。API 密钥字段在界面中以掩码形式显示。
 
 ![Agent Canvas 首次使用的 LLM Advanced 设置，显示 Lemonade 模型和本地 base URL](assets/01-llm-advanced-settings.png)
 
-Agent Canvas 会将这些值保存为一个 LLM 配置文件。如果您的版本要求为该配置
-文件命名，请使用不含空格的名称，例如 `lemonade-local`。如果之后更换模型，
+Agent Canvas 会将这些值保存为一个 LLM 配置。如果您的版本要求为该配置
+命名，请使用不含空格的名称，例如 `lemonade-local`。如果之后更换模型，
 请打开 **Settings > LLM** 并更新相同的 Advanced 字段。您可以在聊天输入框中
-使用 `/model` 命令切换已保存的配置文件。
+使用 `/model` 命令切换已保存的配置。
 
 ## 5. 打开工作区
 
-agent 只能读取和修改您所选工作区内的文件。在开始任务之前，请将 Agent
+智能体只能读取和修改您所选工作区内的文件。在开始任务之前，请将 Agent
 Canvas 指向您的项目文件夹：
 
 1. 从主屏幕选择 **Open Workspace**。
-2. 选择包含您项目的文件夹（例如，您希望 agent 处理的 git 仓库）。
+2. 选择包含您项目的文件夹（例如，您希望智能体处理的 git 仓库）。
 3. 在该工作区中开始新对话。
 
-agent 所做的一切——读取文件、运行命令、编辑代码——都仅限于该工作区。
+智能体所做的一切——读取文件、运行命令、编辑代码——都仅限于该工作区。
 
 ![引导完成后的 Agent Canvas 主页](assets/02-agent-canvas-home.png)
 
@@ -536,18 +536,18 @@ when run as a script.
 - 可选地运行 `python3 hello.py` 以验证输出。
 - 在聊天中报告其所做的操作以及任何命令输出。
 
-您应能看到新文件出现在工作区中，并且 agent 的最终消息应描述其所做的
-更改。这就是收获的时刻：agent 在您的项目文件夹中编写并运行了真实的代码。
+您应能看到新文件出现在工作区中，并且智能体的最终消息应描述其所做的
+更改。这就是收获的时刻：智能体在您的项目文件夹中编写并运行了真实的代码。
 
-## 7. 审查并引导 agent
+## 7. 审查并引导智能体
 
-在 agent 完成一个步骤后，请在接受下一步之前审查其工作：
+在智能体完成一个步骤后，请在接受下一步之前审查其工作：
 
-- **文件更改**：使用工作区文件浏览器或 agent 的差异视图，查看究竟添加、
+- **文件更改**：使用工作区文件浏览器或智能体的差异视图，查看究竟添加、
   更改或删除了哪些内容。
-- **命令输出**：展开 agent 运行的任何命令，以查看 stdout、stderr 和退出代码。
+- **命令输出**：展开智能体运行的任何命令，以查看 stdout、stderr 和退出代码。
 - **后续跟进**：如果结果不是您想要的，请在同一对话中回复以进行更正。
-  agent 会保留之前的上下文，并在相同文件上继续迭代。
+  智能体会保留之前的上下文，并在相同文件上继续迭代。
 
 例如，如果测试未打印预期的问候语，请回复：
 
@@ -556,7 +556,7 @@ The script did not print anything. Run python3 hello.py and fix it so the
 greet("World") test prints to stdout.
 ```
 
-agent 将重新读取文件、运行命令、诊断问题，并再次编辑该文件——所有这些
+智能体将重新读取文件、运行命令、诊断问题，并再次编辑该文件——所有这些
 都在同一对话中完成。
 ## 故障排查
 
@@ -576,7 +576,7 @@ agent 将重新读取文件、运行命令、诊断问题，并再次编辑该�
   ```
 - **缺少 `uv`：** 从
   [uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/) 进行安装。
-  Agent Canvas 使用 `uv` 来管理 agent 服务器的 Python 环境。
+  Agent Canvas 使用 `uv` 来管理 Agent Server 的 Python 环境。
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -593,29 +593,29 @@ agent 将重新读取文件、运行命令、诊断问题，并再次编辑该�
 <!-- @os:end -->
 
 - **界面已加载，但后端显示不健康：** 请等待一两分钟，让
-  agent 服务器完成启动，然后刷新页面。如果仍然不健康，请重启
+  Agent Server 完成启动，然后刷新页面。如果仍然不健康，请重启
   该技术栈并查看日志以了解错误信息。
 - **Lemonade 聊天请求因连接错误而失败：** 确认
-  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` 执行成功，并且
-  Lemonade 仍在通过 `lemonade status` 提供该模型的服务。
-- **agent 报错，提示上下文长度或 token 限制相关的错误：** 开启一个
-  新对话，以免 agent 携带过大的历史记录。如果问题
+  `curl -fsS "http://127.0.0.1:13305/api/v1/health"` 执行成功，并通过
+  `lemonade status` 确认 Lemonade 仍在提供该模型的服务。
+- **智能体报错，提示上下文长度或 token 限制相关的错误：** 开启一个
+  新对话，以免智能体携带过大的历史记录。如果问题
   持续出现，请在内存允许的情况下，将 Lemonade 的 `ctx_size`
   设置得比默认值 65536 更大（例如 `ctx_size=131072`）后重新启动。
-- **agent 生成的编辑质量较低或不完整：** 切换到 Lemonade 中
-  更大的模型，或者给 agent 分配一个更小、更具体的任务，
+- **智能体生成的编辑质量较低或不完整：** 切换到 Lemonade 中
+  更大的模型，或者给智能体分配一个更小、更具体的任务，
   并在提出下一个更改要求之前让其先完成当前任务。
 
 ## 后续步骤
 
 - 在同一工作区中尝试一个更大的任务，例如添加单元测试文件或
-  修复一个已知错误，并在保留更改之前审查 agent 的差异（diff）。
+  修复一个已知错误，并在保留更改之前审查智能体的差异（diff）。
 - 在 **Customize** 下连接一个 MCP 服务器（例如 GitHub 或 Slack），以便
-  agent 在工作时可以读取 issue 或发布更新。
-- 保存多个 LLM 配置文件（一个快速的小模型和一个更强大的大模型），
+  智能体在工作时可以读取 issue 或发布更新。
+- 保存多个 LLM 配置（一个快速的小模型和一个更强大的大模型），
   并在对话中途通过 `/model` 在它们之间切换。
 - 继续了解 [OpenHands 自动化功能](https://docs.openhands.dev/openhands/usage/automations/overview)，
-  将重复性的开发循环转变为按计划或事件触发的 agent 运行任务。
+  将日常重复开发工作转变为按计划或事件触发的智能体运行任务。
 
 ## 资源
 

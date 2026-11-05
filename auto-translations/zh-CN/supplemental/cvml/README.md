@@ -16,7 +16,7 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-[Ryzen AI CVML 库](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是一款 AMD C++ 计算机视觉与机器学习工具包，提供强大的本地感知能力——包括深度估计、人脸检测和人脸网格跟踪。该库基于 Ryzen AI 驱动程序构建，能够自动为推理选择最佳可用硬件（GPU 或 NPU），让您无需担心模型训练或框架集成即可为 C++ 应用程序添加 AI 功能。所有处理均在本地系统上完成，非常适合对隐私敏感、低延迟的应用场景。
+[Ryzen AI CVML 库](https://ryzenai.docs.amd.com/en/latest/ryzen_ai_libraries.html#ryzen-ai-cvml-library) 是一款 AMD C++ 计算机视觉与机器学习工具包，提供强大的本地感知能力——包括深度估计、人脸检测和人脸网格跟踪。该库基于 Ryzen AI 驱动程序构建，能够自动为推理选择绝佳可用硬件（GPU 或 NPU），让您无需担心模型训练或框架集成即可为 C++ 应用程序添加 AI 功能。所有处理均在本地系统上完成，非常适合对隐私敏感、低延迟的应用场景。
 
 本手册将指导您完成 Ryzen AI CVML 库的搭建、构建随附的示例应用程序，并在示例图像上运行人脸检测。
 
@@ -314,7 +314,7 @@ context->Release();
 
 ### 推理后端
 
-该库会自动为每个操作选择最佳硬件（GPU 或 NPU）。您也可以显式设置后端：
+该库会自动为每个操作选择绝佳硬件（GPU 或 NPU）。您也可以显式设置后端：
 
 ```cpp
 // Let the library choose the best hardware (default)
@@ -486,7 +486,7 @@ cvml-sample-face-detection.exe -i sample_face.jpg -m precise
 | 模型 | 速度 | 准确性 | 最适用于 |
 |-------|-------|----------|----------|
 | `fast`（默认） | 更高的 FPS | 良好 | 实时摄像头应用 |
-| `precise` | 更低的 FPS | 最佳 | 照片分析、高精度需求场景 |
+| `precise` | 更低的 FPS | 绝佳 | 照片分析、高精度需求场景 |
 
 
 <!-- @os:windows -->

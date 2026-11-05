@@ -17,17 +17,17 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-开发者在许多小而重复的循环上花费了大量时间：审查已标记标签的拉取请求、回复 GitHub 评论、对新问题进行分类、将 Slack 线程转化为站会记录或事故跟进内容，以及追踪发布或研究相关的信号。
-每种循环都很熟悉，但仍然需要判断力：收集正确的上下文、判断哪些内容重要，并在团队已有的工作场所发布清晰的更新。
+开发者在许多日常重复工作上花费了大量时间：审查已标记标签的拉取请求、回复 GitHub 评论、对新问题进行分类、将 Slack 消息串转化为站会记录或事故跟进内容，以及追踪发布或研究相关的信号。
+这些日常重复工作都很熟悉，但仍然需要判断力：收集正确的上下文、判断哪些内容重要，并在团队日常使用的平台上发布清晰的更新。
 
-[OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) 将这些循环转变为定时或事件触发的智能体对话：在这些运行过程中，AI 软件智能体可以读取上下文、调用工具，并生成一条更新。
+[OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) 将这些日常重复工作转变为定时或事件触发的智能体对话：在这些运行过程中，AI 软件智能体可以读取上下文、调用工具，并生成一条更新。
 OpenHands 扩展目录中共享的自动化模板遵循这种模式，涵盖了 GitHub 拉取请求审查、仓库监控、Linear 问题分类、事故复盘、Slack 站会摘要以及研究简报：一个自动化任务被唤醒，使用配置好的集成（例如 GitHub 或 Slack）获取上下文，通过大语言模型（LLM）对该上下文进行推理，并写回结果。
 
 [Agent Canvas](https://github.com/OpenHands/agent-canvas) 是用于构建和测试这些自动化任务的本地控制平面。
 在本实践指南中，它运行一个 OpenHands Agent Server（执行智能体对话的后端进程），并将智能体连接到 GitHub 和 Slack 等外部服务。
 
 为了让工作流保留在您的 AMD 系统上，智能体会与由 Lemonade Server 提供的本地模型进行通信。
-Lemonade 通过与 OpenAI 兼容的 API 暴露该模型，因此 Agent Canvas 可以像配置远程 OpenAI 风格的端点一样配置它，同时模型、提示词和工作流上下文都保留在本地。
+Lemonade 通过与 OpenAI 兼容的 API 暴露该模型，因此 Agent Canvas 可以像配置远程 OpenAI 兼容端点一样配置它，同时模型、提示词和工作流上下文都保留在本地。
 
 在本实践指南中，您将构建一个具体的自动化任务：一个定时的 GitHub 到 Slack 开发摘要。
 它使用 GitHub 检查最近的仓库活动，使用 Slack 发布摘要，使用 Agent Canvas API 调用来配置和测试自动化任务，并使用 Lemonade 在本地运行 LLM。
@@ -85,8 +85,8 @@ Lemonade 通过与 OpenAI 兼容的 API 暴露该模型，因此 Agent Canvas �
 <!-- @os:linux -->
 - Node.js 22.12 或更高版本以及 `npm`，用于安装已发布的 Agent Canvas CLI 并通过 `npx` 运行 MCP 服务器。
 - `uv`，Agent Canvas 用于构建 Agent Server 环境的 Python 包管理器。如果尚未安装，请从 [uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/) 进行安装。
-- 一个近期发布的 `@openhands/agent-canvas` 包，具备基于模式驱动的智能体设置、`LLMSummarizingCondenserSettings.max_tokens` 以及 LLM `custom_tokenizer` 支持。
-- Agent Server 环境中可用的 Python `transformers` 包。当设置了 `custom_tokenizer` 时，这是聊天模板令牌计数所必需的。
+- 一个近期发布的 `@openhands/agent-canvas` 包，具备由 schema 驱动的智能体设置、`LLMSummarizingCondenserSettings.max_tokens` 以及 LLM `custom_tokenizer` 支持。
+- Agent Server 环境中可用的 Python `transformers` 包。当设置了 `custom_tokenizer` 时，这是聊天模板 token 计数所必需的。
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -370,7 +370,7 @@ agent-canvas
 
 > **注意：** 首次启动会构建 Agent Server 由 `uv` 管理的 Python 环境，因此后端在报告健康状态之前可能需要几分钟时间。
 
-`agent-canvas` 命令会同时启动 agent 服务器、自动化后端和 web 前端。
+`agent-canvas` 命令会同时启动 Agent Server、自动化后端和 Web 前端。
 你只需要这一条命令即可在本地运行 OpenHands。
 本手册的其余部分将通过浏览器中的 Agent Canvas UI 完成所有配置。
 <!-- @os:end -->
@@ -543,7 +543,7 @@ finally {
 首次启动时，Agent Canvas 会打开一个引导流程。
 在该流程中：
 
-1. 保持 **OpenHands** 作为所选代理，然后点击 **Next**。
+1. 保持选中 **OpenHands** 作为智能体，然后点击 **Next**。
 2. 在 **Set up your LLM** 中，选择 **Advanced**。
 3. 保持 **Authentication** 设置为 **API key**。
 4. 将 **Custom Model** 设置为 `openai/Qwen3.6-35B-A3B-GGUF`。
@@ -556,7 +556,7 @@ finally {
 <!-- @os:end -->
 
 连接字段应如下所示。
-API 密钥字段在 UI 中会被遮蔽显示。
+API 密钥字段在界面中以掩码形式显示。
 
 ![Agent Canvas 首次使用的 LLM Advanced 设置，包含 Lemonade 模型和本地 base URL](assets/01-llm-advanced-settings.png)
 
@@ -586,7 +586,7 @@ LLM 设置应显示如下：
 
 ## 5. 安装 GitHub 和 Slack MCP 服务器
 
-在 Agent Canvas UI 中，打开 **Customize**（或 **Settings > MCP**）以添加为代理提供 GitHub 和 Slack 工具的 MCP 服务器。
+在 Agent Canvas UI 中，打开 **Customize**（或 **Settings > MCP**）以添加为智能体提供 GitHub 和 Slack 工具的 MCP 服务器。
 令牌值仅会发送到你本地的 Agent Server，并以加密设置的形式持久保存。
 
 <!-- @os:windows -->
@@ -620,7 +620,7 @@ LLM 设置应显示如下：
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
 | Env | `SLACK_CHANNEL_IDS` = 你的摘要频道 ID |
 
-将 `SLACK_CHANNEL_IDS` 设置为摘要频道 ID（与 `SLACK_DIGEST_CHANNEL` 使用相同的值），这样代理就无需翻遍每个 Slack 频道。
+将 `SLACK_CHANNEL_IDS` 设置为摘要频道 ID（与 `SLACK_DIGEST_CHANNEL` 使用相同的值），这样智能体就无需翻遍每个 Slack 频道。
 
 添加完这两个服务器后，请使用每个服务器上的 **Test** 按钮，确认其能够连接并公布相应工具。
 GitHub 服务器应列出 GitHub 工具，Slack 服务器应列出 Slack 工具。
@@ -707,7 +707,7 @@ npm view @modelcontextprotocol/server-slack version
 - **GitHub MCP 无法看到私有仓库：** 确认 GitHub 令牌对目标仓库具有读取权限，并且 **Customize** 中的 MCP **Test** 按钮显示了 GitHub 工具。
 - **Slack 可以读取频道但无法发布消息：** 将 Slack 应用邀请到目标频道，并确认该机器人具有 `chat:write` 权限。
 - **自动化列出的 Slack 频道过多：** 使用 Slack 频道 ID，并在 **Customize** 中的 Slack MCP 服务器上设置 `SLACK_CHANNEL_IDS`。
-- **自动化运行失败或超出上下文限制：** 确认 Lemonade 是使用 `ctx_size=65536` 启动的，确认 OpenHands LLM 已设置 `custom_tokenizer`，并使用明确指定的仓库，将 GitHub 结果集限制在 3 到 5 项以内。如果您的 Agent Canvas 版本提供了压缩器（condenser）设置，请将压缩器的最大令牌数设置为低于 Lemonade 的上下文窗口大小。
+- **自动化运行失败或超出上下文限制：** 确认 Lemonade 是使用 `ctx_size=65536` 启动的，确认 OpenHands LLM 已设置 `custom_tokenizer`，并使用明确指定的仓库，将 GitHub 结果集限制在 3 到 5 项以内。如果您的 Agent Canvas 版本提供了压缩器（condenser）设置，请将压缩器的最大 token 数设置为低于 Lemonade 的上下文窗口大小。
 
 ## 后续步骤
 

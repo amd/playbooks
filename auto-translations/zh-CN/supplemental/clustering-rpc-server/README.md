@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- auto-translated-disclaimer v2 -->
 > [!WARNING]
-> **机器翻译。**本页面由英文自动翻译，未经人工审核。其中可能包含错误，某些说明、命令、下载内容、产品可用性或其他内容可能因语言或地区而异。如内容存在任何不一致或差异，应以英文原版 playbook 为准。
+> **机器翻译。**本页面由英文自动翻译，未经人工审核，其中可能包含错误，某些说明、命令、下载内容、产品可用性或其他内容可能因语言或地区而异，如内容存在任何不一致或差异，应以英文原版 playbook 为准。
 <!-- auto-translated-disclaimer:end -->
 
 <!-- @github-only -->
@@ -18,16 +18,16 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-您的 Ryzen™ AI Halo 已经能够在本地运行大语言模型。集群化更进一步，将多个系统的 GPU 内存通过本地网络组合起来，让您能够访问更大规模的模型，获得更强的推理能力、更好的代码生成能力和更深入的多语言理解能力，而这一切都完全在您自己的硬件上完成。
+您的 Ryzen™ AI Halo 已经能够在本地运行大语言模型，集群技术通过本地网络将多个系统的 GPU 内存合并，从而进一步提升了这一能力，让您能够访问更大规模的模型，获得更强的推理能力、更好的代码生成能力和更深入的多语言理解能力，而这一切都完全在您自己的硬件上完成。
 
-本手册将教您如何使用 llama.cpp 的 RPC 引擎集群化两台 Ryzen AI Halo 系统，并借助 AMD ROCm™ 加速在两台机器上运行 GLM 4.7（一个 3580 亿参数的模型）。
+本手册将教您如何使用llama.cpp的RPC引擎对两个Ryzen AI Halo系统进行集群，并在两台具有AMD ROCm™加速的机器上运行GLM 4.7，这是一个358B参数模型。
 
 ## 您将学到什么
 
-- 如何扩展 Ryzen AI Halo 系统上的 VRAM 分配
+- 如何在 Ryzen AI Halo 系统上扩展 VRAM 分配
 - 安装带有 ROCm 和 RPC 支持的 llama.cpp
 - 配置 RPC 工作节点并在两个节点上启动分布式推理
-- 在两台联网的 Ryzen AI Halo 系统上运行 3580 亿参数模型
+- 在两台联网的 Ryzen AI Halo 系统上运行 358B 参数模型
 
 ## 设置内存配置
 
@@ -36,7 +36,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:windows -->
 在 Windows 上，要运行需要更高内存的更大模型，我们需要使用 AMD 可变显存 (Variable Graphics Memory)（iGPU VRAM）分配功能。
 
-可以通过打开 AMD Software: Adrenalin Edition 控制面板，并导航至：`性能 > 调优 > AMD 可变显存` 来完成此操作。将值设置为 **96 GB**。请重启系统以使更改生效。
+您可以通过打开 AMD 软件: Adrenalin Edition 控制面板并导航至：`性能 > 调优 > AMD 可变显存` 来完成此操作，将值设置为 **96 GB**，请重启系统以使更改生效。
 
 <p align="center">
   <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
@@ -45,9 +45,9 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 
 <!-- @os:linux -->
-在 Linux 上，ROCm 使用共享系统内存池，默认情况下该内存池配置为系统内存的一半。
+在 Linux 上，ROCm 使用共享系统内存池，该内存池默认配置为系统内存的一半。
 
-可以通过以下说明更改内核的转换表管理器 (TTM) 页面设置来增加此数量。AMD 建议在 BIOS 中设置最小专用显存（0.5 GB）。
+通过按照以下说明更改内核的转换表管理器 (TTM) 页面设置，来增加此数量，AMD 建议在 BIOS 中设置最小专用显存（0.5 GB）。
 
 * 安装 pipx 实用工具，并将 pipx 安装的 wheel 路径添加到系统搜索路径中。
 
@@ -84,15 +84,15 @@ SPDX-License-Identifier: MIT
 
 ### 硬件
 
-本手册需要两台 Ryzen AI Halo 设备和一台以太网交换机，以星形拓扑连接，每台设备都直接连接到交换机。
+本手册需要两台 Ryzen AI Halo 设备和一台以太网交换机，以星形拓扑结构连接，每台设备都直接连接到交换机。
 
 | 组件 | 数量 | 描述 |
 |-----------|----------|-------------|
 | Ryzen AI Halo | 2 | 组成集群的计算节点 |
-| 10Gbps 以太网交换机 | 1 | 用于支持多节点 Ryzen AI Halo 通信的中央交换机（至少 2 个端口） |
-| 以太网线缆 | 2 | 将每台 Halo 设备连接到交换机（建议使用 Cat 7 或更高规格） |
+| 10Gbps 以太网交换机 | 1 | 支持多节点 Ryzen AI Halo 通信的中央交换机（至少 2 个端口） |
+| 以太网线缆 | 2 | 将每台 Halo 设备连接到交换机（建议使用 Cat 7 或更高规格线缆） |
 
-> **注意**：连接两台 Ryzen AI Halo 设备需要两个以太网交换机端口。如果您是从单独的客户端机器而不是从其中一台 Halo 设备访问模型，则需要第三个端口。
+> **注意**：连接两台 Ryzen AI Halo 设备需要两个以太网交换机端口，如果您是从单独的客户端机器而不是从其中一台 Halo 设备访问模型，则需要第三个端口。
 
 ### 软件
 <!-- @os:windows -->
@@ -116,11 +116,11 @@ sudo apt install git cmake python3 python3-pip
 
 > **注意**：请在机器 1 和机器 2 上都完成此步骤。
 
-使用 Cat 7（或更高规格）线缆将每台 Ryzen AI Halo 设备连接到以太网交换机。这将建立用于节点间高速通信的 10Gbps 链路。
+使用 Cat 7（或更高规格）网线将每台 Ryzen AI Halo 设备连接到以太网交换机，这将建立用于节点间高速通信的 10Gbps 链路。
 <!-- @os:linux -->
 ### 1. 确定网络接口
 
-在每台机器上，找到其网络接口的名称并记录下来（下文将其称为 `IFNAME`）。运行：
+在每台机器上，找到其网络接口的名称并记录下来（下文将其称为 `IFNAME`），运行：
 
 ```bash
 ip route get 1.1.1.1 | grep -oP 'dev \K\S+'
@@ -148,7 +148,7 @@ sudo ethtool <IFNAME> | grep Speed
 	Speed: 10000Mb/s
 ```
 
-> **注意**：如果速度低于 `10000Mb/s` 或链路未能建立，请检查线缆连接，并确认交换机端口设置为 10Gbps。某些交换机需要禁用自动协商并手动设置链路速度；请参阅您的交换机文档。
+> **注意**：如果速度低于 `10000Mb/s` 或链路无法建立，请检查网线连接并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商功能并手动设置链路速度；请参阅您的交换机文档。
 
 <!-- @os:end -->
 
@@ -169,7 +169,7 @@ Name      Status  LinkSpeed
 Ethernet  Up      10 Gbps
 ```
 
-> **注意**：如果速度低于 `10 Gbps` 或链路未能建立，请检查线缆连接，并确认交换机端口设置为 10Gbps。某些交换机需要禁用自动协商并手动设置链路速度；请参阅您的交换机文档。
+> **注意**：如果速度低于 `10 Gbps` 或链路未能建立，请检查网线连接，并确认交换机端口设置为 10Gbps；某些交换机需要禁用自动协商并手动设置链路速度；请参阅您的交换机文档。
 
 <!-- @os:end -->
 
@@ -179,8 +179,8 @@ Ethernet  Up      10 Gbps
 
 提供两种安装方式：
 
-- [选项 1：Lemonade SDK（推荐）](#option-1-lemonade-sdk-recommended) - 预构建二进制文件，设置速度最快
-- [选项 2：手动源码构建](#option-2-manual-source-build) - 从源码构建，完全控制构建标志
+- [选项 1：Lemonade SDK（推荐）](#option-1-lemonade-sdk-recommended) - 预编译二进制文件，设置速度最快
+- [选项 2：手动源码构建](#option-2-manual-source-build) - 从源码构建，并完全控制构建标志
 
 ### 选项 1：Lemonade SDK（推荐）
 
@@ -189,7 +189,7 @@ Lemonade SDK 提供带有 AMD ROCm 7 加速的 llama.cpp 每日构建版本，�
 <!-- @os:windows -->
 #### 步骤 1：下载预编译二进制文件
 
-访问最新发布页面，下载与您的平台和 GPU 目标相匹配的压缩包：
+访问最新版本页面并下载与您的平台和 GPU 目标相匹配的压缩包：
 
 [https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/](https://github.com/lemonade-sdk/llamacpp-rocm/releases/latest/)
 
@@ -263,7 +263,7 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 <!-- @os:windows -->
 #### 步骤 1：构建 llama.cpp
 
-打开 **x64 Native Tools Command Prompt**（随 Visual Studio Build Tools 安装）并克隆代码仓库：
+打开 **x64 Native Tools Command Prompt**（随 Visual Studio 生成工具一起安装）并克隆代码仓库：
 
 ```cmd
 git clone https://github.com/ggml-org/llama.cpp
@@ -303,7 +303,7 @@ Available devices:
 
 #### 步骤 3：将 HIP 添加到用户路径
 
-上述构建步骤仅在当前会话中设置了 `%HIP_PATH%\bin`。要使 HIP 库在任意终端（而不仅仅是 x64 Native Tools Command Prompt）中都可用，请将其永久添加到用户 `PATH` 中：
+上述构建步骤仅在当前会话中设置了 `%HIP_PATH%\bin`，要使 HIP 库在任意终端（而不仅仅是 x64 本机工具命令提示符）中都可用，请将其永久添加到用户 `PATH` 中：
 
 ```cmd
 powershell -Command "[System.Environment]::SetEnvironmentVariable('Path', [System.Environment]::GetEnvironmentVariable('Path', 'User') + ';%HIP_PATH%\bin', 'User')"
@@ -359,7 +359,7 @@ ggml_backend_cuda_get_available_uma_memory: final available_memory_kb: 127697544
 
 ## 下载模型
 
-本操作手册使用 [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7)，这是一个来自 [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL) 的 358B 参数模型，采用 `Q4_K_XL` 量化。在该量化级别下，模型大约需要 205GB 存储空间，并可容纳于两个 Ryzen AI Halo 节点的合并 GPU 内存中。
+本操作手册使用 [GLM 4.7](https://huggingface.co/zai-org/GLM-4.7)，这是一个来自 [Unsloth](https://huggingface.co/unsloth/GLM-4.7-GGUF/tree/main/UD-Q4_K_XL) 的 358B 参数模型，采用 `Q4_K_XL` 量化，在该量化级别下，模型大约需要 205GB 存储空间，并可容纳于两个 Ryzen AI Halo 节点的合并 GPU 内存中。
 
 使用 Hugging Face CLI 下载 GGUF 文件：
 <!-- @os:linux -->
@@ -380,13 +380,13 @@ hf download unsloth/GLM-4.7-GGUF --include "UD-Q4_K_XL/*" --local-dir GLM-4.7-GG
 ```
 <!-- @os:end -->
 
-> **注意**：模型下载必须在机器 1（控制器）上完成。RPC 工作节点不需要本地保存模型文件的副本。
+> **注意**：模型下载必须在机器 1（控制器）上完成，RPC 工作节点不需要本地保存模型文件的副本。
 
 ## 在集群上启动模型
 
-llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通过网络将模型层卸载到远程工作节点。一台机器充当**控制器**（机器 1），负责分词、调度和编排。另一台机器运行轻量级的 **RPC 服务器**（机器 2），将其 GPU 内存和计算能力暴露给控制器。
+llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通过网络将模型层卸载到远程工作节点，一台机器充当**控制器**（机器 1），负责分词、调度和编排；另一台机器运行轻量级的 **RPC 服务器**（机器 2），将其 GPU 内存和计算能力暴露给控制器。
 
-在加载时，llama.cpp 会将模型分片到两个节点上。加载完成后，推理过程就如同在单个加速器上运行一样。RPC 在幕后处理张量传输和同步。
+在加载时，llama.cpp 会将模型分片到两个节点上，加载完成后，推理过程就如同在单个加速器上运行一样，RPC 在幕后处理张量传输和同步。
 
 ### 步骤 1：启动 RPC 服务器（机器 2）
 
@@ -417,7 +417,7 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 
 #### llama-cli
 
-`llama-cli` 提供了一个基于终端的界面，用于直接与模型交互。它非常适合用于基准测试、调试和底层实验。
+`llama-cli` 提供了一个基于终端的界面，用于直接与模型交互，它非常适合用于基准测试、调试和底层实验。
 
 <!-- @os:linux -->
 ```bash
@@ -455,7 +455,7 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 ![llama-cli 在两个节点上运行 GLM 4.7](assets/llama-cli-example.png)
 #### llama-server
 
-`llama-server` 通过一个持久化的服务器进程暴露相同的推理引擎，该进程集成了 Web UI 和兼容 OpenAI 的 HTTP API。这是用于长时间运行的部署、多用户访问以及与外部工具集成的首选接口。
+`llama-server` 通过一个持久化的服务器进程暴露相同的推理引擎，该进程集成了 Web UI 和兼容 OpenAI 的 HTTP API，这是用于长时间运行的部署、多用户访问以及与外部工具集成的首选接口。
 
 <!-- @os:linux -->
 ```bash
@@ -491,7 +491,7 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 > **查找 `<RPC_WORKER_IP>`**：在机器 2 上，在终端（Powershell）中运行 `ipconfig | findstr /C:"IPv4"` 以查找其本地 IP 地址。
 <!-- @os:end -->
 
-启动后，在浏览器中打开 `http://<HOST_IP>:8081` 即可访问内置的 Web UI。该界面提供了一个基于浏览器的聊天界面，用于与模型进行交互：
+启动后，在浏览器中打开 `http://<HOST_IP>:8081` 即可访问内置的 Web UI，该界面提供了一个基于浏览器的聊天界面，用于与模型进行交互：
 
 ![在两个节点上运行 GLM 4.7 的 llama-server Web UI](assets/llama-server-example.png)
 
@@ -508,7 +508,7 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 | 标志 | 用途 |
 |------|---------|
 | `-m` | GGUF 模型文件的路径（使用第一个分片，`00001-of-00005`） |
-| `-c` | 以 token 为单位的上下文大小。数值越大，占用的内存越多 |
+| `-c` | 以 token 为单位的上下文大小，数值越大，占用的内存越多 |
 | `-fa on` | 启用 rocWMMA Flash Attention，以提升在 AMD GPU 上的性能 |
 | `-ngl 999` | 将所有模型层卸载到 GPU |
 | `-lm none` | 将模型加载模式设置为 `none`，禁用内存映射，以便在模型大小超过系统内存但可容纳于显存时缩短加载时间 |
@@ -520,6 +520,6 @@ llama.cpp 的 RPC（远程过程调用）引擎允许单个 llama.cpp 实例通�
 
 ## 后续步骤
 
-- **连接第三方应用程序**：`llama-server` 暴露了一个兼容 OpenAI 的 API。将任何兼容 OpenAI 的应用程序（例如 Open WebUI）指向 `http://<HOST_IP>:8081`，并使用任意占位符 API 密钥（例如 `none`）即可连接到你的集群
+- **连接第三方应用程序**：`llama-server` 暴露了一个兼容 OpenAI 的 API，将任何兼容 OpenAI 的应用程序（例如 Open WebUI）指向 `http://<HOST_IP>:8081`，并使用任意占位符 API 密钥（例如 `none`）即可连接到你的集群
 - **探索其他模型**：在 [Hugging Face](https://huggingface.co/models?search=gguf) 上浏览量化后的 GGUF 模型，以找到适合你集群总 GPU 内存容量的模型
-- **扩展到四个节点**：再添加两台 Ryzen AI Halo 系统作为额外的 RPC 工作节点，即可访问参数规模达 1 万亿的模型。将额外的端点以逗号分隔的形式传递给 `--rpc`（例如，`--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`）
+- **扩展到四个节点**：再添加两台 Ryzen AI Halo 系统作为额外的 RPC 工作节点，即可访问参数规模达 1 万亿的模型，将额外的端点以逗号分隔的形式传递给 `--rpc`（例如，`--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`）
