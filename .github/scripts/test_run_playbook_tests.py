@@ -106,3 +106,46 @@ class TimeoutOutputTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LocalizedMetadataTest(unittest.TestCase):
+    def _repo(self, d, localized_json=None, english=True):
+        root = Path(d)
+        if english:
+            en = root / "playbooks" / "supplemental" / "pb"
+            en.mkdir(parents=True)
+            (en / "playbook.json").write_text(
+                '{"id": "pb", "title": "T", "description": "D", "supported_platforms": {}}'
+            )
+        loc = root / "localized-playbooks" / "zh-CN" / "supplemental" / "pb"
+        loc.mkdir(parents=True)
+        (loc / "README.md").write_text("x")
+        if localized_json is not None:
+            (loc / "playbook.json").write_text(localized_json)
+        return root
+
+    def test_readme_only_overlay_inherits_english(self):
+        with tempfile.TemporaryDirectory() as d:
+            meta = rpt.load_merged_metadata("zh-CN", "supplemental", "pb", self._repo(d))
+        self.assertFalse(meta["localized_only"])
+        self.assertEqual(meta["title"], "T")
+
+    def test_title_only_overlay_inherits_english(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._repo(d, '{"id": "pb", "title": "Z"}')
+            meta = rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)
+        self.assertFalse(meta["localized_only"])
+        self.assertEqual(meta["title"], "Z")
+        self.assertIn("supported_platforms", meta)
+
+    def test_explicit_localized_only_stays_strict(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._repo(d, '{"id": "pb", "localized_only": true}')
+            with self.assertRaisesRegex(ValueError, "missing"):
+                rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)
+
+    def test_region_only_playbook_without_metadata_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._repo(d, english=False)
+            with self.assertRaisesRegex(ValueError, "ID mismatch"):
+                rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)

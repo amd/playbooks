@@ -294,7 +294,9 @@ def load_merged_metadata(locale: str, category: str, playbook_id: str, repo_root
     if localized_file.is_file():
         localized_metadata = json.loads(localized_file.read_text(encoding="utf-8"))
 
-    localized_only = localized_metadata.get("localized_only", True)
+    # Unset means a same-id overlay inherits English (localized-playbooks/README.md);
+    # a region-only playbook with no English counterpart stays strict.
+    localized_only = localized_metadata.get("localized_only", not english_file.is_file())
     if not isinstance(localized_only, bool):
         raise ValueError(f"'localized_only' in {localized_file} must be a boolean")
 
