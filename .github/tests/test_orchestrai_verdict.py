@@ -133,6 +133,56 @@ def run_verdict(summary, playbook, console="", platform="linux", build_url=BUILD
     return code, doc, buf.getvalue()
 
 
+
+class TestRetryCause(unittest.TestCase):
+    """Only a playbook that provably never executed gets a retryable cause."""
+
+    def cause(self, summary, **kw):
+        return run_verdict(summary, "alpha", **kw)[1]["cause"]
+
+    def test_never_executed_is_retryable(self):
+        self.assertEqual(self.cause(OLD_SCHEMA, build_url=""), "no_build")
+        self.assertEqual(self.cause({"expected_groups": ["playbook-alpha"], "groups": {}}), "never_ran")
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 1, "not_run": 1, "status": "NOT_RUN"}}}), "never_ran")
+
+    def test_hangs_unknown_evidence_and_bad_documents_are_not(self):
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 0, "errors": 1, "did_not_finish": 1,
+            "status": "FAILED"}}}), "did_not_finish")
+        self.assertEqual(self.cause(UNREACHABLE, console=UNREACHABLE), "evidence_unavailable")
+        self.assertEqual(self.cause({"groups": []}), "malformed_summary")
+        self.assertEqual(self.cause({"expected_groups": ["playbook-beta"], "groups": {}}), "not_in_plan")
+        self.assertEqual(self.cause({"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "status": "PASSED"}}}),
+            "no_tests_recorded")
+
+    def test_a_missing_group_never_ran_only_with_evidence(self):
+        planned = {"expected_groups": ["playbook-alpha"], "groups": {}}
+        # Its suite started and never reported: cut off, not never run.
+        code, doc, _ = run_verdict(planned, "alpha", console=(
+            'Started suite "playbook-alpha #1" id=0a1b\n'))
+        self.assertEqual((doc["outcome"], doc["cause"], code), ("INTERRUPTED", "did_not_finish", 2))
+        # The console could not be read: nothing proves it never started.
+        self.assertEqual(self.cause(planned, console=UNREACHABLE), "evidence_unavailable")
+        # The batch only says INTERRUPTED and lists no plan: it may have run.
+        self.assertEqual(self.cause({"status": "INTERRUPTED", "groups": {}}), "interrupted")
+        # A readable console with no start, and a plan or a batch that ran nothing: never ran.
+        self.assertEqual(self.cause(planned), "never_ran")
+        self.assertEqual(self.cause({"status": "NOT_RUN", "groups": {}}), "never_ran")
+        self.assertEqual(self.cause({"status": "INTERRUPTED", "groups": {},
+                                     "results": {"passed": 0, "failed": 0}}), "never_ran")
+
+    def test_a_verdict_crash_is_not_retryable(self):
+        def boom(*a, **k):
+            raise RuntimeError("x")
+        self.assertEqual(run_verdict({}, "alpha", patch={"normalise_groups": boom})[1]["cause"],
+                         "verdict_error")
+
+    def test_a_definite_verdict_has_no_cause(self):
+        self.assertIsNone(self.cause({"groups": {"playbook-alpha": {
+            "passed": 1, "failed": 0, "skipped": 0, "errors": 0, "status": "PASSED"}}}))
+
 class TestPassingPath(unittest.TestCase):
     def test_group_passed_exits_zero_with_populated_results(self):
         code, doc, _ = run_verdict(OLD_SCHEMA, "alpha")
@@ -391,6 +441,8 @@ class TestCancelledOrSkippedNeverPass(unittest.TestCase):
                                          "not_run": 1, "status": "PASSED"})
         self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
         self.assertIn("1 of its tests were cancelled or never ran", doc["infrastructure_reason"])
+        # Three tests ran: rerunning the playbook would repeat them.
+        self.assertEqual(doc["cause"], "partly_ran")
 
     def test_the_same_counts_without_a_status_are_not_passed(self):
         group = {k: v for k, v in self.RECORDED.items() if k != "status"}

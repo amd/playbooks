@@ -15,7 +15,9 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -104,6 +106,50 @@ class ControlPlaneApi(unittest.TestCase):
                          ("rp-cred", True, "77"))
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
+    def test_a_device_can_run_its_playbooks_as_another(self):
+        cfg = dict(load_config(), device_runs_as={"grgh": "halo"})
+        def device(arch):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, tags=["t"]), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
+        self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
+        self.assertEqual(device("stx"), {("stx", ("t",))})
+        self.assertEqual(load_config()["device_runs_as"], {"grgh": "halo"})
+
+    def test_a_device_image_reaches_only_that_device_and_platform(self):
+        cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
+        def sessions(arch, platform):
+            plan = trigger.make_plan(dict(BATCH, arch=arch, platform=platform), "refs/heads/main", cfg, 1,
+                                     "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+            fake = FakeApi((201, {"run": {"id": "r1"}}))
+            with mock.patch.object(trigger, "http_json", fake):
+                trigger.start_run(self.cp, f"{platform}/{arch}", plan, {}, platform, "", "a" * 40)
+            return {s["os_image"] for s in fake.calls[0][3]["plan_document"]["document"]["sessions"]}
+        self.assertEqual(sessions("grgh", "windows"), {"windows/custom-x"})
+        self.assertEqual(sessions("grgh", "linux"), {"ubuntu"})
+        self.assertEqual(sessions("stx", "windows"), {"windows"})
+
+    def test_device_sites_reach_every_session_of_that_device_only(self):
+        cfg = load_config()
+        # Every configured device stays in Markham.
+        self.assertTrue(cfg["device_site_ids"])
+        self.assertEqual({tuple(v) for v in cfg["device_site_ids"].values()},
+                         {("maas-mkm-mnb", "maas-mkm-cs")})
+        cfg["device_site_ids"] = {"krk": ["maas-mkm-mnb", "maas-mkm-cs"]}  # stx: any site
+        krk = trigger.make_plan(dict(BATCH, arch="krk", playbooks=["gaia-agents", "cvml"]), "refs/heads/main",
+                                cfg, 1, "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        self.assertEqual({tuple(g["site_ids"]) for g in krk["groups"]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        stx = trigger.make_plan(BATCH, "refs/heads/main", cfg, 1, "https://github.com/amd/playbooks",
+                                "a" * 40, "https://index.example")
+        self.assertNotIn("site_ids", stx["groups"][0])
+        fake = FakeApi((201, {"run": {"id": "r1"}}), (201, {"run": {"id": "r2"}}))
+        with mock.patch.object(trigger, "http_json", fake):
+            trigger.start_run(self.cp, "linux/krk", krk, {}, "linux", "", "a" * 40)
+            trigger.start_run(self.cp, "linux/stx", stx, {}, "linux", "", "a" * 40)
+        sessions = [c[3]["plan_document"]["document"]["sessions"] for c in fake.calls]
+        self.assertEqual({tuple(s["site_ids"]) for s in sessions[0]}, {("maas-mkm-mnb", "maas-mkm-cs")})
+        self.assertNotIn("site_ids", sessions[1][0])
+
     def test_windows_image_override(self):
         fake = FakeApi((201, {"run": {"id": "r1"}}))
         with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_WINDOWS_IMAGE": "windows/win11-x"}):
@@ -117,6 +163,56 @@ class ControlPlaneApi(unittest.TestCase):
         keys = {c[2]["Idempotency-Key"] for c in fake.calls}
         self.assertEqual(len(fake.calls), 3)
         self.assertEqual(len(keys), 1)
+
+    def test_only_a_definite_answer_is_a_refusal(self):
+        with mock.patch.object(trigger, "API_RETRY_SECONDS", 0):
+            with self.assertRaises(ValueError) as lost:
+                self.start(FakeApi((503, None)))
+            with self.assertRaises(trigger.Refused):
+                self.start(FakeApi((403, {"error": {"code": "no_matching_rule"}})))
+            with self.assertRaises(ValueError) as unreadable:
+                self.start(FakeApi((201, None)))  # it may have started
+        self.assertNotIsInstance(lost.exception, trigger.Refused)
+        self.assertNotIsInstance(unreadable.exception, trigger.Refused)
+
+    def test_a_refused_replay_of_a_lost_start_is_not_a_refusal(self):
+        # The first POST may have started the run; the replay's 4xx says
+        # nothing about it, so the batch must stay unconfirmed.
+        for first in (OSError("reset"), (503, None),
+                      (409, {"error": {"code": "idempotency_in_progress"}})):
+            with self.subTest(first=first), self.assertRaises(ValueError) as caught:
+                self.start(FakeApi(first, (422, {"error": {"code": "invalid_request"}})))
+            self.assertNotIsInstance(caught.exception, trigger.Refused)
+
+    def test_cancel_gives_up_on_one_run_in_time_to_cancel_the_next(self):
+        clock = iter(range(0, 10_000, 30))
+        fake = FakeApi(*[(503, None)] * 3, (202, {"run": {"id": "r2"}}))
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake), \
+                mock.patch.object(trigger, "API_RETRY_SECONDS", 600), \
+                mock.patch.object(trigger.time, "monotonic", lambda: next(clock)):
+            trigger.cancel_main()
+        self.assertEqual(fake.calls[-1][1], "https://cp.example/api/ci/v1/runs/r2/cancel")
+
+    def test_cancel_with_an_empty_2xx_body_is_a_success(self):
+        # The cancel endpoint may answer 202/204 with no body: that is a cancel.
+        fake = FakeApi((202, None), (204, None))
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
+            trigger.cancel_main()
+        self.assertEqual(len(fake.calls), 2)
+        self.assertNotIn("not cancelled", err.getvalue())
+        self.assertIn("run r1: cancel requested", err.getvalue())
+
+    def test_cancel_asks_for_every_run_and_a_refusal_only_warns(self):
+        fake = FakeApi((403, {"error": {"code": "forbidden"}}), (202, {"run": {"id": "r2"}}))
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "http_json", fake):
+            trigger.cancel_main()
+        self.assertEqual([(c[0], c[1]) for c in fake.calls],
+                         [("POST", "https://cp.example/api/ci/v1/runs/r1/cancel"),
+                          ("POST", "https://cp.example/api/ci/v1/runs/r2/cancel")])
 
     def test_a_refusal_is_not_retried_and_reports_code_and_request_id(self):
         fake = FakeApi((403, {"error": {"code": "no_matching_rule", "message": "no rule"},
@@ -133,7 +229,7 @@ class ControlPlaneApi(unittest.TestCase):
         with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
             urls = trigger.await_builds(self.cp, {"x/a": "a", "x/b": "b"}, 3600)
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
-        self.assertIn("run b ended error without a build: no image", err.getvalue())
+        self.assertIn("run b ended error without a build: error=no image", err.getvalue())
 
 
 class ReportingSwitch(unittest.TestCase):
@@ -149,7 +245,7 @@ class ReportingSwitch(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
-                mock.patch.object(trigger, "await_builds", return_value={"linux/stx": "https://j/1/"}), \
+                mock.patch.object(trigger, "await_builds", side_effect=AssertionError("Detect must not wait")), \
                 contextlib.redirect_stderr(io.StringIO()):
             trigger.main()
         return start.call_args.args[5]
@@ -160,6 +256,85 @@ class ReportingSwitch(unittest.TestCase):
 
     def test_api_keeps_results_in_orchestrai(self):
         self.assertEqual(self.run_main("api"), "")
+
+    def test_the_tested_commit_is_handed_on_for_retries(self):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/stx": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_REPO": "https://github.com/x/playbooks.git",
+               "ORCHESTRAI_PLAYBOOK_REF": "main", "ORCHESTRAI_REPORTING": "api"}
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                    mock.patch.object(trigger, "start_run", mock.Mock(return_value="r1")), \
+                    mock.patch.object(trigger, "resolve_sha", return_value="b" * 40) as resolve, \
+                    contextlib.redirect_stderr(io.StringIO()):
+                trigger.main()
+            outputs = dict(line.split("=", 1) for line in out.read().splitlines())
+        resolve.assert_called_once_with("https://github.com/x/playbooks.git", "main")
+        self.assertEqual((outputs["playbook_repo"], outputs["playbook_sha"]),
+                         ("https://github.com/x/playbooks.git", "b" * 40))
+
+    def test_a_batch_whose_start_may_have_happened_is_unconfirmed(self):
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/ok": BATCH, "linux/no": BATCH, "linux/lost": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        answers = {"linux/ok": "r1", "linux/no": trigger.Refused("HTTP 403"),
+                   # e.g. the OIDC token could not be refreshed to replay a lost POST
+                   "linux/lost": ValueError("OIDC token request failed")}
+        def start(cp, bid, *_):
+            if isinstance(answers[bid], Exception):
+                raise answers[bid]
+            return answers[bid]
+        err = io.StringIO()
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                    mock.patch.object(trigger, "start_run", start), \
+                    contextlib.redirect_stderr(err):
+                trigger.main()
+            outputs = dict(line.split("=", 1) for line in out.read().splitlines())
+        self.assertEqual(json.loads(outputs["run_ids"]), {"linux/ok": "r1"})
+        self.assertEqual(json.loads(outputs["unconfirmed"]), ["linux/lost"])
+        # Only a definite refusal is called one; an unconfirmed start says to check first.
+        self.assertIn("linux/no: the Control Plane refused the run", err.getvalue())
+        self.assertNotIn("linux/lost: the Control Plane refused", err.getvalue())
+        self.assertIn("linux/lost: the run's start was not confirmed", err.getvalue())
+
+    def run_status(self, rid, api, wait=0):
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": rid, "GITHUB_OUTPUT": out.name,
+                                              "RUN_STATUS_WAIT_SECONDS": str(wait)}, clear=True), \
+                    mock.patch.object(trigger, "api", api), \
+                    mock.patch.object(trigger.time, "sleep"), \
+                    mock.patch.object(trigger, "control_plane", return_value={}), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                trigger.run_status_main()
+            return out.read()
+
+    def test_run_status_is_read_for_a_retry_and_never_guessed(self):
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {"status": "queued"}}), "status=queued\n")
+        self.assertEqual(self.run_status("", lambda *a: self.fail("no run, no call")), "status=never_started\n")
+
+        def down(*a):
+            raise ValueError("503")
+        self.assertEqual(self.run_status("r1", down), "")  # unknown: the retry is skipped
+
+    def test_run_status_reports_a_build_the_job_may_not_have_seen(self):
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {
+            "status": "failed", "pipeline_url": "https://j/job/p/9"}}),
+            "status=failed\nbuild_url=https://j/job/p/9/\n")
+        # A Jenkins queue item is not a build.
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {
+            "status": "error", "pipeline_url": "https://j/queue/item/4/"}}), "status=error\n")
+
+    def test_run_status_waits_for_a_run_that_is_still_closing(self):
+        # Its build has ended but the run still reads "running" for a moment.
+        api = mock.Mock(side_effect=[{"run": {"status": "running"}}, {"run": {"status": "running"}},
+                                     {"run": {"status": "failed"}}])
+        self.assertEqual(self.run_status("r1", api, wait=900), "status=failed\n")
+        self.assertEqual(api.call_count, 3)
 
     def test_reportportal_without_its_credential_fails_before_submitting(self):
         with self.assertRaises(SystemExit):
@@ -177,7 +352,7 @@ class MachinesPerBatch(unittest.TestCase):
                "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
                "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
         start, err = mock.Mock(return_value="r1"), io.StringIO()
-        self.wait = mock.Mock(side_effect=lambda _cp, runs, _s: {b: "https://j/1/" for b in runs})
+        self.wait = mock.Mock()
         with mock.patch.dict(os.environ, env, clear=True), \
                 mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                 mock.patch.object(trigger, "start_run", start), \
@@ -200,10 +375,52 @@ class MachinesPerBatch(unittest.TestCase):
         self.assertEqual(requested, {"linux/stx": 1})
         self.assertIn("1 batch(es), 1 machine(s) requested", log)
 
-    def test_builds_are_awaited_as_long_as_the_control_plane_queues(self):
+    def test_the_run_link_opens_its_tests_tab_as_a_page(self):
+        # With reporting=api there is no ReportPortal link: the result table
+        # links the run, so open it on its tests.
+        _, log = self.run_main(1, {"linux/stx": BATCH})
+        self.assertIn("/#/runs/r1?tab=tests&presentation=page", log)
+
+    def test_detect_and_trigger_does_not_wait_for_builds(self):
+        # Each Test job waits for its own batch (--await-build).
         self.run_main(1, {"linux/stx": BATCH})
-        wait = load_config()["run_settings"]["acquire_timeout"] * 60 + trigger.BUILD_WAIT_MARGIN
-        self.assertEqual(self.wait.call_args.args[2], wait)
+        self.wait.assert_not_called()
+
+
+class AwaitBuild(unittest.TestCase):
+    """--await-build: one Test job waits for its own batch's build."""
+
+    def run_it(self, run_id, found):
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": run_id, "BATCH_ID": "linux/stx",
+                                          "GITHUB_OUTPUT": os.devnull}), \
+                mock.patch.object(trigger, "await_builds", return_value=found) as wait, \
+                mock.patch.object(trigger, "acquire_timeout_minutes", return_value=360), \
+                mock.patch("builtins.open", mock.mock_open()) as opened, \
+                contextlib.redirect_stderr(out):
+            trigger.await_build_main(CONFIG)
+        written = "".join(c.args[0] for c in opened().write.call_args_list)
+        return wait, written, out.getvalue()
+
+    def test_writes_the_build_url_for_this_batch_only(self):
+        wait, written, _ = self.run_it("r1", {"linux/stx": "https://j/job/p/9/"})
+        self.assertEqual(wait.call_args.args[1], {"linux/stx": "r1"})
+        # As long as the Control Plane keeps the run queued, plus the margin.
+        self.assertEqual(wait.call_args.args[2], 360 * 60 + trigger.BUILD_WAIT_MARGIN)
+        self.assertEqual(written, "build_url=https://j/job/p/9/\n")
+
+    def test_no_build_leaves_the_url_unset_for_not_run(self):
+        _, written, _ = self.run_it("r1", {})
+        self.assertEqual(written, "")
+
+    def test_a_batch_that_never_started_says_so(self):
+        wait, written, err = self.run_it("", {})
+        wait.assert_not_called()
+        self.assertIn("failed to start", err)
+
+    def test_acquire_timeout_is_read_from_the_config_without_yaml(self):
+        self.assertEqual(trigger.acquire_timeout_minutes(CONFIG),
+                         load_config()["run_settings"]["acquire_timeout"])
 
 
 class WorkflowWiring(unittest.TestCase):
@@ -215,15 +432,79 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-playbooks",
-                                            "test-localized-playbooks", "test-gate"])
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
+                                            "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
-        self.assertEqual((reporting["default"], reporting["options"]), ("reportportal", ["reportportal", "api"]))
+        self.assertEqual((reporting["default"], reporting["options"]), ("api", ["api", "reportportal"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
         step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if s.get("id") == "trigger")
         self.assertIn("inputs.reporting", step["env"]["ORCHESTRAI_REPORTING"])
         self.assertEqual(self.load("orchestrai-pr-command.yml")["jobs"]["command"]["permissions"]["id-token"],
                          "write")
+
+    def test_every_job_that_submits_runs_installs_pyyaml_first(self):
+        """Each job is a fresh environment: a job that starts runs (the trigger
+        without --await-build/--run-status reads the YAML config) must install PyYAML itself.
+        The batch job's retry once crashed with No module named 'yaml'."""
+        for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
+            for job_id, job in self.load(name)["jobs"].items():
+                steps = job.get("steps") or []
+                for i, step in enumerate(steps):
+                    run = step.get("run") or ""
+                    # --await-build and --run-status only read the Control Plane.
+                    if ("orchestrai_trigger.py" in run and "--await-build" not in run
+                            and "--run-status" not in run):
+                        before = " ".join(s.get("run") or "" for s in steps[:i])
+                        self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
+
+    def test_the_trigger_fails_without_pyyaml_except_await_build(self):
+        """--await-build must keep working where PyYAML is absent."""
+        code = ("import sys, builtins; real = builtins.__import__\n"
+                "def no_yaml(n, *a, **k):\n"
+                "    if n == 'yaml': raise ModuleNotFoundError(\"No module named 'yaml'\")\n"
+                "    return real(n, *a, **k)\n"
+                "builtins.__import__ = no_yaml\n"
+                f"sys.path.insert(0, {SCRIPTS_DIR!r}); import orchestrai_trigger as t\n"
+                "print(t.acquire_timeout_minutes(sys.argv[1]))")
+        import subprocess
+        out = subprocess.run([sys.executable, "-c", code, CONFIG], capture_output=True, text=True)
+        self.assertEqual(out.returncode, 0, out.stderr)
+
+    def test_every_test_job_waits_for_its_own_batch(self):
+        for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
+                          ("orchestrai-pr-command.yml", "test-playbooks")):
+            steps = self.load(name)["jobs"][job]["steps"]
+            ids = [s.get("id") for s in steps]
+            self.assertLess(ids.index("build"), ids.index("wait"), name)
+            self.assertIn("--await-build", steps[ids.index("build")]["run"])
+            self.assertIn("steps.build.outputs.build_url", steps[ids.index("wait")]["env"]["STARTED_BUILD_URL"])
+            self.assertEqual(self.load(name)["jobs"][job]["permissions"]["id-token"], "write", name)
+
+
+class RetryRun(unittest.TestCase):
+    def submit(self, retry):
+        cp = {"api_url": "https://cp/api/ci/v1", "audience": "a", "portal_url": "https://cp", "workspace": "w"}
+        plan = trigger.make_plan(BATCH, "refs/heads/main", load_config(), 1,
+                                 "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
+        api = mock.Mock(return_value={"run": {"id": "r1"}})
+        env = {"GITHUB_RUN_ID": "77", "GITHUB_RUN_ATTEMPT": "1", **({"ORCHESTRAI_RETRY": retry} if retry else {})}
+        with mock.patch.object(trigger, "api", api), mock.patch.dict(os.environ, env, clear=True):
+            trigger.start_run(cp, "linux/stx", plan, {}, "linux", "", "a" * 40)
+        body, key = api.call_args[0][3], api.call_args[0][4]
+        return body["plan_document"]["name"], key
+
+    def test_a_retry_is_a_new_run_not_the_original_again(self):
+        (name, key), (rname, rkey) = self.submit(""), self.submit("1")
+        self.assertNotEqual(key, rkey)  # the idempotency key would return the first run
+        self.assertTrue(rname.endswith(" retry 1") and not name.endswith("retry 1"))
+
+
+class FailureReason(unittest.TestCase):
+    def test_a_run_that_ended_says_why_whatever_the_field(self):
+        self.assertEqual(trigger.failure_reason({"status": "error", "error": "no machine"}), "error=no machine")
+        self.assertEqual(trigger.failure_reason({"status": "error", "outcome": {"failure_reason": "reimage failed"}}),
+                         "outcome.failure_reason=reimage failed")
+        self.assertEqual(trigger.failure_reason({"status": "error", "id": "r1"}), "")
 
 
 class AcquireTimeoutValidation(unittest.TestCase):
@@ -245,13 +526,27 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # wait no longer comes out of max_duration.
         self.assertEqual(self.errors_for(acquire_timeout=360, max_duration=240), [])
 
-    def test_jobs_outlast_the_build_wait(self):
-        need = load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
-        for name, job in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
-                          ("orchestrai-pr-command.yml", "command")):
+    def test_test_jobs_outlast_the_machine_wait_and_the_build(self):
+        # One attempt: the wait for its build to start (acquire_timeout + margin),
+        # then orchestrai_wait_build.sh's poll of the build itself, plus explicit
+        # overhead for checkout, verdicts, upload and summaries.
+        with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
+            build_wait = int(re.search(r"DEADLINE=\$\(\(SECONDS \+ (\d+) \* 60\)\)", f.read()).group(1))
+        attempt = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
+                   + build_wait)
+        overhead = 30
+        workflows = {}
+        for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
-                limit = int(yaml.safe_load(f)["jobs"][job]["timeout-minutes"])
-            self.assertGreater(limit, need, name)
+                workflows[name] = yaml.safe_load(f)
+        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-playbooks"]
+        self.assertGreaterEqual(orc["timeout-minutes"], attempt + overhead)
+        # The batch job: one attempt, then a retry only while a whole one still fits.
+        batch = workflows["test-playbooks-orchestrai.yml"]["jobs"]["test-batches"]
+        pick = next(s for s in batch["steps"] if s.get("id") == "pick")
+        retry_start = int(pick["env"]["RETRY_START_LIMIT_MINUTES"])
+        self.assertGreaterEqual(batch["timeout-minutes"], retry_start + attempt + overhead)
+        self.assertLessEqual(batch["timeout-minutes"], 24 * 60)  # the GITHUB_TOKEN's lifetime
 
     def test_no_overall_limit_means_no_comparison(self):
         self.assertEqual(self.errors_for(acquire_timeout=600, max_duration=0), [])

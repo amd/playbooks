@@ -51,10 +51,13 @@ Outputs:
 """
 
 import base64
+import hashlib
 import json
 import os
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 
 COUNT_KEYS = ("passed", "failed", "skipped", "errors")
@@ -68,12 +71,31 @@ EXIT_FAILED = 1
 EXIT_INFRA = 2
 
 FETCH_TIMEOUT = 60
+FETCH_RETRY_SECONDS = 5
 
 # Reasons reported when there is nothing to judge this playbook by. These are
 # infrastructure conditions, never test failures.
 REASON_NO_BUILD = "no OrchestrAI build was produced for this batch"
 REASON_NO_SUMMARY = "could not retrieve the build summary"
 REASON_BAD_SUMMARY = "the build summary was malformed (groups is not an object)"
+
+# Why a NOT_RUN/INTERRUPTED playbook did not pass, as a structured `cause` in
+# summary.json. Only RETRY_CAUSES may be rerun automatically: the playbook
+# provably never executed. Everything else -- results we could not read, a
+# test cut off mid-run (a hang looks the same as a lost machine), a summary
+# that claims nothing ran -- is reported, never retried.
+CAUSE_NO_BUILD = "no_build"              # the batch produced no pipeline build
+CAUSE_NEVER_RAN = "never_ran"            # planned, but no test of it executed
+CAUSE_EVIDENCE_UNAVAILABLE = "evidence_unavailable"  # summary and console unreadable
+CAUSE_MALFORMED_SUMMARY = "malformed_summary"
+CAUSE_NOT_IN_PLAN = "not_in_plan"        # the batch plan does not list it
+CAUSE_DID_NOT_FINISH = "did_not_finish"  # started, cut off: a hang or a lost machine
+CAUSE_NO_TESTS_RECORDED = "no_tests_recorded"
+CAUSE_INTERRUPTED = "interrupted"        # the pipeline said INTERRUPTED, no detail
+CAUSE_PARTLY_RAN = "partly_ran"          # some tests ran, others never did
+CAUSE_VERDICT_ERROR = "verdict_error"
+RETRY_CAUSES = (CAUSE_NO_BUILD, CAUSE_NEVER_RAN)
+FETCH_ATTEMPTS = 3
 
 
 def fetch(url, user, token):
@@ -91,15 +113,47 @@ def fetch(url, user, token):
     runner any other local process could read the pipeline token. Doing the HTTP
     in-process (stdlib only — this job has no pip install step) keeps the secret
     in this process's memory only.
+
+    With ORCHESTRAI_FETCH_CACHE=<dir> (orchestrai_batch_verdict.py, which runs
+    this once per playbook of a finished build) each answer is kept there and
+    reused, so a batch downloads its summary and console once. A failure is
+    kept too, once its retries are spent: an unreachable pipeline then costs
+    the batch one round of retries per URL, not one per playbook. The cache
+    lives for one resolution pass, so a retry's pass asks again.
     """
+    cache_dir = os.environ.get("ORCHESTRAI_FETCH_CACHE")
+    cached = os.path.join(cache_dir, hashlib.sha256(url.encode()).hexdigest()) if cache_dir else ""
+    if cached and os.path.exists(cached):
+        with open(cached, "rb") as f:  # bytes: the exact body, line endings included
+            return f.read().decode("utf-8", "replace")
+    if cached and os.path.exists(cached + ".failed"):
+        return None
     req = urllib.request.Request(url)
     req.add_header("Authorization",
                    "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode())
-    try:
-        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as r:
-            return r.read().decode("utf-8", "replace")
-    except Exception:
+    # A transient error (network, 5xx) is retried: an unread result must not be
+    # mistaken for one that does not exist. 404 means it does not.
+    raw = None
+    for attempt in range(FETCH_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as r:
+                raw = r.read()
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                break
+        except Exception:
+            pass
+        if attempt < FETCH_ATTEMPTS - 1:
+            time.sleep(FETCH_RETRY_SECONDS * (attempt + 1))
+    if raw is None:
+        if cached:
+            open(cached + ".failed", "wb").close()
         return None
+    if cached:
+        with open(cached, "wb") as f:
+            f.write(raw)
+    return raw.decode("utf-8", "replace")
 
 
 def normalise_groups(summary):
@@ -182,15 +236,20 @@ def status_from_group(grp):
     return "NOT_RUN" if unrun else "PASSED"
 
 
+def suite_start(console, playbook):
+    """The console's 'Started suite' line for this playbook, or None."""
+    esc = re.escape(playbook)
+    return re.search(rf'Started suite "playbook-{esc} #\d+".*?id=([0-9a-fA-F-]+)',
+                     console or "")  # fetch() returns None when the console is unreachable
+
+
 def status_from_console(console, playbook):
     """Fallback: the console exposes the per-playbook suite lifecycle even when
     summary.json has no group for it:
         Started suite "playbook-<id> #<n>" ... id=<sid>
         Finished item <sid> -> PASSED|FAILED
     """
-    esc = re.escape(playbook)
-    console = console or ""   # fetch() returns None when the console is unreachable
-    m = re.search(rf'Started suite "playbook-{esc} #\d+".*?id=([0-9a-fA-F-]+)', console)
+    m = suite_start(console, playbook)
     if not m:
         return None
     sid = m.group(1)
@@ -232,6 +291,33 @@ def batch_ran_nothing(summary):
         return sum(int(results.get(k) or 0) for k in COUNT_KEYS) == 0
     except (TypeError, ValueError):
         return False
+
+
+def infra_cause(status, summary, grp, group_key):
+    """The structured cause of a NOT_RUN/INTERRUPTED verdict (see RETRY_CAUSES)."""
+    if isinstance(grp, dict):
+        if did_not_finish_count(grp):
+            return CAUSE_DID_NOT_FINISH
+        if status == "INTERRUPTED":
+            return CAUSE_NO_TESTS_RECORDED if not sum(group_counts(grp).values()) else CAUSE_INTERRUPTED
+        # An unrun test is also counted as skipped; any other count executed.
+        c = group_counts(grp)
+        if c["passed"] + c["failed"] + c["errors"] + max(0, c["skipped"] - not_run_count(grp)):
+            return CAUSE_PARTLY_RAN
+        return CAUSE_NEVER_RAN
+    summary = summary if isinstance(summary, dict) else {}
+    expected = summary.get("expected_groups")
+    if isinstance(expected, list) and expected and group_key not in expected:
+        return CAUSE_NOT_IN_PLAN
+    # No rollup for this playbook: it never ran only when the plan lists it or
+    # the batch says nothing ran. A batch that merely says INTERRUPTED may
+    # have cut this playbook off mid-run.
+    planned = isinstance(expected, list) and group_key in expected
+    batch_not_run = ((summary.get("status") or "").strip().upper() == "NOT_RUN"
+                     or batch_ran_nothing(summary))
+    if status == "NOT_RUN" and (planned or batch_not_run):
+        return CAUSE_NEVER_RAN
+    return CAUSE_INTERRUPTED
 
 
 def infrastructure_reason(summary, grp, group_key):
@@ -309,7 +395,7 @@ def build_results(playbook, outcome, grp, reason):
 
 
 def make_summary(playbook, platform, outcome, grp=None, reason=None,
-                 summary=None):
+                 summary=None, cause=None):
     """The per-playbook test-results/summary.json document."""
     summary = summary if isinstance(summary, dict) else {}
 
@@ -330,6 +416,7 @@ def make_summary(playbook, platform, outcome, grp=None, reason=None,
     if outcome == "PASSED" and total == 0:
         # Contract: never emit PASSED with nothing behind it.
         outcome, reason = "INTERRUPTED", reason or "no tests were recorded for this playbook"
+        cause = CAUSE_NO_TESTS_RECORDED
 
     return {
         "playbook_id": playbook,
@@ -340,6 +427,7 @@ def make_summary(playbook, platform, outcome, grp=None, reason=None,
         "skipped": skipped,
         "outcome": outcome,
         "infrastructure_reason": reason if outcome in INFRA_STATUSES else None,
+        "cause": (cause or CAUSE_INTERRUPTED) if outcome in INFRA_STATUSES else None,
         "reportportal_url": (summary.get("rp_launch_url") or None),
         "results": build_results(playbook, outcome, grp, reason),
     }
@@ -380,10 +468,10 @@ def _run():
 
     group_key = f"playbook-{playbook}"
 
-    def finish(status, grp=None, reason=None, summary=None, how=""):
+    def finish(status, grp=None, reason=None, summary=None, how="", cause=None):
         """Write the artifact, annotate, and exit with the mapped code."""
         doc = make_summary(playbook, platform, status, grp=grp, reason=reason,
-                           summary=summary)
+                           summary=summary, cause=cause)
         write_artifact(doc)
         outcome = doc["outcome"]
         code = exit_code_for(outcome)
@@ -402,7 +490,7 @@ def _run():
         # infrastructure, and emitting an error first contradicts that in the
         # very place a reader looks to tell the two apart.
         print(f"No OrchestrAI pipeline build URL for {playbook} ({platform})")
-        finish("NOT_RUN", reason=REASON_NO_BUILD, how="no build url")
+        finish("NOT_RUN", reason=REASON_NO_BUILD, how="no build url", cause=CAUSE_NO_BUILD)
 
     raw = fetch(f"{build_url}artifact/.pipeline/summary.json", user, token)
     summary_unreachable = raw is None
@@ -422,6 +510,7 @@ def _run():
 
     # Primary: per-group rollup in summary.json.
     status, how = None, ""
+    console_read, console_started = True, False
     grp = groups.get(group_key)
     if not isinstance(grp, dict):
         grp = None
@@ -435,6 +524,8 @@ def _run():
     # between infrastructure and a hard failure.
     if status is None:
         console = fetch(f"{build_url}consoleText", user, token)
+        console_read = console is not None
+        console_started = suite_start(console, playbook) is not None
         status = status_from_console(console, playbook)
         if status:
             how = "console suite lifecycle"
@@ -447,13 +538,25 @@ def _run():
             # at all. Distinguishable from a legitimately empty document
             # precisely because fetch() returns None rather than "".
             finish("NOT_RUN", reason=REASON_NO_SUMMARY, summary=summary,
-                   how="build summary unreachable")
+                   how="build summary unreachable", cause=CAUSE_EVIDENCE_UNAVAILABLE)
         if groups_malformed:
             finish("INTERRUPTED", reason=REASON_BAD_SUMMARY, summary=summary,
-                   how="malformed summary.json")
+                   how="malformed summary.json", cause=CAUSE_MALFORMED_SUMMARY)
         if has_infra_schema(summary):
-            # Infrastructure-aware pipeline: a planned group with no session
-            # never ran; it is not a playbook failure.
+            # Infrastructure-aware pipeline: no result is not a playbook
+            # failure. It never ran only if the console proves its suite never
+            # started; a start with no result was cut off (a hang or a lost
+            # machine), and an unreadable console proves nothing.
+            if console_started:
+                finish("INTERRUPTED", grp=grp, summary=summary,
+                       reason="its suite started but never reported a result: the batch "
+                              "was cut off or the machine stopped responding",
+                       how="console suite started, no result", cause=CAUSE_DID_NOT_FINISH)
+            if not console_read:
+                finish("NOT_RUN", grp=grp, summary=summary,
+                       reason="no result for this playbook, and the build console "
+                              "could not be read to tell whether it started",
+                       how="console unreachable", cause=CAUSE_EVIDENCE_UNAVAILABLE)
             status = "NOT_RUN"
             how = "expected_groups (no session for this playbook)"
 
@@ -466,9 +569,11 @@ def _run():
               f"console. groups present: {list(groups.keys())}")
         sys.exit(EXIT_FAILED)
 
-    reason = (infrastructure_reason(summary, grp, group_key)
-              if status in INFRA_STATUSES else None)
-    finish(status, grp=grp, reason=reason, summary=summary, how=how)
+    reason = cause = None
+    if status in INFRA_STATUSES:
+        reason = infrastructure_reason(summary, grp, group_key)
+        cause = infra_cause(status, summary, grp, group_key)
+    finish(status, grp=grp, reason=reason, summary=summary, how=how, cause=cause)
 
 
 def main():
@@ -490,7 +595,7 @@ def main():
         reason = f"the verdict step failed unexpectedly: {type(exc).__name__}: {exc}"
         try:
             write_artifact(make_summary(playbook, platform, "INTERRUPTED",
-                                        reason=reason))
+                                        reason=reason, cause=CAUSE_VERDICT_ERROR))
         except Exception:                                     # noqa: BLE001
             pass
         print(f"::warning::{playbook} ({platform}): INTERRUPTED — {reason} "

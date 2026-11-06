@@ -15,10 +15,12 @@
 # Required repo variables: ORCHESTRAI_V2_CI_API_URL, ORCHESTRAI_V2_OIDC_AUDIENCE,
 #   ORCHESTRAI_V2_PORTAL_URL, ORCHESTRAI_V2_WORKSPACE, and for ReportPortal
 #   reporting ORCHESTRAI_V2_RP_CREDENTIAL / ORCHESTRAI_V2_RP_PROJECT.
+#   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label. Each Test job waits for
+#   its batch's machines and build, and for one retry of each, up to 24 h;
+#   GitHub-hosted runners stop a job at 6 h.
 # Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
 #                          without inputs; default reportportal)
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
-#                          ORCHESTRAI_WAIT_RUNNER    (default ubuntu-latest)
 # Required for Linux Radeon batches: ORCHESTRAI_LINUX_DRIVER_SOURCE points to
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
@@ -73,10 +75,10 @@ on:
       reporting:
         description: 'Results: reportportal (also export to ReportPortal) or api (OrchestrAI only)'
         type: choice
-        default: reportportal
+        default: api
         options:
-          - reportportal
           - api
+          - reportportal
       playbook_ref:
         description: 'amd/playbooks branch, tag or commit to test'
         type: string
@@ -104,19 +106,20 @@ jobs:
   detect-and-trigger:
     name: Detect & Trigger
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
-    # Must exceed acquire_timeout + 30 min (tested).
-    timeout-minutes: 420
     permissions:
       contents: read
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
+      batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+      batches: ${{ steps.prepare-matrices.outputs.batches }}
       localized_matrix: ${{ steps.prepare-matrices.outputs.localized_matrix }}
-      has_english_entries: ${{ steps.prepare-matrices.outputs.has_english_entries }}
-      has_localized_entries: ${{ steps.prepare-matrices.outputs.has_localized_entries }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
-      build_urls: ${{ steps.trigger.outputs.build_urls }}
+      run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
+      unconfirmed: ${{ steps.trigger.outputs.unconfirmed }}
+      playbook_repo: ${{ steps.trigger.outputs.playbook_repo }}
+      playbook_sha: ${{ steps.trigger.outputs.playbook_sha }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -233,7 +236,19 @@ jobs:
           ENGLISH_BATCHES: ${{ steps.build-english.outputs.batches }}
           LOCALIZED_MATRIX: ${{ steps.build-localized.outputs.matrix }}
           LOCALIZED_BATCHES: ${{ steps.build-localized.outputs.batches }}
+          BATCH_JOBS: "true"  # one Test job per batch: bound the batch matrix
         run: python3 .github/scripts/orchestrai_prepare_matrices.py
+
+      # Checked before anything is reserved: the Test jobs outlive a
+      # GitHub-hosted runner's 6 h limit.
+      - name: Require a self-hosted wait runner
+        if: steps.gate.outputs.enabled == 'true' && steps.prepare-matrices.outputs.has_entries == 'true'
+        env:
+          WAIT_RUNNER: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
+        run: |
+          if [ -z "$WAIT_RUNNER" ]; then
+            echo "::error::Set the repository variable ORCHESTRAI_WAIT_RUNNER to a self-hosted runner label: the Test jobs run up to 24 h"; exit 1
+          fi
 
       - name: Trigger OrchestrAI pipeline builds
         id: trigger
@@ -273,183 +288,322 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
-  test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.required && ' ✦' || '' }}"
+  test-batches:
+    # One job per batch (not per playbook), English and localized alike: it waits
+    # on the batch's build once and resolves each playbook from it, so a full run
+    # needs ~1 runner per batch instead of one per playbook, and several runs no
+    # longer starve each other.
+    name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
     needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_english_entries == 'true'
-    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER || 'ubuntu-latest' }}
-    continue-on-error: ${{ !matrix.required }}
+    if: needs.detect-and-trigger.outputs.has_entries == 'true'
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
+    # Each attempt waits for machines (acquire_timeout 360 min + 30) and then for
+    # the build (330 min): up to 720 min. The retry starts only while a whole
+    # attempt still fits (RETRY_START_LIMIT_MINUTES below), so the job stays
+    # within 24 h, the GITHUB_TOKEN's lifetime.
+    timeout-minutes: 1440
+    # A batch with no required playbook shows its failures without failing the run.
+    continue-on-error: ${{ toJson(matrix.required) == '[]' }}
     strategy:
       fail-fast: false
-      max-parallel: 16
       matrix:
-        include: ${{ fromJson(needs.detect-and-trigger.outputs.english_matrix) }}
+        include: ${{ fromJson(needs.detect-and-trigger.outputs.batch_matrix) }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
+      - name: Record the job's start
+        run: echo "JOB_START=$(date +%s)" >> "$GITHUB_ENV"
+
+      # The wait steps never fail the job by themselves: a batch that got no build
+      # resolves as NOT_RUN, which the retry may recover, and "Batch result"
+      # decides the job from the final verdicts.
+      - name: Wait for the batch's build to start
+        id: build
+        continue-on-error: true
+        env:
+          RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-build
+
       - name: Wait for OrchestrAI pipeline build
         id: wait
+        continue-on-error: true
         env:
-          BUILD_URLS_JSON: ${{ needs.detect-and-trigger.outputs.build_urls }}
+          STARTED_BUILD_URL: ${{ steps.build.outputs.build_url }}
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        run: |
-          BUILD_URL=$(python3 -c "import json,os;print(json.loads(os.environ.get('BUILD_URLS_JSON','{}') or '{}').get(os.environ['BATCH_ID'],''))")
-          if [ -z "$BUILD_URL" ]; then
-            echo "::error::No OrchestrAI pipeline build URL for batch ${BATCH_ID}"; exit 1
-          fi
-          echo "build_url=${BUILD_URL}" >> "$GITHUB_OUTPUT"
-          echo "Waiting for OrchestrAI pipeline build ..."
-          # SECURITY: pass credentials via a 0600 netrc file, never as `curl -u
-          # user:token` — argv is world-readable (/proc/<pid>/cmdline, ps) for the
-          # life of each curl, which would leak the pipeline token to any other
-          # process on a shared/persistent self-hosted runner. mktemp creates the
-          # file 0600; printf is a shell builtin, so the token never hits argv.
-          NETRC="$(mktemp)"
-          trap 'rm -f "$NETRC"' EXIT
-          NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
-          printf 'machine %s login %s password %s\n' \
-            "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-          # Bounded poll: 330 min of wall-clock time (not a count of polls, which
-          # each take 15s plus the request) — max_duration (300m) plus 30 min for
-          # the build to wind down, and under GitHub's 360-minute job timeout.
-          DEADLINE=$((SECONDS + 330 * 60))
-          FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
-          finished=""; fails=0
-          while [ "$SECONDS" -lt "$DEADLINE" ]; do
-            if data=$(curl -sf --connect-timeout 10 --max-time 30 --netrc-file "$NETRC" "${BUILD_URL}api/json?tree=result,building" 2>/dev/null); then
-              fails=0
-              building=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('building',True))" 2>/dev/null || echo "True")
-              result=$(echo "$data" | python3 -c "import sys,json;print(json.load(sys.stdin).get('result') or '')" 2>/dev/null || echo "")
-              # The batch result reflects ALL its playbooks; this job's verdict is
-              # resolved per-playbook in the next step from summary.json.
-              if [ "$building" = "False" ] && [ -n "$result" ]; then
-                echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1; break
-              fi
-            else
-              fails=$((fails + 1))
-              if [ "$fails" -ge "$FAIL_MAX" ]; then
-                echo "::error::OrchestrAI pipeline unreachable ($FAIL_MAX consecutive failures)"; exit 1
-              fi
-            fi
-            sleep 15
-          done
-          if [ -z "$finished" ]; then
-            echo "::error::Timed out waiting for OrchestrAI pipeline build"; exit 1
-          fi
+        run: bash .github/scripts/orchestrai_wait_build.sh
 
-      - name: Resolve per-playbook verdict
-        if: always()
-        id: results
+      # !cancelled(): a cancelled job must reach the cancel step below without
+      # first resolving the whole batch against a pipeline that may not answer.
+      - name: Resolve every playbook's verdict
+        if: "!cancelled()"
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
-          PLAYBOOK_ID: ${{ matrix.playbook }}
-          PLATFORM: ${{ matrix.platform }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Resolve per-playbook verdict"), which is where the user-facing !orc
-        # sticky comment comes from. Deliberately duplicated rather than
-        # factored into .github/actions/ — see the rationale on that copy.
-        #
-        # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
-        # INTERRUPTED (the batch never produced results for this playbook).
-        # GitHub has no neutral step result, so 2 still fails the job — but it is
-        # annotated as infrastructure and the artifact records outcome=NOT_RUN,
-        # so the aggregated PR report counts it separately from test failures.
+          DEFER_EXIT: "1"  # the job's result is decided after the retry below
+        run: python3 .github/scripts/orchestrai_batch_verdict.py
+
+      # One new OrchestrAI run, usually on another machine, for the playbooks that
+      # provably never executed (orchestrai_verdict.RETRY_CAUSES: no build, or
+      # planned but never started) -- never a failed test, a test cut off
+      # mid-run (a hang looks the same as a lost machine), or results that could
+      # not be read. And only when the first run has certainly ended: its build
+      # was seen to finish (a wait that gave up proves nothing), and the Control
+      # Plane reports the run terminal and not cancelled, with no build the job
+      # did not see (that build may have run them). Anything less is
+      # reported and left alone, so two runs never hold the same playbooks.
+      # Repo variable ORCHESTRAI_RETRY_NOT_RUN=false turns this off. The retry
+      # steps use !cancelled(), not always(): a cancelled or timed-out job must
+      # never reserve hardware for a new run.
+      - name: Pick playbooks to retry
+        id: pick
+        if: '!cancelled() && vars.ORCHESTRAI_RETRY_NOT_RUN != ''false'''
+        env:
+          BATCHES: ${{ needs.detect-and-trigger.outputs.batches }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          FIRST_BUILD_URL: ${{ steps.build.outputs.build_url }}
+          FIRST_WAIT: ${{ steps.wait.outcome }}
+          FIRST_UNCONFIRMED: ${{ contains(fromJson(needs.detect-and-trigger.outputs.unconfirmed || '[]'), matrix.batch_id) }}
+          RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+          # 1440 - a whole attempt (720) - time to resolve, upload and report.
+          RETRY_START_LIMIT_MINUTES: 660
         run: |
-          rc=0
-          python3 .github/scripts/orchestrai_verdict.py || rc=$?
-          echo "verdict_rc=${rc}" >> "$GITHUB_OUTPUT"
-          if [ "$rc" = "2" ]; then
-            echo "::warning::${PLAYBOOK_ID} (${PLATFORM}) did not run — OrchestrAI infrastructure issue, not a test failure"
+          retry=$(python3 .github/scripts/orchestrai_batch_verdict.py --retryable test-results/batch.json 2>/dev/null || true)
+          if [ -z "$retry" ]; then echo "Nothing to retry"; exit 0; fi
+          names=$(tr "\n" " " <<< "$retry")
+          skip() { echo "::warning::Not retrying ${names}: $1"; echo "> ⚠️ Not retrying ${names}: $1" >> "$GITHUB_STEP_SUMMARY"; exit 0; }
+          elapsed=$(( ($(date +%s) - JOB_START) / 60 ))
+          if [ "$elapsed" -gt "$RETRY_START_LIMIT_MINUTES" ]; then
+            skip "${elapsed} min have passed and a retry can take 720 more"
           fi
-          exit "$rc"
+          if [ "$FIRST_UNCONFIRMED" = "true" ]; then
+            skip "the first run's start got no definite answer; it may have started"
+          fi
+          if [ -n "$FIRST_BUILD_URL" ] && [ "$FIRST_WAIT" != "success" ]; then
+            skip "the first build was not seen to finish (${FIRST_BUILD_URL}); it may still be running"
+          fi
+          status_file=$(mktemp)
+          GITHUB_OUTPUT="$status_file" python3 .github/scripts/orchestrai_trigger.py --run-status || true
+          status=$(sed -n 's/^status=//p' "$status_file")
+          run_build=$(sed -n 's/^build_url=//p' "$status_file")
+          case "$status" in
+            never_started|passed|failed|unstable|error) ;;
+            cancelled) skip "the first run was cancelled" ;;
+            "") skip "the first run's state could not be read; it may still be queued or running" ;;
+            *) skip "the first run is still ${status}" ;;
+          esac
+          # A build this job never saw (the wait gave up or could not read the
+          # run) may have run these playbooks: report them, never run them twice.
+          if [ -z "$FIRST_BUILD_URL" ] && [ -n "$run_build" ]; then
+            skip "the first run started a build this job did not see (${run_build}); they may have run there"
+          fi
+          echo "Retrying (did not run): $(tr "\n" " " <<< "$retry")"
+          RETRY="$retry" python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          batch = json.loads(os.environ["BATCHES"])[os.environ["BATCH_ID"]]
+          batch["playbooks"] = os.environ["RETRY"].split()
+          print("batches_json=" + json.dumps({os.environ["BATCH_ID"]: batch}))
+          print("playbooks=" + json.dumps(batch["playbooks"]))
+          PY
+
+      # The trigger reads orchestrai-config.yml (PyYAML); Detect & Trigger's
+      # install does not reach this job.
+      # Preparing the retry never fails the job: if it fails, nothing is
+      # submitted and the first attempt's results stand.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        id: retry_python
+        continue-on-error: true
+        if: "!cancelled() && steps.pick.outputs.batches_json != ''"
+        with:
+          python-version: '3.12'
+
+      - name: Install the trigger's dependencies
+        id: retry_deps
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_python.outcome == 'success'"
+        run: pip install --quiet pyyaml
+
+      - name: Retry them in a new OrchestrAI run
+        id: retry_trigger
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_deps.outcome == 'success'"
+        env:
+          BATCHES_JSON: ${{ steps.pick.outputs.batches_json }}
+          ORCHESTRAI_RETRY: "1"
+          GIT_REF: ${{ github.ref }}
+          MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
+          ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
+          ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
+          ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL: ${{ vars.ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL }}
+          ORCHESTRAI_LINUX_DRIVER_SOURCE: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCE }}
+          ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON: ${{ vars.ORCHESTRAI_LINUX_DRIVER_SOURCES_JSON }}
+          ORCHESTRAI_RYZENAI_NPU_XRT_URL: ${{ secrets.ORCHESTRAI_RYZENAI_NPU_XRT_URL }}
+          ORCHESTRAI_WINDOWS_DRIVER_SOURCE: ${{ secrets.ORCHESTRAI_WINDOWS_DRIVER_SOURCE }}
+          ORCHESTRAI_WINDOWS_DRIVER: ${{ (inputs.windows_driver != 'default' && inputs.windows_driver) || vars.ORCHESTRAI_WINDOWS_DRIVER || '' }}
+          ORCHESTRAI_WINDOWS_DRIVER_URL: ${{ vars.ORCHESTRAI_WINDOWS_DRIVER_URL }}
+          # The repository and commit the first attempt resolved, never the ref
+          # again: on a schedule, main may have moved since.
+          ORCHESTRAI_PLAYBOOK_REPO: ${{ needs.detect-and-trigger.outputs.playbook_repo }}
+          ORCHESTRAI_PLAYBOOK_SHA: ${{ needs.detect-and-trigger.outputs.playbook_sha }}
+          ORCHESTRAI_REPORTING: ${{ inputs.reporting || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
+          ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
+          ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
+          ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: |
+          if [ -z "$ORCHESTRAI_PLAYBOOK_SHA" ]; then
+            echo "::error::Detect & Trigger recorded no playbook commit; not retrying"; exit 1
+          fi
+          python3 .github/scripts/orchestrai_trigger.py
+
+      # The rest of the retry runs only for an actual retry run of this batch,
+      # and its results replace the first attempt's only when it got a build.
+      - name: Wait for the retry's build to start
+        id: retry_build
+        continue-on-error: true
+        if: "!cancelled() && fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id]"
+        env:
+          RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-build
+
+      - name: Wait for the retry's build
+        id: retry_wait
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_build.outputs.build_url != ''"
+        env:
+          STARTED_BUILD_URL: ${{ steps.retry_build.outputs.build_url }}
+          BATCH_ID: ${{ matrix.batch_id }}
+          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
+          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+        run: bash .github/scripts/orchestrai_wait_build.sh
+
+      - name: Resolve the retried playbooks
+        id: retry_resolve
+        continue-on-error: true
+        if: "!cancelled() && steps.retry_build.outputs.build_url != ''"
+        env:
+          BUILD_URL: ${{ steps.retry_wait.outputs.build_url }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RETRY_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
+          RUN_URL: ${{ fromJson(steps.retry_trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}
+          ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
+          ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+          DEFER_EXIT: "1"
+        run: |
+          cp test-results/batch.json "$RUNNER_TEMP/attempt1.json"
+          BATCH_JSON=$(python3 -c 'import json,os; b=json.loads(os.environ["BATCH_JSON"]); b["playbooks"]=json.loads(os.environ["RETRY_PLAYBOOKS"]); print(json.dumps(b))') \
+          RETRY_OF="$RUNNER_TEMP/attempt1.json" python3 .github/scripts/orchestrai_batch_verdict.py
+
+      - name: Record a retry that produced no results
+        if: "!cancelled() && steps.pick.outputs.batches_json != '' && steps.retry_resolve.outcome != 'success'"
+        env:
+          RETRY_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
+          # The first step that did not succeed: preparation, submission, or the build.
+          STAGE: >-
+            ${{ steps.retry_deps.outcome != 'success' && 'could not be prepared'
+            || !fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] && 'was not accepted by OrchestrAI'
+            || steps.retry_build.outputs.build_url == '' && 'got no build'
+            || 'could not be resolved' }}
+        run: |
+          msg="Retry of $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["RETRY_PLAYBOOKS"])))') ${STAGE}; their first attempt's results stand"
+          echo "::warning::${msg}"
+          echo "> ⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
+
+      # A cancelled or timed-out job stops its runs: nothing else would, and a
+      # queued run would still take machines hours later.
+      - name: Cancel this batch's OrchestrAI runs
+        if: cancelled()
+        timeout-minutes: 5
+        env:
+          RUN_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --cancel
+
+      - name: Batch result
+        if: always()
+        env:
+          BATCH_JSON: ${{ toJson(matrix) }}
+        # Fails only when a required playbook did not pass (after any retry); with
+        # nothing required, when any playbook did not (continue-on-error above).
+        run: python3 .github/scripts/orchestrai_batch_verdict.py --exit-code test-results/batch.json
 
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: batch-results-${{ strategy.job-index }}-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
 
-      - name: Test summary
-        if: always()
+  playbook-results:
+    # PASS / FAIL / NOT RUN for each system (device + OS), then the full gate.
+    name: Results by Device
+    needs: [detect-and-trigger, test-batches]
+    if: always() && needs.detect-and-trigger.outputs.has_entries == 'true'
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: batch-results-*
+          path: batch-results
+      - name: Each system's result
         env:
-          RP_URL: ${{ steps.results.outputs.rp_url }}
-          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
-        # KEEP IN SYNC with the identical step in orchestrai-pr-command.yml
-        # ("Test summary"). See the sync note on the verdict step above.
-        run: |
-          # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
-          # the job summary instead of letting it read as a failed playbook.
-          INFRA_NOTE=$(python3 - <<'PY'
-          import json
-          try:
-              d = json.load(open("test-results/summary.json"))
-          except Exception:
-              d = {}
-          outcome = (d.get("outcome") or "").upper()
-          if outcome in ("NOT_RUN", "INTERRUPTED"):
-              reason = d.get("infrastructure_reason") or "reason not reported by the pipeline"
-              print(f"> ⚠️ **{outcome}** — this playbook produced no test results. "
-                    f"Infrastructure: {reason}")
-          PY
-          )
-          {
-            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
-            echo ""
-            if [ -n "${INFRA_NOTE}" ]; then
-              echo "${INFRA_NOTE}"
-              echo ""
-            fi
-            # Link to the test results: ReportPortal when the run exported there,
-            # otherwise the OrchestrAI run. The pipeline build URL is
-            # intentionally not shown here.
-            if [ -n "${RP_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| ReportPortal | [View Results](${RP_URL}) |"
-            elif [ -n "${RUN_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  test-localized-playbooks:
-    name: Localized Playbooks
-    needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_localized_entries == 'true'
-    uses: ./.github/workflows/orchestrai-test-matrix.yml
-    with:
-      matrix_json: ${{ needs.detect-and-trigger.outputs.localized_matrix }}
-      build_urls: ${{ needs.detect-and-trigger.outputs.build_urls }}
-      run_urls: ${{ needs.detect-and-trigger.outputs.run_urls }}
-    secrets: inherit
+          # Every batch that should report: one without an artifact is NO RESULTS.
+          EXPECTED_BATCHES: ${{ needs.detect-and-trigger.outputs.batch_matrix }}
+        run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
 
   test-gate:
     name: Test Gate (Required)
-    needs: [detect-and-trigger, test-playbooks, test-localized-playbooks]
+    needs: [detect-and-trigger, test-batches, playbook-results]
     if: always()
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Check required tests
         run: |
           echo "detect-and-trigger: ${{ needs.detect-and-trigger.result }}"
-          echo "English playbooks:  ${{ needs.test-playbooks.result }}"
-          echo "Localized playbooks:${{ needs.test-localized-playbooks.result }}"
-          # A failure or cancellation in detect/matrix/trigger skips both test
+          echo "batches:            ${{ needs.test-batches.result }}"
+          # A failure or cancellation in detect/matrix/trigger skips the batch
           # jobs, so require success here rather than checking only "failure".
           if [ "${{ needs.detect-and-trigger.result }}" != "success" ]; then
             echo "::error::Detect/trigger did not succeed — the pipeline did not run"; exit 1
           fi
-          if [ "${{ needs.detect-and-trigger.outputs.has_english_entries }}" = "true" ] \
-             && [ "${{ needs.test-playbooks.result }}" != "success" ]; then
-            echo "::error::Required English tests did not complete successfully"; exit 1
-          fi
-          if [ "${{ needs.detect-and-trigger.outputs.has_localized_entries }}" = "true" ] \
-             && [ "${{ needs.test-localized-playbooks.result }}" != "success" ]; then
-            echo "::error::Required localized tests did not complete successfully"; exit 1
+          # A batch job fails only when one of its required playbooks did not
+          # pass (batches with nothing required are continue-on-error).
+          if [ "${{ needs.detect-and-trigger.outputs.has_entries }}" = "true" ] \
+             && [ "${{ needs.test-batches.result }}" != "success" ]; then
+            echo "::error::Required playbooks did not all pass — see Results by Device"; exit 1
           fi
           echo "All required tests passed (or none were needed)"
