@@ -1420,7 +1420,11 @@ def list_localized_playbook_ids(repo_root: Path, locale: str) -> list[str]:
     for category in ("core", "supplemental"):
         base = repo_root / "localized-playbooks" / locale / category
         if base.is_dir():
-            ids.update(p.name for p in base.iterdir() if (p / "playbook.json").exists())
+            # A same-id overlay may be a README.md alone; it inherits English metadata.
+            ids.update(
+                p.name for p in base.iterdir()
+                if (p / "playbook.json").exists() or (p / "README.md").exists()
+            )
     return sorted(ids)
 
 

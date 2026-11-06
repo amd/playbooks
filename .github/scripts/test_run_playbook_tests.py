@@ -104,10 +104,6 @@ class TimeoutOutputTest(unittest.TestCase):
                 os.kill(int(pidfile.read_text()), 0)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class LocalizedMetadataTest(unittest.TestCase):
     def _repo(self, d, localized_json=None, english=True):
         root = Path(d)
@@ -144,8 +140,17 @@ class LocalizedMetadataTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "missing"):
                 rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)
 
+    def test_readme_only_overlay_is_listed(self):
+        with tempfile.TemporaryDirectory() as d:
+            ids = rpt.list_localized_playbook_ids(self._repo(d), "zh-CN")
+        self.assertEqual(ids, ["pb"])
+
     def test_region_only_playbook_without_metadata_fails(self):
         with tempfile.TemporaryDirectory() as d:
             root = self._repo(d, english=False)
             with self.assertRaisesRegex(ValueError, "ID mismatch"):
                 rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)
+
+
+if __name__ == "__main__":
+    unittest.main()
