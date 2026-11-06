@@ -17,9 +17,9 @@ sudo reboot
 ```
 
 **在创建的虚拟环境中安装 ROCm。**
-> **注意**：请确保在继续操作前虚拟环境已处于激活状态。
+> **注意**：请确保在继续操作前虚拟环境处于激活状态。
 
-<!-- @device:halo_box,halo -->
+<!-- @device:halo_box,halo,grgh -->
 <!-- @test:id=install-rocm timeout=300 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "rocm[libraries,devel,device-gfx1151]==10.0.0"
