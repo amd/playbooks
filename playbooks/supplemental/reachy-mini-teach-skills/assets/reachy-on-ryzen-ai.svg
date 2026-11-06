@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+  </defs>
+  <rect width="960" height="440" fill="#ffffff"/>
+
+  <!-- the AMD Ryzen AI processor -->
+  <rect x="20" y="20" width="700" height="400" rx="14" fill="#f6f6f6" stroke="#222" stroke-width="2"/>
+  <text x="40" y="52" font-size="20" font-weight="700" fill="#222">AMD Ryzen™ AI processor</text>
+  <text x="40" y="74" font-size="13" fill="#555">one chip: CPU, GPU and NPU share the same memory</text>
+
+  <!-- iGPU -->
+  <rect x="40" y="92" width="320" height="170" rx="10" fill="#fde8e8" stroke="#ED1C24" stroke-width="2.5"/>
+  <text x="56" y="120" font-size="17" font-weight="700" fill="#b0101a">Radeon™ iGPU</text>
+  <text x="56" y="140" font-size="12" fill="#7a1a1a">Ollama · AMD ROCm™ software on Linux</text>
+  <rect x="56" y="152" width="288" height="44" rx="8" fill="#ffffff" stroke="#ED1C24"/>
+  <text x="70" y="172" font-size="14" font-weight="600" fill="#222">Qwen3.5 2B: chat (Tasks 1, 2)</text>
+  <text x="70" y="189" font-size="12" fill="#555">reads your message, writes Reachy's reply</text>
+  <rect x="56" y="204" width="288" height="44" rx="8" fill="#ffffff" stroke="#ED1C24"/>
+  <text x="70" y="224" font-size="14" font-weight="600" fill="#222">Qwen3.5 2B: vision (Task 3)</text>
+  <text x="70" y="241" font-size="12" fill="#555">looks at Reachy's camera picture</text>
+
+  <!-- CPU -->
+  <rect x="380" y="92" width="320" height="170" rx="10" fill="#e6f0fb" stroke="#1f6fc5" stroke-width="2.5"/>
+  <text x="396" y="120" font-size="17" font-weight="700" fill="#14508f">Ryzen™ CPU cores</text>
+  <text x="396" y="140" font-size="12" fill="#1f3f66">Python, in your virtual environment</text>
+  <text x="396" y="166" font-size="14" fill="#222">robot simulation (MuJoCo)</text>
+  <text x="396" y="190" font-size="14" fill="#222">Piper voice (Tasks 2, 3)</text>
+  <text x="396" y="214" font-size="14" fill="#222">emotions, gestures, lip-sync</text>
+  <text x="396" y="238" font-size="14" fill="#222">the web app (Gradio)</text>
+
+  <!-- unified memory -->
+  <rect x="40" y="278" width="660" height="56" rx="10" fill="#fff4d6" stroke="#c98a00" stroke-width="2"/>
+  <text x="56" y="303" font-size="16" font-weight="700" fill="#7a5200">Unified memory</text>
+  <text x="56" y="322" font-size="12" fill="#7a5200">the model (2.7 GB) is loaded once and used by the iGPU directly: no copy over a bus</text>
+
+  <!-- NPU -->
+  <rect x="40" y="348" width="660" height="56" rx="10" fill="#efefef" stroke="#999" stroke-dasharray="6 4" stroke-width="2"/>
+  <text x="56" y="373" font-size="16" font-weight="700" fill="#777">NPU</text>
+  <text x="56" y="392" font-size="12" fill="#777">not used in this lab: free for always-on tasks (see Next Steps)</text>
+
+  <!-- outside -->
+  <rect x="760" y="92" width="180" height="80" rx="10" fill="#eef7ee" stroke="#2e8b3e" stroke-width="2"/>
+  <text x="776" y="120" font-size="16" font-weight="700" fill="#1f6a2c">Your browser</text>
+  <text x="776" y="142" font-size="12" fill="#1f6a2c">Reachy, its camera,</text>
+  <text x="776" y="158" font-size="12" fill="#1f6a2c">its voice, the chat</text>
+
+  <rect x="760" y="198" width="180" height="80" rx="10" fill="#f3eefb" stroke="#6b3fb3" stroke-width="2"/>
+  <text x="776" y="226" font-size="16" font-weight="700" fill="#4b2a85">Internet</text>
+  <text x="776" y="248" font-size="12" fill="#4b2a85">Edge-TTS voice,</text>
+  <text x="776" y="264" font-size="12" fill="#4b2a85">Task 1 only</text>
+
+  <line x1="702" y1="140" x2="756" y2="132" stroke="#444" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="702" y1="214" x2="756" y2="232" stroke="#444" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>
