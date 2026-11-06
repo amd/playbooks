@@ -52,6 +52,10 @@
       "linux",
       "windows"
     ],
+    "grgh": [
+      "linux",
+      "windows"
+    ],
     "rx7900xt": [
       "linux",
       "windows"
@@ -137,5 +141,5 @@
     }
   ],
   "published_date": "2025-12-30",
-  "updated_date": "2026-10-01"
+  "updated_date": "2026-10-20"
 }

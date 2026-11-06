@@ -17,7 +17,7 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 **Hardware**: AMD Radeon™ GPU with ROCm support  
 **Framework**: PyTorch + Hugging Face (Transformers, PEFT, Transformer Reinforcement Learning (TRL))
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 > **Note:** 
 > - Full fine-tuning requires at least **64 GB of system RAM**, with at least **32 GB of it available to the GPU** (the 32 GB is part of the 64 GB, not in addition to it).
 > - You can also try other model architectures, including **GPT-OSS-20B**, by substituting the model in the provided training scripts.
@@ -56,7 +56,7 @@ This tutorial provides step-by-step examples for fine-tuning a large language mo
 - How to save and deploy your fine-tuned model
 - How to monitor training and debug common issues
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -91,7 +91,7 @@ source finetune-venv/bin/activate
 <!-- @setup:id=activate-venv command="source finetune-venv/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -121,7 +121,7 @@ finetune-venv\Scripts\activate
 <!-- @setup:id=activate-venv command="finetune-venv\Scripts\activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=180 -->
 ```powershell
 python -m venv finetune-venv
@@ -247,7 +247,7 @@ sys.exit(r.returncode)
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @test:id=quick-train-full-finetuning timeout=1200 hidden=True setup=activate-venv -->
 ```python
 import os
@@ -454,7 +454,7 @@ print("PASS: QLoRA output looks correct")
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @test:id=verify-full-finetuning-output timeout=300 hidden=True setup=activate-venv -->
 ```python
 import glob
