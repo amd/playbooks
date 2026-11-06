@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 **Install PyTorch with AMD ROCm™ software support** in the created virtual environment:
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://stable.repo.amd.com/rocm/whl-next/ "torch[device-gfx1151]==2.14.0+rocm10.1.0" "torchvision[device-gfx1151]==0.29.0a0+rocm10.1.0" "torchaudio==2.11.0.3+rocm10.1.0"

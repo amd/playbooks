@@ -38,7 +38,7 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Advanced: increasing GPU memory (optional)
 
 You may need to increase the memory allocated to the GPU to run certain larger
@@ -77,7 +77,7 @@ Click **Apply Changes** and reboot for the change to take effect.
 </p>
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 On Linux, raise the shared **GTT/TTM** pool so the GPU can map more system memory.
 AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB) so the
 maximum is available as shared memory.
