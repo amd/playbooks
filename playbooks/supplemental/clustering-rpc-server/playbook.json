@@ -1,7 +1,7 @@
 {
   "id": "clustering-rpc-server",
-  "title": "Clustering Two Ryzen™ AI Halos with RPC",
-  "description": "Set up distributed inference using RPC server across two Ryzen™ AI Halo devices with llama.cpp to run 350B+ models",
+  "title": "Clustering Ryzen™ AI Halos with RPC",
+  "description": "Set up distributed inference with llama.cpp's RPC engine across Ryzen™ AI Halo devices (2 or 4 nodes, Ethernet or USB4) to run 350B+ models",
   "time": 90,
   "unsupported_platforms": {
     "stx": [
@@ -117,5 +117,50 @@
     }
   ],
   "published_date": "2026-02-03",
-  "updated_date": "2026-10-26"
+  "updated_date": "2026-10-01",
+  "toggles": [
+    {
+      "id": "link",
+      "label": "Interconnect",
+      "default": "ethernet",
+      "options": [
+        {
+          "value": "ethernet",
+          "label": "Ethernet"
+        },
+        {
+          "value": "usb4",
+          "label": "USB4"
+        }
+      ],
+      "constraints": [
+        {
+          "when": "usb4",
+          "restrict": {
+            "nodes": [
+              "2"
+            ],
+            "os": [
+              "linux"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "nodes",
+      "label": "Nodes",
+      "default": "2",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 Nodes"
+        },
+        {
+          "value": "4",
+          "label": "4 Nodes"
+        }
+      ]
+    }
+  ]
 }

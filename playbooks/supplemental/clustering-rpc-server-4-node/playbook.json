@@ -79,7 +79,7 @@
   "isNew": true,
   "isFeatured": false,
   "developed": true,
-  "published": true,
+  "published": false,
   "tags": [
     "clustering",
     "rpc",
@@ -97,5 +97,7 @@
     }
   ],
   "published_date": "2026-09-01",
-  "updated_date": "2026-10-26"
+  "updated_date": "2026-10-01",
+  "_consolidatedInto": "clustering-rpc-server",
+  "_consolidationNote": "Merged into the toggle-based playbook; kept on disk pending web-team toggle support, safe to delete afterward."
 }
