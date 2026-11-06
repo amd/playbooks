@@ -232,7 +232,7 @@ class BatchVerdict(unittest.TestCase):
 
 
 class FetchCache(unittest.TestCase):
-    def test_a_batch_downloads_each_url_once_and_never_caches_a_failure(self):
+    def test_a_batch_downloads_each_url_once_and_gives_up_on_a_failure_once(self):
         import orchestrai_verdict as v
         calls = []
 
@@ -257,9 +257,25 @@ class FetchCache(unittest.TestCase):
                 mock.patch.object(v.urllib.request, "urlopen", urlopen), \
                 mock.patch.object(v.time, "sleep"):
             self.assertEqual([v.fetch("https://b/summary", "u", "t") for _ in range(3)], ["{}"] * 3)
+            self.assertEqual([v.fetch("https://b/down", "u", "t") for _ in range(20)], [None] * 20)
+        # A failure is retried (3 attempts), then kept: 20 playbooks of an
+        # unreachable build cost one round of retries, not twenty.
+        self.assertEqual(calls, ["https://b/summary"] + ["https://b/down"] * 3)
+
+    def test_without_a_cache_each_failure_is_retried(self):
+        import orchestrai_verdict as v
+        calls = []
+
+        def urlopen(req, timeout):
+            calls.append(1)
+            raise OSError("unreachable")
+
+        with mock.patch.dict(os.environ, {}), \
+                mock.patch.object(v.urllib.request, "urlopen", urlopen), \
+                mock.patch.object(v.time, "sleep"):
+            os.environ.pop("ORCHESTRAI_FETCH_CACHE", None)
             self.assertEqual([v.fetch("https://b/down", "u", "t") for _ in range(2)], [None, None])
-        # A transient failure is retried (3 attempts each time), never cached.
-        self.assertEqual(calls, ["https://b/summary"] + ["https://b/down"] * 6)
+        self.assertEqual(len(calls), 6)
 
     def test_the_cache_returns_the_exact_body(self):
         import orchestrai_verdict as v
@@ -327,11 +343,16 @@ class Workflows(unittest.TestCase):
         # A start with no definite answer may have made a run: never retry it.
         self.assertIn("needs.detect-and-trigger.outputs.unconfirmed", pick["env"]["FIRST_UNCONFIRMED"])
         self.assertIn('[ "$FIRST_UNCONFIRMED" = "true" ]', pick["run"])
+        # A build the job never saw may have run them: skip, never rerun.
+        self.assertIn('[ -z "$FIRST_BUILD_URL" ] && [ -n "$run_build" ]', pick["run"])
 
     def test_a_cancelled_job_cancels_its_first_and_retry_runs(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
         step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
         self.assertEqual(step["if"], "cancelled()")
+        # Nothing before it keeps working once the job is cancelled.
+        before = job["steps"][:job["steps"].index(step)]
+        self.assertFalse([s.get("name") for s in before if "always()" in str(s.get("if", ""))])
         self.assertIn("needs.detect-and-trigger.outputs.run_ids", step["env"]["RUN_IDS"])
         self.assertIn("steps.retry_trigger.outputs.run_ids", step["env"]["RUN_IDS"])
 
