@@ -157,6 +157,22 @@ class TestRetryCause(unittest.TestCase):
             "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "status": "PASSED"}}}),
             "no_tests_recorded")
 
+    def test_a_missing_group_never_ran_only_with_evidence(self):
+        planned = {"expected_groups": ["playbook-alpha"], "groups": {}}
+        # Its suite started and never reported: cut off, not never run.
+        code, doc, _ = run_verdict(planned, "alpha", console=(
+            'Started suite "playbook-alpha #1" id=0a1b\n'))
+        self.assertEqual((doc["outcome"], doc["cause"], code), ("INTERRUPTED", "did_not_finish", 2))
+        # The console could not be read: nothing proves it never started.
+        self.assertEqual(self.cause(planned, console=UNREACHABLE), "evidence_unavailable")
+        # The batch only says INTERRUPTED and lists no plan: it may have run.
+        self.assertEqual(self.cause({"status": "INTERRUPTED", "groups": {}}), "interrupted")
+        # A readable console with no start, and a plan or a batch that ran nothing: never ran.
+        self.assertEqual(self.cause(planned), "never_ran")
+        self.assertEqual(self.cause({"status": "NOT_RUN", "groups": {}}), "never_ran")
+        self.assertEqual(self.cause({"status": "INTERRUPTED", "groups": {},
+                                     "results": {"passed": 0, "failed": 0}}), "never_ran")
+
     def test_a_verdict_crash_is_not_retryable(self):
         def boom(*a, **k):
             raise RuntimeError("x")

@@ -236,6 +236,7 @@ jobs:
           ENGLISH_BATCHES: ${{ steps.build-english.outputs.batches }}
           LOCALIZED_MATRIX: ${{ steps.build-localized.outputs.matrix }}
           LOCALIZED_BATCHES: ${{ steps.build-localized.outputs.batches }}
+          BATCH_JOBS: "true"  # one Test job per batch: bound the batch matrix
         run: python3 .github/scripts/orchestrai_prepare_matrices.py
 
       # Checked before anything is reserved: the Test jobs outlive a
@@ -341,8 +342,10 @@ jobs:
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
+      # !cancelled(): a cancelled job must reach the cancel step below without
+      # first resolving the whole batch against a pipeline that may not answer.
       - name: Resolve every playbook's verdict
-        if: always()
+        if: "!cancelled()"
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
           BATCH_JSON: ${{ toJson(matrix) }}
@@ -359,7 +362,8 @@ jobs:
       # mid-run (a hang looks the same as a lost machine), or results that could
       # not be read. And only when the first run has certainly ended: its build
       # was seen to finish (a wait that gave up proves nothing), and the Control
-      # Plane reports the run terminal and not cancelled. Anything less is
+      # Plane reports the run terminal and not cancelled, with no build the job
+      # did not see (that build may have run them). Anything less is
       # reported and left alone, so two runs never hold the same playbooks.
       # Repo variable ORCHESTRAI_RETRY_NOT_RUN=false turns this off. The retry
       # steps use !cancelled(), not always(): a cancelled or timed-out job must
@@ -398,12 +402,18 @@ jobs:
           status_file=$(mktemp)
           GITHUB_OUTPUT="$status_file" python3 .github/scripts/orchestrai_trigger.py --run-status || true
           status=$(sed -n 's/^status=//p' "$status_file")
+          run_build=$(sed -n 's/^build_url=//p' "$status_file")
           case "$status" in
             never_started|passed|failed|unstable|error) ;;
             cancelled) skip "the first run was cancelled" ;;
             "") skip "the first run's state could not be read; it may still be queued or running" ;;
             *) skip "the first run is still ${status}" ;;
           esac
+          # A build this job never saw (the wait gave up or could not read the
+          # run) may have run these playbooks: report them, never run them twice.
+          if [ -z "$FIRST_BUILD_URL" ] && [ -n "$run_build" ]; then
+            skip "the first run started a build this job did not see (${run_build}); they may have run there"
+          fi
           echo "Retrying (did not run): $(tr "\n" " " <<< "$retry")"
           RETRY="$retry" python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os

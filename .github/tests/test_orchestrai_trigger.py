@@ -175,6 +175,15 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertNotIsInstance(lost.exception, trigger.Refused)
         self.assertNotIsInstance(unreadable.exception, trigger.Refused)
 
+    def test_a_refused_replay_of_a_lost_start_is_not_a_refusal(self):
+        # The first POST may have started the run; the replay's 4xx says
+        # nothing about it, so the batch must stay unconfirmed.
+        for first in (OSError("reset"), (503, None),
+                      (409, {"error": {"code": "idempotency_in_progress"}})):
+            with self.subTest(first=first), self.assertRaises(ValueError) as caught:
+                self.start(FakeApi(first, (422, {"error": {"code": "invalid_request"}})))
+            self.assertNotIsInstance(caught.exception, trigger.Refused)
+
     def test_cancel_gives_up_on_one_run_in_time_to_cancel_the_next(self):
         clock = iter(range(0, 10_000, 30))
         fake = FakeApi(*[(503, None)] * 3, (202, {"run": {"id": "r2"}}))
@@ -278,15 +287,20 @@ class ReportingSwitch(unittest.TestCase):
             if isinstance(answers[bid], Exception):
                 raise answers[bid]
             return answers[bid]
+        err = io.StringIO()
         with tempfile.NamedTemporaryFile("r") as out:
             with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
                     mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
                     mock.patch.object(trigger, "start_run", start), \
-                    contextlib.redirect_stderr(io.StringIO()):
+                    contextlib.redirect_stderr(err):
                 trigger.main()
             outputs = dict(line.split("=", 1) for line in out.read().splitlines())
         self.assertEqual(json.loads(outputs["run_ids"]), {"linux/ok": "r1"})
         self.assertEqual(json.loads(outputs["unconfirmed"]), ["linux/lost"])
+        # Only a definite refusal is called one; an unconfirmed start says to check first.
+        self.assertIn("linux/no: the Control Plane refused the run", err.getvalue())
+        self.assertNotIn("linux/lost: the Control Plane refused", err.getvalue())
+        self.assertIn("linux/lost: the run's start was not confirmed", err.getvalue())
 
     def run_status(self, rid, api, wait=0):
         with tempfile.NamedTemporaryFile("r") as out:
@@ -306,6 +320,14 @@ class ReportingSwitch(unittest.TestCase):
         def down(*a):
             raise ValueError("503")
         self.assertEqual(self.run_status("r1", down), "")  # unknown: the retry is skipped
+
+    def test_run_status_reports_a_build_the_job_may_not_have_seen(self):
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {
+            "status": "failed", "pipeline_url": "https://j/job/p/9"}}),
+            "status=failed\nbuild_url=https://j/job/p/9/\n")
+        # A Jenkins queue item is not a build.
+        self.assertEqual(self.run_status("r1", lambda *a: {"run": {
+            "status": "error", "pipeline_url": "https://j/queue/item/4/"}}), "status=error\n")
 
     def test_run_status_waits_for_a_run_that_is_still_closing(self):
         # Its build has ended but the run still reads "running" for a moment.

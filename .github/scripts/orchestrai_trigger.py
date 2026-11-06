@@ -475,6 +475,11 @@ def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=Fals
     never start a second run. A fresh OIDC token is used for every call.
     """
     deadline, delay = time.monotonic() + (retry_seconds or API_RETRY_SECONDS), 2
+    # Once an attempt may have reached the server (a lost answer, a 5xx, a
+    # request still in progress), a later 4xx refuses only that replay: the
+    # first may have started a run. Only a refusal with no such attempt
+    # before it proves nothing started.
+    ambiguous = False
     while True:
         headers = {"Authorization": "Bearer " + oidc_token(cp["oidc_audience"]),
                    "Accept": "application/json", "Content-Type": "application/json",
@@ -492,6 +497,8 @@ def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=Fals
         err = payload.get("error") if isinstance(payload, dict) else None
         err = err if isinstance(err, dict) else {}
         code = err.get("code", "")
+        if status is None or status == 408 or status >= 500 or code == "idempotency_in_progress":
+            ambiguous = True
         if (status is None or status in (408, 429) or status >= 500
                 or code == "idempotency_in_progress") and time.monotonic() < deadline:
             time.sleep(delay)
@@ -500,7 +507,8 @@ def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=Fals
         request_id = payload.get("request_id", "") if isinstance(payload, dict) else ""
         # Only a 4xx that is not "try again" proves nothing started; a 2xx
         # without a readable body may have started a run.
-        refused = status and 400 <= status < 500 and status not in (408, 429) and code != "idempotency_in_progress"
+        refused = (status and 400 <= status < 500 and status not in (408, 429)
+                   and code != "idempotency_in_progress" and not ambiguous)
         raise (Refused if refused else ValueError)(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
                          + (f" (request_id={request_id})" if request_id else ""))
 
@@ -608,8 +616,8 @@ def await_build_main(config_path):
     """
     rid, bid = os.environ.get("RUN_ID", ""), os.environ.get("BATCH_ID", "")
     if not rid:
-        print(f"::error::batch {bid} has no OrchestrAI run (it failed to start; "
-              f"see Detect & Trigger)", file=sys.stderr)
+        print(f"::error::batch {bid} has no OrchestrAI run (it failed to start, or its "
+              f"start was not confirmed; see Detect & Trigger)", file=sys.stderr)
         return
     try:
         # The Control Plane holds a queued run for its acquire_timeout; never
@@ -629,9 +637,11 @@ def run_status_main():
     """--run-status: the Control Plane's status for one run (RUN_ID), written as
     status=<status> to $GITHUB_OUTPUT: never_started without a run, nothing when
     it cannot be read. A retry needs the first run to have ended, or two runs of
-    the same playbooks could hold machines at once."""
+    the same playbooks could hold machines at once. Also writes build_url= when
+    the run started a pipeline build: its tests may have run even if the job
+    never saw that build (--await-build timed out or could not read the run)."""
     rid = os.environ.get("RUN_ID", "")
-    status = "never_started"
+    status, build_url = "never_started", ""
     if rid:
         # A run whose build has just ended can read "running" for a while
         # longer while the Control Plane closes it, so wait for it to end.
@@ -646,11 +656,17 @@ def run_status_main():
             if status in TERMINAL or time.monotonic() >= deadline:
                 break
             time.sleep(POLL_SECONDS)
-        print(f"run {rid}: {status or 'no status'}", file=sys.stderr)
+        url = run.get("pipeline_url") or ""
+        if url and "/queue/" not in url:  # a Jenkins queue item is not a build
+            build_url = url.rstrip("/") + "/"
+        print(f"run {rid}: {status or 'no status'}" + (f", build {build_url}" if build_url else ""),
+              file=sys.stderr)
     out = os.environ.get("GITHUB_OUTPUT")
     if status and out:
         with open(out, "a") as f:
             f.write(f"status={status}\n")
+            if build_url:
+                f.write(f"build_url={build_url}\n")
 
 
 def cancel_main():
@@ -776,12 +792,16 @@ def main():
     for bid, batch, plan, builds in prepared:
         try:
             runs[bid] = start_run(cp, bid, plan, builds, batch["platform"], publisher, sha)
-        except ValueError as exc:
-            if not isinstance(exc, Refused):
-                # Anything short of a refusal (a lost answer, a token that could
-                # not be refreshed) may have left a run: never retry such a batch.
-                unconfirmed.append(bid)
+        except Refused as exc:
             print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
+            continue
+        except ValueError as exc:
+            # Anything short of a refusal (a lost answer, a token that could
+            # not be refreshed) may have left a run: never retry such a batch.
+            unconfirmed.append(bid)
+            print(f"::error::{bid}: the run's start was not confirmed and it may have started; "
+                  f"check OrchestrAI for a run of this batch before resubmitting: {exc}",
+                  file=sys.stderr)
             continue
         # The run's Tests tab as a full page: the result tables link here when
         # there is no ReportPortal launch (reporting=api).
@@ -811,8 +831,10 @@ def main():
     if not runs:
         # Nothing triggered at all: fail hard. There is no partial run to
         # preserve, and every downstream job would otherwise fail identically.
-        print("::error::No OrchestrAI runs were started — every batch "
-              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)}).",
+        print("::error::No OrchestrAI run was confirmed started — every batch "
+              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)})."
+              + (f" Not confirmed, may have started: {', '.join(unconfirmed)}."
+                 if unconfirmed else ""),
               file=sys.stderr)
         sys.exit(1)
     if failed:
@@ -823,7 +845,9 @@ def main():
         # is not reported green.
         print(f"::error::{len(failed)} batch(es) failed to start and will report "
               f"no build URL downstream: {', '.join(failed)}. The other "
-              f"{len(runs)} batch(es) were started and will run.",
+              f"{len(runs)} batch(es) were started and will run."
+              + (f" Not confirmed, may have started (check OrchestrAI): {', '.join(unconfirmed)}."
+                 if unconfirmed else ""),
               file=sys.stderr)
 
 
