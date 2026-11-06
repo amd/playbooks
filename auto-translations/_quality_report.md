@@ -32,7 +32,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
 | tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
 | uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 82 | 92.9 | 78 | Claude-Opus-4.8 |
+| zh-CN | 80 | 92.8 | 78 | Claude-Opus-4.8 |
 | zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
 
 ## Files below 85 (94)

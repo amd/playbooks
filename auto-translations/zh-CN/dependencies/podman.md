@@ -8,7 +8,6 @@ SPDX-License-Identifier: MIT
 
 Podman 是适用于 Linux 的容器化软件。
 
-
 **步骤 1**：安装核心 Podman 引擎和独立的 Compose V2 解析插件。
 
 ```bash
@@ -22,7 +21,7 @@ podman --version
 podman-compose --version
 ```
 
-**步骤 3**：启用系统级 Podman API 套接字，以便 Compose 插件能够与容器运行时通信。
+**步骤 3**：启用系统级的 Podman API 套接字，以便 Compose 插件能够与容器运行时进行通信。
 
 ```bash
 sudo systemctl enable --now podman.socket
