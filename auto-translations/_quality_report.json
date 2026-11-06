@@ -169,8 +169,8 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
+      "files_scored": 82,
+      "mean": 92.9,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
@@ -388,9 +388,9 @@
     },
     {
       "locale": "zh-CN",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 78,
-      "issues": "Trademark symbol misplaced onto LLM instead of Unsloth; slight rephrasing but adequate."
+      "issues": "Title mistranslates 'Remote Development with AMD Sync'; word order wrong, 'AMD Sync' rendered as '同步'."
     },
     {
       "locale": "zh-TW",
@@ -706,9 +706,21 @@
     },
     {
       "locale": "zh-CN",
-      "file": "playbooks/supplemental/clustering-rccl/playbook.json",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
       "score": 82,
-      "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
+      "issues": "Trademark symbol misplaced; '内存高效的微调LLM' slightly awkward phrasing, should be '内存高效的大语言模型微调'."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json",
+      "score": 82,
+      "issues": "Title mistranslated: 'Running...with ds4' is instruction/gerund, not 'is running'; alters meaning slightly."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/clustering-rccl-4-node/playbook.json",
+      "score": 82,
+      "issues": "Title 'Clustering' rendered as '聚合', slightly off; title omits full context; 'with RCCL' placement minor awkwardness."
     },
     {
       "locale": "zh-TW",

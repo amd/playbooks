@@ -39,7 +39,7 @@ In this playbook, we use Lemonade to serve a local LLM that n8n connects to for 
 
 n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -69,7 +69,7 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @prereq:podman -->
 <!-- @os:end -->
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
@@ -207,12 +207,28 @@ npm -v
 
 ## Installing n8n
 <!-- @os:windows -->
-Install n8n globally using npm.
+> [!IMPORTANT]
+> **n8n supports Node.js 20.19 through 24.x only**
+> ([n8n install docs](https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm)).
+> The current release on nodejs.org is newer than this. Installing n8n on Node 26 fails on
+> Windows with `EBADPLATFORM` or a native build error, and the resulting install throws
+> `MODULE_NOT_FOUND`. Confirm your version before continuing:
+>
+> ```cmd
+> node --version
+> ```
+>
+> If it is outside 20.19&ndash;24.x, install a supported version with
+> [nvm-windows](https://github.com/coreybutler/nvm-windows) (`nvm install 24.10.0 && nvm use 24.10.0`).
+
+Install n8n globally using npm. Pin the version &mdash; at time of writing the latest n8n release
+declares a Linux-only binary as a hard dependency and fails to install on Windows with
+`EBADPLATFORM`, on every supported Node version:
 
 > **Note**: You may see some npm warnings. This is expected.
 
 ```bash
-npm install -g n8n
+npm install -g n8n@2.45.6
 ```
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
@@ -356,7 +372,7 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo -->
+<!-- @device:halo,grgh -->
 ```bash
 lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
@@ -386,7 +402,7 @@ When you first open n8n, you'll be prompted to create an account or log in:
 We've provided a pre-built workflow that you can import directly:
 
 1. Download the following workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the + Button in the top left, and then **Add workflow**.
+2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the **+** button in the top left, choose **New workflow**, then **Build workflow**.
 3. Click the **...** menu (three dots) in the top right bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
 5. The workflow will appear on the canvas

@@ -261,6 +261,27 @@ class TestInfrastructure(unittest.TestCase):
         self.assertEqual(doc["failed"], 0)
         self.assertEqual(doc["infrastructure_reason"], "machine acquisition timed out")
 
+    def test_test_cut_off_by_the_time_limit_is_interrupted(self):
+        # Jenkins #2148: speech2speech was running when the batch hit its
+        # 300-minute limit.
+        summary = {"expected_groups": ["playbook-alpha"],
+                   "groups": {"playbook-alpha": {
+                       "passed": 0, "failed": 0, "skipped": 0, "errors": 1,
+                       "did_not_finish": 1, "status": "FAILED"}}}
+        code, doc, _ = run_verdict(summary, "alpha")
+        self.assertEqual(code, 2)
+        self.assertEqual(doc["outcome"], "INTERRUPTED")
+        self.assertEqual(doc["failed"], 0)
+        self.assertIn("did not finish", doc["infrastructure_reason"])
+
+    def test_did_not_finish_beside_a_real_failure_stays_failed(self):
+        summary = {"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 1, "skipped": 0, "errors": 1,
+            "did_not_finish": 1, "status": "FAILED"}}}
+        code, doc, _ = run_verdict(summary, "alpha")
+        self.assertEqual(code, 1)
+        self.assertEqual(doc["outcome"], "FAILED")
+
     def test_missing_build_url_is_infrastructure_not_a_failure(self):
         # This is the 79-job shape: no build means NO playbook in the batch
         # ran, so it must not fan out into N alleged test failures.

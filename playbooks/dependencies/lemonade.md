@@ -9,16 +9,16 @@ SPDX-License-Identifier: MIT
 #### Installing Lemonade
 
 <!-- @os:windows -->
-Download the latest installer from [lemonade-server.ai](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) and run the `.msi` file. 
+Download the latest installer from [lemonade-server.ai](https://lemonade-server.ai/docs/guide/install/) and run the `.msi` file. Two installers are published, and they are not interchangeable:
+
+| Installer | Contents |
+|-----------|----------|
+| [`lemonade.msi`](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade.msi) | Server **and** the Lemonade desktop app. Use this one unless you have a reason not to. |
+| [`lemonade-server-minimal.msi`](https://github.com/lemonade-sdk/lemonade/releases/latest/download/lemonade-server-minimal.msi) | Server only, no desktop app. |
 
 After installation:
 - The `lemonade` CLI is added to your system PATH automatically
 - Lemonade server is expected to run in the background automatically
-
-You can also install silently from the command line:
-```cmd
-msiexec /i lemonade-server-minimal.msi /qn
-```
 <!-- @os:end -->
 
 <!-- @os:linux -->
