@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-本教程提供了使用 PyTorch 和 ROCm 对大语言模型（LLM）进行微调的分步示例。内容涵盖了从标准微调到内存高效的参数高效微调（PEFT）策略等多种技术，方便您根据自身需求轻松调整模型。
+本教程提供了使用 PyTorch 和 ROCm 对大语言模型（LLM）进行微调的分步示例。内容涵盖了从标准微调到内存高效的参数高效微调（PEFT）策略等多种技术，方便你根据自身需求轻松调整模型。
 
 **使用的模型**：LLM-Research/gemma-3-4b-it（google/gemma-3-4b-it）  *（如为受限模型，请参阅 [启用 ModelScope 认证](#启用-modelscope-身份验证受限模型或未预安装的自定义模型)）*<br>
 **硬件**：支持 ROCm 的 AMD Radeon™ GPU  
@@ -20,7 +20,7 @@ SPDX-License-Identifier: MIT
 <!-- @device:halo,halo_box -->
 > **注意：** 
 > - 完整微调至少需要 **64 GB 系统内存**，其中至少 **32 GB 可供 GPU 使用**（这 32 GB 是 64 GB 中的一部分，而非额外增加）。
-> - 您也可以尝试其他模型架构，包括 **GPT-OSS-20B**，只需在提供的训练脚本中替换模型即可。
+> - 你也可以尝试其他模型架构，包括 **GPT-OSS-20B**，只需在提供的训练脚本中替换模型即可。
 <!-- @device:end -->
 
 
@@ -50,7 +50,7 @@ SPDX-License-Identifier: MIT
 <!-- @os:end -->
 <!-- @device:end -->
 
-## 您将学到什么
+## 你将学到什么
 
 - 如何使用 PyTorch 和 ROCm，通过 LoRA、QLoRA 和完整微调方式对 LLM 进行微调
 - 如何保存和部署经过微调的模型
@@ -62,7 +62,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 ## 检查软件更新
-> **注意**：如果尚未安装 VS Code，您可以通过 Ryzen AI Developer Center 进行安装。
+> **注意**：如果尚未安装 VS Code，你可以通过 Ryzen AI Developer Center 进行安装。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -154,7 +154,7 @@ pip install transformers==5.10.1 safetensors==0.6.2 datasets==4.2.0 accelerate p
 
 #### 启用 ModelScope 身份验证（受限模型或未预安装的自定义模型）
 
-在本示例中，我们使用 **LLM-Research/gemma-3-4b-it**（`google/gemma-3-4b-it`），这是一个**公开（public）** 模型。对于**受限（gated）** 模型，您必须先在 ModelScope 上接受该模型的使用条款，然后进行身份验证，训练脚本才能下载该模型。
+在本示例中，我们使用 **LLM-Research/gemma-3-4b-it**（`google/gemma-3-4b-it`），这是一个**公开（public）** 模型。对于**受限（gated）** 模型，你必须先在 ModelScope 上接受该模型的使用条款，然后进行身份验证，训练脚本才能下载该模型。
 
 1. **接受许可协议：** 打开模型页面，登录（或创建账户），并在模型页面上申请模型下载和使用（例如点击“接受协议内容”和“申请下载和使用”）。
 2. **安装并登录：** 安装 ModelScope，然后运行标准登录命令：
@@ -295,7 +295,7 @@ Total: 12GB (vs 40GB full precision)
 > **注意**：对于像 `openai-mirror/gpt-oss-20b`（`openai/gpt-oss-20b`）这样的 MXFP4 基础模型，我们建议使用 **LoRA**（`train_lora.py`）而非 QLoRA。QLoRA 脚本中 `bitsandbytes` 的 4 位路径通常会将 MXFP4 权重反量化为 BF16，因此其运行方式与标准 LoRA 相同。若要使用原生 MXFP4，需要从源代码构建 `bitsandbytes`，并搭配相匹配的 Transformers/Triton/kernels 组件栈。详情请参阅 [Transformers MXFP4 文档](https://huggingface.co/docs/transformers/main/en/quantization/mxfp4)。
 
 ---
-### 2. 选择您的方法
+### 2. 选择你的方法
 
 | 方法 | 内存 | 速度 | 质量 | 最适用场景 |
 |--------|--------|-------|---------|----------|
@@ -311,9 +311,9 @@ Total: 12GB (vs 40GB full precision)
 - **用户：** “给我一句关于：&lt;tag&gt; 的名言”
 - **助手：** “&lt;quote&gt; – &lt;author&gt;”
 
-微调会教会模型如何回应要求提供某个主题名言的提示，并以 `<quote text> - <author>` 的格式返回结果。LoRA 和全量微调脚本使用 **AI-ModelScope/databricks-dolly-15k**（通用的指令/回复对），因此具体任务因脚本而异；但思路是相同的——让模型适应您选择的数据集和格式。
+微调会教会模型如何回应要求提供某个主题名言的提示，并以 `<quote text> - <author>` 的格式返回结果。LoRA 和全量微调脚本使用 **AI-ModelScope/databricks-dolly-15k**（通用的指令/回复对），因此具体任务因脚本而异；但思路是相同的——让模型适应你选择的数据集和格式。
 
-以下是可用训练方法的摘要。每种方法都链接到其脚本，并附有简要说明，帮助您选择合适的方法。
+以下是可用训练方法的摘要。每种方法都链接到其脚本，并附有简要说明，帮助你选择合适的方法。
 
 | 脚本                           | 方法            | 说明                                                                                                         | 典型显存占用 | 推荐使用场景                                 |
 |-----------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------|
@@ -331,13 +331,13 @@ Total: 12GB (vs 40GB full precision)
 <!-- @os:end -->
 <!-- @device:end -->
 
-只需选择您偏好的 `Training method`，下载对应的脚本，并在保持虚拟环境激活的状态下使用命令执行它：
+只需选择你偏好的 `Training method`，下载对应的脚本，并在保持虚拟环境激活的状态下使用命令执行它：
 
 ```python
 python3 train_<method_name>.py.
 ```
 
-## 使用您微调后的模型
+## 使用你微调后的模型
 
 ### 全量微调之后
 
@@ -389,11 +389,11 @@ tokenizer.save_pretrained("gemma-3-4b-merged")
 ```
 
 **注意：**  
-- 请确保模型目录名称（`output-gemma-3-4b-full`、`output-gemma-3-4b-qlora`）与您训练后实际得到的输出文件夹一致。  
-- 如果您使用的是 LoRA 而非 QLoRA，只需相应地替换路径即可。  
+- 请确保模型目录名称（`output-gemma-3-4b-full`、`output-gemma-3-4b-qlora`）与你训练后实际得到的输出文件夹一致。  
+- 如果你使用的是 LoRA 而非 QLoRA，只需相应地替换路径即可。  
 - 部分 Gemma 模型需要在 `from_pretrained` 中指定 `trust_remote_code=True`；如果看到相关警告，请添加此项。
 
-如需更多自定义设置（填充令牌、设备等），请参阅您用于训练的脚本。
+如需更多自定义设置（填充令牌、设备等），请参阅你用于训练的脚本。
 
 <!-- @test:id=verify-lora-output timeout=120 hidden=True setup=activate-venv -->
 ```python
@@ -491,7 +491,7 @@ print(f"PASS: Full fine-tuned model output looks correct: {out_dir}")
 
 ## 自定义指南
 
-### 使用您自己的数据集
+### 使用你自己的数据集
 
 所有脚本都使用相同的数据集格式。请替换加载部分：
 
@@ -521,7 +521,7 @@ dataset = dataset.map(format_instruction)
 
 **本地 JSON/JSONL 文件的数据集格式：**
 
-使用此方法时，请确保您的 JSON 文件结构正确，以避免解析错误。
+使用此方法时，请确保你的 JSON 文件结构正确，以避免解析错误。
 
 必须遵循以下准则：
 * **文件格式：** JSON 文件应在集成开发环境（IDE）中进行格式化，以确保结构和语法正确。
@@ -540,13 +540,13 @@ dataset = dataset.map(format_instruction)
 ```
 **Hugging Face Hub 数据集的数据集格式**
 
-使用 Hugging Face 数据集时，请确保您的数据集结构正确，以便顺利集成。
+使用 Hugging Face 数据集时，请确保你的数据集结构正确，以便顺利集成。
 
 应遵循以下准则：
 * **指令-回复对：** 请重点关注包含 `instruction-response`（指令-回复）对的数据集。此结构对于预期功能至关重要。
-* **自定义键修改：** 如果您的数据集不符合 `instruction-response` 结构，您可以选择修改 `format_instruction()` 函数，以适应特定的键。
+* **自定义键修改：** 如果你的数据集不符合 `instruction-response` 结构，你可以选择修改 `format_instruction()` 函数，以适应特定的键。
 
-调整示例：如果数据集的输出需要调整，您可以修改 format_instruction() 函数中的响应部分，以满足您的需求。
+调整示例：如果数据集的输出需要调整，你可以修改 format_instruction() 函数中的响应部分，以满足你的需求。
 ```python
 def format_instruction(example):
     return {
@@ -558,7 +558,7 @@ def format_instruction(example):
 ```
 **CSV 文件的数据集格式**
 
-若要使脚本适配 CSV 文件格式，您需要确保 CSV 文件包含名为 `instruction` 和 `response` 的列。
+若要使脚本适配 CSV 文件格式，你需要确保 CSV 文件包含名为 `instruction` 和 `response` 的列。
 ```csv
 instruction,response
 "Your first instruction here","Expected response here"
@@ -567,7 +567,7 @@ instruction,response
 
 ### 调整训练参数
 
-编辑训练脚本并更改变量以匹配您的目标：**学习率**（`LR`）、**训练轮数**（`EPOCHS`）、**批量大小**（`BATCH_SIZE`）、**梯度累积**（`GRAD_ACCUM_STEPS`），以及针对 LoRA/QLoRA 的**秩**（`LORA_R`）。若需要更快的运行速度，请使用更少的训练轮数和更高的学习率（LR）；若需要更高的质量，请使用更多的训练轮数和更低的 LR。如果遇到内存不足的错误，请减小批量大小或序列长度。
+编辑训练脚本并更改变量以匹配你的目标：**学习率**（`LR`）、**训练轮数**（`EPOCHS`）、**批量大小**（`BATCH_SIZE`）、**梯度累积**（`GRAD_ACCUM_STEPS`），以及针对 LoRA/QLoRA 的**秩**（`LORA_R`）。若需要更快的运行速度，请使用更少的训练轮数和更高的学习率（LR）；若需要更高的质量，请使用更多的训练轮数和更低的 LR。如果遇到内存不足的错误，请减小批量大小或序列长度。
 ### 内存优化技巧
 
 如果遇到内存不足的错误：
@@ -651,7 +651,7 @@ BATCH_SIZE = 8
 1. **评估**：在保留的测试数据上进行充分评估，衡量泛化能力，避免过拟合。
 2. **实验**：尝试不同的超参数值，以在准确性、速度和内存之间取得更好的平衡。
 3. **跟踪**：使用 Weights & Biases 跟踪所有实验（及相应指标），以实现可复现的研究。
-4. **尝试**：在自己的自定义数据集上进行训练，使模型专门适应您的使用场景。
+4. **尝试**：在自己的自定义数据集上进行训练，使模型专门适应你的使用场景。
 5. **部署**：使用 vLLM 等高效后端在兼容硬件上部署微调后的模型，实现快速推理。
 6. **探索**：了解更多高级技巧，包括提示工程、混合精度和更长的序列长度。
 7. **训练**：为不同任务或领域训练多个 LoRA 适配器，并根据需要进行切换。

@@ -136,6 +136,14 @@ def not_run_count(grp):
         return 0
 
 
+def did_not_finish_count(grp):
+    """Tests the pipeline started but stopped before they finished."""
+    try:
+        return int(grp.get("did_not_finish") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 def status_from_group(grp):
     """Verdict from a group rollup, or None if it carries none.
 
@@ -155,6 +163,12 @@ def status_from_group(grp):
 
     if status in INFRA_STATUSES:
         return status
+    # A test cut off by the batch time limit is counted as an error and the
+    # group labelled FAILED ({"errors":1,"did_not_finish":1,"status":"FAILED"},
+    # Jenkins #2148). Nothing failed, so it is INTERRUPTED. A real failure in
+    # the same group still wins.
+    if did_not_finish_count(grp) and not counts["passed"] and not counts["failed"]:
+        return "INTERRUPTED"
     if status == "PASSED" and not ran_something:
         return "INTERRUPTED"
     if status == "PASSED" and unrun:
@@ -234,6 +248,9 @@ def infrastructure_reason(summary, grp, group_key):
 
     if isinstance(grp, dict):
         counts = group_counts(grp)
+        if did_not_finish_count(grp):
+            return ("its test started but did not finish: the batch reached its time "
+                    "limit or the machine stopped responding")
         if counts["passed"] == 0 and (counts["skipped"] or not_run_count(grp)):
             return (f"its test was cancelled, skipped or never ran (passed 0, skipped "
                     f"{counts['skipped']}, not_run {not_run_count(grp)})")
@@ -299,8 +316,10 @@ def make_summary(playbook, platform, outcome, grp=None, reason=None,
     if isinstance(grp, dict):
         c = group_counts(grp)
         # Errors are test outcomes too; fold them into `failed` so consumers
-        # that only look at `failed` cannot miss them.
-        passed, failed, skipped = c["passed"], c["failed"] + c["errors"], c["skipped"]
+        # that only look at `failed` cannot miss them. A test that did not
+        # finish is also counted as an error; it never failed, so leave it out.
+        errors = max(0, c["errors"] - did_not_finish_count(grp))
+        passed, failed, skipped = c["passed"], c["failed"] + errors, c["skipped"]
     elif outcome in INFRA_STATUSES:
         passed = failed = skipped = 0
     else:

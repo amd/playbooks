@@ -16,6 +16,17 @@ node --version
 npm --version
 ```
 
+> **Check the version range your tool supports.** The current release on nodejs.org is often
+> newer than a given tool's supported range, and installing outside that range can fail with
+> native-build or `EBADPLATFORM` errors. Use
+> [nvm-windows](https://github.com/coreybutler/nvm-windows) to install and select a specific
+> version:
+>
+> ```cmd
+> nvm install 24.10.0
+> nvm use 24.10.0
+> ```
+
 <!-- @os:end -->
 
 <!-- @os:linux -->

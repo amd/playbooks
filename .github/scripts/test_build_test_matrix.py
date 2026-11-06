@@ -49,6 +49,9 @@ HARNESS = (
     ".github/scripts/run_playbook_tests.py",
     ".github/scripts/build_test_matrix.py",
     ".github/workflows/test-playbooks.yml",
+    # The builder reads this to drop devices with no runner group, so the
+    # fixture needs it or every device falls through unfiltered.
+    ".github/runners.json",
 )
 
 
@@ -66,12 +69,38 @@ def make_repo(path: Path) -> None:
     git("config", "commit.gpgsign", "false", cwd=path)
 
 
+# Synthetic runner groups pre-registered in the fixture's runners.json. The
+# builder drops devices with no runner group, so tests that invent a device need
+# it to exist in the catalog — and it has to be there in the BASE commit, since
+# runners.json is harness state and editing it mid-test forces the full matrix.
+FIXTURE_EXTRA_GROUPS = ("newdev", *(f"dev{i}" for i in range(200)))
+
+
 def graft_harness(dest: Path) -> None:
     """Copy the working tree's harness into dest so both sides match byte-for-byte."""
     for rel in HARNESS:
         target = dest / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO_ROOT / rel, target)
+    register_fixture_groups(dest)
+
+
+def register_fixture_groups(dest: Path) -> None:
+    """Append the synthetic test groups to the fixture's runner catalog."""
+    runners = dest / ".github" / "runners.json"
+    catalog = json.loads(runners.read_text(encoding="utf-8"))
+    catalog += [
+        {"name": f"fixture-{group}", "os": os_name, "group": group, "labels": []}
+        for group in FIXTURE_EXTRA_GROUPS
+        for os_name in ("Linux", "Windows")
+    ]
+    runners.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+
+
+def fixture_runner_groups(fixture: Path) -> set[str]:
+    """Device groups the fixture's catalog actually has machines for."""
+    catalog = json.loads((fixture / ".github" / "runners.json").read_text(encoding="utf-8"))
+    return {r["group"] for r in catalog if r.get("group")}
 
 
 def populate_from_rev(dest: Path, rev: str) -> None:
@@ -210,6 +239,27 @@ class FixtureCase(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("256", proc.stderr)
 
+    def test_device_without_a_runner_group_is_dropped(self):
+        """A device no machine serves must not reach the matrix.
+
+        Its runs-on would match no runner, so the job queues until it times out
+        rather than failing — indistinguishable from a hung test. Such devices
+        are covered by the OrchestrAI workflow instead.
+        """
+        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
+        meta = json.loads(pj.read_text())
+        meta["tested_platforms"]["unserved"] = ["linux", "windows"]
+        pj.write_text(json.dumps(meta, indent=2))
+        proc = subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
+             "--github-output", os.devnull],
+            cwd=self.fx, capture_output=True, text=True, check=True,
+        )
+        entries = json.loads(proc.stdout)
+        self.assertEqual(len(entries), self.total, "an unserved device must add no jobs")
+        self.assertNotIn("unserved", {e["arch"] for e in entries})
+        self.assertIn("unserved", proc.stderr)
+
     def test_new_device_is_selected_even_though_signature_matches(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
@@ -264,7 +314,10 @@ class FixtureCase(unittest.TestCase):
         """Dropping a device from tested_platforms must still run the lost entry."""
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
-        dev = sorted(meta["tested_platforms"])[0]
+        # Only a device with a runner group reaches the matrix at all; one
+        # without is absent on both sides, so dropping it selects nothing.
+        groups = fixture_runner_groups(self.fx)
+        dev = sorted(d for d in meta["tested_platforms"] if d in groups)[0]
         lost = meta["tested_platforms"].pop(dev)
         pj.write_text(json.dumps(meta, indent=2))
         got = select(self.fx)
