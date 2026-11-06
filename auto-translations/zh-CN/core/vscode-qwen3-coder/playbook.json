@@ -1,6 +1,6 @@
 {
   "id": "vscode-qwen3-coder",
-  "title": "使用 VS Code 和 Qwen3-Coder 进行本地 LLM 编码",
-  "description": "使用运行在本地的 Qwen3-Coder 搭配 VS Code，实现私密的代码辅助。",
+  "title": "使用 VS Code 和 Qwen3-Coder 进行本地 LLM 编程",
+  "description": "使用 VS Code 配合本地运行的 Qwen3-Coder，实现私密代码辅助。",
   "auto_translated": true
 }

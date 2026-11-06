@@ -1423,9 +1423,38 @@ def list_playbook_ids(repo_root: Path) -> list[str]:
     return sorted(ids)
 
 
+def runner_groups(repo_root: Path) -> set[str]:
+    """Device groups that have at least one machine in .github/runners.json.
+
+    A device can be declared in tested_platforms before it has a self-hosted
+    runner — e.g. grgh, which is reachable through the OrchestrAI broker fleet
+    but has no machine in the GitHub pool. Returning the groups lets the matrix
+    builder skip those devices instead of emitting a runs-on no runner matches.
+    """
+    runners_file = repo_root / ".github" / "runners.json"
+    try:
+        data = json.loads(runners_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        # An unreadable catalog must not silently empty the matrix: fall back to
+        # "every device is fine" so the old, unfiltered behaviour applies.
+        print(f"Warning: cannot read {runners_file} ({exc}); "
+              f"not filtering the matrix by runner group", file=sys.stderr)
+        return set()
+    return {str(r.get("group", "")) for r in data if r.get("group")}
+
+
 def build_matrix_entries(repo_root: Path) -> list[dict]:
-    """Expand every playbook.json into CI matrix entries."""
+    """Expand every playbook.json into CI matrix entries.
+
+    Devices with no runner group in .github/runners.json are skipped: a job
+    whose runs-on no machine satisfies would queue until it times out rather
+    than fail, which is indistinguishable from a hung test. Those devices are
+    still tested through the OrchestrAI workflow, which acquires hardware from
+    the MAAS broker instead of the GitHub self-hosted pool.
+    """
     entries = []
+    groups = runner_groups(repo_root)
+    unmapped: set[str] = set()
     for playbook_id in list_playbook_ids(repo_root):
         for category in ("core", "supplemental"):
             meta_file = repo_root / "playbooks" / category / playbook_id / "playbook.json"
@@ -1438,6 +1467,9 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                 break
             required = meta.get("required_platforms", {})
             for device, platforms in meta.get("tested_platforms", {}).items():
+                if groups and device not in groups:
+                    unmapped.add(device)
+                    continue
                 for platform in platforms:
                     os_label = "Windows" if platform == "windows" else "Linux"
                     entries.append({
@@ -1449,6 +1481,11 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                         "required": platform in set(required.get(device, [])),
                     })
             break
+    if unmapped:
+        print(f"::warning::skipping device(s) with no runner group in "
+              f".github/runners.json: {', '.join(sorted(unmapped))} "
+              f"(tested through the OrchestrAI workflow instead; add a runner "
+              f"there to also schedule native self-hosted jobs)", file=sys.stderr)
     return entries
 
 
