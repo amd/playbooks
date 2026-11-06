@@ -158,6 +158,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -208,6 +209,54 @@ class TestResult:
     duration: float
     error_message: str = ""
     skipped: bool = False
+    timed_out: bool = False
+
+
+def _kill_tree(proc: subprocess.Popen, own_group: bool) -> None:
+    """Kill a step and everything it started."""
+    if os.name == "nt":
+        # /T finds children through their parent, so run it before the shell dies.
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                           capture_output=True, timeout=60, check=False)
+        proc.kill()
+    elif own_group:
+        # TERM first: sudo forwards it to the command it runs.
+        for sig in (signal.SIGTERM, signal.SIGKILL):
+            with contextlib.suppress(ProcessLookupError, PermissionError):
+                os.killpg(proc.pid, sig)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=5)
+    else:
+        proc.kill()
+    with contextlib.suppress(subprocess.TimeoutExpired):
+        proc.wait(timeout=15)
+
+
+def run_step_command(cmd, cwd, timeout: int, env: dict):
+    """Run a step, killing its whole tree on timeout. Returns (returncode, timed_out, stdout, stderr).
+
+    Output goes to files: with pipes, subprocess.run on Windows waits for children holding them.
+    """
+    with tempfile.TemporaryFile("w+", errors="replace") as out, \
+            tempfile.TemporaryFile("w+", errors="replace") as err:
+        # Own process group, so a timeout spares servers that earlier steps left running.
+        # Not in a terminal run: there the step keeps the terminal, so sudo can prompt.
+        own_group = os.name != "nt" and not os.isatty(0)
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=out, stderr=err,
+                                start_new_session=own_group)
+        timed_out = False
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            _kill_tree(proc, own_group)
+        except BaseException:
+            _kill_tree(proc, own_group)
+            raise
+        out.seek(0)
+        err.seek(0)
+        return proc.returncode, timed_out, out.read(), err.read()
 
 
 @dataclass
@@ -1000,53 +1049,34 @@ def run_test(
     # Execute the test
     start_time = time.time()
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=workdir,
-            capture_output=True,
-            text=True,
-            timeout=test.timeout,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        returncode, timed_out, stdout, stderr = run_step_command(
+            cmd, workdir, test.timeout, {**os.environ, "PYTHONUNBUFFERED": "1"}
         )
         duration = time.time() - start_time
 
         # Save output to files
-        stdout_file = results_dir / f"{test.id}_stdout.txt"
-        stderr_file = results_dir / f"{test.id}_stderr.txt"
-        stdout_file.write_text(result.stdout, encoding="utf-8")
-        stderr_file.write_text(result.stderr, encoding="utf-8")
+        (results_dir / f"{test.id}_stdout.txt").write_text(stdout, encoding="utf-8")
+        (results_dir / f"{test.id}_stderr.txt").write_text(stderr, encoding="utf-8")
 
-        success = result.returncode == 0
-
-        print(f"Exit code: {result.returncode}")
+        error_msg = f"Test timed out after {test.timeout} seconds" if timed_out else ""
+        print(f"TIMEOUT: {error_msg}" if timed_out else f"Exit code: {returncode}")
         print(f"Duration: {duration:.2f}s")
+        when = " before the timeout" if timed_out else ""
         console_log_chars = 10000
-        if result.stdout:
-            print(f"STDOUT (last {console_log_chars} chars):\n{result.stdout[-console_log_chars:]}")
-        if result.stderr:
-            print(f"STDERR (last {console_log_chars} chars):\n{result.stderr[-console_log_chars:]}")
+        if stdout:
+            print(f"STDOUT{when} (last {console_log_chars} chars):\n{stdout[-console_log_chars:]}")
+        if stderr:
+            print(f"STDERR{when} (last {console_log_chars} chars):\n{stderr[-console_log_chars:]}")
 
         return TestResult(
             test_id=test.id,
-            success=success,
-            exit_code=result.returncode,
-            stdout=result.stdout,
-            stderr=result.stderr,
-            duration=duration,
-        )
-
-    except subprocess.TimeoutExpired:
-        duration = time.time() - start_time
-        error_msg = f"Test timed out after {test.timeout} seconds"
-        print(f"TIMEOUT: {error_msg}")
-        return TestResult(
-            test_id=test.id,
-            success=False,
-            exit_code=-1,
-            stdout="",
-            stderr="",
+            success=not timed_out and returncode == 0,
+            exit_code=-1 if timed_out else returncode,
+            stdout=stdout,
+            stderr=stderr,
             duration=duration,
             error_message=error_msg,
+            timed_out=timed_out,
         )
     except Exception as e:
         duration = time.time() - start_time
@@ -1103,6 +1133,7 @@ def write_failure_metadata(
         "result": {
             "exit_code": result.exit_code,
             "duration": result.duration,
+            "timed_out": result.timed_out,
             "error_message": result.error_message,
             "stdout_excerpt": stdout_excerpt,
             "stderr_excerpt": stderr_excerpt,
@@ -1221,6 +1252,7 @@ def _run_playbook_tests_at_path(
                 "skipped": r.skipped,
                 "exit_code": r.exit_code,
                 "duration": r.duration,
+                "timed_out": r.timed_out,
                 "error_message": r.error_message,
             }
             for r in suite.results
@@ -1315,9 +1347,38 @@ def list_playbook_ids(repo_root: Path) -> list[str]:
     return sorted(ids)
 
 
+def runner_groups(repo_root: Path) -> set[str]:
+    """Device groups that have at least one machine in .github/runners.json.
+
+    A device can be declared in tested_platforms before it has a self-hosted
+    runner — e.g. grgh, which is reachable through the OrchestrAI broker fleet
+    but has no machine in the GitHub pool. Returning the groups lets the matrix
+    builder skip those devices instead of emitting a runs-on no runner matches.
+    """
+    runners_file = repo_root / ".github" / "runners.json"
+    try:
+        data = json.loads(runners_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        # An unreadable catalog must not silently empty the matrix: fall back to
+        # "every device is fine" so the old, unfiltered behaviour applies.
+        print(f"Warning: cannot read {runners_file} ({exc}); "
+              f"not filtering the matrix by runner group", file=sys.stderr)
+        return set()
+    return {str(r.get("group", "")) for r in data if r.get("group")}
+
+
 def build_matrix_entries(repo_root: Path) -> list[dict]:
-    """Expand every playbook.json into CI matrix entries."""
+    """Expand every playbook.json into CI matrix entries.
+
+    Devices with no runner group in .github/runners.json are skipped: a job
+    whose runs-on no machine satisfies would queue until it times out rather
+    than fail, which is indistinguishable from a hung test. Those devices are
+    still tested through the OrchestrAI workflow, which acquires hardware from
+    the MAAS broker instead of the GitHub self-hosted pool.
+    """
     entries = []
+    groups = runner_groups(repo_root)
+    unmapped: set[str] = set()
     for playbook_id in list_playbook_ids(repo_root):
         for category in ("core", "supplemental"):
             meta_file = repo_root / "playbooks" / category / playbook_id / "playbook.json"
@@ -1330,6 +1391,9 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                 break
             required = meta.get("required_platforms", {})
             for device, platforms in meta.get("tested_platforms", {}).items():
+                if groups and device not in groups:
+                    unmapped.add(device)
+                    continue
                 for platform in platforms:
                     os_label = "Windows" if platform == "windows" else "Linux"
                     entries.append({
@@ -1341,6 +1405,11 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                         "required": platform in set(required.get(device, [])),
                     })
             break
+    if unmapped:
+        print(f"::warning::skipping device(s) with no runner group in "
+              f".github/runners.json: {', '.join(sorted(unmapped))} "
+              f"(tested through the OrchestrAI workflow instead; add a runner "
+              f"there to also schedule native self-hosted jobs)", file=sys.stderr)
     return entries
 
 
@@ -1527,6 +1596,8 @@ def main():
         help="Disable canonical fallback for localized content",
     )
     args = parser.parse_args()
+    # SIGTERM to the runner alone: exit through run_step_command so it kills the step's tree.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(128 + signal.SIGTERM))
 
     success = run_playbook_tests(
         args.playbook,

@@ -75,7 +75,7 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -92,26 +92,32 @@ Lemonade runs the models; Open WebUI is the interface you interact with. Use the
 This playbook needs Lemonade running as the backend and, on Linux, a container engine (Podman) to run Open WebUI. Set these up before installing Open WebUI.
 
 <!-- @os:windows -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade -->
 <!-- @device:end -->
+<!-- @prereq:hf-models-all-minilm-l6-v2 -->
 ---
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade,podman -->
 <!-- @device:end -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
 <!-- @device:end -->
 <!-- @os:end -->
+
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+<!-- @prereq:lemonade-models-qwen3-5-4b,lemonade-models-sdxl-turbo -->
 
 <!-- @test:id=lemonade-cli-verify timeout=30 hidden=True -->
 ```bash
@@ -131,7 +137,8 @@ Before installing Open WebUI, make sure the models you want to use are downloade
 
 
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
+<!-- @prereq:lemonade-models-qwen3-4b-hybrid -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -819,7 +826,7 @@ Now, you're all set up. Let's look at three interesting things to do.
 
 ### Activity 1: Chat with a Local LLM
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 1. Click the dropdown menu in the top-left of the interface. This will display the Lemonade models you have installed. Select one to proceed. (example: `Qwen3-4B-Hybrid`).
 
     <p align="center">
@@ -956,7 +963,7 @@ This establishes that Open WebUI can coordinate a "two-part" workflow:
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Activity 3: Generate an Image from a Text Prompt (Stable Diffusion)
 
 Stable Diffusion models don't support text generation, they only generate images through the Images API. 

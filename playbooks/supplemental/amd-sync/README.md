@@ -122,7 +122,7 @@ The home view gives you five one-click components — all available regardless o
 
 ### Try VS Code
 
-For your first launch, try **VS Code**.
+For your first launch, try **VS Code**. The following instructions are for Linux, but the Windows experience is similar.
 
 1. Leave **Directory** on the default `~/Documents/AMD_Sync`.
 2. Click **VS Code**.

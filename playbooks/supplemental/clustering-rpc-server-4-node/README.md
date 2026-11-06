@@ -26,50 +26,21 @@ This playbook teaches you how to cluster four Ryzen AI Halo systems using llama.
 
 ## Setting the Memory Configuration
 
-> **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
+> **Note**: Complete this step on **all four machines (Machine 1 through Machine 4)**.
 
+Running a 1T-parameter model across the cluster requires a large GPU memory
+allocation, so this step is required here (not optional). Follow the memory
+configuration below, and set the allocation on each machine to at least
+**96 GB** (Windows: AMD Variable Graphics Memory in Adrenalin; Linux: `amd-ttm --set 120`).
+
+<!-- @device:halo_box -->
 <!-- @os:windows -->
-On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
-
-This can be done by opening AMD Software: Adrenalin Edition control panel and navigating to: `Performance > Tuning > AMD Variable Graphics Memory`. Set the value to **96 GB**. Please reboot the system for the changes to take effect.
-
-<p align="center">
-  <img src="/api/dependencies/assets/memory-config/adrenalin_vram_new.png" alt="AMD Software Adrenalin Edition — AMD Variable Graphics Memory panel" width="600"/>
-</p>
-
+> **Running models near or above 128 GB:** On AMD Ryzen™ AI Max 400 Series (Gorgon Halo) systems running Windows, models that approach or exceed 128 GB of memory require additional configuration to run without errors. Follow the [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) before loading the model.
 <!-- @os:end -->
+<!-- @device:end -->
 
-<!-- @os:linux -->
-On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
+<!-- @require:memory-config -->
 
-This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
-
-* Install the pipx utility and add the path for pipx installed wheels into the system search path.
-
-  ```bash
-  sudo apt install pipx
-  pipx ensurepath
-  ```
-
-* Install the amd-debug-tools wheel from PyPI.
-  ```bash
-  pipx install amd-debug-tools
-  ```
-
-* Run the amd-ttm tool to query the current settings for shared memory.
-  ```bash
-  amd-ttm
-  ```
-
-* Reconfigure shared memory settings to **120 GB**:
-  ```bash
-  amd-ttm --set 120
-  ```
-
-* Reboot the system for changes to take effect.
-
-
-<!-- @os:end -->
 <!-- @device:halo_box -->
 ## Check for Software Updates
 

@@ -27,7 +27,7 @@ By the end of this playbook you will be able to:
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -55,7 +55,13 @@ By the end of this playbook you will be able to:
 - [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) (Optional, for sandboxing OpenClaw)
 <!-- @os:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @os:linux -->
+<!-- @prereq:nodejs -->
+<!-- @os:end -->
+<!-- On Windows OpenClaw runs in WSL, so its Node.js is covered by the openclaw prereq. -->
+<!-- @prereq:docker,openclaw,lemonade-models-qwen3-6-35b-a3b,lemonade -->
 
 <!-- @var:id=openclaw_model value="Qwen3.6-35B-A3B-GGUF" -->
 

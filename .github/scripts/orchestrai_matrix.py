@@ -204,7 +204,41 @@ def build(playbooks, cfg, devices=None, platforms=None, locale=""):
         if locale:
             batches[bid]["localized_only"][e["playbook"]] = e["localized_only"]
 
+    # 6) A machine with more of a capacity (ram_128gb) also runs the device's
+    #    untagged playbooks, so fold the untagged batch into it: one machine for
+    #    the device instead of two. Only superset_tags qualify, and only when
+    #    the device has exactly one such batch on that platform.
+    fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for)
+
     return matrix, batches
+
+
+def fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for):
+    superset = set(cfg.get("superset_tags") or [])
+    if not superset:
+        return
+    extras = {}  # batch id -> its extra tags
+    for e in matrix:
+        extras.setdefault(e["batch_id"], tuple(tags_for(e["playbook"], e["arch"])))
+    targets = {}  # (platform, device) -> capacity batch ids
+    for bid, b in batches.items():
+        if extras.get(bid) and set(extras[bid]) <= superset:
+            targets.setdefault((b["platform"], b["arch"]), []).append(bid)
+    moved = {}
+    for (platform, device), found in targets.items():
+        base = batch_id_for(platform, device, [])
+        if len(found) != 1 or base not in batches:
+            continue
+        target = batches[found[0]]
+        for pb in batches[base]["playbooks"]:
+            if pb not in target["playbooks"]:
+                target["playbooks"].append(pb)
+        if "localized_only" in target:
+            target["localized_only"].update(batches[base].get("localized_only", {}))
+        del batches[base]
+        moved[base] = found[0]
+    for e in matrix:
+        e["batch_id"] = moved.get(e["batch_id"], e["batch_id"])
 
 
 def main():

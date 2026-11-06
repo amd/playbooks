@@ -14,11 +14,14 @@ name: Translate Playbooks
 
 on:
   # Maintenance mode: retranslate a playbook once its English source lands on main.
+  # Push-triggered runs translate into Simplified Chinese (zh-CN) only; every other
+  # locale is translated on demand via workflow_dispatch below.
   push:
     branches: [main]
     paths:
       - 'playbooks/**'
   # On-demand backfill: translate a specific playbook (or all) into chosen locales.
+  # This is the only way to translate into locales other than zh-CN.
   workflow_dispatch:
     inputs:
       playbook_id:
@@ -26,9 +29,9 @@ on:
         required: false
         type: string
       locales:
-        description: 'Comma-separated target locales (defaults to all 30)'
+        description: "Comma-separated target locales, or 'all' for all 30 (defaults to zh-CN)"
         required: false
-        default: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+        default: 'zh-CN'
         type: string
 
 permissions:
@@ -58,10 +61,14 @@ jobs:
     outputs:
       changed: ${{ steps.push.outputs.changed }}
       branch: ${{ steps.push.outputs.branch }}
+      summary: ${{ steps.push.outputs.summary }}
     env:
+      # Locales translated automatically on push to main: Simplified Chinese only.
+      DEFAULT_LOCALES: 'zh-CN'
       # The 29 Lenovo languages (Portuguese ships as both pt-BR Brazilian and pt-PT
       # European) plus fr-CA for the Canada launch, so French ships as both fr-FR and fr-CA.
-      DEFAULT_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
+      # Translated only on manual dispatch (locales input, or 'all').
+      ALL_LOCALES: 'zh-CN,zh-TW,cs-CZ,da-DK,de-DE,el-GR,es-LA,fi-FI,fr-FR,fr-CA,hu-HU,it-IT,ja-JP,ko-KR,nl-NL,nb-NO,pl-PL,pt-BR,pt-PT,ru-RU,sv-SE,th-TH,tr-TR,uk-UA,ar,he,ro-RO,sr-Latn,sk-SK,sl-SI'
       # LLM API endpoint config, read from repository secrets. For exactly what
       # each secret should contain (with examples), see the "What the repository
       # maintainers need to do" table in auto-translations/README.md.
@@ -93,6 +100,7 @@ jobs:
         run: |
           LOCALES="${{ github.event.inputs.locales }}"
           if [ -z "$LOCALES" ]; then LOCALES="$DEFAULT_LOCALES"; fi
+          if [ "$LOCALES" = "all" ]; then LOCALES="$ALL_LOCALES"; fi
           echo "locales=$LOCALES" >> "$GITHUB_OUTPUT"
           echo "Target locales: $LOCALES"
 
@@ -114,8 +122,8 @@ jobs:
             CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'playbooks/**' 2>/dev/null || echo "")
             PLAYBOOKS=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' \
               | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | tr '\n' ' ')
-            # ...and the shared dependency files if any of them changed.
-            if echo "$CHANGED" | grep -qE '^playbooks/dependencies/.+\.md$'; then DEPS=true; fi
+            # ...and the shared dependency docs if a doc, or a playbook doc that picks them, changed.
+            if echo "$CHANGED" | grep -qE '^playbooks/(dependencies/[^/]+|(core|supplemental)/[^/]+/[^/]+)\.md$'; then DEPS=true; fi
           fi
           echo "playbooks=$PLAYBOOKS" >> "$GITHUB_OUTPUT"
           echo "deps=$DEPS" >> "$GITHUB_OUTPUT"
@@ -180,6 +188,47 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
+          # Build a human-readable summary for the PR body: a "why" trigger line
+          # (from the detect step) plus a "what changed" breakdown (from the diff
+          # we just committed). This replaces the old bland one-line PR body.
+          EVENT="${{ github.event_name }}"
+          DISPATCH_ID="${{ github.event.inputs.playbook_id }}"
+          CHANGED_IDS="${{ steps.detect.outputs.playbooks }}"
+          DEPS="${{ steps.detect.outputs.deps }}"
+          if [ "$EVENT" = "workflow_dispatch" ] && [ -z "$DISPATCH_ID" ]; then
+            TRIGGER="Manual full backfill of all playbooks."
+          elif [ "$EVENT" = "workflow_dispatch" ]; then
+            TRIGGER="Manual backfill of: \`$DISPATCH_ID\`."
+          else
+            IDS_CSV=$(echo "$CHANGED_IDS" | tr -s ' ' ',' | sed 's/^,//; s/,$//')
+            if [ -n "$IDS_CSV" ]; then
+              TRIGGER="Triggered by changes to the English source of: \`$IDS_CSV\`."
+            else
+              TRIGGER="Triggered by a push to main."
+            fi
+            if [ "$DEPS" = "true" ]; then
+              TRIGGER="$TRIGGER Shared dependency files also changed."
+            fi
+          fi
+          # The summary is cosmetic: if it can't be built, warn and fall back to a
+          # stub so a successful translation run never fails over it.
+          WHAT=$(git diff --name-only HEAD~1 HEAD -- auto-translations \
+            | python .github/scripts/summarize_translation_diff.py) || WHAT=""
+          if [ -z "$WHAT" ]; then
+            echo "::warning::Could not build the translation diff summary; opening the PR without it."
+            WHAT="_Change summary unavailable; see the Files changed tab._"
+          fi
+          {
+            echo "summary<<SUMMARY_EOF"
+            echo "### Trigger"
+            echo ""
+            echo "$TRIGGER"
+            echo ""
+            echo "$WHAT"
+            echo "SUMMARY_EOF"
+          } >> "$GITHUB_OUTPUT" \
+            || echo "::warning::Could not write the summary output; PR will have no summary."
+
   # PR/issue creation runs on a GitHub-hosted runner: `gh` is preinstalled and
   # api.github.com is reachable. The self-hosted `translation` runner has neither
   # guaranteed, so keeping any `gh` call there is what broke the previous run.
@@ -202,16 +251,35 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ needs.translate.outputs.branch }}
+          # Multiline what/which/why summary built by the translate job. Passed via
+          # env (not inline) so its markdown can't break the shell quoting.
+          SUMMARY: ${{ needs.translate.outputs.summary }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
         run: |
-          # Open a PR for manual review. The @-mention notifies the maintainer.
+          # Assemble the PR body: @-mention + the run's what/which/why summary.
+          # Use a body file so the multiline markdown is passed verbatim.
+          {
+            echo "@bconsolvo automated translation update from the Translate Playbooks workflow ([run ${RUN_ID}](${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}))."
+            echo ""
+            echo "$SUMMARY"
+            echo ""
+            echo "Touches \`auto-translations/\` only — please review and merge."
+          } > pr_body.md
+          # Open the PR WITHOUT --label first: `gh pr create --label X` fails
+          # atomically if label X doesn't exist, which would abort PR creation
+          # entirely (this is what happened when the repo had no 'translation'
+          # label). The @-mention in the body is what actually notifies the
+          # maintainer, so the PR must open regardless of label/reviewer state.
           PR_URL=$(gh pr create --repo "${{ github.repository }}" \
             --base "${{ github.ref_name }}" --head "$BRANCH" \
             --title "l10n: update translations" \
-            --body "@bconsolvo automated translation update from the Translate Playbooks workflow (run ${{ github.run_id }}). Touches \`auto-translations/\` only — please review and merge." \
-            --label "translation")
+            --body-file pr_body.md)
           echo "Opened $PR_URL for manual review."
-          # Request review so it surfaces in the maintainer's review queue,
-          # not just as an @-mention. Best-effort — never fail the run over it.
+          # Label + reviewer are both best-effort: never fail the run over them.
+          gh pr edit "$PR_URL" --add-label "translation" \
+            || echo "::warning::Could not add 'translation' label (does it exist?); PR $PR_URL is still open."
           gh pr edit "$PR_URL" --add-reviewer bconsolvo \
             || echo "::warning::Could not add reviewer; PR $PR_URL is open with an @-mention."
 

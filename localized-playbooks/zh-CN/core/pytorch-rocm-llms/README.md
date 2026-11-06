@@ -12,10 +12,10 @@ SPDX-License-Identifier: MIT
 ## 概述
 
 
-想要在自己的硬件上运行强大的 AI 语言模型吗？本指南将向您展示如何实现。
+想要在自己的硬件上运行强大的 AI 语言模型吗？本指南将向你展示如何实现。
 本教程使用由 AMD ROCm™ 软件驱动的 PyTorch，来运行可以总结文档、回答问题、生成文本等功能的模型，全部在本地运行。
 
-## 您将学到什么
+## 你将学到什么
 
 - 使用 PyTorch 和 ROCm 在本地运行 gpt-oss-20b 和 qwen3.5-4B 等 LLM
 - 创建一个使用 LLM 的文档摘要工具
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 ## 检查软件更新
-> **注意**：如果未安装 VS Code，您可以通过 Ryzen AI Developer Center 进行安装。
+> **注意**：如果未安装 VS Code，你可以通过 Ryzen AI Developer Center 进行安装。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -37,8 +37,8 @@ SPDX-License-Identifier: MIT
 
 <!-- @os:linux -->
 <!-- @device:halo_box -->
-在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
-<!-- @test:id=create-venv timeout=120 -->
+在 Linux 上，在你选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -50,14 +50,14 @@ source pytorch-env/bin/activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
+**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
-在 Linux 上，在您选择的目录中打开终端，并按照以下命令创建一个 venv。
-<!-- @test:id=create-venv timeout=120 -->
+在 Linux 上，在你选择的目录中打开终端，并按照以下命令创建一个 venv。
+<!-- @test:id=create-venv timeout=300 -->
 ```bash
 sudo apt update
 sudo apt install -y python3-venv
@@ -72,7 +72,7 @@ source pytorch-env/bin/activate
 
 <!-- @os:windows -->
 <!-- @device:halo_box -->
-在 Windows 上，在您选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
+在 Windows 上，在你选择的目录中打开终端，并按照以下命令创建一个已预装 ROCm+Pytorch 的 venv。
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env --system-site-packages
@@ -83,7 +83,7 @@ pytorch-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-在 Windows 上，在您选择的目录中打开终端，并按照以下命令创建一个 venv。
+在 Windows 上，在你选择的目录中打开终端，并按照以下命令创建一个 venv。
 <!-- @test:id=create-venv timeout=60 -->
 ```bash
 python -m venv pytorch-env
@@ -104,6 +104,12 @@ pytorch-env\Scripts\activate
 
 <!-- @var:id=ms_model device=halo,halo_box value="openai-mirror/gpt-oss-20b" -->
 <!-- @var:id=ms_model device=stx,krk,rx7900xt,rx9070xt,r9700 value="Qwen/Qwen3.5-4B" -->
+<!-- @device:halo,halo_box -->
+<!-- @prereq:modelscope-models-gpt-oss-20b -->
+<!-- @device:end -->
+<!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:modelscope-models-qwen3-5-4b -->
+<!-- @device:end -->
 
 <!-- @device:halo,halo_box -->
 <!-- @os:windows -->
@@ -143,7 +149,7 @@ pip install "transformers>=5.9.0" safetensors accelerate sentencepiece protobuf 
 
 ## 使用示例脚本快速入门
 
-本行动手册包含可直接使用的脚本。点击它们即可预览并下载到您创建环境所在的同一目录中。
+本行动手册包含可直接使用的脚本。点击它们即可预览并下载到你创建环境所在的同一目录中。
 
 | 脚本 | 描述 | 用法 |
 |--------|-------------|-------|
@@ -177,11 +183,11 @@ for script in ['run_llm.py', 'summarizer.py']:
 - 通过 `--model` 标志选择模型
 - 用于正确进行模型提示的聊天模板格式化，对文档摘要尤其有用
 
-## 加载并运行您的第一个 LLM
+## 加载并运行你的第一个 LLM
 
 随附的 [run_llm.py](assets/run_llm.py) 脚本展示了如何使用 PyTorch 和 AMD ROCm 生成文本。
 
-> **注意：** 当您加载模型时，ModelScope 会首先检查其本地缓存（Linux 上为 `~/.cache/modelscope/models`，Windows 上为 `C:\Users\<user>\.cache\modelscope\models`）。如果模型未被缓存，它会自动从 modelscope.cn 下载。首次运行可能需要几分钟，具体取决于模型大小和网络速度。
+> **注意：** 当你加载模型时，ModelScope 会首先检查其本地缓存（Linux 上为 `~/.cache/modelscope/models`，Windows 上为 `C:\Users\<user>\.cache\modelscope\models`）。如果模型未被缓存，它会自动从 modelscope.cn 下载。首次运行可能需要几分钟，具体取决于模型大小和网络速度。
 
 以下代码片段展示了如何使用该模型并自定义所提出的问题。
 
@@ -268,7 +274,7 @@ python run_llm.py --model ${ms_model}
 
 ## 构建文档摘要工具
 
-既然您已经生成了本地 LLM 输出，接下来可以在此基础上构建一个实用的文档摘要工具。在本节中，您将使用 [summarizer.py](assets/summarizer.py) 脚本输入一个 .txt 文件，并自动生成简洁的摘要，全部在您的 GPU 上本地运行。
+既然你已经生成了本地 LLM 输出，接下来可以在此基础上构建一个实用的文档摘要工具。在本节中，你将使用 [summarizer.py](assets/summarizer.py) 脚本输入一个 .txt 文件，并自动生成简洁的摘要，全部在你的 GPU 上本地运行。
 
 该脚本旨在开箱即用。请在编辑器中打开该脚本，以探索代码、自定义提示，并调整长度和温度等参数。
 
@@ -313,9 +319,9 @@ python summarizer.py --file document.txt --max-length 400
 
 ## 后续步骤
 
-- **微调**：根据您的特定领域或术语调整模型以提高准确性（参见微调行动手册）
+- **微调**：根据你的特定领域或术语调整模型以提高准确性（参见微调行动手册）
 - **RAG 系统**：将 LLM 与文档检索相结合，实现具备上下文感知能力的问答和搜索
 - **模型探索**：尝试使用 Llama 3、Phi-3 或 Qwen 等新模型以获得更好的结果
 - **生产部署**：使用 vLLM 等工具在组织中实现可扩展的 LLM 服务
 
-您的系统赋予您在本地运行复杂语言模型的能力。请尝试不同的模型、提示和参数，以发现最适合您应用场景的方案。
+你的系统赋予你在本地运行复杂语言模型的能力。请尝试不同的模型、提示和参数，以发现最适合你应用场景的方案。

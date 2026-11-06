@@ -32,6 +32,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "orchestrai_verdict", Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_verdict.py"
@@ -260,6 +261,27 @@ class TestInfrastructure(unittest.TestCase):
         self.assertEqual(doc["failed"], 0)
         self.assertEqual(doc["infrastructure_reason"], "machine acquisition timed out")
 
+    def test_test_cut_off_by_the_time_limit_is_interrupted(self):
+        # Jenkins #2148: speech2speech was running when the batch hit its
+        # 300-minute limit.
+        summary = {"expected_groups": ["playbook-alpha"],
+                   "groups": {"playbook-alpha": {
+                       "passed": 0, "failed": 0, "skipped": 0, "errors": 1,
+                       "did_not_finish": 1, "status": "FAILED"}}}
+        code, doc, _ = run_verdict(summary, "alpha")
+        self.assertEqual(code, 2)
+        self.assertEqual(doc["outcome"], "INTERRUPTED")
+        self.assertEqual(doc["failed"], 0)
+        self.assertIn("did not finish", doc["infrastructure_reason"])
+
+    def test_did_not_finish_beside_a_real_failure_stays_failed(self):
+        summary = {"groups": {"playbook-alpha": {
+            "passed": 0, "failed": 1, "skipped": 0, "errors": 1,
+            "did_not_finish": 1, "status": "FAILED"}}}
+        code, doc, _ = run_verdict(summary, "alpha")
+        self.assertEqual(code, 1)
+        self.assertEqual(doc["outcome"], "FAILED")
+
     def test_missing_build_url_is_infrastructure_not_a_failure(self):
         # This is the 79-job shape: no build means NO playbook in the batch
         # ran, so it must not fan out into N alleged test failures.
@@ -340,6 +362,86 @@ class TestZeroCountsNeverPass(unittest.TestCase):
                 self.assertGreater(doc["total_tests"], 0)
 
 
+class TestCancelledOrSkippedNeverPass(unittest.TestCase):
+    """2026-10-21: 56 false greens. A cancelled test is reported as skipped AND
+    not_run, and the pipeline rolled the group up as PASSED."""
+
+    # The exact recorded group.
+    RECORDED = {"passed": 0, "failed": 0, "skipped": 1, "errors": 0, "not_run": 1,
+                "status": "PASSED"}
+
+    def verdict_for(self, group):
+        return run_verdict({"groups": {"playbook-alpha": group}}, "alpha")
+
+    def test_recorded_payload_is_not_run_not_passed(self):
+        code, doc, out = self.verdict_for(self.RECORDED)
+        self.assertEqual(doc["outcome"], "NOT_RUN")
+        self.assertEqual(code, 2)  # infrastructure, not a pass and not a test failure
+        self.assertIn("cancelled, skipped or never ran (passed 0, skipped 1, not_run 1)",
+                      doc["infrastructure_reason"])
+        self.assertNotIn("PASSED", out.split("(via")[0])
+
+    def test_all_skipped_group_claiming_passed_is_rejected(self):
+        code, doc, _ = self.verdict_for({"passed": 0, "failed": 0, "skipped": 2, "errors": 0,
+                                         "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_cancelled_test_beside_passes_is_not_a_pass(self):
+        code, doc, _ = self.verdict_for({"passed": 3, "failed": 0, "skipped": 1, "errors": 0,
+                                         "not_run": 1, "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+        self.assertIn("1 of its tests were cancelled or never ran", doc["infrastructure_reason"])
+
+    def test_the_same_counts_without_a_status_are_not_passed(self):
+        group = {k: v for k, v in self.RECORDED.items() if k != "status"}
+        code, doc, _ = self.verdict_for(group)
+        self.assertNotEqual(doc["outcome"], "PASSED")
+        self.assertNotEqual(code, 0)
+
+    def test_the_fixed_pipeline_status_is_reported_as_not_run(self):
+        code, doc, _ = self.verdict_for(dict(self.RECORDED, status="not_run"))
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_real_pass_and_a_real_failure_are_unchanged(self):
+        code, doc, _ = self.verdict_for({"passed": 1, "failed": 0, "skipped": 1, "errors": 0,
+                                         "status": "PASSED"})
+        self.assertEqual((doc["outcome"], code), ("PASSED", 0))
+        code, doc, _ = self.verdict_for({"passed": 0, "failed": 1, "skipped": 0, "errors": 0,
+                                         "not_run": 1, "status": "FAILED"})
+        self.assertEqual((doc["outcome"], code), ("FAILED", 1))
+
+
+class TestBatchThatRanNothingIsNotRun(unittest.TestCase):
+    """2026-10-22: a batch whose provisioning failed was reported as one FAILED
+    playbook per member (29 + 5 false reds). The pipeline's summary says
+    not_run; the resolver did not count that as the infrastructure schema."""
+
+    # Recorded summary.json of Jenkins #1282 (Windows STX, Adrenalin DNS failure).
+    RECORDED = {"timestamp": "2026-10-22T18:34:04Z", "build_number": "1282",
+                "build_url": BUILD, "upstream_build_url": "",
+                "results": {"passed": 0, "failed": 0, "skipped": 0, "errors": 0},
+                "levels": {}, "groups": {}, "status": "not_run"}
+
+    def test_recorded_provisioning_failure_is_not_run(self):
+        code, doc, out = run_verdict(self.RECORDED, "lmstudio-rocm-llms", platform="windows")
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+        self.assertIn("provisioning or setup failed", doc["infrastructure_reason"])
+        self.assertNotIn("::error::No verdict", out)
+
+    def test_zero_results_without_a_status_is_also_not_run(self):
+        summary = {k: v for k, v in self.RECORDED.items() if k != "status"}
+        code, doc, _ = run_verdict(summary, "cvml")
+        self.assertEqual((doc["outcome"], code), ("NOT_RUN", 2))
+
+    def test_a_batch_that_ran_tests_but_lost_this_group_still_fails(self):
+        summary = dict(self.RECORDED, status="FAILED",
+                       results={"passed": 3, "failed": 1, "skipped": 0, "errors": 0},
+                       groups={"playbook-other": {"passed": 3, "failed": 1, "skipped": 0,
+                                                  "errors": 0, "status": "FAILED"}})
+        code, doc, _ = run_verdict(summary, "cvml")
+        self.assertEqual((doc["outcome"], code), ("FAILED", 1))
+
+
 class TestExitCodeMap(unittest.TestCase):
     """STRUCTURAL: asserts the helper exists and maps as the contract says.
     (Against the pre-change script this errors rather than fails — the helper
@@ -350,6 +452,19 @@ class TestExitCodeMap(unittest.TestCase):
         self.assertEqual(verdict.exit_code_for("FAILED"), 1)
         self.assertEqual(verdict.exit_code_for("NOT_RUN"), 2)
         self.assertEqual(verdict.exit_code_for("INTERRUPTED"), 2)
+
+
+class TestReportPortalLinkFromPublisherLog(unittest.TestCase):
+    """The Control Plane publishes to ReportPortal itself and logs the launch."""
+
+    def test_launch_url_is_read_from_the_publisher_log_line(self):
+        log = ("[publish] reportportal project p (credential c): published: "
+               "https://rp.example.invalid/ui/#p/launches/all/69554\n")
+        with mock.patch.object(verdict, "fetch", lambda *_: log):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"),
+                             "https://rp.example.invalid/ui/#p/launches/all/69554")
+        with mock.patch.object(verdict, "fetch", lambda *_: None):
+            self.assertEqual(verdict.rp_url_from_console(BUILD, "u", "t"), "")
 
 
 if __name__ == "__main__":

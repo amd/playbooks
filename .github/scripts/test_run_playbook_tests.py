@@ -15,9 +15,12 @@ platform/device filtering, so a filtered-out test never triggers the warning.
 import contextlib
 import importlib.util
 import io
+import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 _SPEC = importlib.util.spec_from_file_location(
     "run_playbook_tests", Path(__file__).with_name("run_playbook_tests.py")
@@ -72,6 +75,33 @@ class SetupResolutionTest(unittest.TestCase):
         self.assertNotIn(WARNING_SUBSTR, out)
         self.assertEqual([t.id for t in tests], ["deps-linux"])
         self.assertEqual(tests[0].setup, "source venv/bin/activate")
+
+
+class TimeoutOutputTest(unittest.TestCase):
+    def test_a_timed_out_test_keeps_what_it_printed(self):
+        test = rpt.TestBlock(id="hangs", timeout=1, code="echo waiting for the lock\nsleep 5")
+        with tempfile.TemporaryDirectory() as d:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                result = rpt.run_test(test, Path(d), Path(d))
+            saved = (Path(d) / "hangs_stdout.txt").read_text(encoding="utf-8")
+        self.assertEqual((result.success, result.error_message), (False, "Test timed out after 1 seconds"))
+        self.assertIn("waiting for the lock", result.stdout)
+        self.assertIn("waiting for the lock", saved)
+        self.assertIn("waiting for the lock", buf.getvalue())
+
+    @unittest.skipIf(os.name == "nt", "bash step")
+    def test_a_timeout_kills_the_child_holding_the_output(self):
+        with tempfile.TemporaryDirectory() as d:
+            pidfile = Path(d) / "pid"
+            script = f"sleep 60 & echo $! > {pidfile}; wait"
+            start = time.monotonic()
+            with mock.patch.object(rpt.os, "isatty", return_value=False):  # as in CI
+                _, timed_out, _, _ = rpt.run_step_command(["bash", "-c", script], d, 1, dict(os.environ))
+            self.assertLess(time.monotonic() - start, 10)
+            self.assertTrue(timed_out)
+            with self.assertRaises(ProcessLookupError):
+                os.kill(int(pidfile.read_text()), 0)
 
 
 if __name__ == "__main__":

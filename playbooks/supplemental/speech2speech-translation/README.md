@@ -27,7 +27,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -59,7 +59,7 @@ source s2st-env/bin/activate
 <!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -97,7 +97,7 @@ s2st-env\Scripts\activate
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
 
 <!-- @test:id=create-venv timeout=180 -->
@@ -121,13 +121,14 @@ s2st-env\Scripts\activate
 <!-- @device:end -->
 
 <!-- @require:pytorch -->
+<!-- @prereq:hf-models-seamless-m4t-v2-large -->
 
 ### Additional Dependencies
 
 Install m4t dependencies using pip:
 <!-- @test:id=install-deps timeout=300 setup=activate-venv -->
 ```bash
-pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.9.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio scipy==1.15.3 
+pip install transformers==5.10.1 safetensors==0.6.2 tiktoken==0.12.0 accelerate soundfile==0.13.1 sentencepiece protobuf gradio "scipy>=1.15.3"
 ```
 <!-- @test:end -->
 

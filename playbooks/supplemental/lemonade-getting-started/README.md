@@ -22,11 +22,11 @@ By the end of this playbook you will be able to:
 * **Explore the web UI** and try different modalities such as vision, speech-to-text, and image generation.
 * **Switch GPU backends** between Vulkan and AMD ROCm™ software.
 * **Build a Python app** powered by a local LLM using the OpenAI-compatible API.
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 * **Run models on the AMD Neural Processing Unit (NPU)** using Hybrid and FLM execution modes on AMD Ryzen™ AI hardware.
 <!-- @device:end -->
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -47,7 +47,7 @@ Before you begin, make sure you have:
 - **~4–30 GB of free disk space**, depending on the models you download. The largest model in this guide is about 20 GB.
 - **Python 3.10–3.13** (used in the Python app section)
 - An internet connection (wired or wireless)
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 - [Optional] An AMD XDNA 2 NPU (Ryzen AI 300/400/Max 300 series or Z2 Extreme) with the latest driver installed from [Ryzen AI Software Installation Instructions](https://ryzenai.docs.amd.com/en/latest/inst.html#install-npu-drivers) if you want to run a model on the NPU.
 <!-- @device:end -->
 
@@ -55,7 +55,9 @@ Before you begin, make sure you have:
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:lemonade-models-gemma-4-e2b,lemonade -->
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -113,7 +115,7 @@ Write-Host "OK: Model Gemma-4-E2B-it-GGUF responded"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=lemonade-update-linux timeout=120 hidden=True -->
+<!-- @test:id=lemonade-update-linux timeout=300 hidden=True -->
 ```bash
 sudo apt update
 sudo apt install --only-upgrade lemonade-server
@@ -551,7 +553,7 @@ These same patterns scale to any application such as chatbots, code assistants, 
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Running Models on the NPU (Optional)
 
 If you have a Ryzen AI 300/400/Max 300 series or Z2 Extreme, your device has a built-in **Neural Processing Unit (NPU)**, a dedicated chip designed specifically for AI workloads. Running models on the NPU is more power-efficient than using the GPU, which makes it ideal for background AI tasks, longer sessions, and battery-powered use.
@@ -597,7 +599,7 @@ To enable `FastFlowLM` on Windows:
 <!-- @device:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 When the `Lemonade` App is launched for the first time, the `FastFlowNPU` backend is not enabled by default. 
 The local app will open the installation page to guide you through setup.
 
@@ -606,8 +608,7 @@ To enable `FastFlowLM` on Linux:
 * Open the `Lemonade` App.
 * Visit the [official FLM](https://lemonade-server.ai/flm_npu_linux.html) documentation and follow the installation steps for FLM by selecting your Linux distribution.
 * Enable backports as instructed on the installation page.
-* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).'
-<!-- @device:end -->
+* Download the latest `v0.9.x` release from the [tags page](https://github.com/FastFlowLM/FastFlowLM/tags).
 
 <!-- @device:halo_box -->
 >[!Note]
@@ -617,7 +618,7 @@ fastflowlm_0.9.X_debian13_amd64.deb
 ```
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 ```
 fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 ```
@@ -628,7 +629,7 @@ fastflowlm_0.9.X_ubuntuY.Z_amd64.deb
 <!-- @device:end -->
 <!-- @os:end -->
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 After a successful installation, you should see that `flm:npu` completed in the **Download Manager** inside the **Lemonade Desktop App**.
 <p align="center">
   <img width="400" height="400" src="assets/FFLM-installationWizard.png" />

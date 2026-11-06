@@ -20,6 +20,10 @@ n8n is a workflow automation platform that lets you connect apps and services us
 
 This playbook teaches you how to set up an AI-powered financial news summarizer that pulls the latest business headlines from a news RSS feed and uses a local LLM running on your system to generate an investor-focused summary.
 
+<!-- @device:halo_box -->
+> **Note:** Some AMD Ryzen AI Halo systems come with the model for this playbook already installed, while others do not. Both are supported. When you reach the **Launching Lemonade** section, check whether the model is already available in Lemonade — if it is, you can load it directly; if not, download it there first.
+<!-- @device:end -->
+
 ## What You'll Learn
 
 - How to install and launch n8n
@@ -35,7 +39,7 @@ In this playbook, we use Lemonade to serve a local LLM that n8n connects to for 
 
 n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a first-class integration - no need for manual configuration. This makes connecting your local LLM to automation workflows straightforward.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -52,19 +56,26 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @require:driver -->
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
+
 <!-- @os:windows -->
 <!-- @require:lemonade,nodejs -->
+<!-- @prereq:n8n,lemonade,nodejs -->
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- Linux runs n8n as a Podman container (see compose.yml below), so Node.js and a host n8n install are not required; podman is the only extra prerequisite. -->
 <!-- @require:lemonade,podman -->
+<!-- @prereq:podman -->
 <!-- @os:end -->
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
+<!-- @prereq:lemonade-models-gpt-oss-120b -->
 <!-- @var:id=lemonade_model value="gpt-oss-120b-mxfp-GGUF" -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @prereq:lemonade-models-gpt-oss-20b -->
 <!-- @var:id=lemonade_model value="gpt-oss-20b-mxfp4-GGUF" -->
 <!-- @device:end -->
 
@@ -185,34 +196,43 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
+<!-- @os:windows -->
 <!-- @test:id=node-npm-version timeout=60 hidden=True -->
 ```bash
 node -v
 npm -v
 ```
 <!-- @test:end -->
+<!-- @os:end -->
 
 ## Installing n8n
 <!-- @os:windows -->
-Install n8n globally using npm.
+> [!IMPORTANT]
+> **n8n supports Node.js 20.19 through 24.x only**
+> ([n8n install docs](https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm)).
+> The current release on nodejs.org is newer than this. Installing n8n on Node 26 fails on
+> Windows with `EBADPLATFORM` or a native build error, and the resulting install throws
+> `MODULE_NOT_FOUND`. Confirm your version before continuing:
+>
+> ```cmd
+> node --version
+> ```
+>
+> If it is outside 20.19&ndash;24.x, install a supported version with
+> [nvm-windows](https://github.com/coreybutler/nvm-windows) (`nvm install 24.10.0 && nvm use 24.10.0`).
+
+Install n8n globally using npm. Pin the version &mdash; at time of writing the latest n8n release
+declares a Linux-only binary as a hard dependency and fails to install on Windows with
+`EBADPLATFORM`, on every supported Node version:
 
 > **Note**: You may see some npm warnings. This is expected.
 
 ```bash
-npm install -g n8n
+npm install -g n8n@2.45.6
 ```
 
 <!-- @test:id=n8n-version timeout=60 hidden=True -->
 ```bash
-n8n --version
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=n8n-version timeout=60 hidden=True -->
-```bash
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 n8n --version
 ```
 <!-- @test:end -->
@@ -284,19 +304,14 @@ try {
 ```bash
 set -euo pipefail
 
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
-p=""
+export PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
 cleanup() {
-  if [ -n "${p:-}" ] && kill -0 "$p" 2>/dev/null; then
-    kill "$p" 2>/dev/null || true
-    sleep 2
-    kill -9 "$p" 2>/dev/null || true
-  fi
+  podman compose -f compose.yml down >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-n8n start >/tmp/n8n-test.log 2>&1 &
-p=$!
+podman rm -f n8n >/dev/null 2>&1 || true
+podman compose -f compose.yml up -d
 
 ok=false
 for i in $(seq 1 120); do
@@ -310,6 +325,8 @@ done
 
 if [ "$ok" != "true" ]; then
   echo "n8n not ready on http://127.0.0.1:5678/healthz"
+  podman ps -a || true
+  podman logs n8n 2>&1 | tail -30 || true
   exit 1
 fi
 
@@ -325,16 +342,16 @@ n8n starts a local web server. Press `'o'` or Open your browser to `http://local
 
 > **Tip**: Keep the terminal window open while using n8n. Closing it might stop the server.
 
-## Launching Lemonade
+## Launching Models with Lemonade
 
 Lemonade is the local server that will run a model and connect to n8n. 
 
 <!-- @os:linux -->
-Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. You can browse models, backends, and load the pre-installed models from here.
+Open the Lemonade GUI by clicking the Lemonade Icon in the taskbar. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 <!-- @os:windows -->
-Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. Then, you can add models, backends, and load the pre-installed models.
+Open the Lemonade GUI by clicking the Lemonade Icon. Right click the tray icon to open the app. From here you can browse models and backends, download any model that isn't already installed, and load it. Systems that shipped with the model pre-installed can load it directly.
 <!-- @os:end -->
 
 >**Tip**: Once running, the Lemonade GUI is also accessible at http://localhost:13305
@@ -355,7 +372,7 @@ lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo -->
+<!-- @device:halo,grgh -->
 ```bash
 lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
 ```
@@ -385,7 +402,7 @@ When you first open n8n, you'll be prompted to create an account or log in:
 We've provided a pre-built workflow that you can import directly:
 
 1. Download the following workflow file: [financial-news-workflow.json](assets/financial-news-workflow.json)
-2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the + Button in the top left, and then **Add workflow**.
+2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the **+** button in the top left, choose **New workflow**, then **Build workflow**.
 3. Click the **...** menu (three dots) in the top right bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
 5. The workflow will appear on the canvas

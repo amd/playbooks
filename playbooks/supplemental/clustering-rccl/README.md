@@ -155,12 +155,12 @@ This amount can be increased by changing the kernel's Translation Table Manager 
   amd-ttm
   ```
 
-* Reconfigure shared memory settings to **120 GB**:
-  ```bash
-  amd-ttm --set 120
-  ```
+Running large models across the cluster requires a large GPU memory allocation,
+so this step is required here (not optional). Follow the memory configuration
+below, and set the allocation on each machine to at least **96 GB** (Linux:
+`amd-ttm --set 120`).
 
-* Reboot the system for changes to take effect.
+<!-- @require:memory-config -->
 
 ## vLLM Container Initialization
 

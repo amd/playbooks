@@ -11,11 +11,11 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-ComfyUI 是一个功能强大、基于节点的 Stable Diffusion 及其他扩散模型界面。与传统的仅有简单提示框的文生图界面不同，ComfyUI 将整个图像生成流程以可视化图表的形式呈现出来，让您能够对从文本编码到隐空间操作再到最终解码的每一个步骤进行精细控制。
+ComfyUI 是一个功能强大、基于节点的 Stable Diffusion 及其他扩散模型界面。与传统的仅有简单提示框的文生图界面不同，ComfyUI 将整个图像生成流程以可视化图表的形式呈现出来，让你能够对从文本编码到隐空间操作再到最终解码的每一个步骤进行精细控制。
 
-本教程将教您如何在您的 GPU 上使用 ComfyUI 搭配 Z Image Turbo 模型来生成高质量的 AI 图像。
+本教程将教你如何在你的 GPU 上使用 ComfyUI 搭配 Z Image Turbo 模型来生成高质量的 AI 图像。
 
-## 您将学到什么
+## 你将学到什么
 
 - 如何启动 ComfyUI 并加载 Z-Image Turbo 模板
 - 理解扩散流程的各个组件
@@ -41,14 +41,14 @@ ComfyUI 是一个功能强大、基于节点的 Stable Diffusion 及其他扩散
 <!-- @os:linux -->
 
 <!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**授予您的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
+**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 #### 创建虚拟环境
-在 Linux 上，打开您选择的目录中的终端，运行以下命令以创建 venv：
+在 Linux 上，打开你选择的目录中的终端，运行以下命令以创建 venv：
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -306,7 +306,7 @@ echo "OK: ComfyUI server is reachable!"
 在 AMD Ryzen™ AI Halo 上，ComfyUI 运行在一个预构建的容器中，无需额外的 Python 设置。
 
 要在 Linux 上启动 ComfyUI，请点击任务栏中的 ComfyUI 快捷方式。它应该会自动在浏览器窗口中打开。
->**提示**：ComfyUI 及其模型存储在 `~/.local/share/ComfyUI/models`。您可以在此处手动添加工作流或新模型。
+>**提示**：ComfyUI 及其模型存储在 `~/.local/share/ComfyUI/models`。你可以在此处手动添加工作流或新模型。
 
 
 <!-- @os:end -->
@@ -321,7 +321,7 @@ echo "OK: ComfyUI server is reachable!"
 
 要启动 ComfyUI：
 
-1. 确保您位于 ComfyUI 目录中。
+1. 确保你位于 ComfyUI 目录中。
 2. 运行 `python3 main.py --use-pytorch-cross-attention`
 
 ComfyUI 会启动一个本地网络服务器。打开浏览器并访问 `http://127.0.0.1:8188` 以访问该界面。
@@ -333,7 +333,7 @@ ComfyUI 会启动一个本地网络服务器。打开浏览器并访问 `http://
 
 ## 查找 Z-Image Turbo 模板
 
-在生成图像之前，您需要加载 Z-Image Turbo 模板。以下是查找方法：
+在生成图像之前，你需要加载 Z-Image Turbo 模板。以下是查找方法：
 
 1. **查看屏幕最左边缘**——应用最左侧有一个从上到下贯穿的垂直工具栏。
 
@@ -353,11 +353,11 @@ ComfyUI 会启动一个本地网络服务器。打开浏览器并访问 `http://
 
 ## 下载模型
 
-<!-- @require:comfyui_models -->
+<!-- @require:comfyui-models -->
 
 ## 理解界面
 
-当 Z-Image Turbo 模板加载后，您将在画布上看到 2 个主要节点。第一个节点名为“Text to Image (Z-Image-Turbo)”，第二个节点用于查看图像。
+当 Z-Image Turbo 模板加载后，你将在画布上看到 2 个主要节点。第一个节点名为“Text to Image (Z-Image-Turbo)”，第二个节点用于查看图像。
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
@@ -376,17 +376,17 @@ Z-Image Turbo 工作流使用四个关键模型组件协同工作：
 
 | 组件 | 作用 |
 |-----------|------|
-| **文本编码器**（Qwen 3 4B） | 将您的文本提示转换为扩散模型能够理解的嵌入向量 |
+| **文本编码器**（Qwen 3 4B） | 将你的文本提示转换为扩散模型能够理解的嵌入向量 |
 | **扩散模型**（Z-Image Turbo） | 核心神经网络，通过迭代方式将隐空间表示去噪为图像 |
 | **VAE**（变分自编码器） | 在图像与隐空间之间进行编码/解码（将最终的隐变量解码为像素） |
 | **LoRA**（可选） | 轻量级适配器，可在不重新训练基础模型的情况下修改风格或主体 |
 
 工作流中的每个节点对应上述其中一个组件。数据从左到右流动：文本 → 嵌入向量 → 引导式去噪 → 隐变量 → 最终图像。
-## 生成您的第一张图像
+## 生成你的第一张图像
 
 Z-Image Turbo 模型已加载完成。要生成图像：
 
-1. **输入您的提示词**，在主 Z-Image 节点中。描述要尽量详细。以下是一个示例：
+1. **输入你的提示词**，在主 Z-Image 节点中。描述要尽量详细。以下是一个示例：
    ```
    一只写实风格的赤狐栖身于积雪林间空地， 
    晨光穿透松树枝叶洒落， 
@@ -589,7 +589,7 @@ KSampler 节点控制核心的扩散过程：
 
 ### ModelSamplingAuraFlow
 
-**ModelSamplingAuraFlow** 节点是一个专用的采样修饰器，用于调整扩散过程处理噪声调度的方式。在 Z-Image Turbo 工作流中，您会看到该节点连接到模型输出端。
+**ModelSamplingAuraFlow** 节点是一个专用的采样修饰器，用于调整扩散过程处理噪声调度的方式。在 Z-Image Turbo 工作流中，你会看到该节点连接到模型输出端。
 
 | 参数 | 控制内容 | 推荐值 |
 |-----------|------------------|-------------------|
@@ -606,7 +606,7 @@ AuraFlow 采样方法专为像 Z-Image Turbo 这样的流匹配（flow-matching�
 
 ### 保存工作流
 
-点击菜单中的 **Save** 按钮，将您的工作流导出为 JSON 文件。这会保存以下内容：
+点击菜单中的 **Save** 按钮，将你的工作流导出为 JSON 文件。这会保存以下内容：
 
 - 所有节点及其参数
 - 节点之间的所有连接
@@ -618,7 +618,7 @@ AuraFlow 采样方法专为像 Z-Image Turbo 这样的流匹配（flow-matching�
 
 ### 分享工作流
 
-工作流是自包含的——将 JSON 文件分享给同事，他们即可重现您的完全相同的设置。这使得 ComfyUI 非常适合协作实验。
+工作流是自包含的——将 JSON 文件分享给同事，他们即可重现你的完全相同的设置。这使得 ComfyUI 非常适合协作实验。
 
 ## 后续步骤
 

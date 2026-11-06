@@ -27,7 +27,7 @@ By the end of this playbook you will be able to:
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -65,7 +65,9 @@ By the end of this playbook you will be able to:
 > Podman is pre-installed on Halo Box and no setup is required
 <!-- @device:end -->
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:lemonade -->
+<!-- @prereq:hermes,lemonade-models-qwen3-6-35b-a3b,podman,lemonade -->
 
 <!-- @var:id=hermes_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -466,7 +468,9 @@ finally {
 
 ## Configure Hermes to Use Lemonade
 
-Hermes stores its model configuration in `~/.hermes/config.yaml`. You can either use the interactive `hermes model` picker or can write the config directly.
+Hermes stores its model configuration in `~/.hermes/config.yaml`. You can either use the interactive `hermes model` picker or write the config directly.
+
+> **Only one option is needed, not both.** These options show you how to build the config.yaml file. Refer to the end of the section for what the final config.yaml file should be.
 
 ### Option 1: Interactive picker
 
@@ -525,7 +529,7 @@ custom_providers:
 
 ```bash
 mkdir -p ~/.hermes
-cat >> ~/.hermes/config.yaml <<'EOF'
+cat > ~/.hermes/config.yaml <<'EOF'
 model:
   default: Qwen3.6-35B-A3B-GGUF
   provider: custom
@@ -587,7 +591,7 @@ Inside your WSL terminal, get the Windows host IP and write the config:
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 
 mkdir -p ~/.hermes
-cat >> ~/.hermes/config.yaml <<EOF
+cat > ~/.hermes/config.yaml <<EOF
 model:
   default: Qwen3.6-35B-A3B-GGUF
   provider: custom
@@ -793,9 +797,11 @@ finally {
 Then configure Hermes to use Podman as the container runtime and set the terminal backend:
 
 ```bash
-echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
+# Point Hermes at Podman (skipped if the line is already there).
+grep -q '^HERMES_DOCKER_BINARY=' ~/.hermes/.env 2>/dev/null || echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
 
-cat >> ~/.hermes/config.yaml <<'EOF'
+# Add the terminal block to the existing config (skipped if it is already there).
+grep -q '^terminal:' ~/.hermes/config.yaml || cat >> ~/.hermes/config.yaml <<'EOF'
 terminal:
   backend: docker
   docker_image: hermes-sandbox:bookworm-slim
@@ -905,6 +911,66 @@ Hermes will now spin up a persistent sandbox container and route all `terminal` 
 > **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname` - you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf <path-to-a-dummy-file/folder>`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
 
 > **Need stronger isolation?** Hermes also provides an official Docker image (`nousresearch/hermes-agent`) that runs the entire agent process inside a container - gateway, tools, and all. See the [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for setup details.
+
+---
+
+## Full Configuration Reference
+
+The final `~/.hermes/config.yaml` should look like this when you are done.
+
+<!-- @os:linux -->
+```bash
+mkdir -p ~/.hermes
+cat > ~/.hermes/config.yaml <<'EOF'
+model:
+  default: Qwen3.6-35B-A3B-GGUF
+  provider: custom
+  base_url: http://127.0.0.1:13305/api/v1
+  api_key: lemonade
+custom_providers:
+  - name: local-lemonade
+    base_url: http://127.0.0.1:13305/api/v1
+    api_key: lemonade
+    model: Qwen3.6-35B-A3B-GGUF
+    models:
+      Qwen3.6-35B-A3B-GGUF:
+        context_length: 262144
+terminal:
+  backend: docker
+  docker_image: hermes-sandbox:bookworm-slim
+EOF
+```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```bash
+WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
+
+mkdir -p ~/.hermes
+cat > ~/.hermes/config.yaml <<EOF
+model:
+  default: Qwen3.6-35B-A3B-GGUF
+  provider: custom
+  base_url: http://$WINDOWS_HOST:13305/api/v1
+  api_key: lemonade
+custom_providers:
+  - name: local-lemonade
+    base_url: http://$WINDOWS_HOST:13305/api/v1
+    api_key: lemonade
+    model: Qwen3.6-35B-A3B-GGUF
+    models:
+      Qwen3.6-35B-A3B-GGUF:
+        context_length: 262144
+terminal:
+  backend: docker
+  docker_image: hermes-sandbox:bookworm-slim
+EOF
+```
+
+> **Note**: The WSL gateway address changes when WSL restarts. If Hermes stops reaching Lemonade after a reboot, re-run the command above to refresh `base_url` with the current IP.
+<!-- @os:end -->
+
+> The `terminal:` block applies only if you set up the Podman sandbox above. Leave it out if you are running Hermes directly on the host.
 
 ---
 

@@ -22,7 +22,7 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 - Chat with models using the CLI
 - Query models programmatically through the REST API
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -37,7 +37,9 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 
 ## Installing Software Prerequisites
 
+<!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
 <!-- @require:driver -->
+<!-- @prereq:ollama,ollama-models-gpt-oss-20b -->
 
 ### Installing Ollama
 

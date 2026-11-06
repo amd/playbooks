@@ -94,7 +94,7 @@
     },
     {
       "parameters": {
-        "model": "gpt-oss-120b-mxfp4-GGUF",
+        "model": "gpt-oss-120b-mxfp-GGUF",
         "options": {
           "maxTokens": 1024
         }
