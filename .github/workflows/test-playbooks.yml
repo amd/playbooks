@@ -182,6 +182,27 @@ jobs:
       - name: Run prereq validator tests
         run: python3 .github/scripts/test_prereq_validate.py
 
+  # The playbook runner drives Windows PowerShell 5.1 (powershell.exe) on the
+  # Windows runners; Ubuntu only has pwsh 7, so the 5.1 setup checks run here.
+  powershell-setup-tests:
+    name: PowerShell Setup Tests (Windows PowerShell 5.1)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Check powershell.exe is Windows PowerShell 5.1
+        run: powershell -NoProfile -Command 'if ($PSVersionTable.PSVersion.Major -ne 5) { exit 1 }'
+      - name: Run PowerShell setup tests
+        shell: bash
+        working-directory: .github/scripts
+        # Fail on any skip: every test in the class, including the execution-policy one, must run here.
+        run: |
+          python -m unittest -v test_run_playbook_tests.PowerShellSetupFailureTest 2>&1 | tee unittest.log
+          ! grep -q "skipped" unittest.log
+
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
     needs: detect-changes
@@ -433,7 +454,7 @@ jobs:
 
   test-gate:
     name: Test Gate (Required Tests)
-    needs: [detect-changes, selector-tests, test-playbooks, test-localized-playbooks]
+    needs: [detect-changes, selector-tests, powershell-setup-tests, test-playbooks, test-localized-playbooks]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -446,6 +467,11 @@ jobs:
           echo "selector-tests result: ${{ needs.selector-tests.result }}"
           echo "English playbooks result: ${{ needs.test-playbooks.result }}"
           echo "Localized playbooks result: ${{ needs.test-localized-playbooks.result }}"
+          echo "PowerShell setup tests result: ${{ needs.powershell-setup-tests.result }}"
+          if [ "${{ needs.powershell-setup-tests.result }}" != "success" ]; then
+            echo "::error::PowerShell setup tests failed on Windows PowerShell 5.1"
+            exit 1
+          fi
           if [ "${{ needs.selector-tests.result }}" != "success" ]; then
             echo "::error::Test-selection regression tests failed; skip decisions cannot be trusted"
             exit 1
