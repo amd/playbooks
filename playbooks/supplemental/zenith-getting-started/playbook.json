@@ -37,7 +37,7 @@
     "inference",
     "agents"
   ],
-  "coverImage": "/assets/cover_image_zenith.png",
+  "coverImage": "assets/cover_image_zenith.png",
   "recommendedSystemMemory": 64,
   "authors": [
     {
