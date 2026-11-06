@@ -32,10 +32,10 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | th-TH | 80 | 92.7 | 70 | Claude-Opus-4.8 |
 | tr-TR | 80 | 92.4 | 80 | Claude-Opus-4.8 |
 | uk-UA | 80 | 92.6 | 78 | Claude-Opus-4.8 |
-| zh-CN | 80 | 93.5 | 78 | Claude-Opus-4.8 |
+| zh-CN | 82 | 92.9 | 78 | Claude-Opus-4.8 |
 | zh-TW | 80 | 93.2 | 78 | Claude-Opus-4.8 |
 
-## Files below 85 (92)
+## Files below 85 (94)
 
 | Locale | File | Score | Issues |
 |--------|------|-------|--------|
@@ -73,7 +73,7 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | th-TH | playbooks/core/comfyui-image-gen/playbook.json | 78 | Title 'กำลังสร้าง' implies ongoing action; should be 'การสร้าง'. Slightly awkward 'ภาพที่สร้างโดย AI'. |
 | uk-UA | playbooks/core/n8n-automation-gpt-oss/playbook.json | 78 | "саммарайзер" is an awkward transliteration; "засіб підсумовування новин" preferred. Otherwise accurate. |
 | uk-UA | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark ™ misplaced (belongs to LLMs term); inconsistent terminology 'тонке'/'точне налаштування'; slightly awkward phrasing. |
-| zh-CN | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 78 | Trademark symbol misplaced onto LLM instead of Unsloth; slight rephrasing but adequate. |
+| zh-CN | playbooks/supplemental/amd-sync/playbook.json | 78 | Title mistranslates 'Remote Development with AMD Sync'; word order wrong, 'AMD Sync' rendered as '同步'. |
 | zh-TW | playbooks/supplemental/clustering-rccl/playbook.json | 78 | Title omits 'with RCCL'; 'Clustering' left untranslated in heading, reducing fluency. |
 | tr-TR | playbooks/supplemental/speech2speech-translation/platform.md | 80 | Headings left untranslated (Platform Configuration, Prerequisites, Required Models, Network Requirements); table headers untranslated. Body translation accurate and fluent. |
 | ar | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Title omits 'Fine' nuance; inconsistent LLaMA Factory vs LLaMA-Factory hyphenation; otherwise accurate and fluent. |
@@ -126,7 +126,9 @@ Automated MQM/GEMBA adequacy+fluency scores (0-100) per locale. No human review.
 | tr-TR | playbooks/supplemental/llama-factory-finetuning/playbook.json | 82 | Minor grammar: 'ince ayar yapın' should be 'ince ayar yapın modelleri' or 'ince ayarlayın'; slightly awkward phrasing. |
 | tr-TR | playbooks/supplemental/vllm-inference/playbook.json | 82 | Added 'AMD' not in source; otherwise accurate and fluent. |
 | uk-UA | playbooks/supplemental/amd-sync/playbook.json | 82 | Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent. |
-| zh-CN | playbooks/supplemental/clustering-rccl/playbook.json | 82 | Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method. |
+| zh-CN | playbooks/supplemental/unsloth-llms-finetuning/playbook.json | 82 | Trademark symbol misplaced; '内存高效的微调LLM' slightly awkward phrasing, should be '内存高效的大语言模型微调'. |
+| zh-CN | playbooks/supplemental/deepseek-v4-flash-ds4/playbook.json | 82 | Title mistranslated: 'Running...with ds4' is instruction/gerund, not 'is running'; alters meaning slightly. |
+| zh-CN | playbooks/supplemental/clustering-rccl-4-node/playbook.json | 82 | Title 'Clustering' rendered as '聚合', slightly off; title omits full context; 'with RCCL' placement minor awkwardness. |
 | zh-TW | playbooks/supplemental/clustering-rpc-server/playbook.json | 82 | Title omits 'with RPC'; 'RPC server' left partly untranslated but acceptable; otherwise accurate. |
 | ro-RO | playbooks/supplemental/pytorch-kernels/playbook.json | 84 | Inconsistent 'kernele' vs 'kernel-uri' plural; otherwise accurate, fluent, terms/brands intact. |
 | sl-SI | playbooks/core/lmstudio-rocm-llms/playbook.json | 84 | "strežba" is awkward for serving LLMs; "strežnik"/"gostovanje" preferred, otherwise accurate. |

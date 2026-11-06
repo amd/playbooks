@@ -1424,7 +1424,11 @@ def list_playbook_ids(repo_root: Path) -> list[str]:
 
 
 def build_matrix_entries(repo_root: Path) -> list[dict]:
-    """Expand every playbook.json into CI matrix entries."""
+    """Expand every playbook.json into CI matrix entries.
+
+    Every tested device is listed, with or without a runner: build_test_matrix
+    drops entries no runner in .github/runners.json serves, after its filters.
+    """
     entries = []
     for playbook_id in list_playbook_ids(repo_root):
         for category in ("core", "supplemental"):

@@ -55,8 +55,10 @@ MATRIX_JOB_LIMIT = 256
 # Files that govern how tests execute. Deny-by-default: anything added under
 # these prefixes is covered without anyone remembering. Editing any of them
 # forces the full matrix, so signatures never have to model harness behaviour.
+# runners.json is in the list because drop_entries_without_runners() reads it, so
+# adding or removing a machine changes the matrix shape, not just where a job lands.
 HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml",
-                    ".github/runners.json")  # decides which entries are scheduled
+                    ".github/runners.json")
 
 # Files under those prefixes that provably cannot change a playbook test verdict.
 # Omitting one only costs a needless full run; wrongly adding one hides a real

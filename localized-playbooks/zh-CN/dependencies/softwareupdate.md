@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 
-在开始之前，请确保您的 Ryzen AI Halo 已安装最新软件。打开 **AMD Ryzen™ AI Developer Center**，检查应用本身以及其他软件是否有可用更新。
+在开始之前，请确保你的 Ryzen AI Halo 已安装最新软件。打开 **AMD Ryzen™ AI Developer Center**，检查应用本身以及其他软件是否有可用更新。
 
 <!-- @os:windows -->
 
