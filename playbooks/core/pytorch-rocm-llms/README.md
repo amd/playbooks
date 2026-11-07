@@ -131,12 +131,34 @@ pip install transformers==5.10.1 safetensors accelerate sentencepiece protobuf
 <!-- @test:end -->
 <!-- @os:end -->
 
-> **Note:** If the model fails to load or runs out of memory, try installing the `kernels` package to load the model with optimized quantization.
+<!-- @os:linux -->
+> **Note:** If the model fails to load or runs out of memory, try installing the `kernels` package
+> to load the model with optimized quantization.
 >
 > ```bash
 > # Use this version which is compatible with the Transformers version
-> pip install "kernels==0.14.1" 
+> pip install "kernels==0.14.1"
 > ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note:** On Windows, Transformers always dequantizes the MXFP4 weights to bf16 and prints:
+>
+> ```
+> MXFP4 quantization requires Triton: CUDA requires Triton >= 3.4.0, XPU/CPU requires Triton >= 3.5.0.
+> We will default to dequantizing the model to bf16.
+> ```
+>
+> This is expected. Triton is not currently available for Windows, so the MXFP4 path cannot be
+> used and the model loads at bf16 instead. Installing the `kernels` package does **not** change
+> this — Transformers checks for Triton first and falls back before `kernels` is ever consulted.
+>
+> The practical effect is on memory, not correctness: `gpt-oss-20b` is roughly 13 GiB of
+> safetensors on disk but occupies about 39 GiB once dequantized. It runs comfortably on a
+> 128 GB system. If you are short of memory, use a smaller model such as `Qwen/Qwen3.5-4B`, or
+> run the model through a GGUF runtime like LM Studio or Lemonade, which keeps the MXFP4 weights
+> packed.
+<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
