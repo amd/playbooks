@@ -38,6 +38,10 @@
       "linux",
       "windows"
     ],
+    "grgh": [
+      "linux",
+      "windows"
+    ],
     "stx": [
       "linux",
       "windows"
@@ -171,5 +175,5 @@
     }
   ],
   "published_date": "2026-03-24",
-  "updated_date": "2026-10-01"
+  "updated_date": "2026-10-09"
 }

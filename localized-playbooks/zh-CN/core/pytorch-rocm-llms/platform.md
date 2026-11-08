@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 ## 前提条件
 
-支持 ROCm 的 PyTorch 已预装在 AMD Ryzen™ AI Halo Developer Platform 上。对于所有其他设备，用户必须手动安装支持 ROCm 的 PyTorch。请参考适用于您操作系统的相应部分：
+支持 ROCm 的 PyTorch 已预装在 AMD Ryzen™ AI Halo Developer Platform 上。对于所有其他设备，用户必须手动安装支持 ROCm 的 PyTorch。请参考适用于你操作系统的相应部分：
 
 ### Windows
 
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MIT
 
 ## 所需模型
 
-以下模型已针对您的平台进行了测试和优化：
+以下模型已针对你的平台进行了测试和优化：
 
 | 模型 | 参数量 | 大小 | 下载位置 |
 |-------|------------|------|-------------------|

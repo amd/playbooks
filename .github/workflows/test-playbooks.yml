@@ -10,12 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       locale:
-        description: 'Localized locale to test alongside English'
-        required: true
-        default: 'zh-CN'
+        description: 'Locale to test (leave empty for canonical English)'
+        required: false
         type: string
       playbook_id:
-        description: 'Specific English/localized playbook ID (leave empty to test all)'
+        description: 'Specific playbook ID (leave empty to test all)'
         required: false
         type: string
       platform:
@@ -84,6 +83,10 @@ jobs:
       # Build independently bounded canonical English and localized matrices.
       # English selection uses extracted test signatures; localized selection
       # conservatively tracks the effective overlay and dependency trees.
+      # Manual runs select exactly one content tree: an empty locale means
+      # canonical English, while a non-empty locale selects that localized tree.
+      # Automatic PR and scheduled runs retain the combined English + zh-CN
+      # coverage that predates the manual single-locale selector.
       # Event data goes through env, never inline, so PR-controlled strings
       # (playbook ids, device names) cannot reach the shell directly.
       - name: Build test matrix
@@ -93,7 +96,7 @@ jobs:
           PLATFORM_INPUT: ${{ github.event.inputs.platform }}
           DEVICE_INPUT: ${{ github.event.inputs.device }}
           RUNNER_LABEL_INPUT: ${{ github.event.inputs.runner_label }}
-          LOCALE: ${{ inputs.locale || 'zh-CN' }}
+          LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
@@ -119,10 +122,29 @@ jobs:
           else
             args=(--mode all)
           fi
-          ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
-          LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE" --allow-empty)
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ -z "$LOCALE_INPUT" ]; then
+              ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
+              LOCALIZED='[]'
+              TARGET_DESCRIPTION="canonical English"
+            else
+              if [[ ! "$LOCALE_INPUT" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]] || [ ! -d "localized-playbooks/$LOCALE_INPUT" ]; then
+                echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE_INPUT"
+                exit 1
+              fi
+              ENGLISH='[]'
+              LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE_INPUT" --allow-empty)
+              TARGET_DESCRIPTION="$LOCALE_INPUT localized"
+            fi
+          else
+            # Automated runs preserve the existing combined English + zh-CN coverage.
+            AUTO_LOCALE="zh-CN"
+            ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
+            LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$AUTO_LOCALE" --allow-empty)
+            TARGET_DESCRIPTION="English or $AUTO_LOCALE localized"
+          fi
           if [ "$ENGLISH" = "[]" ] && [ "$LOCALIZED" = "[]" ] && { [ -n "$PLAYBOOK_INPUT" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; }; then
-            echo "::error::No English or $LOCALE matrix entries match the requested playbook/filter combination"
+            echo "::error::No $TARGET_DESCRIPTION matrix entries match the requested playbook/filter combination"
             exit 1
           fi
           ENGLISH_MATRIX="$ENGLISH" \
@@ -188,13 +210,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml
 
-      # Free the GPU before every job. A prior lemonade/LM Studio playbook can
-      # strand a model on the shared runner (its unload teardown is skipped when
-      # an earlier test in that playbook fails), which OOMs the next job. This
-      # runs regardless of what ran before, so it also protects non-lemonade jobs.
-      # Best-effort and time-bounded: a stuck unload must never wedge the job
-      # (see the ollama note below), so these steps are continue-on-error with a
-      # short timeout.
+      # Free the GPU before every job: (a) unload any loaded models, and
+      # (b) reclaim VRAM from stray GPU processes left by a prior job.
+      # Best-effort and time-bounded, so a stuck cleanup never wedges the job.
       - name: Free GPU before tests (Linux)
         if: matrix.platform == 'linux'
         shell: bash
@@ -210,6 +228,64 @@ jobs:
           if pgrep -x ollama >/dev/null 2>&1; then
             ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
           fi
+          # Kill stray user-owned python processes still holding the GPU. Runs
+          # before our tests, and never touches our own process tree or other
+          # users' processes. Uses /proc and sysfs so it does not depend on
+          # fuser or rocm-smi being installed.
+          log_vram() {
+            local smi
+            smi=$(command -v rocm-smi || ls /opt/rocm*/bin/rocm-smi 2>/dev/null | head -n1) || true
+            if [ -n "$smi" ] && "$smi" --showmeminfo vram 2>/dev/null; then
+              return
+            fi
+            local d found=0
+            for d in /sys/class/drm/card*/device; do
+              [ -r "$d/mem_info_vram_used" ] || continue
+              found=1
+              echo "  $d: $(( $(cat "$d/mem_info_vram_used") / 1048576 )) MiB used of $(( $(cat "$d/mem_info_vram_total") / 1048576 )) MiB"
+            done
+            [ "$found" = 1 ] || echo "  (no VRAM info available: rocm-smi and sysfs both missing)"
+          }
+
+          echo "GPU VRAM before reclaim:"; log_vram
+          # Ancestor set of this shell so we never kill ourselves.
+          self=$$; ancestors=" $self "; p=$self
+          while p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$p" ] && [ "$p" != 0 ]; do
+            ancestors="$ancestors$p "
+          done
+          # PIDs holding the GPU compute (/dev/kfd) or render (/dev/dri/renderD*) nodes.
+          pids=$(
+            for fd in /proc/[0-9]*/fd/*; do
+              case "$(readlink "$fd" 2>/dev/null)" in
+                /dev/kfd|/dev/dri/renderD*) pid=${fd#/proc/}; echo "${pid%%/*}" ;;
+              esac
+            done | sort -u
+          )
+          me=$(id -un)
+          termed=""
+          for pid in $pids; do
+            case "$ancestors" in *" $pid "*) continue ;; esac
+            comm=$(ps -o comm= -p "$pid" 2>/dev/null || true)
+            owner=$(ps -o user= -p "$pid" 2>/dev/null | tr -d ' ' || true)
+            # Only user-owned python training processes; leave root/system alone.
+            if [ "$owner" = "$me" ]; then
+              case "$comm" in
+                python|python3|pt_main_thread)
+                  echo "Killing stray GPU process $pid ($comm, owner $owner)"
+                  kill -TERM "$pid" 2>/dev/null || true
+                  termed="$termed $pid"
+                  ;;
+              esac
+            fi
+          done
+          if [ -n "$termed" ]; then
+            sleep 3
+            # Escalate only on the PIDs we sent SIGTERM to.
+            for pid in $termed; do
+              kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
+            done
+          fi
+          echo "GPU VRAM after reclaim:"; log_vram
 
       - name: Free GPU before tests (Windows)
         if: matrix.platform == 'windows'
