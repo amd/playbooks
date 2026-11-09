@@ -84,7 +84,8 @@ RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"
 
 # Devices tested only through OrchestrAI. They have no self-hosted runner on
 # purpose, so their entries, even required ones, are left out of this matrix.
-ORCHESTRAI_ONLY_DEVICES = frozenset({"grgh"})
+# Box SKUs never get a runner group (see VALID_DEVICES in run_playbook_tests.py).
+ORCHESTRAI_ONLY_DEVICES = frozenset({"grgh", "halo_box", "grgh_box"})
 
 
 def annotate(level: str, message: str) -> None:
