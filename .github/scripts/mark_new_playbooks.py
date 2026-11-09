@@ -12,8 +12,10 @@ playbook (which may not have a published_date yet) is still ranked newest.
 Ranking (newest first):
 * A missing/empty published_date is treated as newest — a playbook that was just
   merged but not yet date-stamped is, by definition, the newest thing.
-* Then by published_date descending, tie-broken by updated_date then id so the
-  set is deterministic.
+* Then by published_date descending. Ties are not broken on any second field:
+  the sort is stable over a path-sorted list, so if two playbooks published on
+  the same day straddle the NEW_COUNT boundary, one simply takes the slot and
+  the other does not. Which one is arbitrary but deterministic.
 
 Only published (published=true) core/supplemental playbooks are considered;
 unpublished drafts never take a "New" slot. Authors/dates are not touched here.
@@ -40,10 +42,8 @@ NEW_COUNT = 3
 _NEWEST = "9999-99-99"
 
 
-def _rank_key(meta: dict) -> tuple:
-    pub = meta.get("published_date") or _NEWEST
-    upd = meta.get("updated_date") or _NEWEST
-    return (pub, upd, meta.get("id", ""))
+def _rank_key(meta: dict) -> str:
+    return meta.get("published_date") or _NEWEST
 
 
 def compute(metas: list[tuple[Path, dict]]) -> set[str]:
