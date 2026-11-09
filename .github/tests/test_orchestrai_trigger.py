@@ -451,9 +451,9 @@ class WorkflowWiring(unittest.TestCase):
                 steps = job.get("steps") or []
                 for i, step in enumerate(steps):
                     run = step.get("run") or ""
-                    # --await-build and --run-status only read the Control Plane.
+                    # --await-build, --run-status and --cancel only call the Control Plane.
                     if ("orchestrai_trigger.py" in run and "--await-build" not in run
-                            and "--run-status" not in run):
+                            and "--run-status" not in run and "--cancel" not in run):
                         before = " ".join(s.get("run") or "" for s in steps[:i])
                         self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
 
@@ -616,6 +616,24 @@ class FoldIntoCapacityBatch(unittest.TestCase):
         self.assertIn("ram_128gb", batches["linux/halo+ram_128gb"]["tags"])
         # Every Test job waits on the batch its playbook now runs in.
         self.assertEqual({e["batch_id"] for e in matrix}, {"linux/halo+ram_128gb"})
+
+    def test_grgh_runs_the_halo_class_playbooks_untagged(self):
+        # grgh's machines (192 GB) carry no ram_* tag: a ram_128gb batch on grgh
+        # could never be placed (409 capacity_unsatisfiable), so it gets none.
+        from orchestrai_matrix import build
+        cfg = load_config()
+        cfg["device_to_tags"] = {device: [f"fixture-{device}"] for device in cfg["device_to_gfx"]}
+        self.assertNotIn("grgh", cfg["extra_tag_devices"]["ram_128gb"])
+        old_cwd = os.getcwd()
+        try:
+            os.chdir(os.path.dirname(GITHUB_DIR))
+            matrix, batches = build(self.MIXED, cfg, devices={"grgh"}, platforms={"linux"})
+        finally:
+            os.chdir(old_cwd)
+        self.assertEqual(sorted(batches), ["linux/grgh"])
+        self.assertNotIn("ram_128gb", batches["linux/grgh"]["tags"])
+        self.assertIn("lmstudio-rocm-llms", batches["linux/grgh"]["playbooks"])
+        self.assertEqual({e["batch_id"] for e in matrix}, {"linux/grgh"})
 
     def test_without_superset_tags_the_batches_stay_separate(self):
         matrix, batches = self.build(superset_tags=[])

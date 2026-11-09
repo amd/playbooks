@@ -155,7 +155,7 @@ class WindowsDriverSelection(unittest.TestCase):
         for name in ["test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"]:
             workflow = yaml.load((GITHUB / "workflows" / name).read_text(), Loader=yaml.BaseLoader)
             trigger_steps = [s for s in workflow["jobs"]["detect-and-trigger" if name.startswith("test-") else "command"]["steps"]
-                             if "orchestrai_trigger.py" in s.get("run", "")]
+                             if "orchestrai_trigger.py" in s.get("run", "") and "--cancel" not in s["run"]]
             self.assertEqual(len(trigger_steps), 1)
             env = trigger_steps[0]["env"]
             self.assertIn("ORCHESTRAI_WINDOWS_DRIVER", env)
