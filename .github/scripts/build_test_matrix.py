@@ -74,10 +74,12 @@ HARNESS_EXCLUDED = frozenset({
     ".github/scripts/create_failure_issues.py",    # if: failure() on main, post-verdict
     ".github/scripts/test_build_test_matrix.py",   # separate selector-tests job
     ".github/scripts/gen_issue_template_playbooks.py",  # validate-playbooks.yml
+    ".github/scripts/orchestrai_batch_verdict.py", # OrchestrAI workflows
     ".github/scripts/orchestrai_matrix.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_report.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_trigger.py",       # OrchestrAI workflows
     ".github/scripts/orchestrai_verdict.py",       # OrchestrAI workflows
+    ".github/scripts/orchestrai_wait_build.sh",    # OrchestrAI workflows
 })
 
 RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"

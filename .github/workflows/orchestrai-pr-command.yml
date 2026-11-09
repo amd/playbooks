@@ -232,6 +232,22 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .orc/.github/scripts/orchestrai_trigger.py --config .orc/.github/orchestrai-config.yml
 
+      # A newer !orc cancels this one (concurrency above). Runs already started
+      # would otherwise keep queueing for or holding machines for hours; the
+      # cancel-runs job below covers a cancel after this job has finished.
+      - name: Cancel the OrchestrAI runs this command started
+        if: cancelled() && steps.trigger.outputs.run_ids != ''
+        timeout-minutes: 15
+        env:
+          RUN_ID_MAP: ${{ steps.trigger.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: |
+          RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
+            python3 .orc/.github/scripts/orchestrai_trigger.py --cancel
+
   test-playbooks:
     name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
     needs: command
@@ -349,6 +365,34 @@ jobs:
               echo "| OrchestrAI | [View Results](${RUN_URL}) |"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # A cancelled command (a newer !orc, or Cancel workflow) stops every run it
+  # started, including batches whose Test jobs never began (max-parallel):
+  # nothing else would, and a queued run would still take machines hours later.
+  cancel-runs:
+    name: Cancel OrchestrAI runs
+    needs: [command, test-playbooks]
+    if: cancelled() && needs.command.result == 'success' && needs.command.outputs.run_ids != ''
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
+    steps:
+      # The controller's revision (this workflow's), not the PR head.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Cancel the runs
+        env:
+          RUN_ID_MAP: ${{ needs.command.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: |
+          RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
+            python3 .github/scripts/orchestrai_trigger.py --cancel
 
   report:
     needs: [command, test-playbooks]

@@ -356,6 +356,26 @@ class Workflows(unittest.TestCase):
         self.assertIn("needs.detect-and-trigger.outputs.run_ids", step["env"]["RUN_IDS"])
         self.assertIn("steps.retry_trigger.outputs.run_ids", step["env"]["RUN_IDS"])
 
+    def test_a_cancelled_orc_command_cancels_every_run_it_started(self):
+        wf = self.load("orchestrai-pr-command.yml")
+        self.assertIs(wf["concurrency"]["cancel-in-progress"], True)  # why this is needed
+        # Cancelled while the command job runs: its own last step.
+        step = next(s for s in wf["jobs"]["command"]["steps"] if "--cancel" in s.get("run", ""))
+        self.assertTrue(step["if"].startswith("cancelled()"))
+        self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ steps.trigger.outputs.run_ids }}")
+        # Cancelled later, including batches whose Test jobs never started.
+        job = wf["jobs"]["cancel-runs"]
+        self.assertEqual(job["needs"], ["command", "test-playbooks"])
+        self.assertTrue(job["if"].startswith("cancelled()"))
+        self.assertEqual(job["permissions"]["id-token"], "write")
+        step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
+        self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ needs.command.outputs.run_ids }}")
+        # The run_ids map becomes the space-separated RUN_IDS --cancel reads.
+        snippet = step["run"].split("python3 -c '", 1)[1].split("'", 1)[0]
+        out = subprocess.run([sys.executable, "-c", snippet], capture_output=True, text=True, check=True,
+                             env={**os.environ, "RUN_ID_MAP": json.dumps({"linux/halo": "r1", "windows/stx": "r2"})})
+        self.assertEqual(out.stdout.split(), ["r1", "r2"])
+
     def test_results_by_device_knows_every_expected_batch(self):
         step = next(s for s in self.load("test-playbooks-orchestrai.yml")["jobs"]["playbook-results"]["steps"]
                     if "--merge" in s.get("run", ""))
