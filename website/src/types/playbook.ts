@@ -183,9 +183,6 @@ export interface PlaybookMeta {
   /** Publication date (YYYY-MM-DD), CI-managed from git history. */
   published_date?: string;
 
-  /** Last-updated date (YYYY-MM-DD), CI-managed from git history. */
-  updated_date?: string;
-  
   /** Short description (shown in cards) */
   description: string;
   

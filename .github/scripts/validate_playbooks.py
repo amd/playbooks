@@ -288,16 +288,15 @@ def validate_playbook_json(
                         f'got: {a.get("type")!r}',
                     )
 
-    # published_date / updated_date are CI-managed (do not hand-edit), but if
-    # present must be YYYY-MM-DD so the website can parse them.
-    for date_field in ("published_date", "updated_date"):
-        if date_field in meta and meta[date_field]:
-            if not (isinstance(meta[date_field], str) and DATE_RE.match(meta[date_field])):
-                result.add_error(
-                    playbook_name,
-                    f'Field "{date_field}" must be a YYYY-MM-DD string, '
-                    f"got: {meta[date_field]!r}",
-                )
+    # published_date is CI-managed (do not hand-edit), but if present must be
+    # YYYY-MM-DD so the website can parse it.
+    if meta.get("published_date"):
+        if not (isinstance(meta["published_date"], str) and DATE_RE.match(meta["published_date"])):
+            result.add_error(
+                playbook_name,
+                f'Field "published_date" must be a YYYY-MM-DD string, '
+                f"got: {meta['published_date']!r}",
+            )
 
     # Validate ID matches folder name
     if "id" in meta and meta["id"] != folder_name:

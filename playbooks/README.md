@@ -247,7 +247,6 @@ To edit an existing playbook:
 | `required_platforms` | No | Subset of `tested_platforms` where CI failure blocks merges |
 | `published` | Yes | Set `true` to show on website |
 | `published_date` | Auto | `YYYY-MM-DD`, stamped by CI from git history. **Do not hand-edit** |
-| `updated_date` | Auto | `YYYY-MM-DD`, refreshed by CI on each change. **Do not hand-edit** |
 | `difficulty` | No | `"beginner"`, `"intermediate"`, or `"advanced"` |
 | `isNew` | Auto | `true` on the 3 most recently published playbooks, else `false`; set by CI. **Do not hand-edit** |
 | `isFeatured` | No | Displays prominently at top |
@@ -270,13 +269,17 @@ If you don't know the author, use the anonymous placeholder:
 "authors": [{ "name": "Anonymous", "github": null, "github_url": null, "type": "community" }]
 ```
 
-**Dates and the New tag are automatic.** The Playbook Metadata workflow stamps
-`published_date` / `updated_date` from git history (`published_date` is set once
-from the first commit and never changed; `updated_date` tracks the latest change),
-then sets `isNew` on the 3 most recently published playbooks and clears it on the
-rest. Leave all three out of new playbooks — CI fills them in via a PR after
-merge. A brand-new playbook ranks newest even before its date is stamped, so it
-is marked New immediately.
+**The publication date and the New tag are automatic.** The Playbook Metadata
+workflow stamps `published_date` from the first commit that added the playbook
+(set once, never changed), then sets `isNew` on the 3 most recently published
+playbooks and clears it on the rest. Leave both out of new playbooks — CI fills
+them in via a PR after merge. A brand-new playbook ranks newest even before its
+date is stamped, so it is marked New immediately.
+
+There is no "last updated" field. Editing a playbook does not re-date it, and a
+repo-wide sweep does not re-date every playbook. How current a playbook is shows
+on the site as **Last validated**, per device, from `validatedDate` /
+`validatedVersions` — i.e. from CI running the playbook on real hardware.
 
 ---
 
