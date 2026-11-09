@@ -17,44 +17,44 @@ SPDX-License-Identifier: MIT
 
 ## 概述
 
-开发者将大量时间花费在小而重复的循环任务上：审查已打标签的拉取请求、回复 GitHub 评论、分类新问题、将 Slack 讨论串转换为站会笔记或事件跟进，以及跟踪发布或研究信号。
-每个循环都很熟悉，但仍需要判断力：收集合适的上下文、决定哪些内容重要，并在团队已有的工作场所发布清晰的更新。
+开发者会在一些琐碎但反复出现的循环工作上花费大量时间：审查带标签的拉取请求、回复 GitHub 评论、对新问题进行分诊、把 Slack 讨论串整理成站会笔记或事件跟进事项，以及跟踪版本发布或研究方面的动态信息。
+每种循环都很熟悉，但仍然需要人工判断：收集合适的上下文、判断哪些信息重要，并在团队已经在使用的地方发布清晰的更新。
 
-[OpenHands automations](https://docs.openhands.dev/openhands/usage/automations/overview) 将这些循环转变为按计划或事件触发的智能体对话：在这种运行中，AI 软件智能体可以读取上下文、调用工具并生成更新。
-OpenHands 扩展目录中共享的自动化模板遵循以下模式，适用于 GitHub 拉取请求审查、仓库监控、Linear 问题分类、事件复盘、Slack 站会摘要和研究简报：自动化被唤醒，使用已配置的集成（如 GitHub 或 Slack）获取上下文，利用大语言模型（LLM）对该上下文进行推理，并将结果写回。
+[OpenHands 自动化](https://docs.openhands.dev/openhands/usage/automations/overview)将这些循环转化为按计划或按事件触发的智能体对话：在这些运行过程中，AI 软件智能体可以读取上下文、调用工具，并产出更新。
+OpenHands 扩展目录中共享的自动化模板遵循这样的模式，覆盖 GitHub 拉取请求审查、仓库监控、Linear 问题分诊、事件复盘、Slack 站会摘要和研究简报：一个自动化任务被唤醒，使用配置好的集成（例如 GitHub 或 Slack）获取上下文，用大语言模型（LLM）对该上下文进行推理，然后把结果写回去。
 
-[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是用于构建和测试这些自动化的本地控制平面。
-在本教程中，它运行一个 OpenHands Agent Server（执行智能体对话的后端进程），并将智能体与 GitHub 和 Slack 等外部服务连接起来。
+[Agent Canvas](https://github.com/OpenHands/agent-canvas) 是用于构建和测试这些自动化任务的本地控制平面。
+在本实践指南中，它会运行一个 OpenHands Agent Server（负责执行智能体对话的后端进程），并将智能体连接到 GitHub、Slack 等外部服务。
 
-为了让工作流保留在您的 AMD 系统上，智能体与 Lemonade Server 托管的本地模型进行通信。
-Lemonade 通过一个与 OpenAI 兼容的 API 公开该模型，因此 Agent Canvas 可以像配置远程 OpenAI 风格端点一样配置它，同时模型、提示词和工作流上下文都保留在本地。
+为了让整个工作流保留在你的 AMD 系统上，智能体会与 Lemonade Server 提供的本地模型通信。
+Lemonade 通过兼容 OpenAI 的 API 公开该模型，因此 Agent Canvas 可以像配置远程 OpenAI 风格的端点一样配置它，同时模型、提示词和工作流上下文都保留在本地。
 
-在本教程中，您将构建一个具体的自动化：一个按计划运行的 GitHub 到 Slack 的开发摘要。
-它使用 GitHub 检查最近的仓库活动，使用 Slack 发布摘要，使用 Agent Canvas API 调用来配置和测试自动化，并使用 Lemonade 在本地运行 LLM。
+在本实践指南中，你将构建一个具体的自动化任务：一个按计划运行的 GitHub 到 Slack 的开发摘要。
+它使用 GitHub 检查最近的仓库活动，使用 Slack 发布摘要，使用 Agent Canvas API 调用来配置和测试该自动化任务，并使用 Lemonade 在本地运行 LLM。
 
 ![显示 GitHub MCP、OpenHands 自动化、Lemonade Server 和 Slack MCP 的架构图](assets/00-architecture-overview.png)
 
-## 您将学到的内容
+## 你将学到什么
 
-- 如何启动 Lemonade Server 并验证本地模型能够响应聊天请求
-- 如何启动 Agent Canvas 并将其 Agent Server 指向本地 LLM
+- 如何启动 Lemonade Server 并验证本地模型能响应聊天请求
+- 如何启动 Agent Canvas，并让其 Agent Server 指向本地 LLM
 - 如何通过 Agent Server API 安装 GitHub 和 Slack 的模型上下文协议（MCP）服务器
-- 如何创建并分发一个按计划运行的 OpenHands 自动化，将开发摘要发布到 Slack
+- 如何创建并分发一个按计划运行的 OpenHands 自动化任务，将开发摘要发布到 Slack
 - 如何排查最常见的本地模型和自动化故障
 
 ## 核心概念
 
-| 概念 | 是什么 | 在本教程中的作用 |
+| 概念 | 是什么 | 在本实践指南中的作用 |
 | --- | --- | --- |
-| Lemonade Server | 一个专为 AMD 硬件打造的本地 LLM 服务平台，公开一个与 OpenAI 兼容的 API。您的数据不会离开您的机器。 | 运行驱动智能体的模型。 |
-| OpenHands Agent Server | 执行 OpenHands 智能体对话的后端进程。 | 托管智能体、其 LLM 配置文件以及其 MCP 服务器。 |
-| Agent Canvas | OpenHands 的本地控制平面，运行 Agent Server 以及用于检查智能体运行情况的 UI。 | 启动后端并提供您调用的 API。 |
-| MCP server | 一个模型上下文协议服务器，为智能体提供针对 GitHub 或 Slack 等外部服务的工具。 | 使智能体能够读取 GitHub 并写入 Slack。 |
-| OpenHands automation | 一个按计划或事件触发的智能体对话，用于获取上下文、对其进行推理，并将结果写入某处。 | 您在此构建的 GitHub 到 Slack 摘要。 |
+| Lemonade Server | 一个为 AMD 硬件构建的本地 LLM 服务平台，公开兼容 OpenAI 的 API。你的数据永远不会离开你的机器。 | 运行驱动智能体的模型。 |
+| OpenHands Agent Server | 执行 OpenHands 智能体对话的后端进程。 | 承载智能体、其 LLM 配置文件及其 MCP 服务器。 |
+| Agent Canvas | OpenHands 的本地控制平面，运行 Agent Server 以及一个用于查看智能体运行情况的 UI。 | 启动各后端并提供你所调用的 API。 |
+| MCP 服务器 | 一个模型上下文协议服务器，为智能体提供访问 GitHub、Slack 等外部服务的工具。 | 让智能体能够读取 GitHub 并写入 Slack。 |
+| OpenHands 自动化 | 一个按计划或按事件触发的智能体对话，获取上下文、对其进行推理，并将结果写到某处。 | 你在这里构建的 GitHub 到 Slack 的摘要任务。 |
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 编码智能体工作流受益于更大的模型和上下文窗口。
+> 编程智能体工作流受益于更大的模型和上下文窗口。
 > 请使用至少 32 GB 的系统内存，对于更大的 GGUF 模型，建议使用 64 GB 或更多。
 <!-- @device:end -->
 
@@ -84,28 +84,28 @@ Lemonade 通过一个与 OpenAI 兼容的 API 公开该模型，因此 Agent Can
 <!-- @prereq:docker,nodejs,lemonade-models-qwen3-6-35b-a3b -->
 <!-- @os:end -->
 
-您需要：
+你需要：
 
-- 按照标准的 [Lemonade installation guide](https://lemonade-server.ai/docs/guide/install/) 安装 Lemonade Server。
+- 已按照标准的 [Lemonade 安装指南](https://lemonade-server.ai/docs/guide/install/)安装好 Lemonade Server。
 
 <!-- @os:linux -->
-- Node.js 22.12 或更高版本以及 `npm`，用于安装已发布的 Agent Canvas CLI 并使用 `npx` 运行 MCP 服务器。
-- `uv`，Agent Canvas 用于构建 Agent Server 环境的 Python 包管理器。如果尚未安装，请从 [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/) 安装它。
-- 一个近期发布的 `@openhands/agent-canvas` 包，支持基于模式（schema）的智能体设置、`LLMSummarizingCondenserSettings.max_tokens` 以及 LLM 的 `custom_tokenizer` 支持。
-- Agent Server 环境中可用的 Python `transformers` 包。当设置了 `custom_tokenizer` 时，进行聊天模板的词元计数需要它。
+- Node.js 22.12 或更高版本以及 `npm`，用于安装已发布的 Agent Canvas CLI，并通过 `npx` 运行 MCP 服务器。
+- `uv`，这是 Agent Canvas 用来构建 Agent Server 环境的 Python 包管理器。如果尚未安装，请从 [uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)进行安装。
+- 一个最近发布的、支持基于 schema 的智能体设置、`LLMSummarizingCondenserSettings.max_tokens` 以及 LLM `custom_tokenizer` 的 `@openhands/agent-canvas` 包。
+- 在 Agent Server 环境中可用的 Python `transformers` 包。当设置了 `custom_tokenizer` 时，这是进行聊天模板 token 计数所必需的。
 <!-- @os:end -->
 
 <!-- @os:windows -->
-- [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)，已安装并正在运行。在 Windows 上，Agent Canvas 技术栈从已发布的 Docker 镜像中运行，该镜像捆绑了 Node.js、`uv`、`transformers` 和 `@openhands/agent-canvas` 包，因此您无需在主机上安装这些内容。
+- [适用于 Windows 的 Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)，已安装并正在运行。在 Windows 上，Agent Canvas 技术栈运行自已发布的 Docker 镜像，该镜像内置了 Node.js、`uv`、`transformers` 和 `@openhands/agent-canvas` 包，因此你无需在主机上单独安装这些组件。
 <!-- @os:end -->
 
 - 一个对目标仓库具有读取权限的 GitHub 令牌。
-- 一个具有 `chat:write` 和频道读取权限的 Slack 机器人令牌（`xoxb-...`）。
+- 一个具备 `chat:write` 权限和频道读取权限的 Slack 机器人令牌（`xoxb-...`）。
 - 一个 Slack 团队 ID（`T...`）。
-- 一个应发布摘要的 Slack 频道 ID（`C...`）。
+- 一个用于发布摘要的 Slack 频道 ID（`C...`）。
 
-在测试该自动化之前，请先将 Slack 应用邀请到目标频道。
-# 本 Playbook 中使用的变量
+在测试该自动化任务之前，请先将 Slack 应用邀请加入目标频道。
+## 本剧本中使用的变量
 
 <!-- @var:id=lemonade_model value="Qwen3.6-35B-A3B-GGUF" -->
 
@@ -123,11 +123,11 @@ $env:LEMONADE_MODEL = "Qwen3.6-35B-A3B-GGUF"
 ```
 <!-- @os:end -->
 
-以下验证命令会使用这两个变量。
-模型、分词器和其他 LLM 设置会在后续步骤中直接在 Agent Canvas UI 中输入，因此在需要用到它们的地方会以内联方式展示其具体值。
+下面的验证命令会用到这两个变量。
+模型、分词器以及其他 LLM 设置会在后续步骤中直接在 Agent Canvas UI 中输入，因此在需要用到它们的地方会以字面值的形式内联显示。
 
-以下值会在后续步骤中输入到 Agent Canvas UI 中。
-请在此处设置好，以便后续直接复制使用：
+以下这些值会在后续步骤中输入到 Agent Canvas UI 中。
+在这里先设置好，方便你复制使用：
 
 <!-- @os:linux -->
 ```bash
@@ -146,7 +146,7 @@ $env:DIGEST_TIMEZONE = "America/New_York"
 <!-- @os:end -->
 
 请为 `GITHUB_REPO_FILTER` 使用明确的 `owner/repo` 值。
-过于宽泛的组织通配符可能会返回过多的 MCP 上下文，超出本地模型的处理能力。
+范围过大的组织通配符可能会为本地模型返回过多的 MCP 上下文。
 
 <!-- @test:id=lemonade-version timeout=60 hidden=True -->
 ```bash
@@ -154,9 +154,9 @@ lemonade --version
 ```
 <!-- @test:end -->
 
-## 1. 启动 Lemonade Server
+## 1. 启动 Lemonade 服务器
 
-通过 Lemonade CLI 启动模型：
+从 Lemonade CLI 启动模型：
 
 <!-- @os:linux -->
 ```bash
@@ -174,19 +174,19 @@ lemonade run "$env:LEMONADE_MODEL"
 ```
 <!-- @os:end -->
 
-> **选择适合你硬件的模型。** `Qwen3.6-35B-A3B-GGUF`（约 20 GB）是适用于此工作流的强力模型，但需要较大的内存池。
-> 如果你的设备内存或 GPU 显存有限，请从 Lemonade 模型库中选择更小的 GGUF 模型，并在本 Playbook 中始终使用该模型 ID（及其对应的分词器）。
+> **选择适合你硬件的模型。** `Qwen3.6-35B-A3B-GGUF`（约 20 GB）对此工作流来说是一个强大的模型，但需要较大的内存池。
+> 如果你的设备内存或 GPU 显存有限，请从 Lemonade 模型库中选择一个较小的 GGUF 模型，并在本剧本中全程使用该模型 ID（以及与之匹配的分词器）。
 
-> **注意：** 首次执行 `lemonade run` 会在模型尚未存在时下载该模型，根据模型大小和网络状况，这可能需要一些时间。
+> **注意：** 首次执行 `lemonade run` 时会下载模型（如果本地尚不存在该模型），根据模型大小和你的网络连接情况，这可能需要一些时间。
 
-Lemonade 会在以下地址暴露一个与 OpenAI 兼容的 API：
+Lemonade 会在以下地址提供一个与 OpenAI 兼容的 API：
 
 ```text
 http://127.0.0.1:13305/api/v1
 ```
 
-可选：如果 Agent Canvas 或自动化运行器不在同一台机器上，可通过安全隧道发布 Lemonade 端点，并将该 HTTPS URL 用作 LLM 基础 URL。
-[ngrok](https://ngrok.com/) 可通过安全的 HTTPS URL 将本地端口暴露到互联网；它需要一个免费的 ngrok 账户，请将 `YOUR_NGROK_DOMAIN.ngrok-free.dev` 替换为你自己保留的域名：
+可选：如果 Agent Canvas 或自动化运行器与该设备不在同一台机器上，可以通过安全隧道发布 Lemonade 端点，并将该 HTTPS URL 用作 LLM 的基础 URL。
+[ngrok](https://ngrok.com/) 可以通过一个安全的 HTTPS URL 将本地端口暴露到互联网上；使用它需要一个免费的 ngrok 账户，你需要将 `YOUR_NGROK_DOMAIN.ngrok-free.dev` 替换为你自己预留的域名：
 
 ```bash
 ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
@@ -196,7 +196,7 @@ ngrok http 13305 --url YOUR_NGROK_DOMAIN.ngrok-free.dev
 
 ## 2. 验证本地模型
 
-确认 Lemonade 能够提供所选模型的服务：
+确认 Lemonade 能够为所选模型提供服务：
 
 <!-- @os:linux -->
 ```bash
@@ -237,7 +237,7 @@ curl.exe -sS "$env:LEMONADE_BASE_URL/chat/completions" -H "Content-Type: applica
 ```
 <!-- @os:end -->
 
-如果返回结果中包含 `choices` 数组，说明 Lemonade 已可供 Agent Canvas 使用。
+如果返回结果中包含 `choices` 数组，说明 Lemonade 已经为 Agent Canvas 准备就绪。
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-chat-linux timeout=1200 hidden=True -->
@@ -360,45 +360,45 @@ npm -v
 ## 3. 启动 Agent Canvas
 
 <!-- @os:linux -->
-安装已发布的 Agent Canvas 包并启动完整的技术栈：
+安装已发布的 Agent Canvas 软件包并启动完整的技术栈：
 
 ```bash
 npm install -g @openhands/agent-canvas
 agent-canvas
 ```
 
-如果全局 npm 安装因权限错误而失败，请参阅下文的 npm 权限问题排查条目。
+如果全局 npm 安装因权限错误而失败，请参阅下方的 npm 权限问题排查条目。
 
 默认情况下，Agent Canvas 会在 `http://localhost:8000` 上启动。
-请在浏览器中打开该 URL。
-该端口没有特殊含义——如果 8000 已被占用，可通过 `--port`（或 `-p`）参数指定任意空闲端口。
-默认的本地后端应在主屏幕上显示为健康状态。
+在浏览器中打开该 URL。
+这个端口号并没有特殊含义——如果 8000 已被占用，可以通过 `--port`（或 `-p`）传入任意空闲端口。
+默认的本地后端应在主界面上显示为健康状态。
 
-> **注意：** 首次启动会构建 Agent Server 的 `uv` 管理的 Python 环境，因此后端报告健康状态之前可能需要几分钟时间。
+> **注意：** 首次启动时会构建 Agent Server 的 `uv` 管理的 Python 环境，因此在后端报告为健康状态之前可能需要几分钟时间。
 
 `agent-canvas` 命令会同时启动 agent server、自动化后端以及 Web 前端。
 你只需要这一条命令即可在本地运行 OpenHands。
-本 Playbook 的其余部分将全部通过浏览器中的 Agent Canvas UI 进行配置。
+本剧本接下来的部分都会通过浏览器中的 Agent Canvas UI 来完成配置。
 <!-- @os:end -->
 
 <!-- @os:windows -->
 在 Windows 上，使用 Docker Desktop 运行已发布的 Agent Canvas 容器镜像。
-该镜像打包了 Agent Server、自动化后端和 Web 前端，因此你无需在主机上安装 Node.js、`uv` 或 CLI。
+该镜像捆绑了 Agent Server、自动化后端以及 Web 前端，因此你无需在主机上安装 Node.js、`uv` 或 CLI。
 
-首先，创建容器将要挂载的配置和工作区文件夹：
+首先，创建容器要挂载的配置目录和工作区目录：
 
 ```powershell
 $env:PROJECTS_PATH = Join-Path $HOME "projects"
 New-Item -ItemType Directory -Force -Path $env:PROJECTS_PATH, (Join-Path $env:USERPROFILE ".openhands") | Out-Null
 ```
 
-拉取已发布的镜像（约 6 GB；该镜像为公开镜像，无需登录）：
+拉取已发布的镜像（约 6 GB；该镜像是公开的，因此无需登录）：
 
 ```powershell
 docker pull ghcr.io/openhands/agent-canvas:1.14.0
 ```
 
-然后启动整个技术栈：
+然后启动该技术栈：
 
 ```powershell
 docker run -it --rm `
@@ -409,12 +409,12 @@ docker run -it --rm `
 ```
 
 在浏览器中打开 `http://localhost:8000/canvas`。
-如果 8000 端口已被占用，可映射到其他主机端口，例如 `-p 8080:8000`，然后改为打开 `http://localhost:8080/canvas`。
+如果 8000 端口已被占用，可以映射到其他主机端口，例如 `-p 8080:8000`，然后改为打开 `http://localhost:8080/canvas`。
 
-> **注意：** 首次启动会在容器内构建 Agent Server 环境，因此后端报告健康状态之前可能需要几分钟时间。
+> **注意：** 首次启动时会在容器内构建 Agent Server 环境，因此在后端报告为健康状态之前可能需要几分钟时间。
 
-`.openhands` 挂载点会在容器重启后持久保存你的 LLM 配置、MCP 服务器和自动化设置。
-本 Playbook 的其余部分将全部通过浏览器中地址为 `http://localhost:8000/canvas` 的 Agent Canvas UI 进行配置。
+`.openhands` 挂载目录会在容器重启后持久保存你的 LLM 配置文件、MCP 服务器以及自动化任务。
+本剧本接下来的部分都会通过浏览器中位于 `http://localhost:8000/canvas` 的 Agent Canvas UI 来完成配置。
 <!-- @os:end -->
 
 <!-- @os:linux -->
@@ -549,22 +549,22 @@ finally {
 首次启动时，Agent Canvas 会打开一个引导流程。
 在该流程中：
 
-1. 保持代理选择为 **OpenHands**，然后点击 **Next**。
-2. 在 **Set up your LLM** 中，选择 **Advanced**。
+1. 保持代理选项为 **OpenHands**，然后点击 **Next**。
+2. 在 **Set up your LLM** 页面，选择 **Advanced**。
 3. 保持 **Authentication** 设置为 **API key**。
 4. 将 **Custom Model** 设置为 `openai/Qwen3.6-35B-A3B-GGUF`。
 5. 将 **Base URL** 设置为 `http://127.0.0.1:13305/api/v1`。
-6. 对于 **API Key**，输入任意非空占位符，例如 `lemonade-local`。Lemonade 不需要真实的密钥，但 OpenHands 客户端需要一个值才能发送请求。
+6. 对于 **API Key**，输入任意非空占位值，例如 `lemonade-local`。Lemonade 不需要真实密钥，但 OpenHands 客户端需要一个值才能发送请求。
 
 <!-- @os:windows -->
-> **Windows（Docker）：** 由于 Agent Server 在容器内运行，请将 **Base URL** 设置为 `http://host.docker.internal:13305/api/v1`，而不是 `http://127.0.0.1:13305/api/v1`。
-> 在容器内部，`127.0.0.1` 指的是容器自身；`host.docker.internal` 则指向在 Windows 主机上运行的 Lemonade，Docker Desktop 会自动提供该主机名。
+> **Windows（Docker）：** Agent Server 在容器内运行，因此需要将 **Base URL** 设置为 `http://host.docker.internal:13305/api/v1`，而不是 `http://127.0.0.1:13305/api/v1`。
+> 从容器内部看，`127.0.0.1` 指的是容器本身；`host.docker.internal` 则指向运行在 Windows 主机上的 Lemonade，Docker Desktop 会自动提供该主机名。
 <!-- @os:end -->
 
 连接字段应如下所示。
-API 密钥字段已被界面遮盖。
+API 密钥字段会被界面遮罩显示。
 
-![Agent Canvas 首次使用的 LLM Advanced 设置，显示 Lemonade 模型和本地 Base URL](assets/01-llm-advanced-settings.png)
+![Agent Canvas 首次使用的 LLM 高级设置，显示 Lemonade 模型和本地基础 URL](assets/01-llm-advanced-settings.png)
 
 然后选择 **All**，并设置额外的本地模型字段：
 
@@ -574,9 +574,9 @@ API 密钥字段已被界面遮盖。
 
 ![Agent Canvas 首次使用的 LLM All 选项卡，显示 Qwen 自定义分词器](assets/02-llm-all-tokenizer-settings.png)
 
-![Agent Canvas 首次使用的 LLM All 选项卡，显示已配置的 LiteLLM extra body](assets/03-llm-all-extra-body-settings.png)
+![Agent Canvas 首次使用的 LLM All 选项卡，显示已配置的 LiteLLM 额外请求体](assets/03-llm-all-extra-body-settings.png)
 
-LLM 设置应显示：
+LLM 设置应显示如下：
 
 | 字段 | 值 |
 | --- | --- |
@@ -585,37 +585,37 @@ LLM 设置应显示：
 | Custom tokenizer | `Qwen/Qwen3.6-35B-A3B` |
 | LiteLLM extra body | `{"enable_thinking": true}` |
 
-`openai/` 前缀告知 LiteLLM 针对 Lemonade 端点使用与 OpenAI 兼容的请求格式。
-自定义分词器是该 GGUF 模型对应的原始 Hugging Face 分词器；它使 OpenHands 能够计算与本地模型服务器相同的聊天模板 token 数。
-当前首次使用的 LLM 表单未显示压缩器（condenser）设置。
-如果您的 Agent Canvas 版本后续在 **Settings > LLM** 下提供了压缩器设置，请使用 `llm_summarizing`，并将最大 token 数设置为低于 Lemonade 上下文窗口的值，例如 `56000`。
+`openai/` 前缀告诉 LiteLLM 针对 Lemonade 端点使用与 OpenAI 兼容的请求格式。
+自定义分词器是该 GGUF 模型对应的原始 Hugging Face 分词器；它使 OpenHands 能够计算与本地模型服务器所看到的相同的聊天模板 token 数。
+当前首次使用的 LLM 表单不显示压缩器（condenser）设置。
+如果你的 Agent Canvas 版本后续在 **Settings > LLM** 下提供了压缩器设置，请使用 `llm_summarizing`，并将最大 token 数设置为低于 Lemonade 上下文窗口的值，例如 `56000`。
 
 ## 5. 安装 GitHub 和 Slack MCP 服务器
 
-在 Agent Canvas 界面中，打开 **Customize**（或 **Settings > MCP**）以添加能为代理提供 GitHub 和 Slack 工具的 MCP 服务器。
-令牌值仅发送到您的本地 Agent Server，并以加密设置的形式持久保存。
+在 Agent Canvas 界面中，打开 **Customize**（或 **Settings > MCP**）以添加 MCP 服务器，为智能体提供 GitHub 和 Slack 的工具。
+令牌值只会发送到你的本地 Agent Server，并作为加密设置持久化保存。
 
 <!-- @os:windows -->
 > **Windows（Docker）：** 下面的 `npx` MCP 服务器命令在容器内运行，而容器中已经包含 Node.js，因此主机上无需额外安装任何内容。
-> 由于挂载了 `.openhands`，MCP 服务器及其令牌会在容器重启后依然保留。
+> 由于 `.openhands` 已挂载，MCP 服务器及其令牌会在容器重启后依然保留。
 <!-- @os:end -->
 
 ### GitHub MCP 服务器
 
-使用以下设置添加一个新的 MCP 服务器：
+添加一个新的 MCP 服务器，使用以下设置：
 
 | 字段 | 值 |
 | --- | --- |
 | Name | `github` |
 | Command | `npx` |
 | Args | `-y @modelcontextprotocol/server-github` |
-| Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = 您的 GitHub 令牌 |
+| Env | `GITHUB_PERSONAL_ACCESS_TOKEN` = 你的 GitHub 令牌 |
 
-请使用对您要汇总的仓库具有读取权限的 GitHub 令牌。
+使用对你要汇总的仓库具有读取权限的 GitHub 令牌。
 
 ### Slack MCP 服务器
 
-使用以下设置添加第二个 MCP 服务器：
+添加第二个 MCP 服务器，使用以下设置：
 
 | 字段 | 值 |
 | --- | --- |
@@ -624,14 +624,14 @@ LLM 设置应显示：
 | Args | `-y @modelcontextprotocol/server-slack` |
 | Env | `SLACK_BOT_TOKEN` = `xoxb-...` |
 | Env | `SLACK_TEAM_ID` = `T0123456789` |
-| Env | `SLACK_CHANNEL_IDS` = 您的摘要频道 ID |
+| Env | `SLACK_CHANNEL_IDS` = 你的摘要频道 ID |
 
-将 `SLACK_CHANNEL_IDS` 设置为摘要频道 ID（与 `SLACK_DIGEST_CHANNEL` 的值相同），这样代理就无需翻阅每一个 Slack 频道。
+将 `SLACK_CHANNEL_IDS` 设置为摘要频道的 ID（与 `SLACK_DIGEST_CHANNEL` 的值相同），这样智能体就不需要翻遍每一个 Slack 频道。
 
-添加两个服务器后，分别使用每个服务器上的 **Test** 按钮，确认其能够连接并公布工具列表。
+添加完两个服务器后，使用每个服务器上的 **Test** 按钮，确认其能够正常连接并公布可用工具。
 GitHub 服务器应列出 GitHub 工具，Slack 服务器应列出 Slack 工具。
 
-![Agent Canvas MCP 页面，显示已安装的 GitHub 和 Slack 服务器](assets/04-mcp-servers-installed.png)
+![已安装 GitHub 和 Slack 服务器的 Agent Canvas MCP 页面](assets/04-mcp-servers-installed.png)
 
 <!-- @test:id=mcp-packages-resolve timeout=300 hidden=True -->
 ```bash
@@ -648,7 +648,7 @@ npm view @modelcontextprotocol/server-slack version
 
 1. 选择 **Create automation**，并选择 **Prompt preset** 类型。
 2. 将 **Name** 设置为 `GitHub Development Digest to Slack`。
-3. 将 **Prompt** 设置为以下文本，并将仓库和频道占位符替换为您自己的值：
+3. 将 **Prompt** 设置为以下文本，并将仓库和频道占位符替换为你的实际值：
 
    ```text
    Use the GitHub MCP server for exactly one repository: your-org/your-repo.
@@ -665,22 +665,22 @@ npm view @modelcontextprotocol/server-slack version
    environment variables, or unrelated Slack messages.
    ```
 
-4. 将 **Trigger** 设置为 **Cron**，计划设为 `0 9 * * 1-5`（工作日上午 9 点），并将 **Timezone** 设置为您所在的时区，例如 `America/New_York`。
+4. 将 **Trigger** 设置为 **Cron**，计划设置为 `0 9 * * 1-5`（工作日上午 9 点），并将 **Timezone** 设置为你所在的时区，例如 `America/New_York`。
 5. 将 **Timeout** 设置为 `900` 秒。
 6. 保存该自动化任务。
 
-自动化详情页面将显示新建的自动化任务，包括其 cron 触发器和生成的 prompt-preset 入口点。
+自动化详情页面会显示新建的自动化任务，包括其 cron 触发器和生成的 prompt-preset 入口点。
 
-![Agent Canvas 创建后的自动化详情页面](assets/05-automation-created.png)
-## 7. 测试自动化
+![创建后的 Agent Canvas 自动化详情页面](assets/05-automation-created.png)
+## 7. 测试自动化流程
 
 在 Agent Canvas UI 的自动化详情页面中：
 
-1. 点击 **Run now**(或 **Dispatch**)立即运行一次自动化。
-2. 观察同一页面上的运行列表。最新的运行应转变为 `COMPLETED` 状态。
-3. 打开你的目标 Slack 频道。其中应包含生成的摘要。
+1. 点击 **Run now**（或 **Dispatch**）立即运行一次该自动化流程。
+2. 观察同一页面上的运行列表。最新的运行应变为 `COMPLETED` 状态。
+3. 打开你的目标 Slack 频道。其中应包含生成的摘要信息。
 
-你无需等待 cron 计划触发——**Run now** 会按需触发一次运行,方便你在依赖计划任务之前确认提示词、MCP 连接以及 Slack 发布是否都正常工作。
+你不需要等待 cron 计划触发——**Run now** 会按需触发一次运行，方便你在依赖计划任务之前确认提示词、MCP 连接以及 Slack 消息发布是否都能正常工作。
 
 ![Agent Canvas 自动化运行成功完成](assets/06-automation-run-completed.png)
 
@@ -689,14 +689,14 @@ npm view @modelcontextprotocol/server-slack version
 ## 故障排查
 
 <!-- @os:windows -->
-- **Docker 端口 8000 已被占用:** 映射到另一个主机端口,例如 `docker run ... -p 8080:8000 ...`,然后打开 `http://localhost:8080/canvas`。
-- **`docker pull` 因凭据错误失败**(例如“指定的登录会话不存在”):从交互式 Windows 会话中运行拉取操作,或预先拉取镜像。该镜像是公开的,因此无需 `docker login`。
-- **UI 已加载但后端不健康:** 首次启动时会在容器内构建 Agent Server 环境。请等待一分钟并刷新,然后查看 `docker logs <container>` 了解进度。
-- **Agent Canvas 无法从容器访问 Lemonade:** 将 LLM 的 **Base URL** 设置为 `http://host.docker.internal:13305/api/v1`(而不是 `127.0.0.1`),并确认 Lemonade 正在 Windows 主机上运行。
+- **Docker 端口 8000 已被占用：** 映射到其他主机端口，例如 `docker run ... -p 8080:8000 ...`，然后打开 `http://localhost:8080/canvas`。
+- **`docker pull` 因凭据错误而失败**（例如出现“A specified logon session does not exist”）：请在交互式 Windows 会话中执行拉取操作，或预先拉取镜像。该镜像为公共镜像，因此无需执行 `docker login`。
+- **UI 已加载但后端状态异常：** 首次启动时会在容器内构建 Agent Server 环境。请等待片刻并刷新页面，然后通过 `docker logs <container>` 查看进度。
+- **Agent Canvas 无法从容器内连接到 Lemonade：** 将 LLM 的 **Base URL** 设置为 `http://host.docker.internal:13305/api/v1`（而非 `127.0.0.1`），并确认 Lemonade 正在 Windows 主机上运行。
 <!-- @os:end -->
 
-- **Lemonade 已停止运行:** 使用步骤 1 中的 `lemonade run "${LEMONADE_MODEL}"` 命令重新启动它,然后重新运行健康检查。
-- **`npm install -g` 因权限错误失败:** 在 Linux 或 WSL 上,配置一个用户拥有的全局 npm 目录,将其添加到你的 shell 启动文件中,然后重新安装 Agent Canvas:
+- **Lemonade 已停止运行：** 使用步骤 1 中的 `lemonade run "${LEMONADE_MODEL}"` 命令重新启动，然后重新运行健康检查。
+- **`npm install -g` 因权限错误而失败：** 在 Linux 或 WSL 上，配置一个用户自有的全局 npm 目录，将其添加到你的 shell 启动文件中，然后重新安装 Agent Canvas：
 
   ```bash
   mkdir -p ~/.npm-global
@@ -706,28 +706,28 @@ npm view @modelcontextprotocol/server-slack version
   npm install -g @openhands/agent-canvas
   ```
 
-如果你使用 `zsh`,请将相同的 `export PATH=...` 行添加到 `~/.zshrc` 中,而不是 `~/.bashrc`。
-- **设置 `custom_tokenizer` 后 Agent Canvas 拒绝 LLM 设置:** 在 Agent Server 的 Python 环境中安装 `transformers`,如有需要重启 Agent Canvas,然后重试保存 LLM 设置。当设置了 `custom_tokenizer` 时,OpenHands 需要 Transformers 来加载分词器聊天模板。
-- **Agent Canvas 无法访问 Lemonade:** 验证 `curl -fsS "${LEMONADE_BASE_URL}/health"`,并确认在首次使用的 LLM 表单或 **Settings > LLM** 中输入的 base URL 与正在运行的本地端点或 HTTPS 隧道一致。
-- **LLM 设置未保存:** 确保你在输入数值后点击了 **Next**。重新打开 **Settings > LLM** 以确认数值已持久保存。
-- **GitHub MCP 无法查看私有仓库:** 确认 GitHub 令牌对目标仓库具有读取权限,并且 **Customize** 中的 MCP **Test** 按钮显示出了 GitHub 工具。
-- **Slack 可以读取频道但无法发布消息:** 将 Slack 应用邀请到目标频道,并确认该机器人具有 `chat:write` 权限。
-- **自动化列出的 Slack 频道过多:** 使用 Slack 频道 ID,并在 **Customize** 中为 Slack MCP 服务器设置 `SLACK_CHANNEL_IDS`。
-- **自动化运行失败或超出上下文:** 确认 Lemonade 是以 `ctx_size=65536` 启动的,确认 OpenHands LLM 已设置 `custom_tokenizer`,并使用显式仓库,且将 GitHub 结果集上限设置为 3 到 5 项。如果你的 Agent Canvas 版本提供了压缩器(condenser)设置,请将压缩器的最大令牌数设置得低于 Lemonade 的上下文窗口大小。
+如果你使用的是 `zsh`，请将同样的 `export PATH=...` 行添加到 `~/.zshrc` 而非 `~/.bashrc` 中。
+- **设置 `custom_tokenizer` 后 Agent Canvas 拒绝 LLM 设置：** 在 Agent Server 的 Python 环境中安装 `transformers`，如有需要请重启 Agent Canvas，然后重试保存 LLM 设置。当设置了 `custom_tokenizer` 时，OpenHands 需要 Transformers 来加载分词器聊天模板。
+- **Agent Canvas 无法连接到 Lemonade：** 验证 `curl -fsS "${LEMONADE_BASE_URL}/health"`，并确认首次使用 LLM 表单或 **Settings > LLM** 中填写的 base URL 与当前运行的本地端点或 HTTPS 隧道一致。
+- **LLM 设置未保存：** 确保在输入值后点击了 **Next**。重新打开 **Settings > LLM** 以确认这些值已被持久保存。
+- **GitHub MCP 无法查看私有仓库：** 确认 GitHub 令牌对目标仓库具有读取权限，并确认 **Customize** 中的 MCP **Test** 按钮显示了 GitHub 工具。
+- **Slack 可以读取频道但无法发布消息：** 将 Slack 应用邀请加入目标频道，并确认该机器人拥有 `chat:write` 权限。
+- **自动化流程列出了过多的 Slack 频道：** 使用 Slack 频道 ID，并在 **Customize** 中为 Slack MCP 服务器设置 `SLACK_CHANNEL_IDS`。
+- **自动化运行失败或超出上下文限制：** 确认 Lemonade 启动时设置了 `ctx_size=65536`，确认 OpenHands LLM 已设置 `custom_tokenizer`，并使用明确指定的仓库，将 GitHub 返回结果集限制在 3 到 5 条以内。如果你的 Agent Canvas 版本暴露了压缩器（condenser）设置，请将压缩器的最大令牌数设置为低于 Lemonade 的上下文窗口值。
 
 ## 后续步骤
 
-- 添加一个仅限每周发布的摘要。
-- 添加一个由 GitHub 事件触发的自动化,以便更快地获得 PR 或推送提醒。
-- 将同样的摘要路由到 Notion、Linear 或其他由 MCP 支持的工具中。
+- 添加仅包含每周发布内容的摘要。
+- 添加由 GitHub 事件触发的自动化流程，以便更快地获得 PR 或推送提醒。
+- 将同一摘要路由到 Notion、Linear 或其他基于 MCP 的工具中。
 
 ## 资源
 
 - [AMD AI Playbooks](https://developer.amd.com/playbooks/)
 - [Lemonade Server 文档](https://lemonade-server.ai/docs)
-- [OpenHands 扩展代码库](https://github.com/OpenHands/extensions)
+- [OpenHands extensions 仓库](https://github.com/OpenHands/extensions)
 - [Model Context Protocol 服务器](https://github.com/modelcontextprotocol/servers)
-- [Slack MCP 软件包](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
+- [Slack MCP 包](https://www.npmjs.com/package/@modelcontextprotocol/server-slack)
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->

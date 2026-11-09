@@ -16,32 +16,32 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 本手册要求系统内存至少为 **32GB**。
+> 本指南要求系统内存至少为 **32GB**。
 <!-- @device:end -->
 
 ## 概述
 
-[Open WebUI](https://docs.openwebui.com) 是一个自托管的、基于浏览器的界面，它提供了熟悉的聊天机器人体验，同时作为一个或多个 AI 模型服务器的前端。Open WebUI 不受限于单一提供商，可以连接到**任何暴露 OpenAI 兼容 API 的后端**，因此你可以在不切换界面的情况下更换模型和功能。
+[Open WebUI](https://docs.openwebui.com) 是一个自托管的、基于浏览器的界面，提供熟悉的聊天机器人体验，同时作为一个或多个 AI 模型服务器的前端。它并不绑定于某一个提供商，Open WebUI 可以连接到**任何暴露 OpenAI 兼容 API 的后端**，因此你可以在不切换 UI 的情况下更换模型和功能。
 
-在本手册中，我们使用 [**Lemonade**](https://lemonade-server.ai) 作为后端，因为它暴露了一个**统一的 OpenAI 兼容端点**，支持多种模态：
-- 用于文本生成的**大语言模型（LLM）**
-- 用于图像理解的**视觉模型**
-- 用于图像生成的 **Stable Diffusion**
-- 用于语音转文字的**音频转录模型**
+在本指南中，我们使用 [**Lemonade**](https://lemonade-server.ai) 作为后端，因为它暴露了一个**统一的 OpenAI 兼容端点**，支持多种模态：
+- **大语言模型 (LLMs)**，用于文本生成
+- **视觉模型**，用于图像理解
+- **Stable Diffusion**，用于图像生成
+- **音频转录模型**，用于语音转文本
 
-此设置使你能够探索**完整的端到端多模态工作流**。
+这一设置使你能够**端到端地探索完整的多模态工作流程**。
 
 ---
 
 ## 你将学到什么
 
-完成本手册后，你将能够：
+完成本指南后，你将能够：
 
-- 将 Open WebUI 连接到本地的 OpenAI 兼容后端（Lemonade）
-- 通过浏览器与本地 LLM 聊天
-- 上传图像并向视觉模型询问相关问题
-- 使用 Stable Diffusion 模型（SDXL-Turbo / SDXL）根据文本提示生成图像
-- 理解其中的思维模型，以便你也能使用其他后端（Ollama、vLLM、llama.cpp server 等）
+- 将 Open WebUI 连接到本地的 OpenAI 兼容后端 (Lemonade)
+- 在浏览器中与本地 LLM 进行聊天
+- 上传图像并向视觉模型提问
+- 使用 Stable Diffusion 模型（SDXL-Turbo / SDXL）通过文本提示词生成图像
+- 理解其背后的思维模型，以便你能够使用其他后端（Ollama、vLLM、llama.cpp server 等）
 
 ---
 
@@ -51,36 +51,36 @@ SPDX-License-Identifier: MIT
 
 | 部分 | 作用 | 示例 |
 |---|---|---|
-| 前端（UI） | 你交互使用的 Web 应用 | Open WebUI |
-| 后端（模型服务器） | 托管模型并暴露 HTTP 端点 | Lemonade、Ollama、vLLM、llama.cpp server、OpenAI 兼容服务器 |
+| 前端 (UI) | 你交互的 Web 应用 | Open WebUI |
+| 后端（模型服务器） | 承载模型并暴露 HTTP 端点 | Lemonade、Ollama、vLLM、llama.cpp server、OpenAI 兼容服务器 |
 | 模型 | 实际的 LLM / 视觉 / 扩散 / 音频模型 | CodeLlama、DeepSeek、Gemma-MM、SDXL、SD-Turbo、Whisper |
 
-#### 为何“OpenAI 兼容 API”很重要
+#### 为什么“OpenAI 兼容 API”很重要
 
-Open WebUI 围绕标准的 OpenAI 风格端点构建，例如：
+Open WebUI 是围绕标准的 OpenAI 风格端点构建的，例如：
   - 聊天：`/chat/completions`
   - 模型列表：`/models`
   - 图像生成：`/images/generations`
   - 音频转录：`/audio/transcriptions`
 
-Lemonade 在 `http://localhost:13305/api/v1/...` 下暴露这些端点。
+Lemonade 在 `http://localhost:13305/api/v1/...` 下暴露这些端点
 
-如果某个后端支持这些端点，Open WebUI 只需极少的设置即可与其通信。这就是我们能够在不改变工作流程的情况下切换后端的原因。
+如果某个后端支持这些端点，Open WebUI 就可以通过最少的设置与之通信。这就是为什么我们可以在不改变工作流程的情况下切换后端。
 
 #### 两个服务，两个端口
 
-在本手册中，你将使用两个独立的服务：
+在本指南中，你将使用两个独立的服务：
 
-| 服务 | URL | 你在这里做什么 |
+| 服务 | URL | 你在那里做什么 |
 |---|---|---|
 | **Lemonade**（GUI） | `http://localhost:13305` | 浏览、下载和管理模型 |
-| **Open WebUI** | `http://localhost:8080` | 聊天、上传图像、生成图像 —— 面向用户的界面 |
+| **Open WebUI** | `http://localhost:8080` | 聊天、上传图像、生成图像——面向用户的界面 |
 
-Lemonade 运行模型；Open WebUI 是你与之交互的界面。请先使用 Lemonade GUI 下载你的模型，然后在 Open WebUI 中使用它们。
+Lemonade 运行模型；Open WebUI 是你与之交互的界面。请先使用 Lemonade GUI 下载你的模型，然后从 Open WebUI 使用它们。
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## 设置内存配置
 
 <!-- @require:memory-config -->
@@ -94,10 +94,10 @@ Lemonade 运行模型；Open WebUI 是你与之交互的界面。请先使用 Le
 
 ## 一次性设置
 
-本手册需要将 Lemonade 作为后端运行，并且在 Linux 上，还需要一个容器引擎（Podman）来运行 Open WebUI。在安装 Open WebUI 之前，请先完成这些设置。
+本指南需要 Lemonade 作为后端运行，在 Linux 上还需要容器引擎 (Podman) 来运行 Open WebUI。请先完成这些设置，然后再安装 Open WebUI。
 
 <!-- @os:windows -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:lemonade -->
 <!-- @prereq:lemonade -->
 <!-- @device:end -->
@@ -109,14 +109,14 @@ Lemonade 运行模型；Open WebUI 是你与之交互的界面。请先使用 Le
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:lemonade,podman -->
 <!-- @prereq:podman -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,lemonade,podman -->
 <!-- @device:end -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ---
 <!-- @device:end -->
 <!-- @os:end -->
@@ -132,17 +132,17 @@ lemonade --version
 
 ## 在 Lemonade 中下载模型
 
-在安装 Open WebUI 之前，请确保你想要使用的模型已在 Lemonade 中下载并准备就绪。
+在安装 Open WebUI 之前，请确保你要使用的模型已经在 Lemonade 中下载并准备就绪。
 
 1. 打开位于 `http://localhost:13305` 的 Lemonade GUI。
-2. 浏览可用的模型，下载你想使用的模型（例如，用于聊天的 LLM、视觉模型，和/或用于图像生成的 Stable Diffusion 模型）。
-3. 在浏览器中访问 `http://localhost:13305/api/v1/models`，确认 API 可以访问 —— 你应该能看到已下载模型的列表。
+2. 浏览可用模型，下载你想使用的模型（例如，用于聊天的 LLM、视觉模型，和/或用于图像生成的 Stable Diffusion 模型）。
+3. 在浏览器中访问 `http://localhost:13305/api/v1/models`，确认 API 可以访问——你应该能看到已下载的模型列表。
 
-> 模型必须先在 **Lemonade**（`localhost:13305`）中下载，然后才能出现在 **Open WebUI**（`localhost:8080`）中。如果稍后某个模型未出现在 Open WebUI 中，请先回到这里检查 Lemonade。
+> 模型必须先在 **Lemonade** (`localhost:13305`) 中下载，然后才能出现在 **Open WebUI** (`localhost:8080`) 中。如果某个模型后续没有出现在 Open WebUI 中，请先回到这里检查 Lemonade。
 
 
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 <!-- @prereq:lemonade-models-qwen3-4b-hybrid -->
 <!-- @test:id=openwebui-lemonade-multimodal-smoke-windows timeout=1800 hidden=True -->
 ```powershell
@@ -484,13 +484,13 @@ PY
 <!-- @os:windows -->
 ### 1. 安装 Python 3.12
 
-Open WebUI 需要 **Python 3.12** —— 它无法在 Python 3.13+ 上安装。Windows Python 启动器（`py`）可以让你在不与现有 Python 版本冲突的情况下并行安装 3.12。
+Open WebUI 需要 **Python 3.12**——它无法在 Python 3.13+ 上安装。Windows 的 Python 启动器 (`py`) 可以让你将 3.12 与任何已有的 Python 版本并行安装，而不会产生冲突。
 
 ```powershell
 winget install Python.Python.3.12
 ```
 
-安装后关闭并重新打开你的终端，然后验证：
+安装完成后，关闭并重新打开终端，然后进行验证：
 
 ```powershell
 py -3.12 --version
@@ -498,7 +498,7 @@ py -3.12 --version
 ```
 
 <!-- @device:halo_box -->
-> **注意：** 你的系统预装了 Python 3.13。安装 3.12 不会影响它 —— `python` 仍然使用 3.13，而 `py -3.12` 只会在你需要时定位到 3.12。
+> **注意：** 你的系统预装了 Python 3.13。安装 3.12 不会影响它——`python` 仍然使用 3.13，而 `py -3.12` 只在你需要时才指向 3.12。
 <!-- @device:end -->
 
 <!-- @test:id=python-env-check-windows timeout=1200 hidden=True -->
@@ -580,7 +580,7 @@ Write-Host "OK: open-webui CLI is available"
 <!-- @os:end -->
 
 <!-- @os:linux -->
-现在我们将使用 Podman 服务来容器化我们的 Open WebUI 安装。
+现在我们将使用 Podman 服务将 Open WebUI 安装容器化。
 
 请将以下文件下载到你选择的目录中：[compose.yml](assets/compose.yml)
 
@@ -663,25 +663,25 @@ echo "OK: podman compose can parse compose.yml"
 ## 启动 Open WebUI 服务器
 
 <!-- @os:windows -->
-- 运行以下命令以启动 Open WebUI HTTP 服务器:
+- 运行以下命令以启动 Open WebUI HTTP 服务器：
 ```bash
 open-webui serve
 ```
 <!-- @os:end -->
 
-- 在浏览器中,导航到 `http://localhost:8080`。
-- Open WebUI 将要求你创建一个本地管理员账户。登录后,你将看到聊天界面。
+- 在浏览器中导航到 `http://localhost:8080`。
+- Open WebUI 会要求你创建一个本地管理员账户。登录后，你将看到聊天界面。
 
 <p align="center">
   <img src="assets/open-webui_chat_interface.png" alt="Open WebUI Chat Interface" width="600"/>
 </p>
 
 <!-- @os:windows -->
-> 请保持终端窗口打开。关闭它将停止 Open WebUI。
+> 保持终端窗口打开。关闭它会停止 Open WebUI。
 <!-- @os:end -->
 
 <!-- @os:linux -->
-> 该容器在后台运行。在包含 `compose.yml` 的目录中,可以使用 `podman compose down`(停止)和 `podman compose up -d`(启动)来管理它。你的账户和设置会保存在 `open_webui_data` 卷中。
+> 该容器在后台运行。在包含 `compose.yml` 的目录下，使用 `podman compose down`（停止）和 `podman compose up -d`（启动）来管理它。你的账户和设置会保存在 `open_webui_data` 卷中。
 <!-- @os:end -->
 
 
@@ -770,37 +770,37 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 ## 将 Open WebUI 连接到 Lemonade
 
-现在这两个服务都已运行——Lemonade 位于 `localhost:13305`,Open WebUI 位于 `localhost:8080`——接下来将它们连接起来,以便 Open WebUI 能够使用 Lemonade 的模型。
+现在，两个服务都已运行——Lemonade 运行在 `localhost:13305`，Open WebUI 运行在 `localhost:8080`——接下来将它们连接起来，让 Open WebUI 可以使用 Lemonade 的模型。
 
-在 Open WebUI 中:
+在 Open WebUI 中：
 
-1. 点击右上角的**用户个人资料图标**,然后选择**设置**。
+1. 点击右上角的**用户头像图标**，然后选择**设置**。
 
    <p align="center">
      <img src="assets/open_settings.png" alt="Click the user profile icon" width="300"/>
    </p>
 
-2. 在设置面板中,点击左下角的**管理员设置**。
+2. 在设置面板中，点击左下角的**管理员设置**。
 
    <p align="center">
      <img src="assets/click_admin_settings.png" alt="Select Admin Settings" width="450"/>
    </p>
 
-3. 在管理员设置侧边栏中,点击**连接**(或直接导航到 `http://localhost:8080/admin/settings/connections`)。
+3. 在管理员设置侧边栏中，点击**连接**（或直接导航到 `http://localhost:8080/admin/settings/connections`）。
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Admin Settings Connections page" width="600"/>
    </p>
 
-4. 在 **OpenAI API** 下,添加一个新连接:
-   - **Base URL(基础 URL):** `http://localhost:13305/api/v1`
-   - **API Key(API 密钥):** `-`(本地使用时,一个短横线即可)
+4. 在 **OpenAI API** 下，添加一个新连接：
+   - **基础 URL：** `http://localhost:13305/api/v1`
+   - **API 密钥：** `-`（本地使用时输入单个短横线即可）
 
    <p align="center">
      <img src="assets/connection_form.png" alt="Connection details for Lemonade server" width="400"/>
    </p>
 
-5. 确保在**“管理 OpenAI API 连接”**下,只启用了 `http://localhost:13305/api/v1`。禁用其他所有连接(例如默认的 OpenAI 连接)。
+5. 确保在**“管理 OpenAI API 连接”**下，只启用了 `http://localhost:13305/api/v1`。禁用其他所有连接（例如默认的 OpenAI 连接）。
 
    <p align="center">
      <img src="assets/admin_settings_connections.png" alt="Manage OpenAI API Connections with only Lemonade enabled" width="600"/>
@@ -808,36 +808,36 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 
 6. 点击**保存**。
 
-7. **(推荐)**禁用自动生成功能,以保持 Open WebUI 在使用本地 LLM 时的响应速度。进入**管理员设置 → 设置 → 界面**,并关闭:
+7. **（推荐）**禁用自动生成功能，以保持 Open WebUI 在使用本地 LLM 时响应流畅。进入**管理员设置 → 设置 → 界面**，然后关闭：
    - 标题生成
-   - 后续提问生成
+   - 后续问题生成
    - 标签生成
 
    <p align="center">
      <img src="assets/admin_settings.png" alt="Admin Settings Interface — disable Title, Follow Up, and Tags Generation" width="600"/>
    </p>
 
-8. 点击**保存**,然后返回 `http://localhost:8080`。
+8. 点击**保存**，然后返回 `http://localhost:8080`。
 9. 点击模型下拉菜单——你应该能看到从 Lemonade 下载的模型。
 
 ---
 
 ## 主要活动
 
-现在,你已经设置完成。让我们来看看三个有趣的操作。
+现在，一切都已设置完毕。让我们来看看三个有趣的操作。
 
 ---
 
-### 活动 1:与本地 LLM 对话
+### 活动 1：与本地 LLM 聊天
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk -->
-1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续操作。(例如:`Qwen3-4B-Hybrid`)。
+<!-- @device:halo,grgh,stx,krk -->
+1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续（示例：`Qwen3-4B-Hybrid`）。
 
     <p align="center">
       <img src="assets/model_selection.png" alt="Model Selection" width="600"/>
     </p>
 
-2. 向 LLM 输入一条消息,然后点击发送(或按下 Enter 键)。LLM 需要几秒钟加载到内存中,之后你将看到响应内容以流式方式呈现。
+2. 向 LLM 输入一条消息并点击发送（或按 Enter 键）。LLM 需要几秒钟加载到内存中，然后你将看到响应以流式方式出现。
 
     <p align="center">
       <img src="assets/sending_a_message.png" alt="Sending a message" width="37.5%"/>
@@ -846,13 +846,13 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @device:end -->
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
-1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续操作。(例如:`Qwen3.5-4B-GGUF`)。
+1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续（示例：`Qwen3.5-4B-GGUF`）。
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. 向 LLM 输入一条消息,然后点击发送(或按下 Enter 键)。LLM 需要几秒钟加载到内存中,之后你将看到响应内容以流式方式呈现。
+2. 向 LLM 输入一条消息并点击发送（或按 Enter 键）。LLM 需要几秒钟加载到内存中，然后你将看到响应以流式方式出现。
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
@@ -860,9 +860,9 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
    </p>
 <!-- @device:end -->    
 
-3. 模型将在聊天中做出回应。
+3. 模型将在聊天中做出响应。
 
-4. 此时,在你的系统上打开 `任务管理器`。根据你选择的模型是 **Hybrid** 还是 **NPU**,你将分别看到**较高的 GPU 或 NPU 利用率**。通过任务管理器,你可以确认模型正在本地运行。
+4. 此时，在你的系统上打开`任务管理器`。根据你选择的模型是**混合（Hybrid）**还是 **NPU** 模型，你将分别看到 **GPU 或 NPU 的高利用率**。通过任务管理器，你可以确认模型正在本地运行。
 
     <p align="center">
       <img src="assets/task_manager.png" alt="Task Manager GPU/NPU utilization" width="700"/>
@@ -870,75 +870,75 @@ podman exec open-webui sh -lc 'python -c "import json, urllib.request; data=json
 <!-- @os:end -->
 
 <!-- @os:linux -->
-1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续操作。(例如:`Qwen3.5-4B-GGUF`)。
+1. 点击界面左上角的下拉菜单。这将显示你已安装的 Lemonade 模型。选择一个继续（示例：`Qwen3.5-4B-GGUF`）。
 
    <p align="center">
      <img src="assets/linux_model_selection.png" alt="Model Selection" width="600"/>
    </p>
 
-2. 向 LLM 输入一条消息,然后点击发送(或按下 Enter 键)。LLM 需要几秒钟加载到内存中,之后你将看到响应内容以流式方式呈现。
+2. 向 LLM 输入一条消息并点击发送（或按 Enter 键）。LLM 需要几秒钟加载到内存中，然后你将看到响应以流式方式出现。
 
    <p align="center">
      <img src="assets/linux_sending_a_message.png" alt="Sending a message" width="41.8%"/>
      <img src="assets/linux_llm_response.png" alt="LLM Response" width="46%"/>
    </p>
 
-3. 模型将在聊天中做出回应。
+3. 模型将在聊天中做出响应。
 <!-- @os:end -->
 
-这验证了 Open WebUI 能够通过兼容 OpenAI 的聊天端点向 Lemonade 发送请求。
+这验证了 Open WebUI 可以使用与 OpenAI 兼容的聊天端点向 Lemonade 发送请求。
 
 ---
 
-### 活动 2:上传图片并提问(视觉)
+### 活动 2：上传图片并提问（视觉能力）
 
-此操作需要一个支持图像输入的模型(视觉或多模态模型)。
+这需要一个支持图像输入的模型（视觉或多模态模型）。
 
-1. 点击筛选图标,选择“按类别”,然后从**视觉**部分选择一个模型(例如 `Qwen3.5-4B-GGUF`)
+1. 点击过滤器图标，选择“按类别”，然后从**视觉（Vision）**部分选择一个模型（例如 `Qwen3.5-4B-GGUF`）
 
    <p align="center">
      <img src="assets/lemonade_vlms.png" alt="Lemonade VLM's" width="600"/>
    </p>
 
-2. 点击消息框中的 **`+`** 按钮并上传一张图片
-3. 提出一个需要真正理解图像内容的问题:`你觉得这是一个设计良好的 GUI 吗?`
+2. 点击消息框中的**`+`**按钮并上传一张图片
+3. 提出一个需要真正理解图像内容的问题：`Do you think this is a well-designed GUI?`
 
    <p align="center">
      <img src="assets/vlm_prompt.png" alt="VLM Prompt" width="43%"/>
      <img src="assets/vlm_response.png" alt="VLM Response" width="40%"/>
    </p>
 
-4. 模型会根据图像内容作答,而非泛泛的文字回答。
+4. 模型会根据图像内容作答，而非给出泛泛的文本回复。
 
-这证明了 Open WebUI 能够通过后端(Lemonade)向视觉模型发送多模态请求(文本 + 图像)。
+这证明了 Open WebUI 可以通过后端（Lemonade）向视觉模型发送多模态请求（文本 + 图像）。
 
 ---
 
 <!-- @os:windows -->
-### 活动 3:根据文本提示生成图像(Stable Diffusion)
+### 活动 3：根据文本提示词生成图像（Stable Diffusion）
 
-Stable Diffusion 模型不支持文本生成,它们仅通过 Images API 生成图像。
+Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生成图像。
 
-#### 步骤 1:在 Open WebUI 中配置图像生成
+#### 步骤 1：在 Open WebUI 中配置图像生成
 
-1. 在 Lemonade GUI 中(`http://localhost:13305`),搜索 `SDXL-Turbo`(速度快)或 `SDXL-Base-1.0`(质量更高)并下载。
-2. 进入**管理员设置 → 图像**(http://localhost:8080/admin/settings/images)
-3. 设置:
-   - **图像生成:** 开启
-   - **图像生成引擎:** 默认(OpenAI)
-   - **OpenAI API Base URL(基础 URL):** `http://localhost:13305/api/v1`
-   - **OpenAI API Key(密钥):** `-`
-   - **模型:** `SDXL-Turbo` 或 `SDXL-Base-1.0`
-4. 如果你想添加更多参数,请以 JSON 格式将它们添加到文本字段中。例如:`{ "steps": 4, "cfg_scale": 1 }`。可用参数请参见[图像生成(Stable Diffusion CPP)](https://lemonade-server.ai/models.html)。
+1. 在 Lemonade GUI（`http://localhost:13305`）中，搜索 `SDXL-Turbo`（速度快）或 `SDXL-Base-1.0`（质量更高）并下载。
+2. 进入**管理员设置 → 图像**（http://localhost:8080/admin/settings/images）
+3. 设置：
+   - **图像生成：** 开启
+   - **图像生成引擎：** 默认（OpenAI）
+   - **OpenAI API 基础 URL：** `http://localhost:13305/api/v1`
+   - **OpenAI API 密钥：** `-`
+   - **模型：** `SDXL-Turbo` 或 `SDXL-Base-1.0`
+4. 如果你想添加更多参数，可以将它们以 JSON 格式添加到文本字段中。例如：`{ "steps": 4, "cfg_scale": 1 }`。可用参数请参阅[图像生成（Stable Diffusion CPP）](https://lemonade-server.ai/models.html)。
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
    </p>
 
 5. 保存
-#### 步骤 2：为模型启用图像生成
-此步骤确保您为模型启用图像生成功能。
-1. 前往 **Admin Settings → Models**（http://localhost:8080/admin/settings/models）并选择您的模型
+#### 第二步：为模型启用图像生成功能
+此步骤确保你为模型启用图像生成作为一项功能。
+1. 前往 **Admin Settings → Models**（http://localhost:8080/admin/settings/models）并选择你的模型
 2. 打开 `Image Generation`
 
    <p align="center">
@@ -946,33 +946,33 @@ Stable Diffusion 模型不支持文本生成,它们仅通过 Images API 生成�
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### 步骤 3：从聊天界面生成图像
+#### 第三步：从聊天界面生成图像
 
 1. 返回 `http://localhost:8080` 的聊天界面。
-2. 在模型下拉菜单中选择一个**文本生成 LLM**（例如：Qwen、Llama）。**请勿选择 Stable Diffusion 模型**，因为这是聊天模型选择器。
-3. 在消息区域，点击 **Integrations**，并将 **Image** 切换为开启状态。
+2. 在模型下拉菜单中选择一个**文本生成 LLM**（例如：Qwen、Llama）。**不要选择 Stable Diffusion 模型**，因为这里是聊天模型选择器。
+3. 在消息区域中，点击 **Integrations**，并将 **Image** 切换为开启。
 4. 使用类似这样的提示词：`A cinematic photo of heavy traffic at sunset, ultra detailed`。
-5. 系统生成一张图像并显示在聊天中。
+5. 生成的图像会出现在聊天中。
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-这说明 Open WebUI 可以协调一个"两部分"工作流：
-  - LLM 帮助优化提示词
-  - 图像通过 Lemonade 的 Images 端点使用 Stable Diffusion 生成
+这证明 Open WebUI 可以协调一个“两部分”工作流程：
+  - LLM 协助优化提示词
+  - 图像通过 Lemonade 的 Images 接口使用 Stable Diffusion 生成
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-### 活动 3：从文本提示生成图像（Stable Diffusion）
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
+### 活动三：根据文本提示词生成图像（Stable Diffusion）
 
-Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生成图像。
+Stable Diffusion 模型不支持文本生成，它们仅通过 Images API 生成图像。
 
-#### 步骤 1：在 Open WebUI 中配置图像生成
+#### 第一步：在 Open WebUI 中配置图像生成
 
-1. 在 Lemonade GUI（`http://localhost:13305`）中，搜索 `SDXL-Turbo`（速度快）或 `SDXL-Base-1.0`（质量高），并下载。
+1. 在 Lemonade GUI 中（`http://localhost:13305`），搜索 `SDXL-Turbo`（速度快）或 `SDXL-Base-1.0`（质量更高）并下载。
 2. 前往 **Admin Settings → Images**（http://localhost:8080/admin/settings/images）
 3. 设置：
    - **Image Generation：** ON
@@ -980,7 +980,7 @@ Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生
    - **OpenAI API Base URL：** `http://localhost:13305/api/v1`
    - **OpenAI API Key：** `-`
    - **Model：** `SDXL-Turbo` 或 `SDXL-Base-1.0`
-4. 如果您想添加更多参数，请以 JSON 格式添加到文本字段中。例如：`{ "steps": 4, "cfg_scale": 1 }`。可在 [图像生成 (Stable Diffusion CPP)](https://lemonade-server.ai/models.html) 查看可用参数。
+4. 如果你想添加更多参数，可将其以 JSON 格式添加到文本字段中。例如：`{ "steps": 4, "cfg_scale": 1 }`。可用参数请参阅 [Image Generation (Stable Diffusion CPP)](https://lemonade-server.ai/models.html)。
 
    <p align="center">
      <img src="assets/images_settings.png" alt="Open WebUI Image Generation settings" width="600"/>
@@ -989,9 +989,9 @@ Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生
 5. 保存
 
 
-#### 步骤 2：为模型启用图像生成
-此步骤确保您为模型启用图像生成功能。
-1. 前往 **Admin Settings → Models**（http://localhost:8080/admin/settings/models）并选择您的模型
+#### 第二步：为模型启用图像生成功能
+此步骤确保你为模型启用图像生成作为一项功能。
+1. 前往 **Admin Settings → Models**（http://localhost:8080/admin/settings/models）并选择你的模型
 2. 打开 `Image Generation`
 
    <p align="center">
@@ -999,22 +999,22 @@ Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生
      <img src="assets/edit_model.png" alt="Edit Model" width="50%"/>
    </p>
 
-#### 步骤 3：从聊天界面生成图像
+#### 第三步：从聊天界面生成图像
 
 1. 返回 `http://localhost:8080` 的聊天界面。
-2. 在模型下拉菜单中选择一个**文本生成 LLM**（例如：Qwen、Llama）。**请勿选择 Stable Diffusion 模型**，因为这是聊天模型选择器。
-3. 在消息区域，点击 **Integrations**，并将 **Image** 切换为开启状态。
+2. 在模型下拉菜单中选择一个**文本生成 LLM**（例如：Qwen、Llama）。**不要选择 Stable Diffusion 模型**，因为这里是聊天模型选择器。
+3. 在消息区域中，点击 **Integrations**，并将 **Image** 切换为开启。
 4. 使用类似这样的提示词：`A cinematic photo of heavy traffic at sunset, ultra detailed`。
-5. 系统生成一张图像并显示在聊天中。
+5. 生成的图像会出现在聊天中。
 
    <p align="center">
      <img src="assets/image_gen_prompt.png" alt="Image Generation" width="49%"/>
      <img src="assets/image_gen_response.png" alt="Generated image response" width="32.5%"/>
    </p>
 
-这说明 Open WebUI 可以协调一个"两部分"工作流：
-  - LLM 帮助优化提示词
-  - 图像通过 Lemonade 的 Images 端点使用 Stable Diffusion 生成
+这证明 Open WebUI 可以协调一个“两部分”工作流程：
+  - LLM 协助优化提示词
+  - 图像通过 Lemonade 的 Images 接口使用 Stable Diffusion 生成
 <!-- @device:end -->
 <!-- @os:end -->
 
@@ -1022,40 +1022,40 @@ Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生
 
 ## 故障排除
 
-### "Open WebUI 中没有显示任何模型"
-- 首先，检查 Lemonade：在浏览器中打开 `http://localhost:13305/api/v1/models`，确认您的模型已列出并已下载
-- 然后，检查 Open WebUI 连接：前往 `http://localhost:8080/admin/settings/connections` 的 **Admin Settings → Connections**，并验证 Base URL 为 `http://localhost:13305/api/v1`
+### "Open WebUI 中未显示任何模型"
+- 首先，检查 Lemonade：在浏览器中打开 `http://localhost:13305/api/v1/models`，确认你的模型已列出并已下载
+- 然后，检查 Open WebUI 的连接：前往 `http://localhost:8080/admin/settings/connections` 的 **Admin Settings → Connections**，确认 Base URL 为 `http://localhost:13305/api/v1`
 
-### "This model does not support chat completion" 错误信息
-- 您在聊天模型下拉菜单中选择了图像模型（SDXL-Turbo / SDXL-Base-1.0）。
-- **解决方法**：为聊天选择一个 LLM，并使用 Image 切换开关 + Images 设置来生成图像。
+### "This model does not support chat completion" 错误消息
+- 你在聊天模型下拉菜单中选择了图像模型（SDXL-Turbo / SDXL-Base-1.0）。
+- **解决方法**：选择一个用于聊天的 LLM，并使用 Image 切换开关 + Images 设置来进行生成。
 <p align="center">
   <img src="assets/model_not_supported_error.png" alt="This model does not support chat completion error message" width="600"/>
 </p>
 
 ### 图像生成错误/超时
-- 先从 `SDXL-Turbo` 开始（速度快，步数少）
-- 运行正常后，再切换到 `SDXL-Base-1.0` 以获得更高质量
+- 先从 `SDXL-Turbo` 开始（速度快、步数少）
+- 运行正常后，再将图像模型切换为 `SDXL-Base-1.0` 以提升质量
 
 ---
 
 ## 后续步骤
 
-您现在已经拥有一个可正常工作的**"本地 AI 技术栈"**，通过标准 API 用单一界面控制多种模型类型。
+你现在已经拥有一个可正常运行的**“本地 AI 技术栈”**，即通过一个标准 API 由单一界面控制多种模型类型。
 
-以下三项扩展功能可解锁全新的工作流：
+以下三个扩展方向可解锁全新的工作流程：
 
 ### 1. 使用 Whisper 进行语音转文本
 
-尝试使用 Whisper 模型将音频转换为文本，然后将其输入 LLM 进行摘要、生成待办事项或改写。这是会议记录和语音驱动助手的基础。
+尝试使用 Whisper 模型将音频转换为文本，然后将其输入 LLM 进行摘要、生成行动项或改写。这是会议纪要和语音驱动助手的基础。
 
-### 2. 在 Open WebUI 内进行 Python 编码
+### 2. 在 Open WebUI 中进行 Python 编程
 
-使用 Open WebUI 内置的代码执行体验来运行 Python 代码片段、检查输出，并更快地迭代——无需离开界面。[参考资料](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
+使用 Open WebUI 内置的代码执行体验来运行 Python 代码片段、查看输出结果，并更快地进行迭代——无需离开该界面。[参考](https://lemonade-server.ai/docs/server/apps/open-webui/#python-coding)
 
-### 3. 在 Open WebUI 内渲染 HTML
+### 3. 在 Open WebUI 中进行 HTML 渲染
 
-直接在界面中渲染 HTML 输出。这对于构建快速原型、格式化报告和交互式代码片段非常强大。[参考资料](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
+直接在界面中渲染 HTML 输出。这对于快速构建原型、格式化报告和交互式片段来说，功能出奇地强大。[参考](https://lemonade-server.ai/docs/server/apps/open-webui/#html-rendering)
 
 ---
 
@@ -1066,9 +1066,9 @@ Stable Diffusion 模型不支持文本生成，它们只能通过 Images API 生
 - [Lemonade Server 文档](https://lemonade-server.ai/docs)
 - [Lemonade Server CLI](https://lemonade-server.ai/docs/lemonade-cli/)
 - [Lemonade ↔ Open WebUI 集成指南](https://lemonade-server.ai/docs/server/apps/open-webui)
-- [Lemonade Server API 规范（端点）](https://lemonade-server.ai/docs/server/server_spec)
-- [视频演示 (Lemonade)](https://www.youtube.com/watch?v=mcf7dDybUco)
-- [视频演示 (Open WebUI + Lemonade)](https://www.youtube.com/watch?v=yZs-Yzl736E)
+- [Lemonade Server API 规范（接口）](https://lemonade-server.ai/docs/server/server_spec)
+- [视频演示（Lemonade）](https://www.youtube.com/watch?v=mcf7dDybUco)
+- [视频演示（Open WebUI + Lemonade）](https://www.youtube.com/watch?v=yZs-Yzl736E)
 
 <!-- @os:linux -->
 <!-- @test:id=lemonade-unload-linux timeout=60 hidden=True -->
