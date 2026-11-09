@@ -70,9 +70,15 @@ jobs:
           fi
           git config user.name "amd-playbooks-bot"
           git config user.email "amd-playbooks-bot@users.noreply.github.com"
-          BRANCH="chore/playbook-metadata-${{ github.run_id }}"
-          # -B (not -b): on a re-run of the same run, github.run_id is unchanged,
-          # so the local branch may already exist — -B resets it instead of failing.
+          # One fixed, CI-owned branch — NOT per-run. A run-id branch opened a new
+          # PR every time the workflow fired, so routine pushes to main stacked up
+          # half a dozen near-identical metadata PRs that all had to be closed by
+          # hand. With a fixed branch each run force-updates the same branch and
+          # reuses the already-open PR, so there is at most one outstanding.
+          BRANCH="chore/playbook-metadata"
+          # -B (not -b): the branch may already exist locally (full-history
+          # checkout fetches it) — -B resets it onto this run's main instead of
+          # failing, so the branch never carries stale commits from a prior run.
           git checkout -B "$BRANCH"
           git add playbooks/**/playbook.json
           git commit -m "chore: update playbook metadata (dates + New tags)"
@@ -93,6 +99,11 @@ jobs:
             echo "Opened $PR_URL for review."
           else
             echo "PR already open for $BRANCH ($PR_URL); branch updated."
+            # The force-push alone is quiet, so leave a note: the open PR now
+            # carries a different diff than when it was first reviewed.
+            gh pr comment "$PR_URL" \
+              --body "Refreshed by run ${{ github.run_id }} — this PR now reflects the latest metadata on \`main\`." \
+              || echo "::warning::Could not comment on $PR_URL."
           fi
           # Reviewer is best-effort: never fail the run over it (the @-mention in
           # the body already notifies the maintainer).
