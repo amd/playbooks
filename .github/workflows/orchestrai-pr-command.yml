@@ -234,9 +234,10 @@ jobs:
 
       # A newer !orc cancels this one (concurrency above). Runs already started
       # would otherwise keep queueing for or holding machines for hours; the
-      # cancel-runs job below covers a cancel after this job has finished.
+      # cancel-runs job below covers a cancel after this job has finished. A
+      # failed job skips test-playbooks, so nothing would read its runs either.
       - name: Cancel the OrchestrAI runs this command started
-        if: cancelled() && steps.trigger.outputs.run_ids != ''
+        if: (cancelled() || failure()) && steps.trigger.outputs.run_ids != ''
         timeout-minutes: 15
         env:
           RUN_ID_MAP: ${{ steps.trigger.outputs.run_ids }}
@@ -245,7 +246,8 @@ jobs:
           ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: |
-          RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
+          # -I: the working directory is the PR's checkout; import nothing from it.
+          RUN_IDS=$(python3 -I -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .orc/.github/scripts/orchestrai_trigger.py --cancel
 
   test-playbooks:

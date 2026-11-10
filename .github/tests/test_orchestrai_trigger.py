@@ -19,6 +19,7 @@ import re
 import sys
 import tempfile
 import unittest
+import urllib.error
 from unittest import mock
 
 import yaml
@@ -51,12 +52,15 @@ CP_ENV = {"ORCHESTRAI_V2_CI_API_URL": "https://cp.example/api/ci/v1",
 class FakeApi:
     """Stands in for http_json: the OIDC endpoint plus scripted CI API answers."""
 
-    def __init__(self, *answers):
-        self.answers, self.calls = list(answers), []
+    def __init__(self, *answers, oidc=()):
+        self.answers, self.calls, self.oidc = list(answers), [], list(oidc)
 
     def __call__(self, method, url, headers, body=None):
         if url.startswith("https://oidc.example/"):
-            return 200, {"value": "oidc-jwt"}
+            answer = self.oidc.pop(0) if self.oidc else (200, {"value": "oidc-jwt"})
+            if isinstance(answer, Exception):
+                raise answer
+            return answer
         self.calls.append((method, url, headers, body))
         answer = self.answers.pop(0)
         if isinstance(answer, Exception):
@@ -183,6 +187,42 @@ class ControlPlaneApi(unittest.TestCase):
             with self.subTest(first=first), self.assertRaises(ValueError) as caught:
                 self.start(FakeApi(first, (422, {"error": {"code": "invalid_request"}})))
             self.assertNotIsInstance(caught.exception, trigger.Refused)
+
+    def test_a_token_that_github_did_not_issue_is_retried_and_sends_nothing(self):
+        # A network error or a 5xx from GitHub's token endpoint: nothing reached
+        # the CI API, so the call is retried, and a later refusal is definite.
+        fake = FakeApi((403, {"error": {"code": "no_matching_rule"}}),
+                       oidc=[urllib.error.URLError("refused"), (503, None), OSError("reset")])
+        with self.assertRaises(trigger.Refused):
+            self.start(fake)
+        self.assertEqual(len(fake.calls), 1)
+        with mock.patch.object(trigger, "API_RETRY_SECONDS", 0), \
+                self.assertRaisesRegex(ValueError, "OIDC token request failed"):
+            self.start(FakeApi(oidc=[urllib.error.URLError("refused")]))
+
+    def test_a_token_blip_is_retried_within_the_call(self):
+        # The call itself retries: the wait never sees the blip as a failed poll.
+        fake = FakeApi((200, {"run": {"id": "a", "status": "running", "pipeline_url": "https://j/job/p/9"}}),
+                       oidc=[urllib.error.URLError("dns")])
+        err = io.StringIO()
+        with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err):
+            self.assertEqual(trigger.await_builds(self.cp, {"x/a": "a"}, 3600), {"x/a": "https://j/job/p/9/"})
+        self.assertNotIn("status unavailable", err.getvalue())
+        self.assertEqual(len(fake.calls), 1)
+
+    def test_cancel_goes_on_after_any_error_on_one_run(self):
+        calls = []
+        def api(cp, method, path, *args, **kwargs):
+            calls.append(path)
+            if "/r1/" in path:
+                raise RuntimeError("boom")
+            return {}
+        err = io.StringIO()
+        with mock.patch.dict(os.environ, {"RUN_IDS": "r1 r2"}), \
+                mock.patch.object(trigger, "api", api), contextlib.redirect_stderr(err):
+            trigger.cancel_main()
+        self.assertEqual(calls, ["/runs/r1/cancel", "/runs/r2/cancel"])
+        self.assertIn("run r1 was not cancelled: boom", err.getvalue())
 
     def test_cancel_gives_up_on_one_run_in_time_to_cancel_the_next(self):
         clock = iter(range(0, 10_000, 30))
