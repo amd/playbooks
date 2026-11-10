@@ -322,8 +322,8 @@ class Workflows(unittest.TestCase):
         for sid in ("build", "wait", "retry_python", "retry_deps", "retry_trigger", "retry_build",
                     "retry_wait", "retry_resolve"):
             self.assertIs(steps[sid].get("continue-on-error"), True, sid)
-        retry = [s for s in job["steps"] if "pick" in str(s.get("if", "")) or "retry" in str(s.get("if", ""))
-                 or s.get("id") == "pick"]
+        retry = [s for s in job["steps"] if ("pick" in str(s.get("if", "")) or "retry" in str(s.get("if", ""))
+                 or s.get("id") == "pick") and "--cancel" not in s.get("run", "")]
         self.assertGreaterEqual(len(retry), 7)
         for s in retry:
             self.assertTrue(s["if"].startswith("!cancelled()"), s.get("name") or s.get("uses"))
@@ -331,7 +331,8 @@ class Workflows(unittest.TestCase):
         # Each later stage needs the one before it to have produced something.
         self.assertIn("steps.retry_deps.outcome == 'success'", steps["retry_trigger"]["if"])
         self.assertIn("[matrix.batch_id]", steps["retry_build"]["if"])
-        self.assertIn("steps.retry_build.outputs.build_url", steps["retry_resolve"]["if"])
+        # Only a retry build seen to finish replaces the first attempt's results.
+        self.assertIn("steps.retry_wait.outcome == 'success'", steps["retry_resolve"]["if"])
 
     def test_a_retry_waits_for_the_first_run_to_end(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
@@ -349,12 +350,30 @@ class Workflows(unittest.TestCase):
     def test_a_cancelled_job_cancels_its_first_and_retry_runs(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
         step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
-        self.assertEqual(step["if"], "cancelled()")
+        # Also a retry whose build was not seen to finish: nothing reads its results.
+        self.assertEqual(step["if"], "cancelled() || steps.retry_wait.outcome == 'failure'")
         # Nothing before it keeps working once the job is cancelled.
         before = job["steps"][:job["steps"].index(step)]
         self.assertFalse([s.get("name") for s in before if "always()" in str(s.get("if", ""))])
-        self.assertIn("needs.detect-and-trigger.outputs.run_ids", step["env"]["RUN_IDS"])
+        # The first run only when the retry's wait did not fail (then it had ended).
+        self.assertIn("steps.retry_wait.outcome != 'failure' && fromJson(needs.detect-and-trigger.outputs.run_ids",
+                      step["env"]["RUN_IDS"])
         self.assertIn("steps.retry_trigger.outputs.run_ids", step["env"]["RUN_IDS"])
+
+    def test_a_cancelled_run_cancels_every_run_detect_and_trigger_started(self):
+        wf = self.load("test-playbooks-orchestrai.yml")
+        self.assertIn("pull_request", wf["concurrency"]["cancel-in-progress"])  # why this is needed
+        # Cancelled mid-trigger: Detect & Trigger's own last step.
+        step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if "--cancel" in s.get("run", ""))
+        self.assertTrue(step["if"].startswith("cancelled()"))
+        self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ steps.trigger.outputs.run_ids }}")
+        # Cancelled later, including batches whose Test job never got a runner.
+        job = wf["jobs"]["cancel-runs"]
+        self.assertEqual(job["needs"], ["detect-and-trigger", "test-batches"])
+        self.assertTrue(job["if"].startswith("cancelled()"))
+        self.assertEqual(job["permissions"]["id-token"], "write")
+        step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
+        self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ needs.detect-and-trigger.outputs.run_ids }}")
 
     def test_a_cancelled_orc_command_cancels_every_run_it_started(self):
         wf = self.load("orchestrai-pr-command.yml")

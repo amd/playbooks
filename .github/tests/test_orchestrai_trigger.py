@@ -302,6 +302,27 @@ class ReportingSwitch(unittest.TestCase):
         self.assertNotIn("linux/lost: the Control Plane refused", err.getvalue())
         self.assertIn("linux/lost: the run's start was not confirmed", err.getvalue())
 
+    def test_each_run_is_handed_on_as_soon_as_it_starts(self):
+        # A step cancelled mid-loop must still name the runs it started, or
+        # nothing could cancel them.
+        env = {**CP_ENV, "BATCHES_JSON": json.dumps({"linux/a": BATCH, "linux/b": BATCH}),
+               "ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL": "https://index.example",
+               "ORCHESTRAI_THEROCK_URL": "https://therock.example/t.tar.gz",
+               "ORCHESTRAI_PLAYBOOK_SHA": "a" * 40, "ORCHESTRAI_REPORTING": "api"}
+        def start(cp, bid, *_):
+            if bid == "linux/b":
+                raise KeyboardInterrupt  # the runner stops the step here
+            return "r1"
+        with tempfile.NamedTemporaryFile("r") as out:
+            with mock.patch.dict(os.environ, {**env, "GITHUB_OUTPUT": out.name}, clear=True), \
+                    mock.patch.object(sys, "argv", ["trigger", "--config", CONFIG]), \
+                    mock.patch.object(trigger, "start_run", start), \
+                    contextlib.redirect_stderr(io.StringIO()), \
+                    self.assertRaises(KeyboardInterrupt):
+                trigger.main()
+            outputs = dict(line.split("=", 1) for line in out.read().splitlines())
+        self.assertEqual(json.loads(outputs["run_ids"]), {"linux/a": "r1"})
+
     def run_status(self, rid, api, wait=0):
         with tempfile.NamedTemporaryFile("r") as out:
             with mock.patch.dict(os.environ, {**CP_ENV, "RUN_ID": rid, "GITHUB_OUTPUT": out.name,
@@ -432,8 +453,8 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "playbook-results",
-                                            "test-gate"])
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "cancel-runs",
+                                            "playbook-results", "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("api", ["api", "reportportal"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
