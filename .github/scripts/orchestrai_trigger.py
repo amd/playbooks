@@ -788,6 +788,18 @@ def main():
     except ValueError as exc:
         print(f"::error::{exc}", file=sys.stderr)
         sys.exit(1)
+    out = os.environ.get("GITHUB_OUTPUT")
+
+    def emit():
+        # Rewritten after every start (the last value of a key wins): a step
+        # cancelled mid-loop still hands on the runs it started, so the cancel
+        # steps can stop them.
+        if out:
+            with open(out, "a") as f:
+                f.write(f"run_ids={json.dumps(runs)}\n")
+                f.write(f"run_urls={json.dumps(run_urls)}\n")
+                f.write(f"unconfirmed={json.dumps(unconfirmed)}\n")
+
     runs, run_urls, unconfirmed = {}, {}, []
     for bid, batch, plan, builds in prepared:
         try:
@@ -799,6 +811,7 @@ def main():
             # Anything short of a refusal (a lost answer, a token that could
             # not be refreshed) may have left a run: never retry such a batch.
             unconfirmed.append(bid)
+            emit()
             print(f"::error::{bid}: the run's start was not confirmed and it may have started; "
                   f"check OrchestrAI for a run of this batch before resubmitting: {exc}",
                   file=sys.stderr)
@@ -808,6 +821,7 @@ def main():
         run_urls[bid] = (f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
                          "?tab=tests&presentation=page")
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
+        emit()
     # Each Test job waits for its own batch's build (--await-build), so a batch
     # still queued for machines never holds back the batches that have started.
     failed = [bid for bid in batches if bid not in runs]
@@ -815,12 +829,9 @@ def main():
 
     # Emit the runs FIRST so the batches that started still run downstream,
     # even if we exit non-zero for an empty result below.
-    out = os.environ.get("GITHUB_OUTPUT")
+    emit()
     if out:
         with open(out, "a") as f:
-            f.write(f"run_ids={json.dumps(runs)}\n")
-            f.write(f"run_urls={json.dumps(run_urls)}\n")
-            f.write(f"unconfirmed={json.dumps(unconfirmed)}\n")
             # The commit every batch tests; a retry reuses it rather than
             # resolving a movable ref (main) again hours later.
             f.write(f"playbook_repo={repo}\n")

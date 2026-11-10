@@ -288,6 +288,21 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
+      # A superseded PR run (cancel-in-progress) can be cancelled mid-trigger:
+      # stop the runs already started (the trigger records each as it starts).
+      - name: Cancel the OrchestrAI runs this job started
+        if: cancelled() && steps.trigger.outputs.run_ids != ''
+        timeout-minutes: 15
+        env:
+          RUN_ID_MAP: ${{ steps.trigger.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: |
+          RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
+            python3 .github/scripts/orchestrai_trigger.py --cancel
+
   test-batches:
     # One job per batch (not per playbook), English and localized alike: it waits
     # on the batch's build once and resolves each playbook from it, so a full run
@@ -506,7 +521,9 @@ jobs:
       - name: Resolve the retried playbooks
         id: retry_resolve
         continue-on-error: true
-        if: "!cancelled() && steps.retry_build.outputs.build_url != ''"
+        # Only a build seen to finish: a wait that gave up leaves the first
+        # attempt's results standing rather than reading a build still running.
+        if: "!cancelled() && steps.retry_wait.outcome == 'success'"
         env:
           BUILD_URL: ${{ steps.retry_wait.outputs.build_url }}
           BATCH_JSON: ${{ toJson(matrix) }}
@@ -530,6 +547,7 @@ jobs:
             ${{ steps.retry_deps.outcome != 'success' && 'could not be prepared'
             || !fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] && 'was not accepted by OrchestrAI'
             || steps.retry_build.outputs.build_url == '' && 'got no build'
+            || steps.retry_wait.outcome != 'success' && 'was not seen to finish (its run was cancelled)'
             || 'could not be resolved' }}
         run: |
           msg="Retry of $(python3 -c 'import json,os; print(", ".join(json.loads(os.environ["RETRY_PLAYBOOKS"])))') ${STAGE}; their first attempt's results stand"
@@ -537,12 +555,14 @@ jobs:
           echo "> ⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
 
       # A cancelled or timed-out job stops its runs: nothing else would, and a
-      # queued run would still take machines hours later.
+      # queued run would still take machines hours later. So does a retry whose
+      # build was not seen to finish: nothing reads its results. (A retry
+      # means the first run had ended, so only the retry's run is cancelled.)
       - name: Cancel this batch's OrchestrAI runs
-        if: cancelled()
+        if: cancelled() || steps.retry_wait.outcome == 'failure'
         timeout-minutes: 5
         env:
-          RUN_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          RUN_IDS: ${{ steps.retry_wait.outcome != 'failure' && fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] || '' }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
           ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
@@ -564,6 +584,34 @@ jobs:
           name: batch-results-${{ strategy.job-index }}-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
+
+  # A cancelled run (a newer push to the PR, or Cancel workflow) stops every run
+  # Detect & Trigger started, including batches whose Test job never got a
+  # runner: their own cancel step never ran, and a queued run would still take
+  # machines hours later. Runs that already ended only log a warning.
+  cancel-runs:
+    name: Cancel OrchestrAI runs
+    needs: [detect-and-trigger, test-batches]
+    if: cancelled() && needs.detect-and-trigger.result == 'success' && needs.detect-and-trigger.outputs.run_ids != ''
+    runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Cancel the runs
+        env:
+          RUN_ID_MAP: ${{ needs.detect-and-trigger.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: |
+          RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
+            python3 .github/scripts/orchestrai_trigger.py --cancel
 
   playbook-results:
     # PASS / FAIL / NOT RUN for each system (device + OS), then the full gate.
