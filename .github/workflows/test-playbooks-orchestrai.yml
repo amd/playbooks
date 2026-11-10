@@ -290,8 +290,9 @@ jobs:
 
       # A superseded PR run (cancel-in-progress) can be cancelled mid-trigger:
       # stop the runs already started (the trigger records each as it starts).
+      # A failed job skips test-batches, so nothing would read its runs either.
       - name: Cancel the OrchestrAI runs this job started
-        if: cancelled() && steps.trigger.outputs.run_ids != ''
+        if: (cancelled() || failure()) && steps.trigger.outputs.run_ids != ''
         timeout-minutes: 15
         env:
           RUN_ID_MAP: ${{ steps.trigger.outputs.run_ids }}
@@ -555,14 +556,26 @@ jobs:
           echo "> ⚠️ ${msg}" >> "$GITHUB_STEP_SUMMARY"
 
       # A cancelled or timed-out job stops its runs: nothing else would, and a
-      # queued run would still take machines hours later. So does a retry whose
-      # build was not seen to finish: nothing reads its results. (A retry
-      # means the first run had ended, so only the retry's run is cancelled.)
+      # queued run would still take machines hours later.
       - name: Cancel this batch's OrchestrAI runs
-        if: cancelled() || steps.retry_wait.outcome == 'failure'
+        if: cancelled()
         timeout-minutes: 5
         env:
-          RUN_IDS: ${{ steps.retry_wait.outcome != 'failure' && fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] || '' }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          RUN_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --cancel
+
+      # So is a retry whose build was not seen to finish (it started no build
+      # in time, or the wait gave up): nothing reads its results. A retry means
+      # the first run had ended, so only the retry's run is cancelled.
+      - name: Cancel an unfinished retry's OrchestrAI run
+        if: "!cancelled() && fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] && steps.retry_wait.outcome != 'success'"
+        timeout-minutes: 5
+        env:
+          RUN_IDS: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
           ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}

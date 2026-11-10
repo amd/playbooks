@@ -349,23 +349,28 @@ class Workflows(unittest.TestCase):
 
     def test_a_cancelled_job_cancels_its_first_and_retry_runs(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
-        step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
-        # Also a retry whose build was not seen to finish: nothing reads its results.
-        self.assertEqual(step["if"], "cancelled() || steps.retry_wait.outcome == 'failure'")
+        cancels = [s for s in job["steps"] if "--cancel" in s.get("run", "")]
+        step, retry = cancels
+        self.assertEqual(step["if"], "cancelled()")
         # Nothing before it keeps working once the job is cancelled.
         before = job["steps"][:job["steps"].index(step)]
         self.assertFalse([s.get("name") for s in before if "always()" in str(s.get("if", ""))])
-        # The first run only when the retry's wait did not fail (then it had ended).
-        self.assertIn("steps.retry_wait.outcome != 'failure' && fromJson(needs.detect-and-trigger.outputs.run_ids",
-                      step["env"]["RUN_IDS"])
+        self.assertIn("needs.detect-and-trigger.outputs.run_ids", step["env"]["RUN_IDS"])
         self.assertIn("steps.retry_trigger.outputs.run_ids", step["env"]["RUN_IDS"])
+        # A retry whose build was not seen to finish (no build in time, or the
+        # wait gave up): nothing reads its results, so only its run is cancelled.
+        self.assertEqual(retry["if"], "!cancelled() && fromJson(steps.retry_trigger.outputs.run_ids || '{}')"
+                                      "[matrix.batch_id] && steps.retry_wait.outcome != 'success'")
+        self.assertNotIn("needs.detect-and-trigger", retry["env"]["RUN_IDS"])
+        self.assertIn("steps.retry_trigger.outputs.run_ids", retry["env"]["RUN_IDS"])
 
     def test_a_cancelled_run_cancels_every_run_detect_and_trigger_started(self):
         wf = self.load("test-playbooks-orchestrai.yml")
         self.assertIn("pull_request", wf["concurrency"]["cancel-in-progress"])  # why this is needed
         # Cancelled mid-trigger: Detect & Trigger's own last step.
         step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if "--cancel" in s.get("run", ""))
-        self.assertTrue(step["if"].startswith("cancelled()"))
+        # Or failed after starting runs: test-batches is then skipped and nothing reads them.
+        self.assertTrue(step["if"].startswith("(cancelled() || failure())"))
         self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ steps.trigger.outputs.run_ids }}")
         # Cancelled later, including batches whose Test job never got a runner.
         job = wf["jobs"]["cancel-runs"]
@@ -380,7 +385,10 @@ class Workflows(unittest.TestCase):
         self.assertIs(wf["concurrency"]["cancel-in-progress"], True)  # why this is needed
         # Cancelled while the command job runs: its own last step.
         step = next(s for s in wf["jobs"]["command"]["steps"] if "--cancel" in s.get("run", ""))
-        self.assertTrue(step["if"].startswith("cancelled()"))
+        # Or failed after starting runs: test-playbooks is then skipped and nothing reads them.
+        self.assertTrue(step["if"].startswith("(cancelled() || failure())"))
+        # It runs in the PR's checkout: isolated, so a json.py there is never imported.
+        self.assertIn("python3 -I -c '", step["run"])
         self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ steps.trigger.outputs.run_ids }}")
         # Cancelled later, including batches whose Test jobs never started.
         job = wf["jobs"]["cancel-runs"]

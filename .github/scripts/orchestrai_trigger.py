@@ -449,17 +449,25 @@ def http_json(method, url, headers, body=None):
         return resp.code, None
 
 
+class TokenUnavailable(ValueError):
+    """GitHub did not hand out an OIDC token this time (network error or
+    non-200): nothing reached the CI API, so the call can be retried."""
+
+
 def oidc_token(audience):
     url = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_URL", "")
     request_token = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN", "")
     if not url or not request_token:
         raise ValueError("GitHub OIDC is unavailable; the job needs permissions id-token: write")
     sep = "&" if "?" in url else "?"
-    status, payload = http_json("GET", f"{url}{sep}audience={urllib.parse.quote(audience, safe='')}",
-                                {"Authorization": f"Bearer {request_token}"})
+    try:
+        status, payload = http_json("GET", f"{url}{sep}audience={urllib.parse.quote(audience, safe='')}",
+                                    {"Authorization": f"Bearer {request_token}"})
+    except (OSError, http.client.HTTPException) as exc:
+        raise TokenUnavailable(f"GitHub OIDC token request failed ({type(exc).__name__})") from exc
     token = payload.get("value") if isinstance(payload, dict) else None
     if status != 200 or not token:
-        raise ValueError(f"GitHub could not issue an OIDC token (HTTP {status})")
+        raise TokenUnavailable(f"GitHub could not issue an OIDC token (HTTP {status})")
     print(f"::add-mask::{token}")
     return token
 
@@ -481,7 +489,16 @@ def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=Fals
     # before it proves nothing started.
     ambiguous = False
     while True:
-        headers = {"Authorization": "Bearer " + oidc_token(cp["oidc_audience"]),
+        try:
+            token = oidc_token(cp["oidc_audience"])
+        except TokenUnavailable as exc:
+            # Nothing was sent, so this attempt cannot have started a run.
+            if time.monotonic() < deadline:
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+                continue
+            raise ValueError(f"CI API {method} {path}: {exc}") from exc
+        headers = {"Authorization": "Bearer " + token,
                    "Accept": "application/json", "Content-Type": "application/json",
                    "X-OrchestrAI-Workspace": cp["workspace"]}
         if key:
@@ -677,7 +694,7 @@ def cancel_main():
         try:
             api(control_plane(), "POST", f"/runs/{urllib.parse.quote(rid, safe='')}/cancel", {}, retry_seconds=60, empty_ok=True)
             print(f"run {rid}: cancel requested", file=sys.stderr)
-        except ValueError as exc:
+        except Exception as exc:  # one run's failure must not leave the rest running
             print(f"::warning::run {rid} was not cancelled: {exc}", file=sys.stderr)
 
 
@@ -807,9 +824,10 @@ def main():
         except Refused as exc:
             print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
             continue
-        except ValueError as exc:
+        except Exception as exc:
             # Anything short of a refusal (a lost answer, a token that could
-            # not be refreshed) may have left a run: never retry such a batch.
+            # not be refreshed, an unexpected error) may have left a run:
+            # never retry such a batch, and keep starting the others.
             unconfirmed.append(bid)
             emit()
             print(f"::error::{bid}: the run's start was not confirmed and it may have started; "
