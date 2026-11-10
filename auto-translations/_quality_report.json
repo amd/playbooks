@@ -169,8 +169,8 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 82,
-      "mean": 92.9,
+      "files_scored": 83,
+      "mean": 92.8,
       "min": 78,
       "judge_model": "Claude-Opus-4.8"
     },
