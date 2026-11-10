@@ -119,10 +119,11 @@ def populate_from_worktree(dest: Path) -> None:
     shutil.copytree(REPO_ROOT / "playbooks", dest / "playbooks", symlinks=True)
 
 
-def select(fixture: Path, base: str = "HEAD") -> list[dict]:
+def select(fixture: Path, base: str = "HEAD", *extra: str) -> list[dict]:
     """Run the fixture's own copy of the builder and return selected entries."""
     proc = subprocess.run(
-        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed", "--base", base],
+        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed",
+         "--base", base, *extra],
         cwd=fixture, capture_output=True, text=True,
     )
     if proc.returncode != 0:
@@ -130,9 +131,9 @@ def select(fixture: Path, base: str = "HEAD") -> list[dict]:
     return json.loads(proc.stdout)
 
 
-def full_count(fixture: Path) -> int:
+def full_count(fixture: Path, *extra: str) -> int:
     proc = subprocess.run(
-        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all"],
+        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all", *extra],
         cwd=fixture, capture_output=True, text=True, check=True,
     )
     return len(json.loads(proc.stdout))
@@ -416,6 +417,114 @@ class FixtureCase(unittest.TestCase):
         }
         self.assertTrue(got)
         self.assertEqual({e["playbook"] for e in got}, consumers)
+
+
+class LocalizedFixtureCase(unittest.TestCase):
+    """--locale selection must follow the English rule: only what executes counts.
+
+    Motivated by PRs that edited English prose or a shared dependency and queued
+    every inheriting zh-CN entry, because the selector hashed whole directories.
+    """
+
+    LOCALE = "zh-CN"
+    TEST_TAG = re.compile(r"(<!-- @test:[^>]+ -->\s*```\w*\n)")
+
+    @classmethod
+    def setUpClass(cls):
+        if not (REPO_ROOT / "localized-playbooks" / cls.LOCALE).is_dir():
+            raise unittest.SkipTest(f"no localized-playbooks/{cls.LOCALE}")
+        cls._tmp = tempfile.TemporaryDirectory(prefix="matrix-localized-")
+        cls.fx = Path(cls._tmp.name) / "repo"
+        make_repo(cls.fx)
+        populate_from_worktree(cls.fx)
+        shutil.copytree(REPO_ROOT / "localized-playbooks", cls.fx / "localized-playbooks",
+                        symlinks=True)
+        # Its eol=lf rule keeps git archive (the base side) byte-identical to the
+        # working tree under core.autocrlf=true, as it is in the real repo
+        shutil.copy2(REPO_ROOT / ".gitattributes", cls.fx / ".gitattributes")
+        graft_harness(cls.fx)
+        git("add", "-A", cwd=cls.fx)  # safe: throwaway repo, not the source tree
+        git("commit", "-qm", "base", cwd=cls.fx)
+        cls.base_sha = git("rev-parse", "HEAD", cwd=cls.fx).stdout.strip()
+        cls.total = full_count(cls.fx, "--locale", cls.LOCALE)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def tearDown(self):
+        git("reset", "-q", "--hard", self.base_sha, cwd=self.fx, check=False)
+        git("clean", "-qfd", cwd=self.fx, check=False)
+
+    def select(self) -> list[dict]:
+        return select(self.fx, "HEAD", "--locale", self.LOCALE, "--allow-empty")
+
+    def append(self, rel: str, text: str) -> None:
+        p = self.fx / rel
+        p.write_text(p.read_text(encoding="utf-8") + text, encoding="utf-8")
+
+    def inheriting_playbook(self) -> str:
+        """A localized id that layers over English (localized_only false)."""
+        entries = json.loads(subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
+             "--locale", self.LOCALE],
+            cwd=self.fx, capture_output=True, text=True, check=True).stdout)
+        pb = next((e["playbook"] for e in entries if not e["localized_only"]), None)
+        if pb is None:
+            self.skipTest("no inheriting localized playbook")
+        return pb
+
+    def test_clean_tree_selects_nothing(self):
+        self.assertEqual(self.select(), [])
+
+    def test_english_dependency_prose_edit_selects_nothing(self):
+        """The reported case: a shared-dependency wording fix queued every overlay."""
+        deps = sorted((self.fx / "playbooks/dependencies").glob("*.md"))
+        self.assertTrue(deps)
+        for dep in deps:
+            self.append(str(dep.relative_to(self.fx)), "\nA typo fix.\n")
+        self.assertEqual(self.select(), [])
+
+    def test_english_readme_prose_edit_selects_nothing(self):
+        pb = self.inheriting_playbook()
+        readme = next((self.fx / "playbooks").glob(f"*/{pb}/README.md"))
+        self.append(str(readme.relative_to(self.fx)), "\nA typo fix.\n")
+        self.assertEqual(self.select(), [])
+
+    def test_overlay_prose_edit_selects_nothing(self):
+        for readme in (self.fx / "localized-playbooks" / self.LOCALE).glob("*/*/README.md"):
+            self.append(str(readme.relative_to(self.fx)), "\n拼写修正。\n")
+        self.assertEqual(self.select(), [])
+
+    def test_overlay_test_change_selects_that_playbook_only(self):
+        for readme in sorted((self.fx / "localized-playbooks" / self.LOCALE).glob("*/*/README.md")):
+            content = readme.read_text(encoding="utf-8")
+            if not self.TEST_TAG.search(content):
+                continue
+            readme.write_text(self.TEST_TAG.sub(r"\1echo probe\n", content, count=1),
+                              encoding="utf-8")
+            got = self.select()
+            if got:
+                self.assertEqual({e["playbook"] for e in got}, {readme.parent.name})
+                return
+            # Block scoped to a device this fleet does not run; try the next one
+            git("checkout", "-q", "--", ".", cwd=self.fx)
+        self.skipTest("no overlay @test block reaches a matrix entry")
+
+    def test_localized_dependency_test_change_is_selected(self):
+        touched = False
+        for dep in (self.fx / "localized-playbooks" / self.LOCALE / "dependencies").glob("*.md"):
+            content = dep.read_text(encoding="utf-8")
+            if self.TEST_TAG.search(content):
+                touched = True
+                dep.write_text(self.TEST_TAG.sub(r"\1echo probe\n", content), encoding="utf-8")
+        if not touched:
+            self.skipTest("no @test block in localized dependencies")
+        self.assertTrue(self.select(), "localized dependency tests are not signed")
+
+    def test_harness_change_forces_full_matrix(self):
+        self.append(".github/workflows/test-playbooks.yml", "\n# touched\n")
+        self.assertEqual(len(self.select()), self.total)
 
 
 class LocalizedRunnerLabelCase(unittest.TestCase):
