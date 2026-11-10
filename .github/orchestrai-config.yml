@@ -256,7 +256,10 @@ extra_install_scripts:
 # necessary but NOT sufficient -- the matrix drops any device missing from the
 # ORCHESTRAI_DEVICE_TAGS repo variable, with a ::warning::, so that variable
 # needs a "krk" entry pointing at the fleet tag before this has any effect.
-skip_devices: []
+# halo_box is the same hardware as halo but ships a dedicated image that
+# OrchestrAI does not have, so a halo_box entry cannot be tested here (the
+# runner also rejects --device halo_box). Playbooks are tested on halo instead.
+skip_devices: ["halo_box"]
 
 # Skip ONE playbook on ONE device, where skip_devices would be too broad: the
 # device works fine for everything else. Keyed by playbook id -> device list.
