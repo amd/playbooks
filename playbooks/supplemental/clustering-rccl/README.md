@@ -136,6 +136,8 @@ You should see a speed of `10000Mb/s`:
 
 On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
 
+Running large models across the cluster requires a large GPU memory allocation, so this step is required here (not optional). Set the allocation on each machine to at least **120 GB**.
+
 This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
 
 * Install the pipx utility and add the path for pipx installed wheels into the system search path.
@@ -155,12 +157,12 @@ This amount can be increased by changing the kernel's Translation Table Manager 
   amd-ttm
   ```
 
-Running large models across the cluster requires a large GPU memory allocation,
-so this step is required here (not optional). Follow the memory configuration
-below, and set the allocation on each machine to at least **96 GB** (Linux:
-`amd-ttm --set 120`).
+* Reconfigure shared memory settings to **120 GB**:
+  ```bash
+  amd-ttm --set 120
+  ```
 
-<!-- @require:memory-config -->
+* Reboot the system for changes to take effect.
 
 ## vLLM Container Initialization
 

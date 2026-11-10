@@ -73,24 +73,22 @@ This playbook teaches you how to cluster two Ryzen AI Halo systems connected dir
 > **Note**: Complete this step on all four machines (Machine 1 through Machine 4).
 <!-- @toggle:end -->
 
-<!-- @toggle:link=ethernet -->
 <!-- @os:windows -->
-On Windows, to run larger models that require higher memory, we need to use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
+On Windows, to run larger models that require higher memory, use the AMD Variable Graphics Memory (iGPU VRAM) allocation.
 
-Running a 358B-parameter model across the cluster requires a large GPU memory
-allocation, so this step is required here (not optional). Follow the memory
-configuration below, and set the allocation on each machine to at least
-**96 GB** (Windows: AMD Variable Graphics Memory in Adrenalin; Linux: `amd-ttm --set 120`).
+Running these large models across the cluster requires a large GPU memory allocation, so this step is required here (not optional). Set the allocation on each machine to at least **120 GB**.
+
+Open **AMD Software: Adrenalin Edition** and navigate to **Performance → Tuning → AMD Variable Graphics Memory**. Set the value to **120 GB** and reboot for the change to take effect.
 
 <!-- @device:halo_box -->
-<!-- @os:windows -->
 > **Running models near or above 128 GB:** On AMD Ryzen™ AI Max 400 Series (Gorgon Halo) systems running Windows, models that approach or exceed 128 GB of memory require additional configuration to run without errors. Follow the [AMD Ryzen AI Max PRO 400 Series Windows OS Guidelines](https://docs.amd.com/v/u/en-US/73342_1.00_AMD_Ryzen_AI_Max_PRO_400_Series_Windows_OS_Guidelines) before loading the model.
-<!-- @os:end -->
 <!-- @device:end -->
+<!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @toggle:end -->
 On Linux, ROCm utilizes a shared system memory pool, and this pool is configured by default to half the system memory.
+
+Running these large models across the cluster requires a large GPU memory allocation, so this step is required here (not optional). Set the allocation on each machine to at least **120 GB**.
 
 This amount can be increased by changing the kernel's Translation Table Manager (TTM) page setting, with the following instructions. AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB).
 
@@ -117,11 +115,7 @@ This amount can be increased by changing the kernel's Translation Table Manager 
   ```
 
 * Reboot the system for changes to take effect.
-
-<!-- @toggle:link=ethernet -->
-
 <!-- @os:end -->
-<!-- @toggle:end -->
 <!-- @device:halo_box -->
 ## Check for Software Updates
 
