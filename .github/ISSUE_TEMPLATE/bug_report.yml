@@ -59,6 +59,7 @@ body:
         - "unsloth-llms-finetuning - Fine-Tuning LLMs with Unsloth"
         - "vllm-inference - Getting Started with vLLM"
         - "vscode-qwen3-coder - Local LLM Coding with VSCode and Qwen3-Coder"
+        - "zenith-getting-started - Getting Started with Your Ryzen AI Halo (Project Zenith)"
         # END generated
         - Something else (the website, repository tooling, or a playbook not listed)
     validations:
