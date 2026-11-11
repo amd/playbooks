@@ -208,11 +208,12 @@ device_runs_as:
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
 # installed on demand, so a device whose only machine runs another OS needs an
-# image on the broker's on-demand list. grgh's machine runs Ubuntu; its Windows
-# batch asks for a custom Windows 11 build until the stock one can be deployed.
+# image on the broker's on-demand list. grgh's only machine (DT574) runs the
+# custom Windows 11 image below, so its Windows batch asks for exactly that one
+# and never reimages it; change this together with the machine's image.
 device_os_images:
   grgh:
-    windows: "windows/windows-26300-9550-20261006"
+    windows: "windows/windows-11-26300-9457-halo-zenith-v4-custom-test"
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
