@@ -158,8 +158,10 @@ class ControlPlaneApi(unittest.TestCase):
         fake = FakeApi((201, {"run": {"id": "r1"}}))
         with mock.patch.dict(os.environ, {"ORCHESTRAI_V2_WINDOWS_IMAGE": "windows/win11-x"}):
             self.start(fake, platform="windows")
-        self.assertEqual(fake.calls[0][3]["plan_document"]["document"]["run_settings"]["os_image"],
-                         "windows/win11-x")
+        document = fake.calls[0][3]["plan_document"]["document"]
+        self.assertEqual({s["os_image"] for s in document["sessions"]}, {"windows/win11-x"})
+        # A run-level image would override every session's own (device_os_images).
+        self.assertNotIn("os_image", document["run_settings"])
 
     def test_lost_start_is_retried_with_the_same_idempotency_key(self):
         fake = FakeApi(OSError("reset"), (503, None), (201, {"run": {"id": "r1"}}))
