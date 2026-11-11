@@ -534,7 +534,9 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     """Start one batch as a Control Plane run; return its run id."""
     image = os.environ.get(f"ORCHESTRAI_V2_{platform.upper()}_IMAGE") or (
         "windows" if platform == "windows" else "ubuntu")
-    settings = {**plan["run_settings"], "executor": "jenkins", "os_image": image}
+    # The image goes on each session only: a run-level os_image would replace a
+    # session's own (device_os_images), and the broker then finds no machine.
+    settings = {**plan["run_settings"], "executor": "jenkins"}
     gh_run = os.environ.get("GITHUB_RUN_ID", "")
     # A retry of a batch's NOT_RUN playbooks (ORCHESTRAI_RETRY=n) is a new run.
     retry = os.environ.get("ORCHESTRAI_RETRY", "")
