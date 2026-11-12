@@ -738,6 +738,7 @@ if __name__ == "__main__":
     args, rest = ap.parse_known_args()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite([loader.loadTestsFromTestCase(FixtureCase),
+                                loader.loadTestsFromTestCase(LocalizedFixtureCase),
                                 loader.loadTestsFromTestCase(LocalizedRunnerLabelCase),
                                 loader.loadTestsFromTestCase(UnreachableBaseCase)])
     if not args.quick:
