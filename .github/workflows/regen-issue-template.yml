@@ -59,20 +59,23 @@ jobs:
             echo "Issue template already up to date."
             exit 0
           fi
-          BRANCH="chore/regen-issue-template-${{ github.run_id }}"
+          # Fixed branch so each run updates one PR instead of opening another.
+          BRANCH="chore/regen-issue-template"
           git config user.name "amd-playbooks-bot"
           git config user.email "amd-playbooks-bot@users.noreply.github.com"
-          # -B (not -b): on a re-run of the same run, github.run_id is unchanged,
-          # so the local branch may already exist — -B resets it instead of failing.
+          # -B resets the branch onto this run's main.
           git checkout -B "$BRANCH"
           git add .github/ISSUE_TEMPLATE/bug_report.yml
           git commit -m "chore: regenerate issue-template playbook list"
-          git push --force-with-lease origin "$BRANCH"
-          # Idempotent: a re-run (or a prior attempt) may already have opened a PR
-          # for this head branch, and `gh pr create` errors if one exists. Reuse it.
-          if gh pr list --repo "${{ github.repository }}" --head "$BRANCH" \
-              --state open --json number --jq '.[0].number' | grep -q .; then
-            echo "PR already open for $BRANCH; branch updated, nothing more to do."
+          # Plain --force: the shallow checkout has no lease ref for this branch.
+          git push --force origin "$BRANCH"
+          PR_URL=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" \
+              --state open --json url --jq '.[0].url // empty')
+          if [ -n "$PR_URL" ]; then
+            echo "PR already open for $BRANCH ($PR_URL); branch updated."
+            gh pr comment "$PR_URL" \
+              --body "Refreshed by run ${{ github.run_id }}; this PR now reflects the latest \`playbooks/\` on \`main\`." \
+              || echo "::warning::Could not comment on $PR_URL."
           else
             gh pr create --repo "${{ github.repository }}" \
               --base "${{ github.ref_name }}" --head "$BRANCH" \
