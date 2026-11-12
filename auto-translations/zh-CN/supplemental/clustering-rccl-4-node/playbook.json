@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl-4-node",
-  "title": "聚合四台 Ryzen™ AI Halo 设备,使用 RCCL",
-  "description": "使用四台搭载 RCCL 的 Ryzen™ AI Halo 设备搭建多节点集群，用于分布式工作负载",
+  "title": "四台 Ryzen™ AI Halo 的 RCCL 集群",
+  "description": "使用四台 Ryzen™ AI Halo 设备通过 RCCL 搭建多节点集群，用于分布式工作负载",
   "auto_translated": true
 }

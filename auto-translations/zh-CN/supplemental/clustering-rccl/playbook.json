@@ -1,6 +1,6 @@
 {
   "id": "clustering-rccl",
-  "title": "两台 AMD Ryzen™ AI Halo 的 RCCL 集群组建",
-  "description": "使用两台 Ryzen™ AI Halo 设备通过 RCCL 搭建多节点集群，以运行分布式工作负载",
+  "title": "两台 Ryzen™ AI Halo 的 RCCL 集群",
+  "description": "使用两台搭载 RCCL 的 Ryzen™ AI Halo 设备设置多节点集群，以运行分布式工作负载",
   "auto_translated": true
 }
