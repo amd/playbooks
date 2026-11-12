@@ -285,32 +285,15 @@ def select_changed(base_tree: Path) -> list[dict]:
     return selected
 
 
-def tree_digest(path: Path) -> str:
-    """Hash a localized content subtree for conservative change detection."""
-    if not path.is_dir():
-        return ""
-    digest = hashlib.sha256()
-    for child in sorted(p for p in path.rglob("*") if p.is_file()):
-        digest.update(str(child.relative_to(path)).replace(os.sep, "/").encode())
-        digest.update(hashlib.sha256(child.read_bytes()).digest())
-    return digest.hexdigest()
-
-
 def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> list[dict]:
-    """Select localized entries whose overlay, metadata, or dependencies changed."""
+    """select_changed() for a locale: signatures of the materialized overlay.
+
+    Same rule as English, so a prose edit to an English playbook, its overlay, or
+    a shared dependency selects nothing; only a change to what would execute does.
+    """
     if harness_changed(base_tree):
         annotate("notice", "Test harness changed; running the full localized matrix")
         return head
-
-    head_dependencies = REPO_ROOT / "localized-playbooks" / locale / "dependencies"
-    base_dependencies = base_tree / "localized-playbooks" / locale / "dependencies"
-    if tree_digest(head_dependencies) != tree_digest(base_dependencies):
-        annotate("notice", "Localized dependencies changed; running the full matrix")
-        return head
-
-    english_dependencies_changed = tree_digest(
-        REPO_ROOT / "playbooks" / "dependencies"
-    ) != tree_digest(base_tree / "playbooks" / "dependencies")
 
     try:
         base_entries = R.build_localized_matrix_entries(base_tree, locale)
@@ -321,31 +304,29 @@ def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> 
     base_by_key = {
         (e["playbook"], e["platform"], e["arch"]): e for e in base_entries
     }
-    selected = []
+    selected, skipped = [], 0
     for entry in head:
         key = (entry["playbook"], entry["platform"], entry["arch"])
+        label = f"{locale}/{key[0]} ({key[1]}/{key[2]})"
         prior = base_by_key.get(key)
-        changed = prior != entry
-        for category in ("core", "supplemental"):
-            rel = Path("localized-playbooks") / locale / category / entry["playbook"]
-            if tree_digest(REPO_ROOT / rel) != tree_digest(base_tree / rel):
-                changed = True
-                break
-            if not entry.get("localized_only", True):
-                english_rel = Path("playbooks") / category / entry["playbook"]
-                if tree_digest(REPO_ROOT / english_rel) != tree_digest(
-                    base_tree / english_rel
-                ):
-                    changed = True
-                    break
-        if not entry.get("localized_only", True) and english_dependencies_changed:
-            changed = True
-        if changed:
-            selected.append(entry)
-    annotate(
-        "notice",
-        f"Selected {len(selected)} localized entries; skipped {len(head) - len(selected)} unchanged",
-    )
+        if prior is None:
+            annotate("notice", f"New localized matrix entry {label}")
+        elif prior != entry:
+            annotate("notice", f"Localized matrix metadata changed for {label}")
+        else:
+            head_sig = R.localized_entry_signature(
+                REPO_ROOT, locale, *key, entry["localized_only"])
+            base_sig = R.localized_entry_signature(
+                base_tree, locale, *key, prior["localized_only"])
+            if head_sig is None or base_sig is None:
+                annotate("warning", f"Cannot prove {label} unchanged; running it")
+            elif head_sig != base_sig:
+                annotate("notice", f"Tests changed for {label}")
+            else:
+                skipped += 1
+                continue
+        selected.append(entry)
+    annotate("notice", f"Selected {len(selected)} localized entries; skipped {skipped} unchanged")
     return selected
 
 
