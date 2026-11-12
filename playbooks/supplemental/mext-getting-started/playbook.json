@@ -1,0 +1,129 @@
+{
+  "id": "mext-getting-started",
+  "title": "Running Models Larger Than Memory with AMD MEXT Predictive Memory",
+  "description": "Add a tier of flash-backed memory with AMD MEXT Predictive Memory\u2122, then load and chat with a 236B-parameter model on a 128 GB Ryzen AI Max+ system.",
+  "time": 90,
+  "supported_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
+  "unsupported_platforms": {
+    "halo_box": [
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "halo": [
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "stx": [
+      {
+        "platform": "linux",
+        "reason": "MEXT requires 64 GB+ of DRAM and a second, dedicated NVMe SSD"
+      },
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "krk": [
+      {
+        "platform": "linux",
+        "reason": "MEXT requires 64 GB+ of DRAM and a second, dedicated NVMe SSD"
+      },
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "rx7900xt": [
+      {
+        "platform": "linux",
+        "reason": "This playbook targets the unified memory of Ryzen AI Max+ systems, where GPU and CPU draw on the same pool"
+      },
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "rx9070xt": [
+      {
+        "platform": "linux",
+        "reason": "This playbook targets the unified memory of Ryzen AI Max+ systems, where GPU and CPU draw on the same pool"
+      },
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ],
+    "r9700": [
+      {
+        "platform": "linux",
+        "reason": "This playbook targets the unified memory of Ryzen AI Max+ systems, where GPU and CPU draw on the same pool"
+      },
+      {
+        "platform": "windows",
+        "reason": "AMD MEXT Predictive Memory is a Linux-only product"
+      }
+    ]
+  },
+  "tested_platforms": {},
+  "required_platforms": {},
+  "published_platforms": {
+    "halo_box": [
+      "linux"
+    ],
+    "halo": [
+      "linux"
+    ]
+  },
+  "difficulty": "advanced",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": false,
+  "tags": [
+    "mext",
+    "memory",
+    "llm",
+    "inference",
+    "llama.cpp",
+    "large-models"
+  ],
+  "recommendedSystemMemory": 128,
+  "primaryModel": "DeepSeek-Coder-V2 236B",
+  "validatedVersions": {
+    "reference": {
+      "linux": {
+        "AMD MEXT Predictive Memory": "1.2.0",
+        "llamacpp-rocm": "b1364",
+        "amd-debug-tools": "0.2.22"
+      }
+    },
+    "apu": {
+      "linux": {
+        "AMD MEXT Predictive Memory": "1.2.0",
+        "llamacpp-rocm": "b1364",
+        "amd-debug-tools": "Latest"
+      }
+    }
+  },
+  "authors": [
+    {
+      "name": "Harkirat Gill",
+      "github": "harkgill-amd",
+      "github_url": "https://github.com/harkgill-amd",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-11-12",
+  "updated_date": "2026-11-12"
+}
