@@ -44,9 +44,7 @@ Supported test attributes:
     - continue_on_error: true/false - whether to continue if this test fails (default: false)
     - hidden: true/false - if true, hides the code block from the website (default: false)
     - setup: Shell commands to run before the test script (e.g. venv activation).
-             For Python tests, wraps execution in a shell that runs the setup first:
-                 setup="source llm-env/bin/activate"  →  bash -c "source llm-env/bin/activate && python <script>"
-             For shell tests, the setup commands are prepended to the script body.
+             If the setup fails, the test stops with "setup failed" (see below).
 
 Setup attribute:
     The `setup` attribute lets you specify shell commands (e.g. venv activation)
@@ -60,10 +58,24 @@ Setup attribute:
         ```
         <!-- @test:end -->
 
-    The runner expands this to: `bash -c "source llm-env/bin/activate && python test_verify-imports.py"`
-    On Windows, it uses PowerShell instead of bash.
+    A setup is one line; a setup that spans lines is refused when the README is
+    read. The setup runs in the same shell session as the test, before it:
 
-    For shell-based tests, the setup commands are prepended to the script body.
+    - Linux (bash, Python and other tests): bash runs the setup under set -e and
+      pipefail, checks its final status, then runs the test. Any failing setup
+      command, including a failed guard such as
+      `[ -d env ] && source env/bin/activate`, stops the test. Keep setups to
+      plain commands: set -e does not see failures inside if conditions or
+      functions called from them, and the setup must not rely on setting
+      errexit, pipefail or an EXIT trap, which the runner resets before the test
+      body.
+    - Windows, PowerShell tests: the setup runs in try/catch with
+      $ErrorActionPreference = 'Stop', so a failing cmdlet, a missing or blocked
+      script (Activate.ps1) or a native command with a nonzero exit stops the test,
+      with the error message. On Windows PowerShell 5.1 only the last native exit
+      code is checked.
+    - Windows, all other tests (cmd, bash, Python, ...): cmd.exe chains the setup
+      and the test's commands with &&, so the first failing command stops the test.
 
 Reusable setup definitions (@setup):
     Instead of repeating raw shell commands in every test's `setup` attribute,
@@ -905,6 +917,10 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
         # for tests that are filtered out on this platform (e.g. a Linux-only
         # setup referenced by a Linux test while building the Windows view).
         test.setup = resolve_setup(attrs.get("setup"), setup_defs, target_platform)
+        if test.setup and "\n" in test.setup.strip():
+            raise ValueError(
+                f"Test '{test.id}': setup must be one line, got {test.setup.strip()!r}"
+            )
 
         tests.append(test)
 
@@ -918,6 +934,48 @@ def extract_tests(readme_path: Path, target_platform: str, target_device: Option
             seen_ids.add(t.id)
             unique_tests.append(t)
     return unique_tests
+
+
+def bash_with_setup(setup: str, body: str) -> str:
+    """Run *setup* before *body* in one bash session; any failing setup command stops the test.
+
+    A failed setup (e.g. a venv an earlier, skipped step never created) must not let
+    the test run on system Python. set -e is ignored on the left of ``||``, so the
+    setup runs at top level under set -e, with an EXIT trap that reports the failure.
+    set -e also ignores a failure before the last command of an ``&&`` list, and a
+    failing command before the last one of a pipeline unless pipefail is set. So
+    pipefail is on, and the setup's final status is checked
+    (``[ -d env ] && source env/bin/activate``). Setups are one line (extract_tests
+    refuses others). Failures inside an ``if`` condition or a function called
+    from one still go unnoticed; keep setups to plain commands.
+
+    The wrapper owns errexit, pipefail and the EXIT trap: it turns the first two off
+    and clears the trap before the body, so a setup must not rely on setting any."""
+    return (f"trap 'echo \"setup failed\" >&2; exit 1' EXIT\nset -e -o pipefail\n{setup}\n"
+            f"[ $? -eq 0 ]\nset +e +o pipefail\ntrap - EXIT\n{body}")
+
+
+def powershell_with_setup(setup: str, body: str) -> str:
+    """PowerShell counterpart of bash_with_setup.
+
+    Stop turns failing cmdlets and blocked or missing scripts (Activate.ps1) into
+    exceptions; native failures are caught by $PSNativeCommandUseErrorActionPreference
+    on PowerShell 7.3+ and by $LASTEXITCODE on Windows PowerShell 5.1."""
+    # ponytail: on 5.1 a failing native command followed by a succeeding one in the
+    # same setup goes unnoticed; split such setups or run them on PowerShell 7.
+    # The error is printed from runtime values, never by splicing the setup text
+    # into a string literal, where its quotes would break the parse.
+    # $LASTEXITCODE is reset first so a value left by the profile or an earlier
+    # command cannot fail a setup that runs no native command.
+    return ("$__eap = $ErrorActionPreference; $__nat = $PSNativeCommandUseErrorActionPreference\n"
+            "$ErrorActionPreference = 'Stop'; $PSNativeCommandUseErrorActionPreference = $true\n"
+            "$global:LASTEXITCODE = 0\n"
+            f"try {{\n{setup}\n}} catch {{\n"
+            "    [Console]::Error.WriteLine(\"setup failed: $($_.Exception.Message)\")\n"
+            "    [Console]::Error.WriteLine($_.InvocationInfo.PositionMessage); exit 1\n}\n"
+            "if ($LASTEXITCODE) { [Console]::Error.WriteLine(\"setup failed: exit code $LASTEXITCODE\"); exit 1 }\n"
+            "$ErrorActionPreference = $__eap; $PSNativeCommandUseErrorActionPreference = $__nat\n"
+            f"{body}")
 
 
 def run_test(
@@ -976,7 +1034,7 @@ def run_test(
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
             if setup_prefix:
-                script_content = f"{setup_prefix}\n{script_content}"
+                script_content = bash_with_setup(setup_prefix, script_content)
     elif test.language in ["cmd", "batch"]:
         shell_cmd = ["cmd", "/c"]
         script_content = effective_code
@@ -988,7 +1046,7 @@ def run_test(
         shell_cmd = ["powershell", "-Command"]
         script_content = effective_code
         if setup_prefix:
-            script_content = f"{setup_prefix}\n{script_content}"
+            script_content = powershell_with_setup(setup_prefix, script_content)
     elif test.language == "python":
         # For Python code blocks, write to temp file and execute
         script_file = results_dir / f"test_{test.id}.py"
@@ -1000,7 +1058,7 @@ def run_test(
                 script_content = f'{setup_prefix} && python "{script_file}"'
             else:
                 shell_cmd = ["bash", "-c"]
-                script_content = f'{setup_prefix} && python "{script_file}"'
+                script_content = bash_with_setup(setup_prefix, f'python "{script_file}"')
         else:
             shell_cmd = ["python", str(script_file)]
             script_content = None
@@ -1018,7 +1076,7 @@ def run_test(
             shell_cmd = ["bash", "-c"]
             script_content = effective_code
             if setup_prefix:
-                script_content = f"{setup_prefix}\n{script_content}"
+                script_content = bash_with_setup(setup_prefix, script_content)
 
     # Build the command
     if script_content is not None:
@@ -1349,38 +1407,13 @@ def list_playbook_ids(repo_root: Path) -> list[str]:
     return sorted(ids)
 
 
-def runner_groups(repo_root: Path) -> set[str]:
-    """Device groups that have at least one machine in .github/runners.json.
-
-    A device can be declared in tested_platforms before it has a self-hosted
-    runner — e.g. grgh, which is reachable through the OrchestrAI broker fleet
-    but has no machine in the GitHub pool. Returning the groups lets the matrix
-    builder skip those devices instead of emitting a runs-on no runner matches.
-    """
-    runners_file = repo_root / ".github" / "runners.json"
-    try:
-        data = json.loads(runners_file.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        # An unreadable catalog must not silently empty the matrix: fall back to
-        # "every device is fine" so the old, unfiltered behaviour applies.
-        print(f"Warning: cannot read {runners_file} ({exc}); "
-              f"not filtering the matrix by runner group", file=sys.stderr)
-        return set()
-    return {str(r.get("group", "")) for r in data if r.get("group")}
-
-
 def build_matrix_entries(repo_root: Path) -> list[dict]:
     """Expand every playbook.json into CI matrix entries.
 
-    Devices with no runner group in .github/runners.json are skipped: a job
-    whose runs-on no machine satisfies would queue until it times out rather
-    than fail, which is indistinguishable from a hung test. Those devices are
-    still tested through the OrchestrAI workflow, which acquires hardware from
-    the MAAS broker instead of the GitHub self-hosted pool.
+    Every tested device is listed, with or without a runner: build_test_matrix
+    drops entries no runner in .github/runners.json serves, after its filters.
     """
     entries = []
-    groups = runner_groups(repo_root)
-    unmapped: set[str] = set()
     for playbook_id in list_playbook_ids(repo_root):
         for category in ("core", "supplemental"):
             meta_file = repo_root / "playbooks" / category / playbook_id / "playbook.json"
@@ -1393,9 +1426,6 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                 break
             required = meta.get("required_platforms", {})
             for device, platforms in meta.get("tested_platforms", {}).items():
-                if groups and device not in groups:
-                    unmapped.add(device)
-                    continue
                 for platform in platforms:
                     os_label = "Windows" if platform == "windows" else "Linux"
                     entries.append({
@@ -1407,11 +1437,6 @@ def build_matrix_entries(repo_root: Path) -> list[dict]:
                         "required": platform in set(required.get(device, [])),
                     })
             break
-    if unmapped:
-        print(f"::warning::skipping device(s) with no runner group in "
-              f".github/runners.json: {', '.join(sorted(unmapped))} "
-              f"(tested through the OrchestrAI workflow instead; add a runner "
-              f"there to also schedule native self-hosted jobs)", file=sys.stderr)
     return entries
 
 
