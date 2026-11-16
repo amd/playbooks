@@ -50,6 +50,22 @@ class PrepareMatricesTests(unittest.TestCase):
         with self.assertRaisesRegex(MatrixLimitError, "Localized matrix has 257"):
             prepare([], {}, [{}] * 257, {})
 
+    @staticmethod
+    def entries(count, batches, prefix="b"):
+        return [{"batch_id": f"{prefix}{index % batches}", "platform": "linux",
+                 "arch": "stx", "playbook": f"p{index}"} for index in range(count)]
+
+    def test_batch_jobs_bound_the_batches_not_the_playbooks(self):
+        # 300 playbook entries in 14 batches: 14 Test jobs, a valid matrix.
+        result = prepare(self.entries(300, 14), {}, [], {}, batch_jobs=True)
+        self.assertEqual(len(result["batch_matrix"]), 14)
+
+    def test_batch_jobs_reject_a_combined_batch_matrix_over_the_limit(self):
+        # Each half is within the limit; together they are not.
+        with self.assertRaisesRegex(MatrixLimitError, "Batch matrix has 258"):
+            prepare(self.entries(129, 129, "en"), {}, self.entries(129, 129, "zh"), {},
+                    batch_jobs=True)
+
     def test_colliding_batch_ids_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "batch IDs collide: duplicate"):
             prepare([], {"duplicate": {}}, [], {"duplicate": {}})

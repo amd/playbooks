@@ -99,9 +99,11 @@ extra_tags:
 # (gpt-oss-120b on Halo, a small model on the smaller devices — qwen3.5-9b for
 # lmstudio, Qwen3.5-4B for pytorch-rocm, gpt-oss-20b for n8n), so they only need
 # 128 GB for the big halo-class runs — the small-device runs fit in normal RAM.
-# grgh (Gorgon Halo) is in the same bucket: its @device/@var scopes resolve the
-# same halo-class models, and the fleet is 128 GB or 192 GB, so it carries the
-# same tag. Tagging ram_128gb ONLY on halo/halo_box/grgh lets them run on every
+# grgh (Gorgon Halo) runs the same halo-class models (its @device/@var scopes
+# resolve them), but its machines have 192 GB and carry no ram_* tag, so it
+# runs these playbooks untagged and is left out of extra_tag_devices[ram_128gb]
+# below (a ram_128gb batch on grgh could never be placed).
+# Tagging ram_128gb ONLY on halo/halo_box lets them run on every
 # device (no tag elsewhere → tags_for() falls back to the empty extra_tags entry)
 # instead of being dropped from the non-128 GB devices by extra_tag_devices.
 # Unsloth uses the same Halo tagging, while its known-OOM STX combination is
@@ -120,38 +122,34 @@ extra_tags:
 # was marked timed out, while openclaw passed on the 128 GB batch the same night.
 # The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
+  # grgh's machines (192 GB; DT574 reports 188 GiB to the OS) carry no ram_*
+  # tag, so the 128 GB requirement in extra_tags would drop its batch.
+  deepseek-v4-flash-ds4:
+    grgh: []
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   lmstudio-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   pytorch-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   n8n-automation-gpt-oss:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   vscode-qwen3-coder:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   gaia-agents:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   openclaw-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   # Fixed Qwen3.6-35B-A3B-GGUF needs more than 32 GB hosts expose; krk is mixed
   # (16/32/64 GB), so pin krk runs to its 64 GB hosts.
   github-slack-development-digest:
@@ -162,7 +160,7 @@ device_extra_tags:
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
-  ram_128gb: ["halo", "halo_box", "grgh"]
+  ram_128gb: ["halo", "halo_box"]
   ram_64gb: ["krk"]
 
 # Extra tags that only add capacity: a machine with them can run everything the
@@ -171,6 +169,51 @@ extra_tag_devices:
 # machine instead of two (they run one after another on it). Remove a tag here
 # to keep its batches separate.
 superset_tags: ["ram_64gb", "ram_128gb"]
+
+# Sites a device's batches may be placed at (OrchestrAI site ids; a device not
+# listed may run at any site). Every device stays in Markham: HYD machines are
+# slow to provision and fetch from Artifactory/PyPI caches far from them, and
+# HYD KRKs are 32 GB. Sites: maas-mkm-mnb, maas-mkm-cs (Markham), maas-hyd-ha
+# (Hyderabad).
+device_site_ids:
+  krk:      &markham ["maas-mkm-mnb", "maas-mkm-cs"]
+  halo:     *markham
+  halo_box: *markham
+  stx:      *markham
+  rx7900xt: *markham
+  rx9070xt: *markham
+  r9700:    *markham
+  grgh:     *markham
+
+# Device -> name shown on its batch jobs and in the results grid
+# ("Halo · Windows (19 playbooks)"). A device not listed shows its id.
+device_names:
+  halo:     "Halo"
+  halo_box: "Halo Box"
+  grgh:     "Gorgon Halo"
+  stx:      "Strix"
+  krk:      "Krackan"
+  rx7900xt: "RX 7900 XT"
+  rx9070xt: "RX 9070 XT"
+  r9700:    "R9700"
+
+# Device -> the device its playbooks run as. Machines are still chosen by the
+# device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
+# README @device blocks, @var values and the test library's per-device
+# dependencies treat it exactly like that one. For a device no README names yet
+# that shares another's silicon: grgh is gfx1151 like halo.
+device_runs_as:
+  grgh: halo
+
+# Device -> platform -> OS image its sessions request instead of the platform's
+# default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
+# installed on demand, so a device whose only machine runs another OS needs an
+# image on the broker's on-demand list. grgh's only machine (DT574) runs the
+# custom Windows 11 image below, so its Windows batch asks for exactly that one
+# and never reimages it; change this together with the machine's image.
+device_os_images:
+  grgh:
+    windows: "windows/windows-11-26300-9457-halo-zenith-v4-custom-test"
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
