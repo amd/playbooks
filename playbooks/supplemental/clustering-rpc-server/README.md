@@ -381,7 +381,7 @@ On Machine 2, start the RPC server to expose its GPU resources to the controller
 > - Keep the cluster machines on the dedicated switch only, and disconnect them from Wi-Fi and other networks while the RPC server is running — or firewall port 50053 so only the controller can reach it.
 > - Stop the RPC server as soon as you finish; do not leave it running unattended.
 
-For more options, refer to the [llama.cpp RPC documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md). [llama.cpp RPC documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
+For more options, refer to the [llama.cpp RPC documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
 ### Step 2: Launch the Model (Machine 1)
 
