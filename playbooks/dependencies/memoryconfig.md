@@ -39,7 +39,7 @@ fi
 <!-- @os:end -->
 
 <!-- @device:halo_box,halo,grgh,stx,krk -->
-## Advanced: increasing GPU memory (optional)
+## Advanced: Increasing GPU memory (Optional)
 
 You may need to increase the memory allocated to the GPU to run certain larger
 models or longer contexts. These devices use unified memory — the GPU shares
