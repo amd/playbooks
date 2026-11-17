@@ -74,7 +74,9 @@ def build(playbooks, cfg, devices=None, platforms=None, locale=""):
                 pb_dir = Path(f"localized-playbooks/{locale}/{cat}/{pb_id}")
                 if not pb_dir.is_dir():
                     continue
-                meta = load_merged_metadata(locale, cat, pb_id)
+                # The playbooks under test are in the working directory, which
+                # for !orc is the PR head and not this script's checkout.
+                meta = load_merged_metadata(locale, cat, pb_id, Path.cwd())
                 localized_only_by_playbook[pb_id] = meta["localized_only"]
             else:
                 pb_file = Path(f"playbooks/{cat}/{pb_id}/playbook.json")

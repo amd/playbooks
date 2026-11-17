@@ -10,8 +10,8 @@ OrchestrAI pipeline trigger
 For each batch (one per platform/device[+extra-tags]) builds a plan -- one
 session per playbook, sharing the batch's hardware -- and starts it through the
 OrchestrAI Control Plane CI API with the job's GitHub OIDC token.
-Waits until the Control Plane has started each batch's pipeline build and
-records its URL so the matrix jobs can wait on it.
+Records each batch's run id; every Test job then waits (--await-build) until
+the Control Plane has started its batch's pipeline build.
 
 Environment-specific values (provisioning scripts, TheRock URLs, Linux/Windows
 driver sources, run settings) come from .github/orchestrai-config.yml and the
@@ -28,9 +28,12 @@ Inputs (env):
     ORCHESTRAI_V2_*         Control Plane endpoint, workspace and ReportPortal credential
 
 Outputs:
-    build_urls={...}  -> $GITHUB_OUTPUT   (batch_id -> pipeline build URL)
+    run_ids={...}     -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run id)
     run_urls={...}    -> $GITHUB_OUTPUT   (batch_id -> OrchestrAI run URL)
+    playbook_repo, playbook_sha -> $GITHUB_OUTPUT   (what every batch tests)
     --dry-run prints each plan/builds payload and starts nothing.
+    --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
+    --run-status (RUN_ID env): status -> $GITHUB_OUTPUT, before a retry
 """
 
 import argparse
@@ -46,8 +49,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-import yaml
-
 # Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
 # for API_RETRY_SECONDS. A run waits for machines for its acquire_timeout; ours
 # waits that long plus BUILD_WAIT_MARGIN for its build.
@@ -59,6 +60,7 @@ TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
 
 
 def load_config(path):
+    import yaml  # only the config path needs it; --await-build runs without PyYAML
     with open(path) as f:
         return yaml.safe_load(f)
 
@@ -149,7 +151,8 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "PLAYBOOK_REF": git_ref,
             "PLAYBOOK_ID": pb_id,
             "PLAYBOOK_PLATFORM": platform,
-            "PLAYBOOK_DEVICE": device,
+            # device_runs_as: playbooks run as another device's (same silicon).
+            "PLAYBOOK_DEVICE": (cfg.get("device_runs_as") or {}).get(device, device),
             "ROCM_MULTI_ARCH_INDEX_URL": rocm_index_url,
         }
         locale = batch.get("locale", "")
@@ -168,13 +171,22 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         # secret is unset so runs still work (just unauthenticated).
         if hf_token:
             variables["HF_TOKEN"] = hf_token
-        groups.append({
+        group = {
             "id": f"playbook-{pb_id}",
             "level": "L4-sys",
             "tests": [test],
             "maas_tags": tags,
             "variables": variables,
-        })
+        }
+        # Only machines at these sites (device_site_ids in the config).
+        sites = (cfg.get("device_site_ids") or {}).get(device)
+        if sites:
+            group["site_ids"] = list(sites)
+        # An OS image of its own for this device and platform (device_os_images).
+        os_image = ((cfg.get("device_os_images") or {}).get(device) or {}).get(platform)
+        if os_image:
+            group["os_image"] = os_image
+        groups.append(group)
 
     return {
         "source": "external-playbook-batch",
@@ -437,30 +449,56 @@ def http_json(method, url, headers, body=None):
         return resp.code, None
 
 
+class TokenUnavailable(ValueError):
+    """GitHub did not hand out an OIDC token this time (network error or
+    non-200): nothing reached the CI API, so the call can be retried."""
+
+
 def oidc_token(audience):
     url = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_URL", "")
     request_token = os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN", "")
     if not url or not request_token:
         raise ValueError("GitHub OIDC is unavailable; the job needs permissions id-token: write")
     sep = "&" if "?" in url else "?"
-    status, payload = http_json("GET", f"{url}{sep}audience={urllib.parse.quote(audience, safe='')}",
-                                {"Authorization": f"Bearer {request_token}"})
+    try:
+        status, payload = http_json("GET", f"{url}{sep}audience={urllib.parse.quote(audience, safe='')}",
+                                    {"Authorization": f"Bearer {request_token}"})
+    except (OSError, http.client.HTTPException) as exc:
+        raise TokenUnavailable(f"GitHub OIDC token request failed ({type(exc).__name__})") from exc
     token = payload.get("value") if isinstance(payload, dict) else None
     if status != 200 or not token:
-        raise ValueError(f"GitHub could not issue an OIDC token (HTTP {status})")
+        raise TokenUnavailable(f"GitHub could not issue an OIDC token (HTTP {status})")
     print(f"::add-mask::{token}")
     return token
 
 
-def api(cp, method, path, body=None, key=None):
+class Refused(ValueError):
+    """The CI API answered with a definite refusal: nothing was started."""
+
+
+def api(cp, method, path, body=None, key=None, retry_seconds=None, empty_ok=False):
     """Call the CI API and return its JSON body, retrying transient failures.
 
     A start is retried with the same Idempotency-Key, so a lost response can
     never start a second run. A fresh OIDC token is used for every call.
     """
-    deadline, delay = time.monotonic() + API_RETRY_SECONDS, 2
+    deadline, delay = time.monotonic() + (retry_seconds or API_RETRY_SECONDS), 2
+    # Once an attempt may have reached the server (a lost answer, a 5xx, a
+    # request still in progress), a later 4xx refuses only that replay: the
+    # first may have started a run. Only a refusal with no such attempt
+    # before it proves nothing started.
+    ambiguous = False
     while True:
-        headers = {"Authorization": "Bearer " + oidc_token(cp["oidc_audience"]),
+        try:
+            token = oidc_token(cp["oidc_audience"])
+        except TokenUnavailable as exc:
+            # Nothing was sent, so this attempt cannot have started a run.
+            if time.monotonic() < deadline:
+                time.sleep(delay)
+                delay = min(delay * 2, 30)
+                continue
+            raise ValueError(f"CI API {method} {path}: {exc}") from exc
+        headers = {"Authorization": "Bearer " + token,
                    "Accept": "application/json", "Content-Type": "application/json",
                    "X-OrchestrAI-Workspace": cp["workspace"]}
         if key:
@@ -471,16 +509,24 @@ def api(cp, method, path, body=None, key=None):
             status, payload = None, {"error": {"message": f"network error ({type(exc).__name__})"}}
         if status and 200 <= status < 300 and isinstance(payload, dict):
             return payload
+        if status and 200 <= status < 300 and payload is None and empty_ok:
+            return {}  # e.g. a cancel answered 202/204 with no body
         err = payload.get("error") if isinstance(payload, dict) else None
         err = err if isinstance(err, dict) else {}
         code = err.get("code", "")
+        if status is None or status == 408 or status >= 500 or code == "idempotency_in_progress":
+            ambiguous = True
         if (status is None or status in (408, 429) or status >= 500
                 or code == "idempotency_in_progress") and time.monotonic() < deadline:
             time.sleep(delay)
             delay = min(delay * 2, 30)
             continue
         request_id = payload.get("request_id", "") if isinstance(payload, dict) else ""
-        raise ValueError(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
+        # Only a 4xx that is not "try again" proves nothing started; a 2xx
+        # without a readable body may have started a run.
+        refused = (status and 400 <= status < 500 and status not in (408, 429)
+                   and code != "idempotency_in_progress" and not ambiguous)
+        raise (Refused if refused else ValueError)(f"CI API {method} {path}: HTTP {status} {code}: {err.get('message', '')}"
                          + (f" (request_id={request_id})" if request_id else ""))
 
 
@@ -488,8 +534,12 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
     """Start one batch as a Control Plane run; return its run id."""
     image = os.environ.get(f"ORCHESTRAI_V2_{platform.upper()}_IMAGE") or (
         "windows" if platform == "windows" else "ubuntu")
-    settings = {**plan["run_settings"], "executor": "jenkins", "os_image": image}
+    # The image goes on each session only: a run-level os_image would replace a
+    # session's own (device_os_images), and the broker then finds no machine.
+    settings = {**plan["run_settings"], "executor": "jenkins"}
     gh_run = os.environ.get("GITHUB_RUN_ID", "")
+    # A retry of a batch's NOT_RUN playbooks (ORCHESTRAI_RETRY=n) is a new run.
+    retry = os.environ.get("ORCHESTRAI_RETRY", "")
     attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "")
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if publisher:
@@ -502,22 +552,39 @@ def start_run(cp, bid, plan, builds, platform, publisher, sha):
                            "github_run_id": gh_run},
         }]
     sessions = [{"name": g["id"], "level": g["level"], "machine_tags": g["maas_tags"],
-                 "os_image": image, "tests": g["tests"], "variables": g["variables"]}
+                 "os_image": g.get("os_image") or image, "tests": g["tests"],
+                 "variables": g["variables"],
+                 **({"site_ids": g["site_ids"]} if g.get("site_ids") else {})}
                 for g in plan["groups"]]
     body = {
         "require_capacity": "queue",
         "plan_document": {
-            "name": f"Playbooks {bid} {gh_run}/{attempt}",
+            "name": f"Playbooks {bid} {gh_run}/{attempt}" + (f" retry {retry}" if retry else ""),
             "description": f"Started by https://github.com/{repo}/actions/runs/{gh_run}",
             "document": {"sessions": sessions, "run_settings": settings},
         },
         "builds_json": builds,
     }
-    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid]).encode()).hexdigest()
+    key = hashlib.sha256(json.dumps([repo, gh_run, attempt, bid] + ([retry] if retry else []))
+                         .encode()).hexdigest()
     run = api(cp, "POST", "/runs", body, key).get("run") or {}
     if not run.get("id"):
         raise ValueError("the CI API start response has no run id")
     return run["id"]
+
+
+def failure_reason(run):
+    """Why a run ended: its error/reason/message/failure/detail fields, one level
+    deep (the Control Plane does not always use the same key)."""
+    found = []
+    def scan(obj, prefix=""):
+        for key, value in (obj or {}).items():
+            if isinstance(value, dict) and not prefix:
+                scan(value, f"{key}.")
+            elif value and any(w in key.lower() for w in ("error", "reason", "message", "failure", "detail")):
+                found.append(f"{prefix}{key}={value if isinstance(value, str) else json.dumps(value)}")
+    scan(run)
+    return "; ".join(found)[:800]
 
 
 def await_builds(cp, runs, wait_seconds):
@@ -539,7 +606,7 @@ def await_builds(cp, runs, wait_seconds):
                 print(f"  {bid}: build {urls[bid]}", file=sys.stderr)
                 del pending[bid]
             elif run.get("status") in TERMINAL:
-                reason = run.get("error") or run.get("status_reason") or run.get("message") or ""
+                reason = failure_reason(run)
                 print(f"::error::{bid}: run {rid} ended {run.get('status')} without a build"
                       + (f": {reason}" if reason else ""), file=sys.stderr)
                 del pending[bid]
@@ -550,11 +617,109 @@ def await_builds(cp, runs, wait_seconds):
     return urls
 
 
+def acquire_timeout_minutes(config_path):
+    """run_settings.acquire_timeout from the config, read without PyYAML (the
+    Test jobs that wait for builds do not install it)."""
+    text = open(config_path, encoding="utf-8").read()
+    m = re.search(r"^\s*acquire_timeout:\s*(\d+)", text, re.M)
+    if not m:
+        raise ValueError(f"{config_path} has no run_settings.acquire_timeout")
+    return int(m.group(1))
+
+
+def await_build_main(config_path):
+    """--await-build: one Test job waits for its batch's build (RUN_ID, BATCH_ID).
+
+    Writes build_url to $GITHUB_OUTPUT; leaves it unset when the run ends or
+    times out without a build, which the verdict step reports as NOT_RUN.
+    """
+    rid, bid = os.environ.get("RUN_ID", ""), os.environ.get("BATCH_ID", "")
+    if not rid:
+        print(f"::error::batch {bid} has no OrchestrAI run (it failed to start, or its "
+              f"start was not confirmed; see Detect & Trigger)", file=sys.stderr)
+        return
+    try:
+        # The Control Plane holds a queued run for its acquire_timeout; never
+        # give up on it sooner.
+        wait = acquire_timeout_minutes(config_path) * 60 + BUILD_WAIT_MARGIN
+        url = await_builds(control_plane(), {bid: rid}, wait).get(bid, "")
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return
+    out = os.environ.get("GITHUB_OUTPUT")
+    if url and out:
+        with open(out, "a") as f:
+            f.write(f"build_url={url}\n")
+
+
+def run_status_main():
+    """--run-status: the Control Plane's status for one run (RUN_ID), written as
+    status=<status> to $GITHUB_OUTPUT: never_started without a run, nothing when
+    it cannot be read. A retry needs the first run to have ended, or two runs of
+    the same playbooks could hold machines at once. Also writes build_url= when
+    the run started a pipeline build: its tests may have run even if the job
+    never saw that build (--await-build timed out or could not read the run)."""
+    rid = os.environ.get("RUN_ID", "")
+    status, build_url = "never_started", ""
+    if rid:
+        # A run whose build has just ended can read "running" for a while
+        # longer while the Control Plane closes it, so wait for it to end.
+        deadline = time.monotonic() + int(os.environ.get("RUN_STATUS_WAIT_SECONDS", "900"))
+        while True:
+            try:
+                run = api(control_plane(), "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
+            except ValueError as exc:
+                print(f"::warning::run {rid} status unavailable: {exc}", file=sys.stderr)
+                return
+            status = run.get("status") or ""
+            if status in TERMINAL or time.monotonic() >= deadline:
+                break
+            time.sleep(POLL_SECONDS)
+        url = run.get("pipeline_url") or ""
+        if url and "/queue/" not in url:  # a Jenkins queue item is not a build
+            build_url = url.rstrip("/") + "/"
+        print(f"run {rid}: {status or 'no status'}" + (f", build {build_url}" if build_url else ""),
+              file=sys.stderr)
+    out = os.environ.get("GITHUB_OUTPUT")
+    if status and out:
+        with open(out, "a") as f:
+            f.write(f"status={status}\n")
+            if build_url:
+                f.write(f"build_url={build_url}\n")
+
+
+def cancel_main():
+    """--cancel: ask the Control Plane to cancel each run in RUN_IDS (space
+    separated). Best effort: a refusal is a warning, never a failure. Each run
+    gets 60 s of retries so all fit in the step's 5 min."""
+    for rid in os.environ.get("RUN_IDS", "").split():
+        try:
+            api(control_plane(), "POST", f"/runs/{urllib.parse.quote(rid, safe='')}/cancel", {}, retry_seconds=60, empty_ok=True)
+            print(f"run {rid}: cancel requested", file=sys.stderr)
+        except Exception as exc:  # one run's failure must not leave the rest running
+            print(f"::warning::run {rid} was not cancelled: {exc}", file=sys.stderr)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--await-build", action="store_true",
+                    help="wait for one batch's build (Test jobs); see await_build_main")
+    ap.add_argument("--run-status", action="store_true",
+                    help="write one run's Control Plane status (RUN_ID); see run_status_main")
+    ap.add_argument("--cancel", action="store_true",
+                    help="cancel the runs in RUN_IDS (a cancelled Test job); see cancel_main")
     args = ap.parse_args()
+    if args.cancel:
+        cancel_main()
+        return
+    if args.run_status:
+        run_status_main()
+        return
+    if args.await_build:
+        await_build_main(args.config)
+        return
 
     cfg = apply_env_overrides(load_config(args.config))
     batches = json.loads(os.environ.get("BATCHES_JSON", "{}") or "{}")
@@ -642,36 +807,65 @@ def main():
     except ValueError as exc:
         print(f"::error::{exc}", file=sys.stderr)
         sys.exit(1)
-    runs, run_urls = {}, {}
+    out = os.environ.get("GITHUB_OUTPUT")
+
+    def emit():
+        # Rewritten after every start (the last value of a key wins): a step
+        # cancelled mid-loop still hands on the runs it started, so the cancel
+        # steps can stop them.
+        if out:
+            with open(out, "a") as f:
+                f.write(f"run_ids={json.dumps(runs)}\n")
+                f.write(f"run_urls={json.dumps(run_urls)}\n")
+                f.write(f"unconfirmed={json.dumps(unconfirmed)}\n")
+
+    runs, run_urls, unconfirmed = {}, {}, []
     for bid, batch, plan, builds in prepared:
         try:
             runs[bid] = start_run(cp, bid, plan, builds, batch["platform"], publisher, sha)
-        except ValueError as exc:
+        except Refused as exc:
             print(f"::error::{bid}: the Control Plane refused the run: {exc}", file=sys.stderr)
             continue
-        run_urls[bid] = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
+        except Exception as exc:
+            # Anything short of a refusal (a lost answer, a token that could
+            # not be refreshed, an unexpected error) may have left a run:
+            # never retry such a batch, and keep starting the others.
+            unconfirmed.append(bid)
+            emit()
+            print(f"::error::{bid}: the run's start was not confirmed and it may have started; "
+                  f"check OrchestrAI for a run of this batch before resubmitting: {exc}",
+                  file=sys.stderr)
+            continue
+        # The run's Tests tab as a full page: the result tables link here when
+        # there is no ReportPortal launch (reporting=api).
+        run_urls[bid] = (f"{cp['portal_url']}/#/runs/{urllib.parse.quote(runs[bid], safe='')}"
+                         "?tab=tests&presentation=page")
         print(f"Batch {bid}: {', '.join(batch['playbooks'])}: run {run_urls[bid]}", file=sys.stderr)
-    # The Control Plane holds a queued run for its acquire_timeout; never give up
-    # on it sooner.
-    build_urls = await_builds(cp, runs, rs["acquire_timeout"] * 60 + BUILD_WAIT_MARGIN)
-    failed = [bid for bid in batches if bid not in build_urls]
-    print(f"\nTriggered {len(build_urls)} OrchestrAI pipeline build(s)", file=sys.stderr)
+        emit()
+    # Each Test job waits for its own batch's build (--await-build), so a batch
+    # still queued for machines never holds back the batches that have started.
+    failed = [bid for bid in batches if bid not in runs]
+    print(f"\nStarted {len(runs)} OrchestrAI run(s)", file=sys.stderr)
 
-    # Emit the URLs FIRST so the batches that did trigger still run downstream,
+    # Emit the runs FIRST so the batches that started still run downstream,
     # even if we exit non-zero for an empty result below.
-    out = os.environ.get("GITHUB_OUTPUT")
+    emit()
     if out:
         with open(out, "a") as f:
-            f.write(f"build_urls={json.dumps(build_urls)}\n")
-            f.write(f"run_urls={json.dumps(run_urls)}\n")
+            # The commit every batch tests; a retry reuses it rather than
+            # resolving a movable ref (main) again hours later.
+            f.write(f"playbook_repo={repo}\n")
+            f.write(f"playbook_sha={sha}\n")
 
     # Surface dropped batches HERE, at the trigger, instead of letting each of
     # their downstream test jobs discover the gap one-by-one as "No build URL".
-    if not build_urls:
+    if not runs:
         # Nothing triggered at all: fail hard. There is no partial run to
         # preserve, and every downstream job would otherwise fail identically.
-        print("::error::No OrchestrAI pipeline builds were triggered — every batch "
-              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)}).",
+        print("::error::No OrchestrAI run was confirmed started — every batch "
+              f"failed to submit ({len(failed)} batch(es): {', '.join(failed)})."
+              + (f" Not confirmed, may have started: {', '.join(unconfirmed)}."
+                 if unconfirmed else ""),
               file=sys.stderr)
         sys.exit(1)
     if failed:
@@ -680,9 +874,11 @@ def main():
         # annotation names the dropped batches so the cause is visible at the
         # trigger; their own downstream jobs still fail, so the run as a whole
         # is not reported green.
-        print(f"::error::{len(failed)} batch(es) failed to trigger and will report "
+        print(f"::error::{len(failed)} batch(es) failed to start and will report "
               f"no build URL downstream: {', '.join(failed)}. The other "
-              f"{len(build_urls)} batch(es) were triggered and will run.",
+              f"{len(runs)} batch(es) were started and will run."
+              + (f" Not confirmed, may have started (check OrchestrAI): {', '.join(unconfirmed)}."
+                 if unconfirmed else ""),
               file=sys.stderr)
 
 
