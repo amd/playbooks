@@ -38,6 +38,14 @@ This tutorial teaches you how to use ComfyUI with the Z Image Turbo model on you
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+## Sync Software with the AI Bundle
+
+<!-- @require:ai-bundle -->
+<!-- @os:end -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
 
 <!-- @os:windows -->

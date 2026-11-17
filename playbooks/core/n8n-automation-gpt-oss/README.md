@@ -51,6 +51,14 @@ n8n includes a **native Lemonade node** (`Lemonade Chat Model`) that provides a 
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+## Sync Software with the AI Bundle
+
+<!-- @require:ai-bundle -->
+<!-- @os:end -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver -->

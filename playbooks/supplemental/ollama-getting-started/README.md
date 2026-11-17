@@ -35,6 +35,14 @@ This playbook walks you through installing Ollama, pulling the GPT-OSS 20B model
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+## Sync Software with the AI Bundle
+
+<!-- @require:ai-bundle -->
+<!-- @os:end -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->

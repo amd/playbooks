@@ -38,6 +38,14 @@ By the end of this playbook you will be able to:
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+## Sync Software with the AI Bundle
+
+<!-- @require:ai-bundle -->
+<!-- @os:end -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
 
 Before you begin, make sure you have:

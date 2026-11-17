@@ -1126,6 +1126,20 @@
       },
       "versionable": false
     },
+    "ai-bundle": {
+      "name": "AI Bundle",
+      "description": "Sync AI applications and frameworks to AMD recommended versions using the AMD Install Manager",
+      "category": "framework",
+      "platforms": [
+        "windows"
+      ],
+      "file": "aibundle.md",
+      "preinstalled": {
+        "linux": [],
+        "windows": []
+      },
+      "versionable": false
+    },
     "hf-models-gpt-oss-20b": {
       "name": "GPT-OSS 20B (Hugging Face)",
       "description": "openai/gpt-oss-20b, which the tests otherwise download from Hugging Face on first use",

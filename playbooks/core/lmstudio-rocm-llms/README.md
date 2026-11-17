@@ -44,6 +44,14 @@ LM Studio is a powerful GUI-based wrapper for [llama.cpp](https://github.com/ggm
 <!-- @require:software-update -->
 <!-- @device:end -->
 
+<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @os:windows -->
+## Sync Software with the AI Bundle
+
+<!-- @require:ai-bundle -->
+<!-- @os:end -->
+<!-- @device:end -->
+
 ## Installing Software Prerequisites
 
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
