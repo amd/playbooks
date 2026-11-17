@@ -13,8 +13,14 @@ fails when a REQUIRED playbook did not pass. A batch with no required playbook
 workflow marks such jobs continue-on-error, so they show red without failing
 the run, as the per-playbook jobs did.
 
+Batch members are keys (orchestrai_keys.py): "<id>" for English, "<locale>/<id>"
+for a localized playbook; rows and test-results/ directories use them too. A
+localized member listed under "covered" ran nothing of its own: it executes
+exactly what its English member does, so its row reports the English result.
+
 Env:
-    BATCH_JSON   {"batch_id", "label", "platform", "arch", "locale", "playbooks": [...], "required": [...]}
+    BATCH_JSON   {"batch_id", "label", "platform", "arch", "playbooks": [...],
+                  "required": [...], "covered": {localized key: English key}}
     BUILD_URL, ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN  (for the verdict)
     RUN_URL      optional OrchestrAI run link, shown when there is no ReportPortal link
     JOB_URL      optional link to this batch's GitHub job (the configuration table links to it)
@@ -45,6 +51,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from orchestrai_keys import split_key
 from orchestrai_verdict import INFRA_STATUSES, RETRY_CAUSES
 
 VERDICT = Path(__file__).with_name("orchestrai_verdict.py")
@@ -53,17 +60,18 @@ ICON = {"PASSED": "✅", "FAILED": "❌", "NOT_RUN": "⚠️", "INTERRUPTED": "�
 SYSTEM_ICON = {"PASS": "✅", "FAIL": "❌", "NOT RUN": "⚠️", "NO RESULTS": "⚠️"}
 
 
-def resolve(playbook, batch, out_dir):
+def resolve(key, batch, out_dir):
     """Run the per-playbook verdict in its own directory; return its row."""
+    locale, playbook_id = split_key(key)
     with tempfile.TemporaryDirectory() as tmp:
         gh_out = Path(tmp, "github_output")
         gh_out.touch()
-        env = {**os.environ, "PLAYBOOK_ID": playbook, "PLATFORM": batch["platform"],
-               "GITHUB_OUTPUT": str(gh_out)}
+        env = {**os.environ, "PLAYBOOK_ID": playbook_id, "PLAYBOOK_LOCALE": locale,
+               "PLATFORM": batch["platform"], "GITHUB_OUTPUT": str(gh_out)}
         rc = subprocess.run([sys.executable, str(VERDICT)], cwd=tmp, env=env).returncode
         summary = {}
         if Path(tmp, "test-results").is_dir():
-            dest = out_dir / playbook
+            dest = out_dir / key
             shutil.rmtree(dest, ignore_errors=True)
             shutil.copytree(Path(tmp, "test-results"), dest)
             try:
@@ -72,24 +80,51 @@ def resolve(playbook, batch, out_dir):
                 pass
         outputs = dict(line.split("=", 1) for line in gh_out.read_text().splitlines() if "=" in line)
     outcome = (summary.get("outcome") or LABEL.get(rc, "FAILED")).upper()
-    return {"playbook": playbook, "platform": batch["platform"], "arch": batch["arch"], "attempt": 1,
+    return {"playbook": key, "playbook_id": playbook_id, "platform": batch["platform"],
+            "arch": batch["arch"], "attempt": 1,
             "job_url": os.environ.get("JOB_URL", ""), "run_url": os.environ.get("RUN_URL", ""),
             "batch_run_url": os.environ.get("RUN_URL", ""),
             "batch_id": batch["batch_id"], "label": batch.get("label") or batch["batch_id"],
-            "locale": batch.get("locale", ""), "required": playbook in batch["required"],
+            "locale": locale, "required": key in batch["required"],
             "outcome": outcome, "rc": rc, "rp_url": outputs.get("rp_url", ""),
             "reason": summary.get("infrastructure_reason") or "", "cause": summary.get("cause") or ""}
 
 
 def retry_note(r):
+    if r.get("covered_by"):
+        return f" (same tests as `{r['covered_by']}`, not run again)"
     if r.get("attempt", 1) < 2:
         return ""
     return f" (retry {r['attempt'] - 1}; first: {r.get('first_outcome', '?')})"
 
 
 def retryable(r):
-    """Rerun automatically only a playbook that provably never executed."""
-    return r["outcome"] in INFRA_STATUSES and r.get("cause") in RETRY_CAUSES
+    """Rerun automatically only a playbook that provably never executed. A
+    covered row ran nothing itself: retrying its English playbook retries it."""
+    return (not r.get("covered_by") and r["outcome"] in INFRA_STATUSES
+            and r.get("cause") in RETRY_CAUSES)
+
+
+def with_covered(rows, batch):
+    """rows, plus a row for each covered localized member that reports its
+    English member's result (that member ran exactly the same tests). Built
+    from the final rows, so a retried English playbook's new result counts."""
+    rows = [r for r in rows if not r.get("covered_by")]
+    by_key = {r["playbook"]: r for r in rows}
+    for key, english in (batch.get("covered") or {}).items():
+        locale, playbook_id = split_key(key)
+        source = by_key.get(english)
+        row = dict(source) if source else {
+            "platform": batch["platform"], "arch": batch["arch"], "attempt": 1,
+            "job_url": os.environ.get("JOB_URL", ""), "run_url": os.environ.get("RUN_URL", ""),
+            "batch_run_url": os.environ.get("RUN_URL", ""), "batch_id": batch["batch_id"],
+            "label": batch.get("label") or batch["batch_id"], "outcome": "NOT_RUN", "rc": 2,
+            "rp_url": "", "reason": f"no result for {english}, whose tests it shares",
+            "cause": ""}
+        row.update(playbook=key, playbook_id=playbook_id, locale=locale, covered_by=english,
+                   required=key in batch.get("required", []))
+        rows.append(row)
+    return rows
 
 
 def batch_failed(rows, batch):
@@ -133,12 +168,15 @@ def by_configuration(rows):
             return "—"
         status = f"[{r['outcome']}]({r['job_url']})" if r.get("job_url") else r["outcome"]
         rp = f" · [ReportPortal]({r['rp_url']})" if r.get("rp_url") else ""
-        retry_run = f" · [retry run]({r['run_url']})" if r.get("attempt", 1) > 1 and r.get("run_url") else ""
+        retry_run = (f" · [retry run]({r['run_url']})"
+                     if r.get("attempt", 1) > 1 and r.get("run_url") and not r.get("covered_by") else "")
         return (f"{ICON.get(r['outcome'], '❌')} {status}{rp}{retry_run}"
                 f"{' ✦' if r.get('required') else ''}{retry_note(r)}")
     out = ["## OrchestrAI playbooks by configuration", "",
            "Result links open the batch's GitHub job; ReportPortal links open the recorded "
-           "launch when available. ✦ = required.", "",
+           "launch when available. ✦ = required. A localized playbook that runs exactly "
+           "the same tests as its English version is not run again and shows the English "
+           "result.", "",
            "| Playbook | " + " | ".join(header(l) for l in labels) + " |",
            "|---|" + "---|" * len(labels)]
     for pb in sorted({r["playbook"] for r in rows}):
@@ -165,9 +203,10 @@ def merge(root):
         print(f"::{level} title={label}::{status} — {passed}/{len(group)} playbooks passed")
     for b in missing:  # its job never uploaded results: never silently absent
         label = b.get("label") or b["batch_id"]
-        place(label, b["platform"], f"{SYSTEM_ICON['NO RESULTS']} NO RESULTS (0/{len(b['playbooks'])})")
+        count = len(b["playbooks"]) + len(b.get("covered") or {})
+        place(label, b["platform"], f"{SYSTEM_ICON['NO RESULTS']} NO RESULTS (0/{count})")
         print(f"::error title={label}::NO RESULTS — the batch job uploaded no results "
-              f"for its {len(b['playbooks'])} playbooks")
+              f"for its {count} playbooks")
     lines = ["## Results by device", "",
              "| Device | " + " | ".join(p.capitalize() for p in platforms) + " |",
              "|---|" + "---|" * len(platforms)]
@@ -219,13 +258,15 @@ def main():
     retried = rows
     if first:
         rows = [next((n for n in retried if n["playbook"] == pb), old) for pb, old in first.items()]
+    rows = with_covered(rows, batch)
     (out_dir / "batch.json").write_text(json.dumps(rows, indent=2))
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
             title = batch.get("label") or batch["batch_id"]
             title += f" — retry of {len(retried)} that did not run" if first else f" ({len(rows)} playbooks)"
-            f.write(f"### {title}\n\n{table(retried, os.environ.get('RUN_URL', ''))}\n\n")
+            shown = retried if first else rows
+            f.write(f"### {title}\n\n{table(shown, os.environ.get('RUN_URL', ''))}\n\n")
     for r in retried:
         if r["rc"] != 0:
             kind = "error" if r["required"] else "warning"

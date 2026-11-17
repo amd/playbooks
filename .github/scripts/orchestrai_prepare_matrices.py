@@ -75,28 +75,37 @@ def device_names() -> dict[str, str]:
 
 
 def batch_matrix(matrix: list[dict[str, Any]], names: dict[str, str] | None = None) -> list[dict[str, Any]]:
-    """One entry per batch (English or localized): the job that waits on its build
-    and resolves every playbook in it. ``required`` lists the playbooks whose
-    failure fails the job; ``label`` is its display name, e.g. "Halo · Windows"."""
+    """One entry per batch, English and localized playbooks together: the job
+    that waits on its build and resolves every playbook in it. Members are keys
+    (orchestrai_keys.py); ``covered`` maps a localized member that is not run
+    again to the English member whose result it reports. ``required`` lists the
+    members whose failure fails the job; ``label`` is its display name, e.g.
+    "Halo · Windows", with the locale when the batch has no English member."""
     names = names or {}
     batches: dict[str, dict[str, Any]] = {}
+    locales: dict[str, set[str]] = {}
     for entry in matrix:
         if "batch_id" not in entry:
             continue
-        label = f"{names.get(entry['arch'], entry['arch'])} · {entry['platform'].capitalize()}"
-        if entry.get("locale"):
-            label += f" [{entry['locale']}]"
+        key = entry.get("key") or entry["playbook"]
         batch = batches.setdefault(entry["batch_id"], {
             "batch_id": entry["batch_id"], "platform": entry["platform"],
-            "arch": entry["arch"], "locale": entry.get("locale", ""), "label": label,
+            "arch": entry["arch"], "locale": "",
+            "label": f"{names.get(entry['arch'], entry['arch'])} · {entry['platform'].capitalize()}",
             "playbooks": [], "required": []})
-        if entry["playbook"] not in batch["playbooks"]:
-            batch["playbooks"].append(entry["playbook"])
-        if entry.get("required") and entry["playbook"] not in batch["required"]:
-            batch["required"].append(entry["playbook"])
+        locales.setdefault(entry["batch_id"], set()).add(entry.get("locale", ""))
+        if entry.get("covered_by"):
+            batch.setdefault("covered", {})[key] = entry["covered_by"]
+        elif key not in batch["playbooks"]:
+            batch["playbooks"].append(key)
+        if entry.get("required") and key not in batch["required"]:
+            batch["required"].append(key)
     seen: dict[str, int] = {}
-    for batch in batches.values():
-        batch["count"] = len(batch["playbooks"])
+    for batch_id, batch in batches.items():
+        if len(locales[batch_id]) == 1 and "" not in locales[batch_id]:
+            batch["locale"] = next(iter(locales[batch_id]))
+            batch["label"] += f" [{batch['locale']}]"
+        batch["count"] = len(batch["playbooks"]) + len(batch.get("covered") or {})
         seen[batch["label"]] = seen.get(batch["label"], 0) + 1
     for batch in batches.values():  # two batches of one device+OS: name the extra tags
         if seen[batch["label"]] > 1 and "+" in batch["batch_id"]:

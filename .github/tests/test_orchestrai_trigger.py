@@ -593,8 +593,10 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # One attempt: the wait for its build to start (acquire_timeout + margin),
         # then orchestrai_wait_build.sh's poll of the build itself, plus explicit
         # overhead for checkout, verdicts, upload and summaries.
+        # The build wait is max_duration + 30 min, read from the config.
         with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
-            build_wait = int(re.search(r"DEADLINE=\$\(\(SECONDS \+ (\d+) \* 60\)\)", f.read()).group(1))
+            self.assertIn("DEADLINE=$((SECONDS + (MAX_DURATION + 30) * 60))", f.read())
+        build_wait = load_config()["run_settings"]["max_duration"] + 30
         attempt = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
                    + build_wait)
         overhead = 30
@@ -728,8 +730,11 @@ class FoldIntoCapacityBatch(unittest.TestCase):
             os.chdir(old_cwd)
         if not batches:
             self.skipTest("no zh-CN playbooks for this selection")
-        self.assertEqual(sorted(batches), ["localized/zh-CN/linux/halo+ram_128gb"])
+        # One language per run (!localized-orc): the batch ID names no locale.
+        self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
         self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
+        self.assertTrue(all(key.startswith("zh-CN/")
+                            for key in batches["linux/halo+ram_128gb"]["playbooks"]))
 
 
 class OpenHandsProvisioning(unittest.TestCase):
