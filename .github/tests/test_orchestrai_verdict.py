@@ -29,11 +29,13 @@ import importlib.util
 import io
 import json
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))  # orchestrai_keys
 _SPEC = importlib.util.spec_from_file_location(
     "orchestrai_verdict", Path(__file__).resolve().parents[1] / "scripts" / "orchestrai_verdict.py"
 )
@@ -80,7 +82,7 @@ DASHBOARD_ROW_KEYS = ("test_id", "success", "skipped", "duration", "error_messag
 
 
 def run_verdict(summary, playbook, console="", platform="linux", build_url=BUILD,
-                patch=None):
+                patch=None, locale=""):
     """Run main() in a temp cwd against a fixture summary.json.
 
     `summary`/`console` may be UNREACHABLE to simulate a fetch transport
@@ -98,6 +100,7 @@ def run_verdict(summary, playbook, console="", platform="linux", build_url=BUILD
         return None if value is UNREACHABLE else value
 
     env = {"BUILD_URL": build_url, "PLAYBOOK_ID": playbook, "PLATFORM": platform,
+           "PLAYBOOK_LOCALE": locale,
            "ORCHESTRAI_PIPELINE_USER": "u", "ORCHESTRAI_PIPELINE_TOKEN": "t"}
     old_env = {k: os.environ.get(k) for k in list(env) + ["GITHUB_OUTPUT"]}
     saved = {"fetch": verdict.fetch}
