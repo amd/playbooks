@@ -38,7 +38,7 @@ on:
   workflow_dispatch:
     inputs:
       locale:
-        description: 'Locale to test (leave empty for canonical English)'
+        description: 'Locale to test: empty for English, a locale (zh-CN) for its translations only, or all for English and zh-CN, as the scheduled run'
         required: false
         type: string
       playbook_id:
@@ -157,7 +157,13 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         run: |
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+          # BOTH: test English and zh-CN together, as automated runs and a
+          # manual run with locale "all" do; otherwise one language.
+          BOTH=true
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$LOCALE_INPUT" = "all" ]; then
+            LOCALE="zh-CN"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            BOTH=false
             LOCALE="$LOCALE_INPUT"
             if [ -n "$LOCALE" ] && { [[ ! "$LOCALE" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]] || [ ! -d "localized-playbooks/$LOCALE" ]; }; then
               echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE"
@@ -170,7 +176,7 @@ jobs:
 
           if [ -n "$PLAYBOOK_INPUT" ]; then
             SELECTED=$(echo "$PLAYBOOK_INPUT" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$BOTH" != true ]; then
               if [ -n "$LOCALE" ]; then
                 ENGLISH=[]
                 LOCALIZED=$SELECTED
@@ -192,10 +198,10 @@ jobs:
             fi
             LOCALIZED=$(echo "$LOCALIZED_CHANGED" | grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" | sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
           else
-            if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -z "$LOCALE" ]; then
+            if [ "$BOTH" != true ] && [ -z "$LOCALE" ]; then
               ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
               LOCALIZED=[]
-            elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            elif [ "$BOTH" != true ]; then
               ENGLISH=[]
               LOCALIZED=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
             else
