@@ -1594,6 +1594,42 @@ def entry_signature(repo_root: Path, playbook_id: str, platform: str,
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
+def localized_entry_signature(repo_root: Path, locale: str, playbook_id: str,
+                              platform: str, device: str,
+                              localized_only: bool) -> Optional[str]:
+    """entry_signature() for a localized entry, or None if it cannot be computed.
+
+    Signs the materialized overlay (English layer included unless strict), so a
+    prose-only edit to either layer, or to a dependency, changes nothing here.
+    """
+    try:
+        with tempfile.TemporaryDirectory(prefix="localized-signature-") as temp_dir:
+            with contextlib.redirect_stdout(io.StringIO()):
+                playbook_path = materialize_localized_playbook(
+                    locale, playbook_id, Path(temp_dir) / playbook_id,
+                    localized_only, repo_root=repo_root,
+                )
+                tests = extract_tests(playbook_path / "README.md", platform, device,
+                                      repo_root=repo_root, locale=locale,
+                                      localized_only=localized_only)
+            own = assets_digest(playbook_path / "assets")
+    except Exception:
+        return None
+    # Either dependency layer can be inlined by @require, so sign both asset trees
+    shared = [
+        assets_digest(repo_root / "playbooks" / "dependencies" / "assets"),
+        assets_digest(repo_root / "localized-playbooks" / locale / "dependencies" / "assets"),
+    ]
+    if own is None or None in shared:
+        return None
+    payload = [
+        {k: v for k, v in dataclasses.asdict(t).items() if k not in SIGNATURE_EXCLUDED}
+        for t in tests
+    ]
+    blob = json.dumps([payload, own, shared], sort_keys=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run playbook tests")
     parser.add_argument("--playbook", required=True, help="Playbook ID to test")
