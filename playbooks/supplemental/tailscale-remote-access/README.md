@@ -88,7 +88,7 @@ Tailscale starts automatically with Windows, so the device stays reachable after
 
 ## Step 3 — Install Tailscale on Your Laptop
 
-Install Tailscale on whichever machine you want to connect *from*. Downloads for macOS, Windows, Linux, iOS, and Android are at [tailscale.com/download](https://tailscale.com/download).
+Install Tailscale on whichever machine you want to connect *from*. This can be any system — macOS, Windows, or Linux, and even a phone or tablet — and it does not have to match the operating system on your AMD device. A Mac laptop connecting to a Linux device is a perfectly normal setup. Downloads for every platform are at [tailscale.com/download](https://tailscale.com/download).
 
 Sign in with the **same account** you used in Step 2. Both machines now belong to the same tailnet and can see each other.
 
@@ -178,7 +178,7 @@ Several playbooks in this library finish with a web interface you'd normally ope
 tailscale serve --bg 8188
 ```
 
-The command prints the `https://<device>.<tailnet>.ts.net` address to open from your laptop. Keep the `--bg` flag — without it the proxy runs in the foreground and stops the moment you close the terminal. Use `tailscale serve status` to see what's published and `tailscale serve reset` to clear it. On Linux, prefix the command with `sudo` if you get a permissions error. (This relies on MagicDNS and HTTPS certificates, both on by default for new tailnets.)
+The command prints the `https://<device>.<tailnet>.ts.net` address to open from your laptop. Keep the `--bg` flag — without it the proxy runs in the foreground and stops the moment you close the terminal. Use `tailscale serve status` to see what's published and `tailscale serve reset` to clear it. If you hit a permissions error, run it with `sudo` on Linux or from an Administrator terminal on Windows. (This relies on MagicDNS and HTTPS certificates, both on by default for new tailnets.)
 
 ### Alternative: bind the service to all interfaces
 
@@ -200,10 +200,7 @@ If you use [AMD Sync](https://developer.amd.com/playbooks/amd-sync) for one-clic
 
 ## Troubleshooting
 
-- **`tailscale` isn't recognized as a command** — The installer adds Tailscale to your `PATH`, but programs only read `PATH` when they start, so a terminal window you already had open won't see it. Close that window and open a new one, then try again. A reboot is rarely needed. If a fresh terminal still can't find the command, restart the machine so every process picks up the updated `PATH`.
-<!-- @os:windows -->
-  This is most common on Windows. To confirm the install itself worked, call the executable by its full path: `& "C:\Program Files\Tailscale\tailscale.exe" status`. If that works, the install is fine and it's purely a `PATH` issue.
-<!-- @os:end -->
+- **`tailscale` isn't recognized as a command** — Open a new terminal window first. Installers update your `PATH`, but terminals that were already open don't pick up the change. If a fresh terminal still can't find it, the command line tool may not be enabled on your platform — check the Tailscale app's settings for an option to install it. Restarting the machine is a last resort.
 - **The device doesn't appear in `tailscale status`** — Confirm both machines are signed in to the *same* Tailscale account. Devices under different accounts cannot see each other.
 - **`tailscale up` never finishes** — The authentication URL has to be opened in a browser and approved. If the device has no browser, copy the URL to another machine and approve it there.
 - **SSH connection refused** — Tailscale is connected but the SSH server isn't running. Re-check the SSH step above.
