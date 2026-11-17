@@ -26,31 +26,82 @@ def prepare(
     english_batches: dict[str, Any],
     localized_matrix: list[dict[str, Any]],
     localized_batches: dict[str, Any],
+    batch_jobs: bool = False,
 ) -> dict[str, Any]:
-    """Return independently bounded matrices and their shared batch map."""
-    for name, matrix in (
-        ("English", english_matrix),
-        ("Localized", localized_matrix),
-    ):
+    """Return the matrices, bounded by what the caller fans out, and their
+    shared batch map.
+
+    test-playbooks.yml runs one job per English and per localized entry, so
+    each of those matrices is bounded. test-playbooks-orchestrai.yml
+    (batch_jobs) runs one job per batch, English and localized together, so
+    only that combined batch matrix is: its per-playbook entries may exceed
+    the limit as long as the batches do not.
+    """
+    collisions = english_batches.keys() & localized_batches.keys()
+    if collisions:
+        joined = ", ".join(sorted(collisions))
+        raise ValueError(f"English/localized batch IDs collide: {joined}")
+
+    batches = batch_matrix(english_matrix + localized_matrix, device_names())
+    bounded = ((("Batch", batches),) if batch_jobs else
+               (("English", english_matrix), ("Localized", localized_matrix)))
+    for name, matrix in bounded:
         if len(matrix) > MATRIX_JOB_LIMIT:
             raise MatrixLimitError(
                 f"{name} matrix has {len(matrix)} entries; GitHub Actions allows "
                 f"{MATRIX_JOB_LIMIT} per matrix job"
             )
 
-    collisions = english_batches.keys() & localized_batches.keys()
-    if collisions:
-        joined = ", ".join(sorted(collisions))
-        raise ValueError(f"English/localized batch IDs collide: {joined}")
-
     return {
         "english_matrix": english_matrix,
         "localized_matrix": localized_matrix,
         "batches": {**english_batches, **localized_batches},
+        "batch_matrix": batches,
         "has_english_entries": bool(english_matrix),
         "has_localized_entries": bool(localized_matrix),
         "has_entries": bool(english_matrix or localized_matrix),
     }
+
+
+CONFIG = Path(__file__).resolve().parents[1] / "orchestrai-config.yml"
+
+
+def device_names() -> dict[str, str]:
+    try:
+        import yaml
+        return (yaml.safe_load(CONFIG.read_text()) or {}).get("device_names") or {}
+    except (ImportError, OSError, ValueError):
+        return {}
+
+
+def batch_matrix(matrix: list[dict[str, Any]], names: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    """One entry per batch (English or localized): the job that waits on its build
+    and resolves every playbook in it. ``required`` lists the playbooks whose
+    failure fails the job; ``label`` is its display name, e.g. "Halo · Windows"."""
+    names = names or {}
+    batches: dict[str, dict[str, Any]] = {}
+    for entry in matrix:
+        if "batch_id" not in entry:
+            continue
+        label = f"{names.get(entry['arch'], entry['arch'])} · {entry['platform'].capitalize()}"
+        if entry.get("locale"):
+            label += f" [{entry['locale']}]"
+        batch = batches.setdefault(entry["batch_id"], {
+            "batch_id": entry["batch_id"], "platform": entry["platform"],
+            "arch": entry["arch"], "locale": entry.get("locale", ""), "label": label,
+            "playbooks": [], "required": []})
+        if entry["playbook"] not in batch["playbooks"]:
+            batch["playbooks"].append(entry["playbook"])
+        if entry.get("required") and entry["playbook"] not in batch["required"]:
+            batch["required"].append(entry["playbook"])
+    seen: dict[str, int] = {}
+    for batch in batches.values():
+        batch["count"] = len(batch["playbooks"])
+        seen[batch["label"]] = seen.get(batch["label"], 0) + 1
+    for batch in batches.values():  # two batches of one device+OS: name the extra tags
+        if seen[batch["label"]] > 1 and "+" in batch["batch_id"]:
+            batch["label"] += f" ({batch['batch_id'].split('+', 1)[1]})"
+    return list(batches.values())
 
 
 def _load_json_env(name: str, expected: type) -> Any:
@@ -71,6 +122,7 @@ def main() -> int:
             _load_json_env("ENGLISH_BATCHES", dict),
             _load_json_env("LOCALIZED_MATRIX", list),
             _load_json_env("LOCALIZED_BATCHES", dict),
+            batch_jobs=os.environ.get("BATCH_JOBS") == "true",
         )
     except (MatrixLimitError, ValueError) as exc:
         print(f"::error::{exc}", file=sys.stderr)
@@ -78,6 +130,7 @@ def main() -> int:
 
     print(f"English matrix: {len(outputs['english_matrix'])} entries")
     print(f"Localized matrix: {len(outputs['localized_matrix'])} entries")
+    print(f"Batches: {len(outputs['batch_matrix'])}")
 
     output_path = os.environ.get("GITHUB_OUTPUT")
     if not output_path:
