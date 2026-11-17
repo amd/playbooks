@@ -49,3 +49,12 @@ _gen_*.txt
 # python cache
 __pycache__/
 *.pyc
+
+# local playbook test output
+/test-results/
+
+# microduck-rl lab output, created when a reader runs the playbook
+playbooks/supplemental/microduck-rl/assets/lab-env.sh
+playbooks/supplemental/microduck-rl/assets/microduck-venv/
+playbooks/supplemental/microduck-rl/assets/microduck_workspace/
+playbooks/supplemental/microduck-rl/assets/runs/
