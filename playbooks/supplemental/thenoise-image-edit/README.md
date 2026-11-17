@@ -9,20 +9,9 @@ SPDX-License-Identifier: MIT
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
-<!--
-Screenshots to capture before publishing (place the files in assets/ and keep each under 500 KB):
-
-1. assets/thenoise_generate_image.jpg - TheNoise web UI (http://localhost:8000/), Generate tab, with the Flux.2 Klein 4B model loaded and a prompt entered.
-2. assets/thenoise_edit_image.jpg     - TheNoise web UI, Edit tab, with an image loaded and an instruction in the prompt box.
-3. assets/city.jpg                    - The input image used in the editing example.
-4. assets/city2.jpg                   - The second reference image used in the Multiple Reference Images example.
-5. assets/multi_image_editing.jpg     - The result of the Multiple Reference Images edit.
-6. assets/cover.jpeg                  - The playbook cover. It is also referenced as the "edit result" in the Web UI section; if you want those to differ, use a dedicated edit-result image there.
--->
-
 ## Overview
 
-TheNoise is a focused, open-source image generation and **editing** engine built for AMD ROCm GPUs. It is tuned to run fast on AMD GPUs — including the Ryzen™ AI Halo and Radeon™ discrete GPUs.
+TheNoise is a focused, open-source image generation and **editing** engine built on AMD ROCm™ software. It is tuned to run fast on AMD GPUs — from the Ryzen™ AI Halo platform to AMD Radeon™ discrete graphics.
 
 This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klein 4B** model — a distilled flow-matching model that generates in only **4 steps** and can also **edit** an existing image from a text instruction. You will generate a picture, then instruct the model to change it, all on your GPU.
 
@@ -33,7 +22,7 @@ This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klei
 - How to edit an image from a text instruction with the `edit` command
 - How to use the Web UI to edit interactively
 
-<!-- @device:halo_box,halo -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -53,7 +42,7 @@ This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klei
 
 <!-- @os:linux -->
 
-<!-- @device:halo,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -64,13 +53,13 @@ sudo usermod -aG render,video $LOGNAME
 <!-- @require:driver -->
 <!-- @os:end -->
 
-TheNoise uses [uv](https://docs.astral.sh/uv/) to create a managed Python environment and installs its own ROCm build of PyTorch automatically. The only system prerequisite is uv itself.
+TheNoise uses [uv](https://docs.astral.sh/uv/) to create a managed Python environment and installs its own ROCm build of PyTorch automatically. The only system prerequisites are uv itself and [Git](https://git-scm.com/downloads), which is needed for the clone below.
 
 ## Installing TheNoise
 
 <!-- @require:uv -->
 
-#### Clone TheNoise
+### Clone TheNoise
 
 TheNoise is developed on GitHub and bootstrapped with [uv](https://docs.astral.sh/uv/). uv provides a managed Python and installs every dependency; the launcher scripts create the virtual environment and install the ROCm build of PyTorch for your GPU automatically.
 
@@ -79,6 +68,7 @@ Clone TheNoise and let the launcher bootstrap the environment:
 <!-- @os:linux -->
 <!-- @test:id=thenoise-clone-linux timeout=1800 -->
 ```bash
+export PATH="$HOME/.local/bin:$PATH" #hide
 git clone https://github.com/lemonade-sdk/thenoise.git
 cd thenoise
 ./thenoise.sh --help
@@ -97,10 +87,26 @@ cd thenoise
 ```
 <!-- @test:end -->
 
-The first run of `thenoise.bat` creates a `.venv`, installs the ROCm torch build for your GPU (best-effort auto-detected from the GPU name; set `$env:GFX_ARCH` to override), and makes `thenoise.bat` ready to use.
+The first run of `thenoise.bat` creates a `.venv` and installs the ROCm torch build for your GPU (detected automatically; set `$env:GFX_ARCH` to override). Expect this first run to take a few minutes.
 <!-- @os:end -->
 
 From here on, use the launcher in the clone root — `./thenoise.sh` on Linux, `thenoise.bat` on Windows — for every `generate`, `edit`, and `serve` command. All commands in this playbook assume you are in the `thenoise` clone directory.
+
+<!-- @os:linux -->
+<!-- @test:id=thenoise-gpu-linux timeout=300 workdir=thenoise hidden=True -->
+```bash
+.venv/bin/python -c "import torch; assert torch.cuda.is_available(), 'PyTorch does not see the GPU'; print('GPU:', torch.cuda.get_device_name(0))"
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=thenoise-gpu-windows timeout=300 workdir=thenoise hidden=True -->
+```powershell
+& .\.venv\Scripts\python.exe -c "import torch; assert torch.cuda.is_available(), 'PyTorch does not see the GPU'; print('GPU:', torch.cuda.get_device_name(0))"
+```
+<!-- @test:end -->
+<!-- @os:end -->
 
 ## Downloading the Flux.2 Klein 4B Model
 
@@ -109,44 +115,38 @@ Flux.2 Klein is a distilled flow-matching MMDiT in two sizes (4B and 9B). The **
 The project ships a model download helper. Fetch the 4B checkpoints (DiT, text encoder, and the shared Flux.2 VAE all land in `./models/klein/`):
 
 <!-- @os:linux -->
+<!-- @test:id=thenoise-download-klein-linux timeout=3600 workdir=thenoise -->
 ```bash
 .venv/bin/python scripts/download.py --model klein
-```
-<!-- @os:end -->
-
-<!-- @os:windows -->
-```powershell
-& .\.venv\Scripts\python.exe scripts/download.py --model klein
-```
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=thenoise-download-klein-linux timeout=1800 hidden=True -->
-```bash
-cd thenoise
-.venv/bin/python scripts/download.py --model klein
-ls -1 ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
-       ./models/klein/split_files/text_encoders/qwen_3_4b.safetensors \
-       ./models/klein/split_files/vae/flux2-vae.safetensors
 ```
 <!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=thenoise-download-klein-windows timeout=1800 hidden=True -->
+<!-- @test:id=thenoise-download-klein-windows timeout=3600 workdir=thenoise -->
 ```powershell
-cd thenoise
 & .\.venv\Scripts\python.exe scripts/download.py --model klein
-$required = @(
-  ".\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors",
-  ".\models\klein\split_files\text_encoders\qwen_3_4b.safetensors",
-  ".\models\klein\split_files\vae\flux2-vae.safetensors"
-)
-foreach ($f in $required) { if (-not (Test-Path $f)) { throw "Missing model file: $f" } }
-Write-Host "OK: Flux.2 Klein 4B checkpoints present"
 ```
 <!-- @test:end -->
 <!-- @os:end -->
+
+<!-- @test:id=thenoise-model-files timeout=60 workdir=thenoise hidden=True -->
+```python
+import os
+import sys
+
+files = [
+    "models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+    "models/klein/split_files/text_encoders/qwen_3_4b.safetensors",
+    "models/klein/split_files/vae/flux2-vae.safetensors",
+]
+missing = [f for f in files if not os.path.isfile(f)]
+empty = [f for f in files if os.path.isfile(f) and os.path.getsize(f) < 1_000_000]
+if missing or empty:
+    sys.exit(f"Flux.2 Klein 4B download incomplete: missing={missing} empty={empty}")
+print("OK: Flux.2 Klein 4B checkpoints present")
+```
+<!-- @test:end -->
 
 The three files are the model itself and everything it depends on:
 
@@ -178,7 +178,9 @@ Flux.2 Klein is trained to accept one or more **reference images** alongside the
 Let's start with a clean image to edit. First generate one, then instruct the model to change it. This is the fun part: you'll watch the same picture change based on a couple of sentences.
 
 <!-- @os:linux -->
+<!-- @test:id=thenoise-generate-city-linux timeout=1800 workdir=thenoise -->
 ```bash
+export PATH="$HOME/.local/bin:$PATH" #hide
 ./thenoise.sh generate \
   --dit ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
   --vae ./models/klein/split_files/vae/flux2-vae.safetensors \
@@ -187,9 +189,11 @@ Let's start with a clean image to edit. First generate one, then instruct the mo
   --width 960 --height 540 \
   --out city.png
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=thenoise-generate-city-windows timeout=1800 workdir=thenoise -->
 ```powershell
 & .\thenoise.bat generate `
   --dit .\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors `
@@ -199,116 +203,57 @@ Let's start with a clean image to edit. First generate one, then instruct the mo
   --width 960 --height 540 `
   --out city.png
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
-> **Note**: In this guide we will use the `generate`, `edit` and `serve` commands. Note that the first two come with the cost of loading the model in VRAM and performing some initialization steps on each launch. Using the `serve` command instead keeps the model resident and avoids the extra overhead after the first image is generated.
+> **Note**: `generate` and `edit` load the model every time they run. `serve` keeps it loaded, so later images are much faster.
 
 Now edit that image. Compared to generation, you switch the command from `generate` to `edit`, add `--image` with the photo to change, and write the prompt as the instruction for the change you want:
 
 <!-- @os:linux -->
+<!-- @test:id=thenoise-edit-city-linux timeout=1800 workdir=thenoise -->
 ```bash
+export PATH="$HOME/.local/bin:$PATH" #hide
 ./thenoise.sh edit \
   --dit ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
   --vae ./models/klein/split_files/vae/flux2-vae.safetensors \
   --text-encoder ./models/klein/split_files/text_encoders/qwen_3_4b.safetensors \
   --image city.png \
-  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner." \
+  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD ROCm' in a monospaced font in the bottom-left corner." \
   --out city_edited.png
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 <!-- @os:windows -->
+<!-- @test:id=thenoise-edit-city-windows timeout=1800 workdir=thenoise -->
 ```powershell
 & .\thenoise.bat edit `
   --dit .\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors `
   --vae .\models\klein\split_files\vae\flux2-vae.safetensors `
   --text-encoder .\models\klein\split_files\text_encoders\qwen_3_4b.safetensors `
   --image city.png `
-  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner." `
+  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD ROCm' in a monospaced font in the bottom-left corner." `
   --out city_edited.png
 ```
+<!-- @test:end -->
 <!-- @os:end -->
 
 Open `city_edited.png` and compare it with `city.png`. The city is still the same, but the mood has changed: it's now early evening, the lights are on, and there's a short phrase written in a monospaced font in the bottom-left corner. The model changed only what your instruction asked for.
 
-<!-- @os:linux -->
-<!-- @test:id=thenoise-generate-city-linux timeout=1200 hidden=True -->
-```bash
-cd thenoise
-./thenoise.sh generate \
-  --dit ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
-  --vae ./models/klein/split_files/vae/flux2-vae.safetensors \
-  --text-encoder ./models/klein/split_files/text_encoders/qwen_3_4b.safetensors \
-  --prompt "An expansive urban landscape at dusk, polished panoramic view. A sea of trees in the foreground leading to a dense skyscraper skyline. Silhouette of a vibrant evening city against a fiery sunset sky. Colors: burnt orange, dusty rose, deep violet, and charcoal gray. Moody, cinematic lighting, heavy atmospheric haze, photorealistic but dreamy. Inspired by wide-angle architectural photography." \
-  --width 512 --height 512 \
-  --out city.png
-```
-<!-- @test:end -->
-<!-- @os:end -->
+`city_edited.png` is also larger than `city.png`. With `--width`/`--height` omitted, `edit` takes the output size from the first reference image — about a megapixel in its aspect ratio, rounded onto the model's size grid. Pass the two flags to choose the size yourself.
 
-<!-- @os:windows -->
-<!-- @test:id=thenoise-generate-city-windows timeout=1200 hidden=True -->
-```powershell
-cd thenoise
-& .\thenoise.bat generate `
-  --dit .\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors `
-  --vae .\models\klein\split_files\vae\flux2-vae.safetensors `
-  --text-encoder .\models\klein\split_files\text_encoders\qwen_3_4b.safetensors `
-  --prompt "An expansive urban landscape at dusk, polished panoramic view. A sea of trees in the foreground leading to a dense skyscraper skyline. Silhouette of a vibrant evening city against a fiery sunset sky. Colors: burnt orange, dusty rose, deep violet, and charcoal gray. Moody, cinematic lighting, heavy atmospheric haze, photorealistic but dreamy. Inspired by wide-angle architectural photography." `
-  --width 512 --height 512 `
-  --out city.png
-```
-<!-- @test:end -->
-<!-- @os:end -->
+<!-- @test:id=thenoise-edit-output timeout=60 workdir=thenoise hidden=True -->
+```python
+import struct
+import sys
 
-<!-- @os:linux -->
-<!-- @test:id=thenoise-edit-city-linux timeout=1200 hidden=True -->
-```bash
-cd thenoise
-./thenoise.sh edit \
-  --dit ./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors \
-  --vae ./models/klein/split_files/vae/flux2-vae.safetensors \
-  --text-encoder ./models/klein/split_files/text_encoders/qwen_3_4b.safetensors \
-  --image city.png \
-  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner." \
-  --out city_edited.png
+data = open("city_edited.png", "rb").read()
+if data[:8] != b"\x89PNG\r\n\x1a\n":
+    sys.exit(f"city_edited.png is not a PNG ({len(data)} bytes) — the edit did not render")
+print("OK: city_edited.png is a %dx%d PNG" % struct.unpack(">II", data[16:24]))
 ```
 <!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=thenoise-edit-city-windows timeout=1200 hidden=True -->
-```powershell
-cd thenoise
-& .\thenoise.bat edit `
-  --dit .\models\klein\split_files\diffusion_models\flux-2-klein-4b.safetensors `
-  --vae .\models\klein\split_files\vae\flux2-vae.safetensors `
-  --text-encoder .\models\klein\split_files\text_encoders\qwen_3_4b.safetensors `
-  --image city.png `
-  --prompt "Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner." `
-  --out city_edited.png
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:linux -->
-<!-- @test:id=thenoise-edit-output-linux timeout=60 hidden=True -->
-```bash
-cd thenoise
-test -f city_edited.png && echo "OK: city_edited.png created" || (echo "Missing city_edited.png" && exit 1)
-```
-<!-- @test:end -->
-<!-- @os:end -->
-
-<!-- @os:windows -->
-<!-- @test:id=thenoise-edit-output-windows timeout=60 hidden=True -->
-```powershell
-cd thenoise
-if (-not (Test-Path .\city_edited.png)) { throw "Missing city_edited.png" }
-Write-Host "OK: city_edited.png created"
-```
-<!-- @test:end -->
-<!-- @os:end -->
 
 ## Editing in the Web UI
 
@@ -334,6 +279,8 @@ The CLI is great for reproducible, scripted edits, but TheNoise also has a simpl
 ```
 <!-- @os:end -->
 
+The server loads the model on the first request and then keeps it in memory, so this terminal stays busy until you press **Ctrl+C**. Leave it running for now — the Web UI and the HTTP API both talk to it.
+
 Open `http://localhost:8000/`. Because Flux.2 Klein supports editing, the interface shows an **Edit** tab alongside Generate.
 
 <p align="center">
@@ -342,20 +289,16 @@ Open `http://localhost:8000/`. Because Flux.2 Klein supports editing, the interf
 
 1. Click the **Edit** tab.
 2. Load your `city.png` (or any image) as the reference image.
-3. Type an instruction, for example: `Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner.`.
-4. Click **Generate** and watch the image change.
+3. Type an instruction, for example: `Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD ROCm' in a monospaced font in the bottom-left corner.`.
+4. Click the **Edit** button and watch the image change.
 
 <p align="center">
   <img src="assets/thenoise_edit_image.jpg" alt="TheNoise web UI Edit tab with an image and an instruction" width="80%"/>
 </p>
 
-<p align="center">
-  <img src="assets/cover.jpeg" alt="TheNoise web UI Edit result showing the edited image" width="80%"/>
-</p>
-
 ### Using Multiple Reference Images
 
-You can use multiple images when editing. The **first** image is resized to 1024 on its largest side (aspect preserved) and sets the output size; the rest are used as additional references. Below is an example of how you tell a model to blend two subjects.
+You can use multiple images when editing. The **first** image sets the output size; the rest are used as additional references. Below is an example of how you tell a model to blend two subjects.
 
 `Prompt`: Take the cityscape from image 2 and place it in the foreground of image 1. Preserve the mood and colors of image 2.
 
@@ -387,15 +330,94 @@ Combining the two images with that prompt gives this result:
 
 ## Calling TheNoise from Other Software
 
-The `serve` mode also exposes an HTTP API at `http://127.0.0.1:8000/`. Endpoints like `/edit` let you integrate image editing into your own scripts and tools:
+The `serve` mode answers a small JSON API on the same address, so another program can drive the same edit. `/edit` takes a **base64**-encoded copy of the image in the request body and answers with the edited PNG — see the [HTTP API reference](https://github.com/lemonade-sdk/thenoise/blob/main/docs/api.md) for every field and endpoint.
 
-```bash
-curl -X POST http://127.0.0.1:8000/edit \
-  -F "image=@city.png" \
-  -F "prompt=Set the scene to early evening. Light up the city's windows. Increase the contrast. Add the text 'AMD Strix Halo, 10/07/2026' in a monospaced font in the bottom-left corner." \
-  -F "steps=4" \
-  -o city_edited.png
+Keep the server running, save this as `edit_api.py` in the `thenoise` folder — it is also included with this playbook as [edit_api.py](assets/edit_api.py) — and run it from a second terminal:
+
+```python
+import base64
+import json
+import urllib.request
+
+PROMPT = ("Set the scene to early evening. Light up the city's windows. Increase the "
+          "contrast. Add the text 'AMD ROCm' in a monospaced font in the bottom-left corner.")
+
+with open("city.png", "rb") as f:
+    image = base64.b64encode(f.read()).decode()
+
+body = json.dumps({"image": image, "prompt": PROMPT, "steps": 4}).encode()
+request = urllib.request.Request(
+    "http://127.0.0.1:8000/edit",
+    data=body,
+    headers={"Content-Type": "application/json"},
+)
+
+with urllib.request.urlopen(request) as response:
+    with open("city_edited_api.png", "wb") as f:
+        f.write(response.read())
+
+print("Saved city_edited_api.png")
 ```
+
+<!-- @os:linux -->
+```bash
+.venv/bin/python edit_api.py
+```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```powershell
+& .\.venv\Scripts\python.exe edit_api.py
+```
+<!-- @os:end -->
+
+The edited image lands in `city_edited_api.png`, next to the `city_edited.png` you wrote with the `edit` command.
+
+<!-- @test:id=thenoise-serve-api timeout=2400 workdir=thenoise hidden=True -->
+```python
+import json
+import os
+import signal
+import struct
+import subprocess
+import sys
+import time
+import urllib.request
+
+PY = ".venv/bin/python" if os.name == "posix" else r".venv\Scripts\python.exe"
+ARGS = [PY, "-m", "thenoise", "serve",
+        "--dit", "./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+        "--vae", "./models/klein/split_files/vae/flux2-vae.safetensors",
+        "--text-encoder", "./models/klein/split_files/text_encoders/qwen_3_4b.safetensors",
+        "--host", "127.0.0.1", "--port", "8000"]
+
+with open("serve.log", "wb") as log:
+    server = subprocess.Popen(ARGS, stdout=log, stderr=subprocess.STDOUT,
+                              start_new_session=os.name == "posix")
+    try:
+        deadline = time.time() + 300
+        while True:
+            try:
+                with urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=5) as r:
+                    print("server:", json.load(r)["status"])
+                    break
+            except Exception:
+                if server.poll() is not None or time.time() > deadline:
+                    raise SystemExit("serve did not come up — see serve.log")
+                time.sleep(5)
+        # The first request is the one that loads the model.
+        subprocess.run([sys.executable, "../edit_api.py"], check=True)
+        png = open("city_edited_api.png", "rb").read()
+        if png[:8] != b"\x89PNG\r\n\x1a\n":
+            raise SystemExit("the /edit reply was not a PNG")
+        print("OK: /edit returned a %dx%d PNG" % struct.unpack(">II", png[16:24]))
+    finally:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/PID", str(server.pid), "/T", "/F"], check=False)
+        else:
+            os.killpg(server.pid, signal.SIGTERM)
+```
+<!-- @test:end -->
 
 ## Next Steps
 

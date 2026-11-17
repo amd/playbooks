@@ -29,8 +29,10 @@ uv --version
 Install uv with the official script:
 
 ```powershell
-irm https://astral.sh/uv/install.ps1 | iex
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
+
+Windows leaves script execution disabled by default, hence the `-ExecutionPolicy ByPass`.
 
 Open a new terminal so the updated `PATH` takes effect, or refresh it in the current session:
 

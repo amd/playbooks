@@ -531,7 +531,7 @@
           "timeout": 300
         },
         "windows": {
-          "cmd": "irm https://astral.sh/uv/install.ps1 | iex",
+          "cmd": "Set-ExecutionPolicy -Scope Process Bypass -Force; irm https://astral.sh/uv/install.ps1 | iex",
           "timeout": 300
         }
       },
