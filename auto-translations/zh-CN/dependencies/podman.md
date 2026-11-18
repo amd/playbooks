@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 ### Podman
 
-Podman 是适用于 Linux 的容器化软件。
+Podman 是面向 Linux 的容器化软件。
 
 
 **步骤 1**：安装核心 Podman 引擎和独立的 Compose V2 解析插件。
