@@ -47,9 +47,36 @@ concurrency:
   # backlogging every later push (which is what stalled translations for weeks).
   cancel-in-progress: true
 
+env:
+  # Every run commits to this one branch, so there is at most one open translation
+  # PR. A per-run branch opened a new PR on every push, and unreviewed PRs piled up
+  # (seven at once, each missing the others' translations).
+  L10N_BRANCH: l10n/translations
+
 jobs:
+  # `gh` is only on GitHub-hosted runners, so the open-PR lookup runs here and the
+  # translate job inherits the answer.
+  find-pr:
+    name: Find open translation PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      pr: ${{ steps.find.outputs.pr }}
+    steps:
+      - name: Look up the open PR for the translation branch
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR=$(gh pr list --repo "${{ github.repository }}" --head "$L10N_BRANCH" \
+            --base "${{ github.ref_name }}" --state open --json number --jq '.[0].number // ""')
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+          echo "Open translation PR: ${PR:-none}"
+
   translate:
     name: Translate playbooks
+    needs: find-pr
     runs-on: translation
     # Bound the job so a hung translate step (e.g. an unresponsive LLM endpoint)
     # cannot run for hours holding the concurrency slot. On timeout the job
@@ -93,6 +120,42 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+
+      - name: Carry over the open translation PR
+        # Stage the open PR's translations on top of the current main, so this run
+        # adds to them instead of opening a second PR that lacks them. The
+        # translation manifest comes along too, so files the PR already translated
+        # are not retranslated. The lease pins the branch tip seen here so the push
+        # below cannot overwrite a commit someone adds to the PR mid-run.
+        id: carry
+        shell: bash
+        env:
+          PR: ${{ needs.find-pr.outputs.pr }}
+        run: |
+          set -euo pipefail
+          LEASE=$(git ls-remote origin "refs/heads/$L10N_BRANCH" | cut -f1)
+          echo "lease=$LEASE" >> "$GITHUB_OUTPUT"
+          if [ -z "$PR" ] || [ -z "$LEASE" ]; then
+            echo "No open translation PR; starting from ${{ github.ref_name }}."
+            exit 0
+          fi
+          git fetch --no-tags origin "$LEASE"
+          git config user.name "amd-playbooks-l10n-bot"
+          git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
+          # On a conflict the PR's (newer) translation wins. A modify/delete conflict
+          # or a broken manifest cannot be resolved that way, so stop rather than
+          # force-push a mangled branch over the PR.
+          git merge --squash -X theirs "$LEASE" || true
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "::error::Could not carry PR #$PR onto ${{ github.ref_name }}; resolve its conflicts by hand."
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+          for f in auto-translations/*/translation_accuracy.json; do
+            python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$f" \
+              || { echo "::error::$f is not valid JSON after carrying over PR #$PR."; exit 1; }
+          done
+          echo "Carried over PR #$PR ($LEASE)."
 
       - name: Determine locales
         id: locales
@@ -169,9 +232,16 @@ jobs:
         # open-pr job opens the PR with `gh` on a GitHub-hosted runner, because
         # `gh` is NOT installed on the self-hosted `translation` runner (that
         # missing binary is what failed run 36627775056 with exit code 127).
+        #
+        # The branch is always one commit on top of main: the carried-over PR plus
+        # this run's translations. Force-pushing it keeps the PR current and
+        # conflict-free; the lease makes the push fail instead of dropping a commit
+        # pushed to the branch since the carry-over step read it.
         id: push
-        if: always() && steps.detect.outputs.playbooks != ''
+        if: always() && steps.carry.outcome == 'success' && steps.detect.outputs.playbooks != ''
         shell: bash
+        env:
+          LEASE: ${{ steps.carry.outputs.lease }}
         run: |
           git config user.name "amd-playbooks-l10n-bot"
           git config user.email "amd-playbooks-l10n-bot@users.noreply.github.com"
@@ -180,12 +250,17 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          BRANCH="l10n/update-${{ github.run_id }}"
-          git checkout -b "$BRANCH"
+          git checkout -B "$L10N_BRANCH"
           git add auto-translations
           git commit -m "l10n: update translations"
-          git push origin "$BRANCH"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          # Nothing new beyond what the open PR already has: leave it untouched.
+          if [ -n "$LEASE" ] && git diff --quiet "$LEASE" HEAD -- auto-translations; then
+            echo "Open translation PR already has these translations."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git push --force-with-lease="refs/heads/$L10N_BRANCH:$LEASE" origin "HEAD:refs/heads/$L10N_BRANCH"
+          echo "branch=$L10N_BRANCH" >> "$GITHUB_OUTPUT"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
           # Build a human-readable summary for the PR body: a "why" trigger line
@@ -220,7 +295,7 @@ jobs:
           fi
           {
             echo "summary<<SUMMARY_EOF"
-            echo "### Trigger"
+            echo "### Latest trigger"
             echo ""
             echo "$TRIGGER"
             echo ""
@@ -234,7 +309,7 @@ jobs:
   # guaranteed, so keeping any `gh` call there is what broke the previous run.
   open-pr:
     name: Open translation PR
-    needs: translate
+    needs: [find-pr, translate]
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -254,6 +329,7 @@ jobs:
           # Multiline what/which/why summary built by the translate job. Passed via
           # env (not inline) so its markdown can't break the shell quoting.
           SUMMARY: ${{ needs.translate.outputs.summary }}
+          PR: ${{ needs.find-pr.outputs.pr }}
           RUN_ID: ${{ github.run_id }}
           SERVER_URL: ${{ github.server_url }}
           REPO: ${{ github.repository }}
@@ -267,6 +343,13 @@ jobs:
             echo ""
             echo "Touches \`auto-translations/\` only — please review and merge."
           } > pr_body.md
+          # The branch already has an open PR: the force-push updated its files, so
+          # refresh the body (the summary covers the whole PR, not just this run).
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --repo "$REPO" --body-file pr_body.md
+            echo "Updated https://github.com/$REPO/pull/$PR for manual review."
+            exit 0
+          fi
           # Open the PR WITHOUT --label first: `gh pr create --label X` fails
           # atomically if label X doesn't exist, which would abort PR creation
           # entirely (this is what happened when the repo had no 'translation'
