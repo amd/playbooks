@@ -1999,10 +1999,9 @@ export default function PlaybookPage({ params, searchParams }: { params: Promise
                     {playbook.published_date && (
                       <span>Published {formatValidationDate(playbook.published_date)}</span>
                     )}
-                    {playbook.updated_date &&
-                      playbook.updated_date !== playbook.published_date && (
-                        <span>Updated {formatValidationDate(playbook.updated_date)}</span>
-                      )}
+                    {/* No "Updated" date here on purpose: freshness is reported
+                        per device as "Last validated" in the versions section,
+                        which reflects CI actually running the playbook. */}
                   </div>
                 )}
 
