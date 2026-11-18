@@ -86,7 +86,7 @@ cd thenoise
 <!-- @os:linux -->
 <!-- @test:id=thenoise-pin-linux timeout=120 workdir=thenoise -->
 ```bash
-git checkout 8df6256
+git checkout v0.15.1
 ```
 <!-- @test:end -->
 <!-- @os:end -->
@@ -94,7 +94,7 @@ git checkout 8df6256
 <!-- @os:windows -->
 <!-- @test:id=thenoise-pin-windows timeout=120 workdir=thenoise -->
 ```powershell
-git checkout 8df6256
+git checkout v0.15.1
 ```
 <!-- @test:end -->
 <!-- @os:end -->
