@@ -136,26 +136,26 @@
   "validatedVersions": {
     "reference": {
       "windows": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       },
       "linux": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       }
     },
     "apu": {
       "windows": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       },
       "linux": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       }
     },
     "gpu": {
       "windows": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       },
       "linux": {
-        "TheNoise": "0.15.0+eef9936"
+        "TheNoise": "0.15.0+8df6256"
       }
     }
   },

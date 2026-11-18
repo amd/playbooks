@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Overview
 
-TheNoise is a focused, open-source image generation and **editing** engine built on AMD ROCm™ software. It is tuned to run fast on AMD GPUs — from the Ryzen™ AI Halo platform to AMD Radeon™ discrete graphics.
+TheNoise is a focused, open-source image generation and **editing** engine built on AMD ROCm™ software. It is tuned to run fast on AMD GPUs — from the AMD Ryzen™ AI Halo Developer Platform to AMD Radeon™ discrete graphics.
 
 This tutorial shows you how to edit images with TheNoise using the **Flux.2 Klein 4B** model — a distilled flow-matching model that generates in only **4 steps** and can also **edit** an existing image from a text instruction. You will generate a picture, then instruct the model to change it, all on your GPU.
 
@@ -63,14 +63,48 @@ TheNoise uses [uv](https://docs.astral.sh/uv/) to create a managed Python enviro
 
 TheNoise is developed on GitHub and bootstrapped with [uv](https://docs.astral.sh/uv/). uv provides a managed Python and installs every dependency; the launcher scripts create the virtual environment and install the ROCm build of PyTorch for your GPU automatically.
 
-Clone TheNoise and let the launcher bootstrap the environment:
-
 <!-- @os:linux -->
-<!-- @test:id=thenoise-clone-linux timeout=1800 -->
+<!-- @test:id=thenoise-clone-linux timeout=600 -->
 ```bash
-export PATH="$HOME/.local/bin:$PATH" #hide
 git clone https://github.com/lemonade-sdk/thenoise.git
 cd thenoise
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=thenoise-clone-windows timeout=600 -->
+```powershell
+git clone https://github.com/lemonade-sdk/thenoise.git
+cd thenoise
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+#### (Optional) Checkout a specific version
+
+<!-- @os:linux -->
+<!-- @test:id=thenoise-pin-linux timeout=120 workdir=thenoise -->
+```bash
+git checkout 8df6256
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+<!-- @os:windows -->
+<!-- @test:id=thenoise-pin-windows timeout=120 workdir=thenoise -->
+```powershell
+git checkout 8df6256
+```
+<!-- @test:end -->
+<!-- @os:end -->
+
+#### First run
+
+<!-- @os:linux -->
+<!-- @test:id=thenoise-bootstrap-linux timeout=1800 workdir=thenoise -->
+```bash
+export PATH="$HOME/.local/bin:$PATH" #hide
 ./thenoise.sh --help
 ```
 <!-- @test:end -->
@@ -79,10 +113,8 @@ The first run of `./thenoise.sh` creates a `.venv`, installs the ROCm torch buil
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @test:id=thenoise-clone-windows timeout=1800 -->
+<!-- @test:id=thenoise-bootstrap-windows timeout=1800 workdir=thenoise -->
 ```powershell
-git clone https://github.com/lemonade-sdk/thenoise.git
-cd thenoise
 .\thenoise.bat --help
 ```
 <!-- @test:end -->
@@ -279,7 +311,9 @@ The CLI is great for reproducible, scripted edits, but TheNoise also has a simpl
 ```
 <!-- @os:end -->
 
-The server loads the model on the first request and then keeps it in memory, so this terminal stays busy until you press **Ctrl+C**. Leave it running for now — the Web UI and the HTTP API both talk to it.
+The server loads the model when it starts and then keeps it in memory, so this terminal stays busy until you press **Ctrl+C**. Wait for `Uvicorn running on http://127.0.0.1:8000`, then leave it running — the Web UI and the HTTP API both talk to it.
+
+> **Note**: If something else on your machine already uses port 8000, start the server on another one with `--port` and use that port in the URLs below.
 
 Open `http://localhost:8000/`. Because Flux.2 Klein supports editing, the interface shows an **Edit** tab alongside Generate.
 
@@ -332,12 +366,15 @@ Combining the two images with that prompt gives this result:
 
 The `serve` mode answers a small JSON API on the same address, so another program can drive the same edit. `/edit` takes a **base64**-encoded copy of the image in the request body and answers with the edited PNG — see the [HTTP API reference](https://github.com/lemonade-sdk/thenoise/blob/main/docs/api.md) for every field and endpoint.
 
-Keep the server running, save this as `edit_api.py` in the `thenoise` folder — it is also included with this playbook as [edit_api.py](assets/edit_api.py) — and run it from a second terminal:
+Keep the server running, save this as `edit_api.py` in the `thenoise` folder — it is also included with this playbook as [edit_api.py](assets/edit_api.py) — and run it from a second terminal. It reads the port from `THENOISE_PORT`, 8000 by default.
 
 ```python
 import base64
 import json
+import os
 import urllib.request
+
+PORT = os.environ.get("THENOISE_PORT", "8000")
 
 PROMPT = ("Set the scene to early evening. Light up the city's windows. Increase the "
           "contrast. Add the text 'AMD ROCm' in a monospaced font in the bottom-left corner.")
@@ -347,7 +384,7 @@ with open("city.png", "rb") as f:
 
 body = json.dumps({"image": image, "prompt": PROMPT, "steps": 4}).encode()
 request = urllib.request.Request(
-    "http://127.0.0.1:8000/edit",
+    f"http://127.0.0.1:{PORT}/edit",
     data=body,
     headers={"Content-Type": "application/json"},
 )
@@ -378,18 +415,29 @@ The edited image lands in `city_edited_api.png`, next to the `city_edited.png` y
 import json
 import os
 import signal
+import socket
 import struct
 import subprocess
 import sys
 import time
 import urllib.request
 
-PY = ".venv/bin/python" if os.name == "posix" else r".venv\Scripts\python.exe"
-ARGS = [PY, "-m", "thenoise", "serve",
-        "--dit", "./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors",
-        "--vae", "./models/klein/split_files/vae/flux2-vae.safetensors",
-        "--text-encoder", "./models/klein/split_files/text_encoders/qwen_3_4b.safetensors",
-        "--host", "127.0.0.1", "--port", "8000"]
+with socket.socket() as probe:
+    probe.bind(("127.0.0.1", 0))
+    PORT = str(probe.getsockname()[1])
+
+if os.name == "nt":
+    LAUNCH = ["cmd", "/c", os.path.abspath("thenoise.bat")]
+else:
+    os.environ["PATH"] = os.path.expanduser("~/.local/bin") + os.pathsep + os.environ["PATH"]
+    LAUNCH = [os.path.abspath("thenoise.sh")]
+ARGS = LAUNCH + [
+    "serve",
+    "--dit", "./models/klein/split_files/diffusion_models/flux-2-klein-4b.safetensors",
+    "--vae", "./models/klein/split_files/vae/flux2-vae.safetensors",
+    "--text-encoder", "./models/klein/split_files/text_encoders/qwen_3_4b.safetensors",
+    "--host", "127.0.0.1", "--port", PORT,
+]
 
 with open("serve.log", "wb") as log:
     server = subprocess.Popen(ARGS, stdout=log, stderr=subprocess.STDOUT,
@@ -398,15 +446,15 @@ with open("serve.log", "wb") as log:
         deadline = time.time() + 300
         while True:
             try:
-                with urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=5) as r:
+                with urllib.request.urlopen(f"http://127.0.0.1:{PORT}/health", timeout=5) as r:
                     print("server:", json.load(r)["status"])
                     break
             except Exception:
                 if server.poll() is not None or time.time() > deadline:
                     raise SystemExit("serve did not come up — see serve.log")
                 time.sleep(5)
-        # The first request is the one that loads the model.
-        subprocess.run([sys.executable, "../edit_api.py"], check=True)
+        subprocess.run([sys.executable, "../edit_api.py"], check=True,
+                       env={**os.environ, "THENOISE_PORT": PORT})
         png = open("city_edited_api.png", "rb").read()
         if png[:8] != b"\x89PNG\r\n\x1a\n":
             raise SystemExit("the /edit reply was not a PNG")

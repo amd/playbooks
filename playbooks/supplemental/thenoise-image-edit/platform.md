@@ -39,8 +39,8 @@ without error and the three files above exist under `./models/klein/`.
 
 ## Hardware Requirements
 
-- An **AMD GPU** with ROCm support. Primary target: **Strix Halo** (gfx1151);
-  also tested on gfx1150 / gfx1152 and AMD Radeon™ discrete GPUs.
+- An **AMD GPU** with ROCm support. Primary target: **AMD Ryzen™ AI Halo Developer Platform**
+  (gfx1151); also tested on gfx1150 / gfx1152 and AMD Radeon™ discrete GPUs.
 - **RAM:** 32 GB minimum; 64 GB+ recommended. The 128 GB Strix Halo
   configuration runs everything comfortably.
 - **Disk:** the model files above (roughly 16 GB total for Flux.2 Klein 4B) plus
