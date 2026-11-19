@@ -9,7 +9,7 @@
 
 # CI, workflows, scripts, and repo config. Any one of these can approve; the
 # required-approval count is set in branch protection, not here.
-/.github/ @harkgill-amd @sreeram-11 @lucbruni-amd
+/.github/ @harkgill-amd @lucbruni-amd
 
 # auto-translations/ is generated automatically by translate-playbooks.yml.
 # localized-playbooks/ holds human-uploaded translations (e.g. the China team).
@@ -19,8 +19,8 @@
 /localized-playbooks/ @bconsolvo
 
 # Test scripts — placed after /.github/ so they win for any test_*.py file.
-test_*.py @sreeram-11 @harkgill-amd @adamlam2-amd
-*test*.py @sreeram-11 @harkgill-amd @adamlam2-amd
+test_*.py @harkgill-amd @adamlam2-amd
+*test*.py @harkgill-amd @adamlam2-amd
 
 # OrchestrAI catch-all, LAST so it wins over everything above: every OrchestrAI
 # file — source, workflows, AND its tests under .github/tests/ — is @saman-amd.
