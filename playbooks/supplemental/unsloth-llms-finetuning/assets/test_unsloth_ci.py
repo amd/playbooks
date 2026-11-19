@@ -79,6 +79,21 @@ def _resolve_model_path(model_name: str) -> str:
 MODEL_NAME = _resolve_model_path(MODEL_NAME)
 
 
+def _load_training_split():
+    # Read the dataset's parquet from the local HF cache when CI primed it, so
+    # load_dataset makes no Hub API call (rate-limited without a token); else
+    # load it from the Hub as usual.
+    try:
+        from huggingface_hub import snapshot_download
+        local = snapshot_download(DATASET_NAME, repo_type="dataset", local_files_only=True)
+        files = sorted(str(p) for p in Path(local).glob("data/*.parquet"))
+        if files:
+            return load_dataset("parquet", data_files=files, split=DATASET_SPLIT)
+    except Exception:
+        pass
+    return load_dataset(DATASET_NAME, split=DATASET_SPLIT)
+
+
 def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -112,7 +127,7 @@ def load_model():
 # =========================
 def prepare_dataset(tokenizer):
     log("Loading dataset...")
-    dataset = load_dataset(DATASET_NAME, split=DATASET_SPLIT)
+    dataset = _load_training_split()
 
     log("Standardizing dataset format...")
     dataset = standardize_data_formats(dataset)
