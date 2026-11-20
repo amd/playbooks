@@ -202,7 +202,7 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
 | Flag | Purpose |
 |------|---------|
 | `--port` | Port to serve the HTTP API on |
-| `--host` | IP address to bind the server to (`0.0.0.0` for all interfaces) |
+| `--host` | IP address to bind the server to (`0.0.0.0` for all interfaces — see [Securing the Cluster Endpoint](#securing-the-cluster-endpoint)) |
 | `--max-model-len` | Maximum context length in tokens |
 | `--gpu-memory-utilization` | Fraction of GPU memory to allocate (0.0–1.0) |
 | `--dtype` | Data type for model weights |
@@ -234,6 +234,16 @@ To connect Open WebUI to your vLLM endpoint:
 Once connected, select the model from the model dropdown in Open WebUI and start chatting. The model is now running across all four of your Ryzen AI Halo nodes:
 
 ![Chatting with Qwen3.5-397B in Open WebUI](assets/openwebui-chat.png)
+
+## Securing the Cluster Endpoint
+
+The commands in this playbook bind Ray (port 6379) and the vLLM API (port 7000) to all network interfaces, and neither service requires authentication by default. `--host 0.0.0.0` does not limit vLLM to the cluster switch: it also exposes the API on every other network the machine is connected to, such as a Wi-Fi or office LAN. Anyone who can reach those ports can submit inference requests and use your hardware.
+
+Before running this cluster on anything other than a fully isolated network:
+
+- **Keep the cluster on its dedicated switch.** Disconnect the cluster machines from Wi-Fi and other LANs while Ray and vLLM are running, or firewall ports 6379 and 7000 so only the cluster machines can reach them.
+- **Bind vLLM to the cluster interface.** Replace `--host 0.0.0.0` with `--host <MACHINE_1_IP>` so the API listens only on the cluster network.
+- **Or require an API key.** Add `--api-key <YOUR_API_KEY>` to the `vllm serve` command, and in the Open WebUI connection steps above set **Auth** to **Bearer** and enter the same key instead of selecting **None**.
 
 ## Next Steps
 
