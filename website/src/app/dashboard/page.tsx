@@ -35,6 +35,7 @@ const HARDWARE_LABELS: Record<string, string> = {
   rx7900xt: "Radeon™ RX 7900 XT",
   rx9070xt: "Radeon™ RX 9070 XT",
   r9700: "Radeon™ AI PRO R9700",
+  w7900: "Radeon™ PRO W7900",
 };
 
 const OS_LABELS = ["Windows", "Linux"];
