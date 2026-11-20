@@ -54,7 +54,7 @@ class BatchMatrix(unittest.TestCase):
 
     def test_localized_batches_are_batches_too(self):
         matrix = [{"playbook": "a", "platform": "linux", "arch": "halo", "required": False,
-                   "batch_id": "localized/zh-CN/linux/halo", "locale": "zh-CN"}]
+                   "batch_id": "linux/halo", "locale": "zh-CN", "key": "zh-CN/a"}]
         self.assertEqual([(b["label"], b["locale"]) for b in batch_matrix(matrix, {"halo": "Halo"})],
                          [("Halo · Linux [zh-CN]", "zh-CN")])
 

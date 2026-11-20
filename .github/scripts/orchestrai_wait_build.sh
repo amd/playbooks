@@ -22,12 +22,18 @@ trap 'rm -f "$NETRC"' EXIT
 NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
 printf 'machine %s login %s password %s\n' \
   "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
-# Bounded poll: 330 min of wall-clock time (not a count of polls, which
-# each take 15s plus the request) — max_duration (300m) plus 30 min for
-# the build to wind down. It starts once the build has started; the wait
-# for machines before it (acquire_timeout + 30 min) is --await-build's.
-# The Test jobs' timeout-minutes budget both, per attempt.
-DEADLINE=$((SECONDS + 330 * 60))
+# Bounded poll: wall-clock time (not a count of polls, which each take 15s
+# plus the request) of run_settings.max_duration in orchestrai-config.yml
+# (next to this script) plus 30 min for the build to wind down. It starts
+# once the build has started; the wait for machines before it
+# (acquire_timeout + 30 min) is --await-build's. The Test jobs'
+# timeout-minutes budget both, per attempt.
+CONFIG="$(dirname "$0")/../orchestrai-config.yml"
+MAX_DURATION=$(sed -nE 's/^[[:space:]]+max_duration:[[:space:]]*([0-9]+).*/\1/p' "$CONFIG" | head -n1)
+if [ -z "$MAX_DURATION" ]; then
+  echo "::error::No run_settings.max_duration in $CONFIG"; exit 1
+fi
+DEADLINE=$((SECONDS + (MAX_DURATION + 30) * 60))
 FAIL_MAX=20       # ~5min of consecutive unreachable polls -> give up
 finished=""; fails=0
 while [ "$SECONDS" -lt "$DEADLINE" ]; do
