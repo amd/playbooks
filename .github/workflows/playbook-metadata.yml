@@ -5,10 +5,12 @@
 name: Playbook Metadata
 
 # Keeps CI-managed playbook.json metadata in sync after a playbook lands on main:
-#   1. published_date / updated_date stamped from git history
-#      (published_date is set once; updated_date tracks the latest change).
+#   1. published_date stamped from git history, once, on first publication.
 #   2. isNew set on exactly the 3 most recently published playbooks, cleared on
 #      the rest — so the website's "What's New" never shows more than 3.
+#
+# Both are write-once-ish, so in steady state this workflow finds nothing to do
+# and opens no PR; it only has work when a playbook is added or published.
 #
 # Order matters: dates are stamped FIRST so a just-merged playbook has its
 # published_date before ranking. A playbook with no date yet still ranks newest
@@ -53,7 +55,7 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Stamp published/updated dates from git history
+      - name: Stamp published dates from git history
         run: python .github/scripts/stamp_playbook_dates.py
 
       - name: Mark the latest 3 playbooks as New
@@ -95,7 +97,7 @@ jobs:
             PR_URL=$(gh pr create --repo "${{ github.repository }}" \
               --base "${{ github.ref_name }}" --head "$BRANCH" \
               --title "chore: update playbook metadata (dates + New tags)" \
-              --body "@bconsolvo automated update from the Playbook Metadata workflow (run ${{ github.run_id }}). Stamps published/updated dates and marks the 3 most recently published playbooks as New (clears the rest). Touches \`playbook.json\` metadata only — please review and merge.")
+              --body "@bconsolvo automated update from the Playbook Metadata workflow (run ${{ github.run_id }}). Stamps published dates and marks the 3 most recently published playbooks as New (clears the rest). Touches \`playbook.json\` metadata only — please review and merge.")
             echo "Opened $PR_URL for review."
           else
             echo "PR already open for $BRANCH ($PR_URL); branch updated."
