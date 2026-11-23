@@ -581,8 +581,10 @@ GRAD_ACCUM_STEPS = 16  # Maintain effective batch size
 ```
 
 **2. Reduce Sequence Length:**
+
+Set on the tokenizer, just after it is created in the training script:
 ```python
-max_seq_length=256  # Instead of 512
+tokenizer.model_max_length = 256  # Instead of 512
 ```
 
 **3. Use More Aggressive Quantization:**

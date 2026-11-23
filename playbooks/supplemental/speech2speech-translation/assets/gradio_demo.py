@@ -119,7 +119,7 @@ def build_ui(runner):
             with gr.Column():
                 input_audio = gr.Audio(
                     label="Input Speech",
-                    sources="microphone",
+                    sources=["upload", "microphone"],
                     type="filepath",
                 )
                 target_language = gr.Dropdown(
