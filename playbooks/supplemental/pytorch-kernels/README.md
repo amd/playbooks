@@ -181,6 +181,13 @@ kernel-env\Scripts\activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
+<!-- @device:halo_box -->
+> **Note:** ROCm and PyTorch come preinstalled on the Ryzen AI Halo, but this playbook
+> still needs them installed **inside your virtual environment**, exactly as on any other
+> Linux system. Custom kernel compilation requires the ROCm development headers
+> (`rocm[libraries,devel,...]`), which the preinstalled system packages do not expose to
+> the venv. Expand the section below and run the commands as written.
+<!-- @device:end -->
 <!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:rocm,pytorch -->
 <!-- @device:end -->
