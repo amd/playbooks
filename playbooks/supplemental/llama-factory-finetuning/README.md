@@ -183,7 +183,7 @@ python -m pip install huggingface_hub
 
 LLaMA Factory depends on PyTorch. You should already have it installed per the above requirements.
 
-Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies.
+Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies. The install pins Transformers 5.8.0, because Transformers 5.15 and later reject the `warmup_ratio` setting that LLaMA Factory's example configurations use.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -191,7 +191,7 @@ Download the source code from [LLaMA Factory official GitHub repository](https:/
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
 pip install setuptools --break-system-packages
-pip install -e . --break-system-packages
+pip install -e . "transformers==5.8.0" --break-system-packages
 pip install -r requirements/metrics.txt --break-system-packages
 ```
 <!-- @test:end --> 
@@ -202,7 +202,7 @@ pip install -r requirements/metrics.txt --break-system-packages
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
-pip install -e .
+pip install -e . "transformers==5.8.0"
 pip install -r requirements/metrics.txt 
 ```
 <!-- @test:end --> 
