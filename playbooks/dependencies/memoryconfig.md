@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 -->
 
 <!-- @os:windows -->
-## Install AMD Software: Adrenalin Edition
+### Install AMD Software: Adrenalin Edition
 
 Download and install the latest **AMD Software: Adrenalin Edition** from
 [amd.com/en/products/software/adrenalin.html](https://www.amd.com/en/products/software/adrenalin.html).
