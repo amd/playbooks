@@ -253,7 +253,14 @@ const TABS: { id: DashboardTab; label: string }[] = [
   { id: "released", label: "Released Playbooks" },
 ];
 
-type PlaybookCellStatus = "pass" | "fail" | "partial" | "no-tests";
+type PlaybookCellStatus = "pass" | "fail" | "partial" | "no-tests" | "not-run" | "interrupted";
+
+type ResultSource = "orchestrai" | "github";
+
+const SOURCES: { id: ResultSource; label: string; title: string }[] = [
+  { id: "orchestrai", label: "OrchestrAI", title: "Test Playbooks (OrchestrAI): test-playbooks-orchestrai.yml" },
+  { id: "github", label: "GitHub runners", title: "Test Playbooks: test-playbooks.yml on self-hosted runners" },
+];
 
 interface PlaybookMatrixColumn {
   id: string;
@@ -269,6 +276,19 @@ interface PlaybookMatrixCell {
   skipped: number;
   totalTests: number;
   status: PlaybookCellStatus;
+  orchestrai?: OrchestraiCellInfo;
+}
+
+interface OrchestraiCellInfo {
+  outcome: string;
+  runUrl: string;
+  rpUrl: string;
+  jobUrl: string;
+  reason: string;
+  attempt: number;
+  firstOutcome: string;
+  required: boolean;
+  batchLabel: string;
 }
 
 interface PlaybookMatrixRow {
@@ -289,6 +309,92 @@ interface PlaybookTestMatrixResponse {
   } | null;
   columns: PlaybookMatrixColumn[];
   rows: PlaybookMatrixRow[];
+  source?: ResultSource;
+  /** OrchestrAI only: the locale shown ("" is English) and the locales the run covered. */
+  locale?: string;
+  locales?: string[];
+}
+
+const ORCHESTRAI_LABELS: Record<string, string> = {
+  PASSED: "Passed",
+  FAILED: "Failed",
+  ERROR: "Error",
+  NOT_RUN: "Not run",
+  INTERRUPTED: "Interrupted",
+};
+
+function orchestraiTooltip(cell: PlaybookMatrixCell, info: OrchestraiCellInfo): string {
+  const lines = [
+    info.batchLabel,
+    `${ORCHESTRAI_LABELS[info.outcome] ?? info.outcome}${info.required ? "" : " (not required)"}`,
+  ];
+  if (cell.totalTests > 0) {
+    lines.push(`Tests: ${cell.passed} passed, ${cell.failed} failed, ${cell.skipped} skipped of ${cell.totalTests}`);
+  }
+  if (info.reason) lines.push(`Reason: ${info.reason}`);
+  if (info.attempt > 1) lines.push(`Retried (attempt ${info.attempt}; first: ${info.firstOutcome || "?"})`);
+  lines.push(info.runUrl ? "Click to open the OrchestrAI run" : "No OrchestrAI run link recorded");
+  return lines.join("\n");
+}
+
+function OrchestraiCell({ cell, info, style }: {
+  cell: PlaybookMatrixCell;
+  info: OrchestraiCellInfo;
+  style: { dot: string | null; text: string; bg: string; border: string };
+}) {
+  const label = ORCHESTRAI_LABELS[info.outcome] ?? info.outcome;
+  const counts = cell.totalTests > 0 ? ` ${cell.passed}/${cell.totalTests}` : "";
+  const badge = (
+    <div
+      className={`inline-flex items-center justify-center gap-1.5 rounded border ${style.border} ${style.bg} px-2 py-1 w-full${info.runUrl ? " hover:border-[#D4915D]/50 hover:bg-[#D4915D]/5 transition-colors" : ""}`}
+    >
+      {style.dot && <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />}
+      <span className={`text-[11px] font-medium whitespace-nowrap ${style.text}`}>
+        {label}
+        <span className="opacity-60 tabular-nums">{counts}</span>
+        {info.attempt > 1 && <span className="opacity-60"> ↻</span>}
+      </span>
+      {info.runUrl && (
+        <svg className="w-2.5 h-2.5 shrink-0 text-[#6b6b6b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      )}
+    </div>
+  );
+  const secondary = [
+    info.rpUrl ? { href: info.rpUrl, label: "RP", title: "ReportPortal launch" } : null,
+    info.jobUrl ? { href: info.jobUrl, label: "Job", title: "GitHub Actions job" } : null,
+  ].filter((l): l is { href: string; label: string; title: string } => l !== null);
+
+  return (
+    <div className="flex flex-col items-stretch gap-0.5" title={orchestraiTooltip(cell, info)}>
+      {info.runUrl ? (
+        <a href={info.runUrl} target="_blank" rel="noopener noreferrer">
+          {badge}
+        </a>
+      ) : (
+        badge
+      )}
+      {secondary.length > 0 && (
+        <div className="flex items-center justify-center gap-1.5 text-[10px] leading-none">
+          {secondary.map((l, i) => (
+            <span key={l.label} className="flex items-center gap-1.5">
+              {i > 0 && <span className="text-[#333]">·</span>}
+              <a
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={l.title}
+                className="text-[#6b6b6b] hover:text-[#D4915D] transition-colors"
+              >
+                {l.label}
+              </a>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CIStatusDashboard() {
@@ -587,15 +693,17 @@ function PlaybookStatusDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [availableRuns, setAvailableRuns] = useState<RunOption[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
+  const [source, setSource] = useState<ResultSource>("orchestrai");
+  const [locale, setLocale] = useState("");
 
-  const fetchMatrix = useCallback(async (runId: number | null = null) => {
+  const fetchMatrix = useCallback(async (runId: number | null, src: ResultSource, loc: string) => {
     setLoading(true);
     setError(null);
     try {
-      const url = runId
-        ? `/api/dashboard/playbook-test-matrix?run_id=${runId}`
-        : "/api/dashboard/playbook-test-matrix";
-      const res = await fetch(url);
+      const params = new URLSearchParams({ source: src });
+      if (runId) params.set("run_id", String(runId));
+      if (src === "orchestrai" && loc) params.set("locale", loc);
+      const res = await fetch(`/api/dashboard/playbook-test-matrix?${params}`);
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || `API error: ${res.status}`);
@@ -609,17 +717,25 @@ function PlaybookStatusDashboard() {
     }
   }, []);
 
-  // Fetch the list of available runs once on mount
+  // Fetch the list of available runs of the selected source's workflow
   useEffect(() => {
-    fetch("/api/dashboard/playbook-runs?per_page=20")
+    setAvailableRuns([]);
+    fetch(`/api/dashboard/playbook-runs?per_page=20&source=${source}`)
       .then((r) => r.json())
       .then((d) => { if (d.runs) setAvailableRuns(d.runs); })
       .catch(() => {/* non-critical — run selector just stays empty */});
-  }, []);
+  }, [source]);
 
   useEffect(() => {
-    fetchMatrix(selectedRunId);
-  }, [fetchMatrix, selectedRunId]);
+    fetchMatrix(selectedRunId, source, locale);
+  }, [fetchMatrix, selectedRunId, source, locale]);
+
+  const changeSource = (next: ResultSource) => {
+    if (next === source) return;
+    setSelectedRunId(null);
+    setLocale("");
+    setSource(next);
+  };
 
   type CellStyle = {
     label: string;
@@ -630,6 +746,18 @@ function PlaybookStatusDashboard() {
   };
 
   const getCellStyle = (cell: PlaybookMatrixCell | undefined, developed: boolean, testsAdded: boolean): CellStyle => {
+    // An OrchestrAI result is shown whatever the playbook's metadata says: it ran.
+    if (cell?.orchestrai) {
+      switch (cell.status) {
+        case "pass":
+          return { label: "Passed", dot: "bg-green-400", text: "text-green-300", bg: "bg-green-900/10", border: "border-green-800/25" };
+        case "not-run":
+        case "interrupted":
+          return { label: "Not run", dot: "bg-yellow-400", text: "text-yellow-300", bg: "bg-yellow-900/10", border: "border-yellow-800/25" };
+        default:
+          return { label: "Failed", dot: "bg-red-400", text: "text-red-300", bg: "bg-red-900/10", border: "border-red-800/25" };
+      }
+    }
     if (!developed || !testsAdded) {
       return { label: "—", dot: null, text: "text-[#2e2e2e]", bg: "bg-transparent", border: "border-[#1e1e1e]" };
     }
@@ -649,27 +777,85 @@ function PlaybookStatusDashboard() {
   };
 
   const runDate = matrix?.run?.createdAt ? new Date(matrix.run.createdAt) : null;
+  const locales = matrix?.source === "orchestrai" ? matrix.locales ?? [] : [];
+
+  const sourceBar = (
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="inline-flex rounded-lg border border-[#333] bg-[#1a1a1a] p-0.5" role="tablist" aria-label="Results source">
+        {SOURCES.map((s) => (
+          <button
+            key={s.id}
+            role="tab"
+            aria-selected={source === s.id}
+            title={s.title}
+            onClick={() => changeSource(s.id)}
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              source === s.id ? "bg-[#D4915D]/15 text-[#D4915D] font-medium" : "text-[#a0a0a0] hover:text-white"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      {source === "orchestrai" && locales.length > 1 && (
+        <label className="flex items-center gap-2 text-sm text-[#a0a0a0]">
+          Locale
+          <select
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+            className="px-2 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-sm text-white hover:border-[#555]"
+          >
+            {locales.map((l) => (
+              <option key={l || "en"} value={l}>
+                {l || "English"}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+    </div>
+  );
+
+  // Outcome totals of the OrchestrAI run in this locale.
+  const oaiCounts = { pass: 0, fail: 0, notRun: 0 };
+  if (matrix?.source === "orchestrai") {
+    for (const row of matrix.rows) {
+      for (const cell of Object.values(row.cells)) {
+        if (cell.status === "pass") oaiCounts.pass++;
+        else if (cell.status === "not-run" || cell.status === "interrupted") oaiCounts.notRun++;
+        else oaiCounts.fail++;
+      }
+    }
+  }
 
   if (loading) {
     return (
+      <div className="space-y-4">
+      {sourceBar}
       <div className="flex items-center justify-center py-16">
         <div className="flex items-center gap-3 text-[#a0a0a0]">
           <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-sm">Loading nightly playbook results...</span>
+          <span className="text-sm">
+            Loading {source === "orchestrai" ? "OrchestrAI" : "nightly"} playbook results...
+          </span>
         </div>
+      </div>
       </div>
     );
   }
 
   if (error) {
     return (
+      <div className="space-y-4">
+      {sourceBar}
       <div className="max-w-3xl mx-auto animate-fade-in">
         <div className="px-4 py-3 rounded-xl bg-red-900/15 border border-red-800/30 text-red-400 text-sm">
           {error}
         </div>
+      </div>
       </div>
     );
   }
@@ -692,12 +878,15 @@ function PlaybookStatusDashboard() {
 
   return (
     <div className="space-y-4 animate-fade-in">
+      {sourceBar}
       {!matrix.run && (
         <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-xs text-[#a0a0a0]">
           <svg className="w-4 h-4 text-[#6b6b6b] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>No nightly test artifacts found — all combinations are shown but no results are available yet.</span>
+          <span>
+            No {source === "orchestrai" ? "OrchestrAI batch results" : "nightly test artifacts"} found — all combinations are shown but no results are available yet.
+          </span>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-3">
@@ -722,6 +911,13 @@ function PlaybookStatusDashboard() {
             <span> not yet developed</span>
           </div>
         )}
+        {matrix.source === "orchestrai" && matrix.run && (
+          <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0] flex items-center gap-3">
+            <span><span className="text-green-400 font-medium">{oaiCounts.pass}</span> passed</span>
+            <span><span className="text-red-400 font-medium">{oaiCounts.fail}</span> failed</span>
+            <span><span className="text-yellow-400 font-medium">{oaiCounts.notRun}</span> not run</span>
+          </div>
+        )}
         {runDate && (
           <div className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm text-[#a0a0a0]">
             Run date: <span className="text-white font-medium">{runDate.toLocaleString()}</span>
@@ -738,7 +934,7 @@ function PlaybookStatusDashboard() {
           </a>
         )}
         <button
-          onClick={() => fetchMatrix(selectedRunId)}
+          onClick={() => fetchMatrix(selectedRunId, source, locale)}
           disabled={loading}
           className="px-4 py-2 rounded-lg border border-[#333] text-[#a0a0a0] text-sm hover:text-white hover:border-[#555] transition-colors disabled:opacity-50"
         >
@@ -817,7 +1013,7 @@ function PlaybookStatusDashboard() {
                       )}
                     </td>
                     <td className="px-3 py-3 border-r border-[#333] align-middle text-center">
-                      {Object.values(row.cells).some((c) => c.totalTests > 0) ? (
+                      {Object.values(row.cells).some((c) => c.totalTests > 0 || c.orchestrai) ? (
                         <svg className="w-4 h-4 text-green-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                         </svg>
@@ -829,7 +1025,7 @@ function PlaybookStatusDashboard() {
                     </td>
                     {matrix.columns.map((column) => {
                       const cell = row.cells[column.id];
-                      const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0);
+                      const testsAdded = Object.values(row.cells).some((c) => c.totalTests > 0 || c.orchestrai);
                       const isUnsupported = Object.prototype.hasOwnProperty.call(row.unsupportedReasons ?? {}, column.id);
                       const unsupportedReason = row.unsupportedReasons?.[column.id] ?? "";
                       const style = getCellStyle(cell, row.developed, testsAdded);
@@ -846,6 +1042,14 @@ function PlaybookStatusDashboard() {
                               <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-blue-400" />
                               <span className="text-[11px] font-medium whitespace-nowrap text-blue-300">Unsupported</span>
                             </div>
+                          </td>
+                        );
+                      }
+
+                      if (cell?.orchestrai) {
+                        return (
+                          <td key={column.id} className="px-2 py-2 align-middle text-center">
+                            <OrchestraiCell cell={cell} info={cell.orchestrai} style={style} />
                           </td>
                         );
                       }
