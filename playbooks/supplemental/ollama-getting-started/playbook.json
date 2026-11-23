@@ -34,33 +34,8 @@
     ]
   },
   "tested_platforms": {
-    "halo": [
-      "linux",
-      "windows"
-    ],
-    "grgh": [
-      "linux",
-      "windows"
-    ],
-    "stx": [
-      "linux",
-      "windows"
-    ],
-    "krk": [
-      "linux",
-      "windows"
-    ],
-    "rx7900xt": [
-      "linux",
-      "windows"
-    ],
     "rx9070xt": [
-      "linux",
-      "windows"
-    ],
-    "r9700": [
-      "linux",
-      "windows"
+      "linux"
     ]
   },
   "required_platforms": {
