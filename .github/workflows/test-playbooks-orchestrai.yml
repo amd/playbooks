@@ -85,8 +85,8 @@ on:
         default: main
   # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
   # keep the shared hardware fleet from being flooded. To test a PR, comment
-  # `!orc` or `!localized-orc` on it (see orchestrai-pr-command.yml) — that runs
-  # the PR's own head commit on demand. Re-enable auto-runs by adding a
+  # `!orc` on it (locale= adds its translations; see orchestrai-pr-command.yml) —
+  # that runs the PR's own head commit on demand. Re-enable auto-runs by adding a
   # `pull_request:` block here;
   # the detect step already handles the pull_request event (changed-playbooks
   # diff) and the trigger step already sets PLAYBOOK_REPO/SHA from the PR head.

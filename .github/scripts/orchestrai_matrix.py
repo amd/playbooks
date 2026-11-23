@@ -30,10 +30,14 @@ Usage:
     orchestrai_matrix.py --playbooks '["comfyui-image-gen", ...]' \
         [--locale zh-CN [--localized-playbooks '["comfyui-image-gen", ...]']] \
         [--config .github/orchestrai-config.yml] [--print]
+    orchestrai_matrix.py --languages '{"": ["a"], "zh-CN": ["a", "b"]}' ...
 
-With --locale alone, --playbooks are that locale's (one language, as
-!localized-orc runs). With --localized-playbooks too, --playbooks are English
-and both languages share the batches.
+With --locale alone, --playbooks are that locale's (one language). With
+--localized-playbooks too, --playbooks are English and both languages share
+the batches. --languages names the playbooks of any number of languages ("" or
+"en" = English), all sharing the batches; it replaces the three above.
+--devices and --platforms narrow the run; a name no device or OS has is an
+error, never a run that silently tests nothing.
 
 Writes matrix=/batches=/has_entries= (and english_matrix=/localized_matrix=)
 to $GITHUB_OUTPUT when set; --print also dumps a human-readable summary + JSON
@@ -113,19 +117,25 @@ def runs_same_tests(entry, device, root):
 
 
 def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_playbooks=None,
-          root=None):
+          root=None, languages=None):
     """Matrix entries and batches for English and localized playbooks.
 
     Without localized_playbooks, `playbooks` are in `locale` ("" = English):
-    one language, as !orc and !localized-orc run. With them, `playbooks` are
-    English and `localized_playbooks` are in `locale`; both share batches, so
-    a device and OS is one OrchestrAI run on one machine for every language.
+    one language. With them, `playbooks` are English and `localized_playbooks`
+    are in `locale`. `languages` ({locale: playbooks}, "" = English) replaces
+    all three and takes any number of locales. Every language shares batches,
+    so a device and OS is one OrchestrAI run on one machine for all of them.
     """
     root = Path(root) if root else Path.cwd()
-    if localized_playbooks and not locale:
-        raise ValueError("localized playbooks need a locale")
-    sources = ([(locale, playbooks)] if localized_playbooks is None
-               else [("", playbooks), (locale, localized_playbooks)])
+    if languages is not None:
+        # English first: the batches list their English members first.
+        sources = sorted(((loc, ids) for loc, ids in languages.items() if ids),
+                         key=lambda item: (item[0] != "", item[0]))
+    else:
+        if localized_playbooks and not locale:
+            raise ValueError("localized playbooks need a locale")
+        sources = ([(locale, playbooks)] if localized_playbooks is None
+                   else [("", playbooks), (locale, localized_playbooks)])
     device_to_tags = cfg["device_to_tags"]
     device_to_gfx = cfg["device_to_gfx"]
     extra_tags = cfg.get("extra_tags", {})
@@ -327,6 +337,47 @@ def fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for):
         e["batch_id"] = moved.get(e["batch_id"], e["batch_id"])
 
 
+PLATFORMS = ("linux", "windows")
+
+
+def known_devices(cfg):
+    """Every device name the config knows: mapped to broker tags or a GPU."""
+    return set(cfg.get("device_to_tags") or {}) | set(cfg.get("device_to_gfx") or {})
+
+
+def unknown_filters(cfg, devices, platforms):
+    """Errors for --devices / --platforms names that match nothing, so a typo
+    fails the command instead of scheduling no playbooks."""
+    problems = []
+    unknown = sorted(set(devices or ()) - known_devices(cfg))
+    if unknown:
+        problems.append(f"unknown device(s): {', '.join(unknown)} "
+                        f"(known: {', '.join(sorted(known_devices(cfg)))})")
+    unknown = sorted(set(platforms or ()) - set(PLATFORMS))
+    if unknown:
+        problems.append(f"unknown platform(s): {', '.join(unknown)} "
+                        f"(known: {', '.join(PLATFORMS)})")
+    return problems
+
+
+def parse_languages(raw):
+    """{locale: [playbook IDs]} from a JSON object; "en" (any case) is English ("")."""
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"--languages is not valid JSON: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError("--languages must be a JSON object of playbook IDs by locale")
+    languages = {}
+    for loc, ids in value.items():
+        if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
+            raise ValueError(f"--languages[{loc!r}] must be a list of playbook IDs")
+        loc = "" if loc.lower() in ("", "en") else loc
+        merged = languages.setdefault(loc, [])
+        merged.extend(i for i in ids if i not in merged)
+    return languages
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--playbooks", default=os.environ.get("PLAYBOOKS", ""),
@@ -347,6 +398,12 @@ def main():
         default=os.environ.get("LOCALIZED_PLAYBOOKS"),
         help="JSON array of --locale playbook IDs to batch with the English --playbooks",
     )
+    ap.add_argument(
+        "--languages",
+        default=os.environ.get("LANGUAGES"),
+        help='JSON object of playbook IDs by locale ("" or "en" = English); '
+             "replaces --playbooks/--locale/--localized-playbooks",
+    )
     args = ap.parse_args()
 
     def parse_csv(s):
@@ -362,24 +419,42 @@ def main():
     devices = parse_csv(args.devices)
     platforms = parse_csv(args.platforms)
 
-    playbooks = parse_ids(args.playbooks)
-    localized = None if args.localized_playbooks is None else parse_ids(args.localized_playbooks)
+    if args.languages is not None and args.languages.strip():
+        try:
+            languages = parse_languages(args.languages)
+        except ValueError as exc:
+            print(f"::error::{exc}", file=sys.stderr)
+            sys.exit(1)
+        playbooks, localized = [], None
+        anything = any(languages.values())
+    else:
+        languages = None
+        playbooks = parse_ids(args.playbooks)
+        localized = None if args.localized_playbooks is None else parse_ids(args.localized_playbooks)
+        anything = bool(playbooks or localized)
 
-    if not playbooks and not localized:
+    cfg = load_config(args.config)
+    # Internal MAAS broker tags are not committed to this (public) repo; they
+    # come from the ORCHESTRAI_DEVICE_TAGS variable (a JSON device->tags map).
+    dt = os.environ.get("ORCHESTRAI_DEVICE_TAGS")
+    if dt:
+        try:
+            cfg["device_to_tags"] = json.loads(dt)
+        except json.JSONDecodeError:
+            print("::warning::ORCHESTRAI_DEVICE_TAGS is not valid JSON — falling back to config",
+                  file=sys.stderr)
+    problems = unknown_filters(cfg, devices, platforms)
+    if problems:
+        for problem in problems:
+            print(f"::error::{problem}", file=sys.stderr)
+        sys.exit(1)
+
+    if not anything:
         matrix, batches = [], {}
     else:
-        cfg = load_config(args.config)
-        # Internal MAAS broker tags are not committed to this (public) repo; they
-        # come from the ORCHESTRAI_DEVICE_TAGS variable (a JSON device->tags map).
-        dt = os.environ.get("ORCHESTRAI_DEVICE_TAGS")
-        if dt:
-            try:
-                cfg["device_to_tags"] = json.loads(dt)
-            except json.JSONDecodeError:
-                print("::warning::ORCHESTRAI_DEVICE_TAGS is not valid JSON — falling back to config",
-                      file=sys.stderr)
         matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms,
-                                locale=args.locale, localized_playbooks=localized)
+                                locale=args.locale, localized_playbooks=localized,
+                                languages=languages)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:

@@ -28,7 +28,7 @@ sys.path.insert(0, str(HERE.parent / "scripts"))
 import orchestrai_batch_verdict as bv  # noqa: E402
 import orchestrai_trigger as trigger  # noqa: E402
 from orchestrai_keys import group_id, member_key, split_key  # noqa: E402
-from orchestrai_matrix import build  # noqa: E402
+from orchestrai_matrix import build, parse_languages, unknown_filters  # noqa: E402
 from orchestrai_prepare_matrices import batch_matrix  # noqa: E402
 
 CFG = {"device_to_tags": {"halo": ["apu_halo"]}, "device_to_gfx": {"halo": "gfx1151"}}
@@ -118,7 +118,7 @@ class Batches(unittest.TestCase):
         self.assertIn("zh-CN/same", batches["linux/halo"]["playbooks"])
 
     def test_one_language_alone_is_unchanged(self):
-        # !localized-orc: the locale's playbooks only, nothing to compare with.
+        # !orc locale=zh-CN: the locale's playbooks only, nothing to compare with.
         _, batches = build(["same", "china-only"], CFG, locale="zh-CN", root=self.repo.root)
         self.assertEqual(batches["linux/halo"]["playbooks"], ["zh-CN/same", "zh-CN/china-only"])
         _, batches = build(["same"], CFG, root=self.repo.root)
@@ -132,6 +132,46 @@ class Batches(unittest.TestCase):
         self.assertEqual(linux["playbooks"], ["same", "zh-CN/changed"])
         self.assertEqual(linux["covered"], {"zh-CN/same": "same"})
         self.assertEqual(linux["count"], 3)
+
+
+class Languages(Batches):
+    """--languages: any number of locales in the same batches."""
+
+    def setUp(self):
+        super().setUp()
+        d = self.repo.root / "localized-playbooks" / "ja" / "core" / "changed"
+        d.mkdir(parents=True)
+        (d / "README.md").write_text("# changed\n\n" + readme_test("pip install torch --pre"))
+
+    def test_every_locale_shares_the_device_batches(self):
+        _, batches = build([], CFG, root=self.repo.root, languages={
+            "ja": ["changed"], "zh-CN": ["changed", "same"], "": ["changed", "same"]})
+        self.assertEqual(sorted(batches), ["linux/halo", "windows/halo"])
+        linux = batches["linux/halo"]
+        # English first, then the locales in order; zh-CN/same runs English's tests.
+        self.assertEqual(linux["playbooks"], ["changed", "same", "ja/changed", "zh-CN/changed"])
+        self.assertEqual(linux["covered"], {"zh-CN/same": "same"})
+        self.assertEqual(set(linux["localized_only"]), {"ja/changed", "zh-CN/changed"})
+
+    def test_a_locale_without_english_runs_alone(self):
+        _, batches = build([], CFG, root=self.repo.root, languages={"zh-CN": ["same"], "": []})
+        self.assertEqual(batches["linux/halo"]["playbooks"], ["zh-CN/same"])
+
+    def test_languages_json_reads_en_as_english(self):
+        self.assertEqual(parse_languages('{"EN": ["a"], "": ["b", "a"], "zh-CN": ["a"]}'),
+                         {"": ["a", "b"], "zh-CN": ["a"]})
+        for bad in ('["a"]', '{"zh-CN": "a"}', "not json"):
+            with self.assertRaises(ValueError):
+                parse_languages(bad)
+
+    def test_unknown_devices_and_platforms_are_errors(self):
+        cfg = {"device_to_tags": {"halo": []}, "device_to_gfx": {"stx": "gfx1150"}}
+        self.assertEqual(unknown_filters(cfg, {"halo", "stx"}, {"linux"}), [])
+        self.assertEqual(unknown_filters(cfg, None, None), [])
+        problems = unknown_filters(cfg, {"hallo"}, {"macos"})
+        self.assertEqual(len(problems), 2)
+        self.assertIn("unknown device(s): hallo (known: halo, stx)", problems[0])
+        self.assertIn("unknown platform(s): macos", problems[1])
 
 
 class Keys(unittest.TestCase):

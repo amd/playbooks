@@ -2,14 +2,22 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# ChatOps: run canonical or localized PR playbooks via OrchestrAI and post a
-# sticky pass/fail comment.
+# ChatOps: run a PR's playbooks via OrchestrAI, in English and any localized
+# version, and post a sticky pass/fail comment.
 #
-#   !orc            -> the playbooks changed in the PR
-#   !orc all        -> every playbook
-#   !orc a,b,c      -> the named playbooks
-#   !localized-orc                     -> changed localized playbooks
-#   !localized-orc <locale> all|a,b,c  -> localized playbooks for one locale
+#   !orc                       -> the playbooks changed in the PR, each in the
+#                                 language it changed in
+#   !orc all                   -> every playbook, in English
+#   !orc a,b,c                 -> the named playbooks, in English
+#   !orc a locale=zh-CN        -> a's zh-CN version (en,zh-CN: both; all: English
+#                                 and every locale under localized-playbooks/)
+#   !orc a device=halo,stx     -> only those devices
+#   !orc a platform=linux      -> only that OS
+#
+# Options combine and may come in any order. Every language of a device and OS
+# shares one batch, so one machine (orchestrai_matrix.py). A typo in a playbook,
+# locale, device or OS refuses the command with a comment saying why
+# (orchestrai_command.py).
 #
 # Only users with write access (OWNER/MEMBER/COLLABORATOR) can trigger it, since
 # it runs internal hardware with the OrchestrAI pipeline secrets. issue_comment runs from the
@@ -23,7 +31,7 @@
 # test-playbooks-orchestrai.yml on the branch.
 #
 # Requires ORCHESTRAI_WAIT_RUNNER (a self-hosted runner label): the Test jobs
-# wait for machines and the build, up to 12 h.
+# (one per batch) wait for machines and the build, up to 16 h.
 
 name: OrchestrAI PR command
 
@@ -41,13 +49,13 @@ permissions:
 # any "LGTM" would cancel a running !orc. Keep the condition in sync with the
 # command job's `if:`.
 concurrency:
-  group: ${{ (github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && format('orchestrai-orc-{0}-{1}', startsWith(github.event.comment.body, '!localized-orc') && 'localized' || 'english', github.event.issue.number) || format('orchestrai-orc-ignored-{0}', github.run_id) }}
+  group: ${{ (github.event.issue.pull_request && startsWith(github.event.comment.body, '!orc') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && format('orchestrai-orc-{0}', github.event.issue.number) || format('orchestrai-orc-ignored-{0}', github.run_id) }}
   cancel-in-progress: true
 
 jobs:
   command:
     name: OrchestrAI PR command
-    if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '!orc') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -55,13 +63,13 @@ jobs:
       issues: write
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
-      has_entries: ${{ steps.build-matrix.outputs.has_entries }}
+      batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+      has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       head_ref: ${{ steps.pr.outputs.head_ref }}
-      locale: ${{ steps.detect.outputs.locale }}
+      filters: ${{ steps.detect.outputs.filters }}
     steps:
       - name: Resolve PR + acknowledge
         id: pr
@@ -85,7 +93,7 @@ jobs:
             echo "::warning::OrchestrAI command refused: PR head '$HEAD_REPO_FULL' is a fork of '$REPO'"
             curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
               "$API/repos/$REPO/issues/$PR/comments" \
-              -d '{"body":"🔒 `!orc` and `!localized-orc` are only available for pull requests from branches in this repository, not forks."}' >/dev/null || true
+              -d '{"body":"🔒 `!orc` is only available for pull requests from branches in this repository, not forks."}' >/dev/null || true
             exit 0
           fi
           {
@@ -130,84 +138,70 @@ jobs:
             echo "::error::Set the repository variable ORCHESTRAI_WAIT_RUNNER to a self-hosted runner label: the Test jobs run up to 12 h"; exit 1
           fi
 
-      - name: Parse command into playbook list
+      # The comment is untrusted: it reaches the parser only through env. The
+      # parser runs from the controller checkout, against the PR head's files.
+      - name: Parse the command
         id: detect
         if: steps.pr.outputs.fork == 'false'
         env:
           BODY: ${{ github.event.comment.body }}
           BASE_SHA: ${{ steps.pr.outputs.base_sha }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
         run: |
-          if printf '%s' "$BODY" | head -n1 | grep -q '^!localized-orc\([[:space:]]\|$\)'; then
-            arg=$(printf '%s' "$BODY" | head -n1 | sed -E 's/^!localized-orc[[:space:]]*//')
-            first=$(printf '%s' "$arg" | awk '{print $1}')
-            rest=$(printf '%s' "$arg" | sed -E 's/^[^[:space:]]+[[:space:]]*//')
-            if [ -n "$rest" ]; then
-              LOCALE=$first
-              selection=$rest
-              if [ ! -d "localized-playbooks/$LOCALE" ]; then
-                echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE"; exit 1
-              fi
-            elif [ -n "$first" ] && [ -d "localized-playbooks/$first" ]; then
-              LOCALE=$first
-              selection=
-            else
-              selection=$arg
-              if [ -z "$selection" ]; then
-                if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'localized-playbooks/*/core/*' 'localized-playbooks/*/supplemental/*'); then
-                  echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
-                fi
-                LOCALES=$(printf '%s\n' "$CHANGED" | sed -nE 's#^localized-playbooks/([^/]+)/(core|supplemental)/[^/]+/.*#\1#p' | sort -u)
-              else
-                LOCALES=$(find localized-playbooks -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|localized-playbooks/||' | sort -u)
-              fi
-              LOCALE_COUNT=$(printf '%s\n' "$LOCALES" | sed '/^$/d' | wc -l | tr -d ' ')
-              if [ "$LOCALE_COUNT" -ne 1 ]; then
-                echo "::error::Could not select one locale automatically; use !localized-orc <locale> [all|playbook IDs]"; exit 1
-              fi
-              LOCALE=$(printf '%s\n' "$LOCALES" | sed '/^$/d')
-            fi
-            if [ "$selection" = "all" ]; then
-              PB=$(find "localized-playbooks/$LOCALE/core" "localized-playbooks/$LOCALE/supplemental" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed "s|localized-playbooks/$LOCALE/[^/]*/||" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            elif [ -n "$selection" ]; then
-              PB=$(printf '%s' "$selection" | tr ', ' '\n\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            else
-              if [ -z "${CHANGED+x}" ] && ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- "localized-playbooks/$LOCALE/core/*" "localized-playbooks/$LOCALE/supplemental/*"); then
-                echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
-              fi
-              PB=$(printf '%s\n' "$CHANGED" | sed -nE "s#^localized-playbooks/$LOCALE/(core|supplemental)/([^/]+)/.*#\2#p" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            fi
-          else
-            LOCALE=
-            arg=$(printf '%s' "$BODY" | head -n1 | sed -E 's/^!orc[[:space:]]*//')
-            if [ "$arg" = "all" ]; then
-              PB=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            elif [ -n "$arg" ]; then
-              PB=$(printf '%s' "$arg" | tr ', ' '\n\n' | sed 's/^ *//;s/ *$//' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            else
-              if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
-                echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
-              fi
-              PB=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            fi
+          if ! CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- playbooks localized-playbooks); then
+            echo "::error::git diff failed (base $BASE_SHA not in history?)"; exit 1
           fi
-          echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
-          echo "playbooks=${PB:-[]}" >> "$GITHUB_OUTPUT"
+          export CHANGED
+          python3 .orc/.github/scripts/orchestrai_command.py --config .orc/.github/orchestrai-config.yml
 
+      - name: Say why the command was refused
+        if: failure() && steps.detect.outputs.error != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          API: ${{ github.api_url }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          ERROR: ${{ steps.detect.outputs.error }}
+        run: |
+          python3 -I -c '
+          import json, os
+          body = ("⚠️ `!orc` refused: " + os.environ["ERROR"] + "\n\n"
+                  "Usage: `!orc [all | a,b,c] [locale=en,zh-CN|all] [device=halo,stx] [platform=linux|windows]`")
+          print(json.dumps({"body": body}))' > "$RUNNER_TEMP/refused.json"
+          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "$API/repos/$REPO/issues/$PR/comments" -d @"$RUNNER_TEMP/refused.json" >/dev/null
+
+      # Every language of a device and OS shares one batch: one OrchestrAI run on
+      # one machine. A localized playbook that would execute exactly what its
+      # English version in the same batch does is not run again; it reports the
+      # English result (orchestrai_matrix.py).
       - name: Build matrix and batches
         id: build-matrix
         if: steps.pr.outputs.fork == 'false'
         env:
-          LOCALE: ${{ steps.detect.outputs.locale }}
-          PLAYBOOKS: ${{ steps.detect.outputs.playbooks }}
+          LANGUAGES: ${{ steps.detect.outputs.languages }}
+          DEVICES: ${{ steps.detect.outputs.devices }}
+          PLATFORMS: ${{ steps.detect.outputs.platforms }}
           ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
         run: python3 .orc/.github/scripts/orchestrai_matrix.py --config .orc/.github/orchestrai-config.yml
 
+      - name: Prepare the batch jobs
+        id: prepare-matrices
+        if: steps.pr.outputs.fork == 'false'
+        env:
+          ENGLISH_MATRIX: ${{ steps.build-matrix.outputs.english_matrix }}
+          ENGLISH_BATCHES: ${{ steps.build-matrix.outputs.batches }}
+          LOCALIZED_MATRIX: ${{ steps.build-matrix.outputs.localized_matrix }}
+          LOCALIZED_BATCHES: "{}"  # the batches above hold every language
+          BATCH_JOBS: "true"  # one Test job per batch: bound the batch matrix
+        run: python3 .orc/.github/scripts/orchestrai_prepare_matrices.py
+
       - name: Trigger OrchestrAI pipeline builds (PR code)
         id: trigger
-        if: steps.pr.outputs.fork == 'false' && steps.build-matrix.outputs.has_entries == 'true'
+        if: steps.pr.outputs.fork == 'false' && steps.prepare-matrices.outputs.has_entries == 'true'
         env:
-          BATCHES_JSON: ${{ steps.build-matrix.outputs.batches }}
+          BATCHES_JSON: ${{ steps.prepare-matrices.outputs.batches }}
           GIT_REF: ${{ steps.pr.outputs.head_ref }}
           ORCHESTRAI_THEROCK_URL: ${{ vars.ORCHESTRAI_THEROCK_URL }}
           ORCHESTRAI_WINDOWS_THEROCK_URL: ${{ vars.ORCHESTRAI_WINDOWS_THEROCK_URL }}
@@ -235,7 +229,7 @@ jobs:
       # A newer !orc cancels this one (concurrency above). Runs already started
       # would otherwise keep queueing for or holding machines for hours; the
       # cancel-runs job below covers a cancel after this job has finished. A
-      # failed job skips test-playbooks, so nothing would read its runs either.
+      # failed job skips test-batches, so nothing would read its runs either.
       - name: Cancel the OrchestrAI runs this command started
         if: (cancelled() || failure()) && steps.trigger.outputs.run_ids != ''
         timeout-minutes: 15
@@ -250,8 +244,12 @@ jobs:
           RUN_IDS=$(python3 -I -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .orc/.github/scripts/orchestrai_trigger.py --cancel
 
-  test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})"
+  test-batches:
+    # One job per batch (not per playbook), every language together: it waits
+    # on the batch's build once and resolves each playbook from it, as the
+    # nightly's batch jobs do (test-playbooks-orchestrai.yml), without their
+    # automatic retry: comment !orc again to re-run what did not run.
+    name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
     needs: command
     if: needs.command.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
@@ -260,20 +258,25 @@ jobs:
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
     # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
     # + 30 min) and then for the build itself (max_duration, 480 min, + 30):
-    # 900 min, plus up to 60 min for checkout, the verdict, upload and the summary.
+    # 900 min, plus up to 60 min for checkout, the verdicts and the upload.
     timeout-minutes: 960
-    continue-on-error: ${{ !matrix.required }}
+    # A batch with no required playbook shows its failures without failing the run.
+    continue-on-error: ${{ toJson(matrix.required) == '[]' }}
     strategy:
       fail-fast: false
       max-parallel: 16
       matrix:
-        include: ${{ fromJson(needs.command.outputs.matrix) }}
+        include: ${{ fromJson(needs.command.outputs.batch_matrix) }}
     steps:
       # The controller's revision (this workflow's), not the PR head.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
+      # The wait steps never fail the job by themselves: a batch that got no
+      # build resolves as NOT_RUN, and "Batch result" decides the job from the
+      # verdicts.
       - name: Wait for the batch's build to start
         id: build
+        continue-on-error: true
         # Each batch is handed off as soon as its own build starts, so a batch
         # still queued for machines never holds back the others.
         env:
@@ -287,6 +290,7 @@ jobs:
 
       - name: Wait for OrchestrAI pipeline build
         id: wait
+        continue-on-error: true
         env:
           STARTED_BUILD_URL: ${{ steps.build.outputs.build_url }}
           BATCH_ID: ${{ matrix.batch_id }}
@@ -294,87 +298,58 @@ jobs:
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
-      - name: Resolve per-playbook verdict
-        if: always()
-        id: results
+      # Each playbook's verdict: PASSED, FAILED, or NOT_RUN/INTERRUPTED
+      # (infrastructure: the batch never produced results for it), which the PR
+      # comment counts apart from test failures. A localized playbook that ran
+      # its English version's tests reports that result. !cancelled(): a
+      # cancelled job must reach the cancel step below first.
+      - name: Resolve every playbook's verdict
+        if: "!cancelled()"
         env:
           BUILD_URL: ${{ steps.wait.outputs.build_url }}
-          PLAYBOOK_ID: ${{ matrix.playbook }}
-          PLAYBOOK_LOCALE: ${{ matrix.locale }}
-          PLATFORM: ${{ matrix.platform }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
+          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ job.check_run_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
-        # One job per playbook here; test-playbooks-orchestrai.yml resolves a
-        # whole batch at once (orchestrai_batch_verdict.py runs this same script
-        # for each playbook).
-        #
-        # Exit codes: 0 PASSED, 1 FAILED (real test failure), 2 NOT_RUN/
-        # INTERRUPTED (the batch never produced results for this playbook).
-        # GitHub has no neutral step result, so 2 still fails the job — but it is
-        # annotated as infrastructure and the artifact records outcome=NOT_RUN,
-        # so the aggregated PR comment counts it separately from test failures.
-        run: |
-          rc=0
-          python3 .github/scripts/orchestrai_verdict.py || rc=$?
-          echo "verdict_rc=${rc}" >> "$GITHUB_OUTPUT"
-          if [ "$rc" = "2" ]; then
-            echo "::warning::${PLAYBOOK_ID} (${PLATFORM}) did not run — OrchestrAI infrastructure issue, not a test failure"
-          fi
-          exit "$rc"
+          DEFER_EXIT: "1"  # "Batch result" decides the job
+        run: python3 .github/scripts/orchestrai_batch_verdict.py
+
+      # A cancelled or timed-out job stops its run: nothing else would, and a
+      # queued run would still take machines hours later.
+      - name: Cancel this batch's OrchestrAI run
+        if: cancelled()
+        timeout-minutes: 5
+        env:
+          RUN_IDS: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --cancel
+
+      - name: Batch result
+        if: always()
+        env:
+          BATCH_JSON: ${{ toJson(matrix) }}
+        # Fails only when a required playbook did not pass; with nothing
+        # required, when any playbook did not (continue-on-error above).
+        run: python3 .github/scripts/orchestrai_batch_verdict.py --exit-code test-results/batch.json
 
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
+          name: batch-results-${{ strategy.job-index }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: test-results/
           if-no-files-found: ignore
-
-      - name: Test summary
-        if: always()
-        env:
-          RP_URL: ${{ steps.results.outputs.rp_url }}
-          RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
-        run: |
-          # NOT_RUN/INTERRUPTED is infrastructure, not a test failure — say so in
-          # the job summary instead of letting it read as a failed playbook.
-          INFRA_NOTE=$(python3 - <<'PY'
-          import json
-          try:
-              d = json.load(open("test-results/summary.json"))
-          except Exception:
-              d = {}
-          outcome = (d.get("outcome") or "").upper()
-          if outcome in ("NOT_RUN", "INTERRUPTED"):
-              reason = d.get("infrastructure_reason") or "reason not reported by the pipeline"
-              print(f"> ⚠️ **{outcome}** — this playbook produced no test results. "
-                    f"Infrastructure: {reason}")
-          PY
-          )
-          {
-            echo "### \`${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}\` (${{ matrix.platform }}/${{ matrix.arch }})"
-            echo ""
-            if [ -n "${INFRA_NOTE}" ]; then
-              echo "${INFRA_NOTE}"
-              echo ""
-            fi
-            # ReportPortal (test results) link only; the pipeline build URL is
-            # intentionally not shown. Populated even when the verdict fails.
-            if [ -n "${RP_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| ReportPortal | [View Results](${RP_URL}) |"
-            elif [ -n "${RUN_URL}" ]; then
-              echo "| | |"; echo "|---|---|"
-              echo "| OrchestrAI | [View Results](${RUN_URL}) |"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
 
   # A cancelled command (a newer !orc, or Cancel workflow) stops every run it
   # started, including batches whose Test jobs never began (max-parallel):
   # nothing else would, and a queued run would still take machines hours later.
   cancel-runs:
     name: Cancel OrchestrAI runs
-    needs: [command, test-playbooks]
+    needs: [command, test-batches]
     if: cancelled() && needs.command.result == 'success' && needs.command.outputs.run_ids != ''
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 20
@@ -398,7 +373,7 @@ jobs:
             python3 .github/scripts/orchestrai_trigger.py --cancel
 
   report:
-    needs: [command, test-playbooks]
+    needs: [command, test-batches]
     if: always() && needs.command.result == 'success' && needs.command.outputs.head_sha != ''
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     steps:
@@ -409,6 +384,7 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
+          pattern: batch-results-*
           path: artifacts
         continue-on-error: true
 
@@ -420,17 +396,16 @@ jobs:
           PR: ${{ github.event.issue.number }}
           HEAD_SHA: ${{ needs.command.outputs.head_sha }}
           HEAD_REF: ${{ needs.command.outputs.head_ref }}
-          LOCALE: ${{ needs.command.outputs.locale }}
+          FILTERS: ${{ needs.command.outputs.filters }}
+          # Every batch that should report: one whose job uploaded nothing is
+          # reported as not run, never left out.
+          EXPECTED_BATCHES: ${{ needs.command.outputs.batch_matrix }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          REPORT_ARGS=()
           MARKER='<!-- orchestrai-orc-report -->'
-          if [ -n "$LOCALE" ]; then
-            REPORT_ARGS+=(--locale "$LOCALE")
-            MARKER='<!-- orchestrai-localized-orc-report -->'
-          fi
-          python3 .github/scripts/orchestrai_report.py "${REPORT_ARGS[@]}" \
-            --artifacts artifacts --run-url "$RUN_URL" --sha "$HEAD_SHA" --ref "$HEAD_REF" > /tmp/body.md
+          python3 .github/scripts/orchestrai_report.py --config .github/orchestrai-config.yml \
+            --artifacts artifacts --run-url "$RUN_URL" --sha "$HEAD_SHA" --ref "$HEAD_REF" \
+            --filters "$FILTERS" > /tmp/body.md
           python3 -c "import json;print(json.dumps({'body':open('/tmp/body.md').read()}))" > /tmp/payload.json
           existing=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$API/repos/$REPO/issues/$PR/comments?per_page=100" \
             | python3 -c "import sys,json;c=[x for x in json.load(sys.stdin) if str(x.get('body','')).startswith('$MARKER')];print(c[0]['id'] if c else '')")

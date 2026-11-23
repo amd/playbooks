@@ -730,7 +730,7 @@ class FoldIntoCapacityBatch(unittest.TestCase):
             os.chdir(old_cwd)
         if not batches:
             self.skipTest("no zh-CN playbooks for this selection")
-        # One language per run (!localized-orc): the batch ID names no locale.
+        # One language per run (!orc locale=zh-CN): the batch ID names no locale.
         self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
         self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
         self.assertTrue(all(key.startswith("zh-CN/")
