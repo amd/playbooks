@@ -601,13 +601,18 @@ model.gradient_checkpointing_enable()
 
 ### Watch GPU Memory
 
-```bash
-# Check ROCm GPU status
-watch -n 1 amd-smi
+<!-- @os:linux -->
+Watch GPU status and memory usage live while a run is in progress (press
+`Ctrl-C` to stop):
 
-# Show memory info
-rocm-smi --showmeminfo vram
+```bash
+watch -n 1 amd-smi
 ```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+> **Note**: On Windows, `amd-smi` is not supported. To track GPU utilization, you can use Task Manager, where you should see utilization rise while training is running.
+<!-- @os:end -->
 
 ### (Optional) Track Experiments with Weights & Biases
 

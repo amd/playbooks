@@ -76,7 +76,7 @@
     ]
   },
   "difficulty": "advanced",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
@@ -96,6 +96,5 @@
       "type": "amd"
     }
   ],
-  "published_date": "2026-09-01",
-  "updated_date": "2026-11-03"
+  "published_date": "2026-09-01"
 }
