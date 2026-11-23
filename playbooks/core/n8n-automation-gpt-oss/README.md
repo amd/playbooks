@@ -361,26 +361,26 @@ Alternatively, you can open a terminal and run `lemonade list` to see what model
 <!-- @device:halo_box -->
 <!-- @os:linux -->
 ```bash
-lemonade run gpt-oss-120b-Q4_K_M --llamacpp vulkan
+lemonade run ${lemonade_model} --llamacpp vulkan
 ```
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ```powershell
-lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
+lemonade run ${lemonade_model} --llamacpp vulkan
 ```
 <!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @device:halo,grgh -->
 ```bash
-lemonade run gpt-oss-120b-GGUF --llamacpp vulkan
+lemonade run ${lemonade_model} --llamacpp vulkan
 ```
 <!-- @device:end -->
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 ```bash
-lemonade run gpt-oss-20b-GGUF --llamacpp vulkan
+lemonade run ${lemonade_model} --llamacpp vulkan
 ```
 <!-- @device:end -->
 
@@ -405,7 +405,7 @@ We've provided a pre-built workflow that you can import directly:
 2. Click **Start from Scratch** to open the workflow editor. Alternatively, click the **+** button in the top left, choose **New workflow**, then **Build workflow**.
 3. Click the **...** menu (three dots) in the top right bar and select **Import from file**
 4. Select the downloaded `financial-news-workflow.json` file
-5. The workflow will appear on the canvas
+5. The workflow will appear on the canvas. Double click the Lemonade Node and confirm the desired model is selected.
 
 
 ### Step 3: Understanding the Workflow
@@ -436,7 +436,8 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 1. Double click the **Lemonade Chat Model** node in n8n
 2. In the dropdown menu **Credential to connect with** select **Create New Credential**
 3. Enter the values in the table below and click save.
-4. Choose the relevant model that you have loaded in Lemonade Server.
+4. Under **Model**, select **`${lemonade_model}`** — the build recommended for your
+   hardware. Any other model you have loaded will also work.
 
   | Field | Value |
   |-------|-------|
@@ -445,7 +446,8 @@ Before running the workflow, you need to connect it to your local Lemonade serve
 
 > **Note**: Before testing, run `lemonade status` in a terminal to confirm that the Lemonade server is running.
 <!-- @device:halo_box -->
-> This workflow uses GPT-OSS-120B and it is pre-installed in Lemonade. You can change this to other loaded models in the Lemonade Chat Model node settings.
+> On the Ryzen AI Halo we recommend `${lemonade_model}`. Some systems ship with it already
+> installed; if you don't see it in the list, download it in Lemonade first.
 <!-- @device:end -->
 
 ### Step 5: Test the Workflow
