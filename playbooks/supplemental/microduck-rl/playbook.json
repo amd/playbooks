@@ -1,7 +1,7 @@
 {
   "id": "microduck-rl",
   "title": "Training a MicroDuck Walking Policy with Reinforcement Learning",
-  "description": "Train a MicroDuck walking policy with PPO on AMD ROCm\u2122 software, then compare it with a reference checkpoint.",
+  "description": "Train a MicroDuck walking policy with PPO on AMD ROCm™ software, then compare it with a reference checkpoint.",
   "time": 90,
   "authors": [
     {
@@ -12,16 +12,33 @@
     }
   ],
   "supported_platforms": {
-    "halo": ["linux"],
-    "r9700": ["linux"],
-    "w7900": ["linux"]
+    "halo": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
+    ],
+    "w7900": [
+      "linux"
+    ]
   },
   "tested_platforms": {
-    "halo": ["linux"],
-    "r9700": ["linux"]
+    "halo": [
+      "linux"
+    ],
+    "r9700": [
+      "linux"
+    ]
   },
   "difficulty": "beginner",
   "developed": true,
   "published": true,
-  "tags": ["reinforcement-learning", "rocm", "simulation", "robotics"]
+  "tags": [
+    "reinforcement-learning",
+    "rocm",
+    "simulation",
+    "robotics"
+  ],
+  "published_date": "2026-11-25",
+  "isNew": true
 }
