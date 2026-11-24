@@ -535,7 +535,7 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_every_test_job_waits_for_its_own_batch(self):
         for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
-                          ("orchestrai-pr-command.yml", "test-playbooks")):
+                          ("orchestrai-pr-command.yml", "test-batches")):
             steps = self.load(name)["jobs"][job]["steps"]
             ids = [s.get("id") for s in steps]
             self.assertLess(ids.index("build"), ids.index("wait"), name)
@@ -604,7 +604,7 @@ class AcquireTimeoutValidation(unittest.TestCase):
         for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 workflows[name] = yaml.safe_load(f)
-        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-playbooks"]
+        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-batches"]
         self.assertGreaterEqual(orc["timeout-minutes"], attempt + overhead)
         # The batch job: one attempt, then a retry only while a whole one still fits.
         batch = workflows["test-playbooks-orchestrai.yml"]["jobs"]["test-batches"]
