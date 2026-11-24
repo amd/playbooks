@@ -35,7 +35,7 @@ Device inference:
     Tests outside any @device: block run on all devices. When --device is
     passed on the CLI, tests whose inferred device list doesn't include that
     device are skipped.
-    Valid devices: halo, grgh, mdsh, stx, krk, grgp, mdsp, rx7900xt, rx9070xt, r9700.
+    Valid devices: halo, grgh, mdsh, stx, krk, grgp, mdsp, rx7900xt, rx9070xt, r9700, w7900.
 
 Supported test attributes:
     - id: Unique identifier for the test (required)
@@ -188,7 +188,7 @@ SIGNATURE_EXCLUDED = frozenset({"line_number", "hidden"})
 VALID_DEVICES = {
     "halo", "grgh", "mdsh",          # halo-class APUs
     "stx", "krk", "grgp", "mdsp",    # point-class APUs
-    "rx7900xt", "rx9070xt", "r9700",  # discrete GPUs
+    "rx7900xt", "rx9070xt", "r9700", "w7900",  # discrete GPUs
 }
 
 

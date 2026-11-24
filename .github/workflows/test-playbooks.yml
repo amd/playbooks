@@ -43,6 +43,7 @@ on:
           - r9700
           - rx7900xt
           - rx9070xt
+          - w7900
       runner_label:
         description: 'Extra runner label to target one specific self-hosted runner (e.g. its hostname/IP/alias label). Use ONLY when platform ≠ all && device ≠ all. Leave empty to let GitHub pick any matching runner.'
         required: false
