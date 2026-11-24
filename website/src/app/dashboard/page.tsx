@@ -282,7 +282,6 @@ interface PlaybookMatrixCell {
 interface OrchestraiCellInfo {
   outcome: string;
   runUrl: string;
-  rpUrl: string;
   jobUrl: string;
   reason: string;
   attempt: number;
@@ -365,7 +364,6 @@ function OrchestraiCell({ cell, info, style }: {
     </div>
   );
   const secondary = [
-    info.rpUrl ? { href: info.rpUrl, label: "RP", title: "ReportPortal launch" } : null,
     info.jobUrl ? { href: info.jobUrl, label: "Job", title: "GitHub Actions job" } : null,
   ].filter((l): l is { href: string; label: string; title: string } => l !== null);
 

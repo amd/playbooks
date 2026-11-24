@@ -95,7 +95,6 @@ interface CellSummary {
   orchestrai?: {
     outcome: string;
     runUrl: string;
-    rpUrl: string;
     jobUrl: string;
     reason: string;
     attempt: number;
@@ -279,7 +278,6 @@ function orchestraiCell(r: OrchestraiResult): CellSummary {
     orchestrai: {
       outcome: r.outcome,
       runUrl: r.runUrl,
-      rpUrl: r.rpUrl,
       jobUrl: r.jobUrl,
       reason: r.reason,
       attempt: r.attempt,

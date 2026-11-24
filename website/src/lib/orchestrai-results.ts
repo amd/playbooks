@@ -6,8 +6,8 @@
  * Reads playbook results of the OrchestrAI CI workflow (test-playbooks-orchestrai.yml).
  *
  * Each batch job of that workflow uploads a `batch-results-<n>-[<locale>-]<platform>-<arch>`
- * artifact holding `batch.json` (one row per playbook, with the OrchestrAI run,
- * ReportPortal launch and GitHub job links) and `<playbook>/summary.json` (test counts).
+ * artifact holding `batch.json` (one row per playbook, with the OrchestrAI run and
+ * GitHub job links) and `<playbook>/summary.json` (test counts).
  *
  * A batch can test English and localized playbooks on the same machine. Its rows are then
  * keyed `<locale>/<id>` (`playbook`), with the bare id in `playbook_id` and the locale in
@@ -50,7 +50,6 @@ export interface OrchestraiResult {
   required: boolean;
   batchLabel: string;
   runUrl: string;
-  rpUrl: string;
   jobUrl: string;
   reason: string;
   attempt: number;
@@ -74,7 +73,6 @@ interface BatchRow {
   label?: string;
   batch_id?: string;
   run_url?: string;
-  rp_url?: string;
   job_url?: string;
   reason?: string;
   attempt?: number;
@@ -86,7 +84,6 @@ interface PlaybookSummary {
   passed?: number;
   failed?: number;
   skipped?: number;
-  reportportal_url?: string | null;
 }
 
 // A completed run's artifacts never change: keep its parsed results.
@@ -190,7 +187,6 @@ async function readBatchArtifact(artifact: Artifact, token: string): Promise<Orc
         required: row.required === true,
         batchLabel: row.label || row.batch_id || "",
         runUrl: row.run_url || "",
-        rpUrl: row.rp_url || summary.reportportal_url || "",
         jobUrl: row.job_url || "",
         reason: row.reason || "",
         attempt: row.attempt ?? 1,
