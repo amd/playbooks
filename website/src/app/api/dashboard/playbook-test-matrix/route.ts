@@ -102,6 +102,7 @@ interface CellSummary {
     firstOutcome: string;
     required: boolean;
     batchLabel: string;
+    coveredBy: string;
   };
 }
 
@@ -285,6 +286,7 @@ function orchestraiCell(r: OrchestraiResult): CellSummary {
       firstOutcome: r.firstOutcome,
       required: r.required,
       batchLabel: r.batchLabel,
+      coveredBy: r.coveredBy,
     },
   };
 }

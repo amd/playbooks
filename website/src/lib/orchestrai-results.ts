@@ -8,6 +8,12 @@
  * Each batch job of that workflow uploads a `batch-results-<n>-[<locale>-]<platform>-<arch>`
  * artifact holding `batch.json` (one row per playbook, with the OrchestrAI run,
  * ReportPortal launch and GitHub job links) and `<playbook>/summary.json` (test counts).
+ *
+ * A batch can test English and localized playbooks on the same machine. Its rows are then
+ * keyed `<locale>/<id>` (`playbook`), with the bare id in `playbook_id` and the locale in
+ * `locale`, and their counts are in `<locale>/<id>/summary.json`. A localized entry whose
+ * tests are the same as its English version's is not run again: it carries `covered_by`
+ * (the English key) and reports the English result.
  */
 import JSZip from "jszip";
 
@@ -37,6 +43,8 @@ export interface OrchestraiResult {
   platform: string;
   arch: string;
   locale: string;
+  /** Set when the entry was not run because its English version runs the same tests. */
+  coveredBy: string;
   /** PASSED, FAILED, ERROR, NOT_RUN or INTERRUPTED */
   outcome: string;
   required: boolean;
@@ -54,10 +62,13 @@ export interface OrchestraiResult {
 }
 
 interface BatchRow {
+  /** The batch key: `<id>` for English, `<locale>/<id>` in a batch shared by several languages. */
   playbook: string;
+  playbook_id?: string;
   platform: string;
   arch: string;
   locale?: string;
+  covered_by?: string;
   outcome?: string;
   required?: boolean;
   label?: string;
@@ -152,22 +163,29 @@ async function readBatchArtifact(artifact: Artifact, token: string): Promise<Orc
   }
 
   const root = batchFile.name.slice(0, batchFile.name.length - "batch.json".length);
+  const readSummary = async (key: string): Promise<PlaybookSummary | null> => {
+    const file = key ? zip.file(`${root}${key}/summary.json`) : null;
+    if (!file) return null;
+    try {
+      return JSON.parse(await file.async("text")) as PlaybookSummary;
+    } catch {
+      return null; // counts stay at zero; the outcome still comes from batch.json
+    }
+  };
   return Promise.all(
     rows.map(async (row) => {
-      let summary: PlaybookSummary = {};
-      const summaryFile = zip.file(`${root}${row.playbook}/summary.json`);
-      if (summaryFile) {
-        try {
-          summary = JSON.parse(await summaryFile.async("text")) as PlaybookSummary;
-        } catch {
-          // counts stay at zero; the outcome still comes from batch.json
-        }
-      }
+      const key = row.playbook || "";
+      const slash = key.lastIndexOf("/");
+      const coveredBy = row.covered_by || "";
+      // A covered entry did not run: its counts are those of the English run it reports.
+      const summary: PlaybookSummary =
+        (await readSummary(key)) ?? (coveredBy ? await readSummary(coveredBy) : null) ?? {};
       return {
-        playbookId: row.playbook,
+        playbookId: row.playbook_id || key.slice(slash + 1),
         platform: (row.platform || "").toLowerCase() === "windows" ? "windows" : "linux",
         arch: (row.arch || "").toLowerCase(),
-        locale: row.locale || "",
+        locale: row.locale ?? (slash > 0 ? key.slice(0, slash) : ""),
+        coveredBy,
         outcome: (row.outcome || "FAILED").toUpperCase(),
         required: row.required === true,
         batchLabel: row.label || row.batch_id || "",

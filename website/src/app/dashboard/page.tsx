@@ -289,6 +289,8 @@ interface OrchestraiCellInfo {
   firstOutcome: string;
   required: boolean;
   batchLabel: string;
+  /** Set when a localized entry was not run because English runs the same tests. */
+  coveredBy?: string;
 }
 
 interface PlaybookMatrixRow {
@@ -332,6 +334,7 @@ function orchestraiTooltip(cell: PlaybookMatrixCell, info: OrchestraiCellInfo): 
     lines.push(`Tests: ${cell.passed} passed, ${cell.failed} failed, ${cell.skipped} skipped of ${cell.totalTests}`);
   }
   if (info.reason) lines.push(`Reason: ${info.reason}`);
+  if (info.coveredBy) lines.push("Same tests as English: not run again, English result shown");
   if (info.attempt > 1) lines.push(`Retried (attempt ${info.attempt}; first: ${info.firstOutcome || "?"})`);
   lines.push(info.runUrl ? "Click to open the OrchestrAI run" : "No OrchestrAI run link recorded");
   return lines.join("\n");
