@@ -293,12 +293,17 @@ export interface RunSummary {
 }
 
 /**
- * Lists recent completed runs of the test workflow across all event types.
+ * Lists recent completed runs of a test workflow (default: test-playbooks.yml)
+ * across all event types.
  * Used to populate run-selector UIs.
  */
-export async function listRecentRuns(token: string, perPage = 20): Promise<RunSummary[]> {
+export async function listRecentRuns(
+  token: string,
+  perPage = 20,
+  workflowFile: string = WORKFLOW_FILE,
+): Promise<RunSummary[]> {
   const res = await ghFetch(
-    `/actions/workflows/${WORKFLOW_FILE}/runs?status=completed&per_page=${perPage}`,
+    `/actions/workflows/${workflowFile}/runs?status=completed&per_page=${perPage}`,
     token
   );
   if (!res.ok) throw new Error(`Failed to list workflow runs (${res.status})`);
