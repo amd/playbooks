@@ -27,7 +27,7 @@ By the end of this playbook you will be able to:
 
 ---
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -1014,11 +1014,13 @@ If successful, you should see the following output:
 
 [SELF-HOST Firecrawl](https://github.com/firecrawl/firecrawl/blob/main/SELF_HOST.md) is ideal for those who need full control over their scraping and data processing environments but comes with the trade-off of additional maintenance and configuration efforts.
 
-Start by cloning the repository:
+Start by cloning the repository into your home directory. `systemd` expects it at
+`~/firecrawl`, which is what `WorkingDirectory` in the unit file above points to:
 ```bash
+cd ~
 git clone https://github.com/firecrawl/firecrawl.git
 ```
-Create a `.env` file, in the `/firecrawl` directory: 
+Create a `.env` file in the `~/firecrawl` directory: 
 ```bash
 # ===== Required ENVS ======
 PORT=3002
@@ -1033,7 +1035,7 @@ Before moving on, make sure you have pulled the latest OpenClaw Docker image:
 ```bash
 podman pull ghcr.io/openclaw/openclaw:latest
 ```
-Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](assets/openclaw-compose.yaml) and place it in the root `/firecrawl` directory:
+Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](assets/openclaw-compose.yaml) and place it in the `~/firecrawl` directory:
 
 > This convention is required for `systemd` to locate and start the service correctly as specified in `WorkingDirectory=${HOME}/firecrawl`.
 
@@ -1041,8 +1043,10 @@ Once that is done, download the OpenClaw Compose file [openclaw-compose.yaml](as
 
 ### 4. Launch OpenClaw service through Firecrawl 
 
-Before handing control over to `systemd`, validate that everything works correctly by running the stack manually:
+Before handing control over to `systemd`, validate that everything works correctly by
+running the stack manually from the `~/firecrawl` directory, where the Compose file lives:
 ```bash
+cd ~/firecrawl
 podman compose -f openclaw-compose.yaml up -d
 ```
 If everything is configured correctly, you should see the OpenClaw container come up and your command line output should look similar to this:

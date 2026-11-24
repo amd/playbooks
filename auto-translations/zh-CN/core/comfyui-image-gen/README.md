@@ -9,25 +9,30 @@ SPDX-License-Identifier: MIT
 > **机器翻译。**本页面由英文自动翻译，未经人工审核。其中可能包含错误，某些说明、命令、下载内容、产品可用性或其他内容可能因语言或地区而异。如内容存在任何不一致或差异，应以英文原版 playbook 为准。
 <!-- auto-translated-disclaimer:end -->
 
-<!-- @github-only -->
+# <!-- @github-only -->
 > [!IMPORTANT]
 > This playbook uses special tags that GitHub cannot render. Please visit [amd.com/playbooks](https://amd.com/playbooks) to correctly preview this content.
 <!-- @github-only:end -->
 
 ## 概述
 
-ComfyUI 是一个功能强大的、基于节点的界面，适用于 Stable Diffusion 及其他扩散模型。与传统的仅包含简单提示框的文本生成图像界面不同，ComfyUI 将整个图像生成流程以可视化图表的形式呈现出来，让您能够对从文本编码到潜在空间操作再到最终解码的每一个步骤进行精细控制。
+ComfyUI 是一款功能强大的基于节点的界面，适用于 Stable Diffusion 和其他扩散模型。与仅有简单提示词输入框的传统文生图界面不同，ComfyUI 将整个图像生成流程以可视化图形的方式呈现出来，让你可以对从文本编码到潜空间操作再到最终解码的每一个步骤进行精细控制。
 
-本教程将教您如何在 GPU 上使用 ComfyUI 配合 Z Image Turbo 模型生成高质量的 AI 图像。
+本教程将教你如何在你的 GPU 上使用 ComfyUI 配合 Z Image Turbo 模型生成高质量的 AI 图像。
 
-## 您将学到什么
+<!-- @device:halo_box -->
+> **注意：** 部分 AMD Ryzen AI Halo 系统预装了本实践指南所用的模型，而其他系统则未预装。两种情况均受支持。当你阅读到模型下载部分时，请检查 ComfyUI 中是否已有该模型——如果已经存在，可以跳过下载步骤；如果没有，请按照该处的步骤进行下载。
+
+<!-- @device:end -->
+
+## 你将学到的内容
 
 - 如何启动 ComfyUI 并加载 Z-Image Turbo 模板
-- 理解扩散流程的各个组件
+- 了解扩散流程的各个组成部分
 - 生成图像并调整生成参数
 - 保存和分享工作流
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## 设置内存配置
 
 <!-- @require:memory-config -->
@@ -47,15 +52,15 @@ ComfyUI 是一个功能强大的、基于节点的界面，适用于 Stable Diff
 
 <!-- @os:linux -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
-**为您的用户授予 GPU 设备访问权限**（需要注销并重新登录才能生效）：
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
+**授予你的用户访问 GPU 设备的权限**（需要注销并重新登录才能生效）：
 
 ```bash
 sudo usermod -aG render,video $LOGNAME
 ```
 
 #### 创建虚拟环境
-在 Linux 上，打开您选择的目录中的终端，运行以下命令创建一个 venv：
+在 Linux 上，在你选择的目录中打开终端，并运行以下提示词以创建一个 venv：
 
 <!-- @test:id=create-venv-linux timeout=300 -->
 ```bash
@@ -294,57 +299,58 @@ echo "OK: ComfyUI server is reachable!"
 
 <!-- @device:halo_box -->
 <!-- @os:windows -->
-要在 Windows 上启动 ComfyUI，请点击桌面上的 ComfyUI Desktop Launcher。按照步骤安装 AMD 本地版本。
+要在 Windows 上启动 ComfyUI，请点击桌面上的 ComfyUI Desktop Launcher。按照提示步骤安装适用于 AMD 的本地版本。
 
 <p align="center">
   <img src="assets/new_installer.png" alt="ComfyUI Desktop Launcher and Installer" width="600"/>
 </p>
 
-然后，点击应用程序顶部中间的 ComfyUI 按钮。这将打开一个设置选项卡。打开 Storage 选项卡，并确保路径设置如下，以便访问预安装的模型。
+然后，点击应用顶部中间的 ComfyUI 按钮。这将打开一个设置选项卡。如果你的 Halo 设备预装了模型，请打开 Storage 选项卡，确保路径设置如下，以便访问预装模型。
 
 <p align="center">
   <img src="assets/models_storage.png" alt="ComfyUI Desktop Menu Storage Tab" width="600"/>
 </p>
 
+否则，请按照模板中的提示安装模型。
 
 <!-- @os:end -->
 
 <!-- @os:linux -->
 在 AMD Ryzen™ AI Halo 上，ComfyUI 运行在一个预构建的容器中，无需额外的 Python 设置。
 
-要在 Linux 上启动 ComfyUI，请点击任务栏中的 ComfyUI 快捷方式。它应该会自动在浏览器窗口中打开。
->**提示**：ComfyUI 及其模型存储在 `~/.local/share/ComfyUI/models` 中。您可以在此处手动添加工作流或新模型。
+要在 Linux 上启动 ComfyUI，请点击任务栏中的 ComfyUI 快捷方式。它会自动在浏览器窗口中打开。
+>**提示**：ComfyUI 及其模型存储在 `~/.local/share/ComfyUI/models` 中。你可以在此处手动添加工作流或新模型。
 
 
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
-要在 Windows 上启动 ComfyUI，只需点击桌面上的 ComfyUI 快捷方式。
+要在 Windows 上启动 ComfyUI，只需点击桌面上的 ComfyUI 快捷方式即可。
 <!-- @os:end -->
 
 <!-- @os:linux -->
 
 要启动 ComfyUI：
 
-1. 确保您位于 ComfyUI 目录中。
+1. 确保你位于 ComfyUI 目录中。
 2. 运行 `python3 main.py --use-pytorch-cross-attention`
 
-ComfyUI 会启动一个本地 Web 服务器。打开浏览器并访问 `http://127.0.0.1:8188` 以访问界面。
+ComfyUI 会启动一个本地 Web 服务器。在浏览器中打开 `http://127.0.0.1:8188` 即可访问该界面。
 
-> **提示**：在使用 ComfyUI 时请保持终端窗口打开。关闭它将停止服务器运行。
+> **提示**：在使用 ComfyUI 时，请保持终端窗口处于打开状态。关闭它将停止服务器运行。
 <!-- @os:end -->
 <!-- @device:end -->
 
 
 ## 查找 Z-Image Turbo 模板
 
-在生成图像之前，您需要加载 Z-Image Turbo 模板。以下是查找方法：
+在生成图像之前，你需要加载 Z-Image Turbo 模板。以下是查找方法：
 
-1. **查看屏幕最左侧边缘**——应用程序最左侧有一个从上到下贯穿的垂直工具栏。
+1. **查看屏幕最左边缘**——在应用最左侧，有一个从上到下延伸的垂直工具栏。
 
-2. **找到文件夹图标**——在左侧工具栏中，寻找一个看起来像文件夹的图标。将鼠标悬停在其上时，会显示标签“Templates”。
+2. **找到文件夹图标**——在左侧工具栏中，查找一个看起来像文件夹的图标。将鼠标悬停在上面时，它会显示标签“Templates”。
 
 <p align="center">
   <img src="assets/templates.png" alt="Templates button in the left toolbar" width="600"/>
@@ -352,7 +358,7 @@ ComfyUI 会启动一个本地 Web 服务器。打开浏览器并访问 `http://1
 
 3. **点击文件夹图标**——这将打开 Templates 面板。
 
-4. **搜索“Z-Image Turbo”**——使用搜索栏或滚动浏览可用模板，找到 Z-Image Turbo Text To Image 工作流，然后点击加载它。
+4. **搜索“Z-Image Turbo”**——使用搜索栏或滚动浏览可用模板，找到 Z-Image Turbo Text To Image 工作流，然后点击以加载它。
 
 <p align="center">
   <img src="assets/select-template.png" alt="Selecting the Z-Image Turbo template" width="600"/>
@@ -361,17 +367,18 @@ ComfyUI 会启动一个本地 Web 服务器。打开浏览器并访问 `http://1
 ## 下载模型
 
 <!-- @require:comfyui-models -->
+<!-- @prereq:comfyui-models -->
 
 ## 了解界面
 
-当 Z-Image Turbo 模板加载完成后，您将看到一个包含 2 个主要节点的画布。第一个节点名为“Text to Image (Z-Image-Turbo)”，第二个节点用于查看图像。
+当 Z-Image Turbo 模板加载完成后，你会在画布上看到 2 个主要节点。第一个节点名为“Text to Image (Z-Image-Turbo)”，第二个节点用于查看图像。
 
 <p align="center">
   <img src="assets/zimagenode.png" alt="ComfyUI Main Node" width="600"/>
 </p>
 
 
-在 Z-Image 节点上，点击右上角按钮以展开节点并查看子图。
+在 Z-Image 节点上，点击右上角的按钮以展开节点，查看其子图。
 
 <p align="center">
   <img src="assets/subgraph_good.png" alt="ComfyUI Node Subgraph" width="600"/>
@@ -379,32 +386,31 @@ ComfyUI 会启动一个本地 Web 服务器。打开浏览器并访问 `http://1
 
 ### 流程组件
 
-Z-Image Turbo 工作流使用四个协同工作的关键模型组件：
+Z-Image Turbo 工作流使用四个关键模型组件协同工作：
 
 | 组件 | 作用 |
 |-----------|------|
-| **文本编码器**（Qwen 3 4B） | 将您的文本提示转换为扩散模型能够理解的嵌入向量 |
-| **扩散模型**（Z-Image Turbo） | 核心神经网络，通过迭代方式将潜在表示去噪成图像 |
-| **VAE**（变分自编码器） | 在潜在空间与图像之间进行编码/解码（将最终潜在向量解码为像素） |
+| **文本编码器**（Qwen 3 4B） | 将你的文本提示词转换为扩散模型能够理解的嵌入向量 |
+| **扩散模型**（Z-Image Turbo） | 核心神经网络，通过迭代方式对潜在表示进行去噪，生成图像 |
+| **VAE**（变分自编码器） | 在图像与潜空间之间进行编解码（将最终的潜在表示解码为像素） |
 | **LoRA**（可选） | 轻量级适配器，可在不重新训练基础模型的情况下修改风格或主体 |
 
-工作流中的每个节点都对应上述其中一个组件。数据流从左到右：文本 → 嵌入向量 → 引导去噪 → 潜在向量 → 最终图像。
+工作流中的每个节点都对应其中一个组件。数据从左到右流动：文本 → 嵌入向量 → 引导去噪 → 潜在表示 → 最终图像。
+## 生成你的第一张图像
 
-## 生成您的第一张图像
+Z-Image Turbo 模型已经加载完成。要生成图像：
 
-Z-Image Turbo 模型已加载完成。要生成图像：
-
-1. **在主 Z-Image 节点中输入您的提示**。请尽量描述得详细一些。示例如下：
+1. **输入你的提示词**，在主 Z-Image 节点中。描述要尽量详细。示例如下：
    ```
    A photorealistic red fox sitting in a snowy forest clearing, 
    morning light filtering through pine trees, 
    detailed fur texture, bokeh background
    ```
-2. **（可选）**：确认或调整子图中的其他特定设置。
-3. **点击右下角的蓝色“Run Workflow”按钮**（或按 `Ctrl+Enter`）
-4. 观察各个节点在执行每个步骤时高亮显示
+2. **（可选）**：确认或微调子图中的其他具体设置。
+3. **点击右上角的蓝色“Run Workflow”按钮**（或按 `Ctrl+Enter`）
+4. 观察每个节点在执行时依次高亮
 
-整个工作流执行过程应在 30 秒内完成。生成的图像将出现在 **Save Image** 节点中，并保存到 `output/` 文件夹。
+整个工作流的执行通常会在 30 秒内完成。生成的图像会出现在 **Save Image** 节点中，并保存到 `output/` 文件夹。
 
 <!-- @os:windows -->
 <!-- @test:id=comfyui-generate-zimage-windows timeout=1200 hidden=True -->
@@ -578,43 +584,56 @@ ls -1t ComfyUI/output/*.png | head -n 5
 <!-- @os:end -->
 
 
+<!-- @os:linux -->
+## 优化注意力机制以提升性能
+
+现在你已经生成了一张图像，可以调整 ComfyUI 计算**注意力（attention）**的方式，以在 AMD GPU 上获得最佳性能。在 ROCm 上，注意力后端——通过诸如 `--use-pytorch-cross-attention`（在上面的启动步骤中使用）或 `--use-flash-attention` 之类的启动标志来选择——对生成速度、内存占用和稳定性都有显著影响。
+
+如需了解针对 AMD 的实用解析，涵盖可用后端（PyTorch SDPA/AOTriton、Flash Attention/CK Tile、Sage Attention 和 xformers）、各自如何映射到 ROCm，以及针对你的工作负载应选择哪个标志，可参阅这篇可选的 AMD ROCm 博客：
+
+> **可选——获取最佳性能：** [理解图像和视频生成中的注意力算法及其后端](https://rocm.blogs.amd.com/software-tools-optimization/comfyui-fa-backends/README.html)
+
+作为该指南中的一个快速经验法则：`--use-pytorch-cross-attention`（PyTorch SDPA）在 AMD 上是最安全的默认选项，而 `--use-flash-attention` 通常能带来最佳的原始性能。尝试用不同的标志重新启动 ComfyUI，并比较生成时间，找出最适合你的模型和 GPU 的选项。
+<!-- @os:end -->
+
 ## 调整生成参数
+
 ### KSampler 设置
 
-KSampler 节点控制核心扩散过程：
+KSampler 节点控制核心的扩散过程：
 
 | 参数 | 控制内容 | Z-Image Turbo 推荐值 |
 |-----------|------------------|-------------------------------|
-| **steps** | 去噪迭代的次数 | 4–10（turbo 模型经过蒸馏，所需步数更少） |
-| **cfg** | 无分类器引导比例——生成结果对提示词的遵循程度 | 1.0–2.0（turbo 模型使用非常低的引导值） |
-| **sampler_name** | 去噪算法 | `euler` 和 `res_multistep` 对 turbo 模型效果良好 |
+| **steps** | 去噪迭代的次数 | 4–10（turbo 模型经过蒸馏，所需步数较少） |
+| **cfg** | 无分类器引导尺度——跟随提示词的紧密程度 | 1.0–2.0（turbo 模型使用非常低的引导强度） |
+| **sampler_name** | 去噪算法 | `euler` 和 `res_multistep` 在 turbo 模型上表现良好 |
 | **scheduler** | 噪声调度曲线 | `normal` 或 `simple` |
-| **seed** | 用于可复现结果的随机种子 | 设置固定值以对某个构图进行迭代 |
+| **seed** | 用于可复现性的随机种子 | 设置固定值以便对同一构图进行迭代 |
 
 ### 图像尺寸
 
-要调整输出的尺寸，请找到 **Empty Latent Image** 节点并修改 **width** 和 **height**。为获得最佳质量，请将最长边保持在 1024 像素或以下。
+要调整输出尺寸，请找到 **Empty Latent Image** 节点并修改 **width** 和 **height**。为获得最佳质量，请将最长边的尺寸保持在 1024 像素或以下。
 
 ### ModelSamplingAuraFlow
 
-**ModelSamplingAuraFlow** 节点是一个专门的采样修饰器，用于调整扩散过程处理噪声调度的方式。在 Z-Image Turbo 工作流中，你会看到该节点连接到模型输出上。
+**ModelSamplingAuraFlow** 节点是一个专用的采样修饰器，用于调整扩散过程处理噪声调度的方式。在 Z-Image Turbo 工作流中，你会看到该节点连接到模型输出端。
 
 | 参数 | 控制内容 | 推荐值 |
 |-----------|------------------|-------------------|
-| **shift** | 调整噪声调度的时序——数值越高，会将更多细节优化推迟到后面的步骤 | 1.0–4.0（默认值为 3.0） |
+| **shift** | 调整噪声调度的时序——数值越高，越多的细节优化会被推迟到后面的步骤 | 1.0–4.0（默认值为 3.0） |
 
 何时调整 **shift**：
 
-- **较低值（1.0–2.0）**：收敛更快，适合简单的构图
-- **较高值（3.0–4.0）**：优化更为渐进，可以提升复杂场景中的细节表现
+- **较低的值（1.0–2.0）**：收敛更快，适合简单构图
+- **较高的值（3.0–4.0）**：渐进式优化更平滑，能改善复杂场景中的细节表现
 
-AuraFlow 采样方法是专为像 Z-Image Turbo 这样的流匹配模型设计的，可确保在整个生成过程中噪声分布合理。
+AuraFlow 采样方法是专门为 Z-Image Turbo 这类流匹配（flow-matching）模型设计的，可确保整个生成过程中噪声分布正确。
 
 ## 使用工作流
 
 ### 保存工作流
 
-点击菜单中的 **Save** 按钮，将工作流导出为 JSON 文件。该文件将保存：
+点击菜单中的 **Save** 按钮，将工作流导出为 JSON 文件。该文件会保存：
 
 - 所有节点及其参数
 - 节点之间的所有连接
@@ -622,19 +641,19 @@ AuraFlow 采样方法是专为像 Z-Image Turbo 这样的流匹配模型设计�
 
 ### 加载工作流
 
-将工作流 JSON 文件拖到画布上，或从菜单中使用 **Load**。默认显示的 Z-Image Turbo 工作流就是从已保存的工作流文件中加载的。
+将工作流 JSON 文件拖放到画布上，或使用菜单中的 **Load**。你默认看到的 Z-Image Turbo 工作流就是从一个已保存的工作流文件中加载的。
 
-### 分享工作流
+### 共享工作流
 
-工作流是自包含的——将 JSON 文件分享给同事，他们即可重现你完全相同的设置。这使得 ComfyUI 非常适合协作实验。
+工作流是自包含的——将 JSON 文件分享给同事，他们就可以复现出和你完全一致的设置。这使得 ComfyUI 非常适合协作实验。
 
 ## 后续步骤
 
 - **探索 LoRA 节点**：无需重新训练即可应用风格或主体适配器
-- **添加负面提示词**：将第二个 CLIP Text Encode 节点连接到 KSampler 的 **negative** 条件输入，引导模型避免出现模糊、伪影或水印等不想要的特征
+- **添加负向提示词**：将第二个 CLIP Text Encode 节点连接到 KSampler 的 **negative** 条件输入，引导模型避开模糊、伪影或水印等不需要的特征
 - **构建自定义工作流**：串联多次生成、添加放大处理，或创建图像变体
-- **浏览社区工作流**：[ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) 提供了许多可直接使用的工作流
+- **浏览社区工作流**：[ComfyUI Examples](https://github.com/comfyanonymous/ComfyUI_examples) 提供了许多开箱即用的工作流
 
-ComfyUI 的优势在于实验：以不同方式连接节点、调整参数，并观察每次更改如何影响输出结果。这种动手实践的探索方式有助于建立对扩散模型工作原理的直觉认知。
+ComfyUI 的优势在于实验：尝试以不同方式连接节点、调整参数，并观察每项改动如何影响输出结果。这种动手探索的方式有助于建立对扩散模型工作原理的直观理解。
 
-如需了解更多信息，请查阅 [ComfyUI Documentation](https://docs.comfy.org/)。
+如需了解更多信息，请查阅 [ComfyUI 文档](https://docs.comfy.org/)。

@@ -43,7 +43,7 @@ This playbook teaches you how to fine-tune LLMs using LLaMA Factory on your loca
 - Duration: It will take about 60 minutes to run this playbook (depending on your model/dataset size and network speed).
 - View the [LLaMA Factory GitHub](https://github.com/hiyouga/LlamaFactory) for more information.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -92,7 +92,7 @@ source llamafactory-env/bin/activate
 <!-- @setup:id=activate-venv command="source llamafactory-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -122,7 +122,7 @@ llamafactory-env\Scripts\activate
 <!-- @setup:id=activate-venv command="llamafactory-env\Scripts\activate" --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
 python -m venv llamafactory-env
@@ -183,7 +183,7 @@ python -m pip install huggingface_hub
 
 LLaMA Factory depends on PyTorch. You should already have it installed per the above requirements.
 
-Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies.
+Download the source code from [LLaMA Factory official GitHub repository](https://github.com/hiyouga/LlamaFactory), and install its dependencies. The install pins Transformers 5.8.0, because Transformers 5.15 and later reject the `warmup_ratio` setting that LLaMA Factory's example configurations use.
 
 <!-- @device:halo_box -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
@@ -191,18 +191,18 @@ Download the source code from [LLaMA Factory official GitHub repository](https:/
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
 pip install setuptools --break-system-packages
-pip install -e . --break-system-packages
+pip install -e . "transformers==5.8.0" --break-system-packages
 pip install -r requirements/metrics.txt --break-system-packages
 ```
 <!-- @test:end --> 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @test:id=install-llamafactory timeout=900 setup=activate-venv -->
 ```bash
 git clone --depth 1 https://github.com/hiyouga/LlamaFactory.git
 cd LlamaFactory
-pip install -e .
+pip install -e . "transformers==5.8.0"
 pip install -r requirements/metrics.txt 
 ```
 <!-- @test:end --> 

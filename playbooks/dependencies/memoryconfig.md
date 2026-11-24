@@ -4,12 +4,12 @@ Copyright Advanced Micro Devices, Inc.
 SPDX-License-Identifier: MIT
 -->
 
-## Install AMD Software: Adrenalin Edition
+<!-- @os:windows -->
+### Install AMD Software: Adrenalin Edition
 
 Download and install the latest **AMD Software: Adrenalin Edition** from
 [amd.com/en/products/software/adrenalin.html](https://www.amd.com/en/products/software/adrenalin.html).
 
-<!-- @os:windows -->
 > **Note:** The installer may not create a Start menu shortcut. If you can't find
 > it, launch it manually from
 > `C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe`.
@@ -27,6 +27,7 @@ if (Test-Path "C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe") {
 <!-- @os:end -->
 
 <!-- @os:linux -->
+<!-- @test:id=gpu-visible-linux timeout=60 hidden=True continue_on_error=true -->
 ```bash
 if command -v rocminfo >/dev/null 2>&1 && rocminfo | grep -q gfx; then
   echo "OK: GPU visible to ROCm"
@@ -38,8 +39,8 @@ fi
 <!-- @test:end -->
 <!-- @os:end -->
 
-<!-- @device:halo_box,halo,stx,krk -->
-## Advanced: increasing GPU memory (optional)
+<!-- @device:halo_box,halo,grgh,stx,krk -->
+### Advanced: Increasing GPU memory (Optional)
 
 You may need to increase the memory allocated to the GPU to run certain larger
 models or longer contexts. These devices use unified memory — the GPU shares
@@ -77,7 +78,7 @@ Click **Apply Changes** and reboot for the change to take effect.
 </p>
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 On Linux, raise the shared **GTT/TTM** pool so the GPU can map more system memory.
 AMD recommends setting the minimum dedicated VRAM in the BIOS (0.5 GB) so the
 maximum is available as shared memory.

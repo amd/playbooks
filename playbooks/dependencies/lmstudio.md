@@ -18,7 +18,7 @@ If your system has pre-installed models, navigate to Settings > General > Models
 </p>
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 1. Download the installer from here: [https://lmstudio.ai/download](https://lmstudio.ai/download)
 2. Install. 
 <!-- @device:end -->

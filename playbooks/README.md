@@ -122,6 +122,7 @@ Instructions for discrete Radeon GPUs
 | `grgp` | Gorgon Point | AMD Ryzen™ AI 400 HX |
 | `mdsp` | Medusa Point | AMD Ryzen™ AI 500 HX |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
+| `w7900` | Radeon PRO W7900 | AMD Radeon™ PRO W7900 |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 | `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
 
@@ -140,7 +141,7 @@ Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to ex
 >    - `.github/scripts/run_playbook_tests.py` — `VALID_DEVICES`
 >    - `.github/workflows/test-playbooks.yml` and `restart-runners.yml` — the `device` / `group` dropdown choices
 >    - `.github/orchestrai-config.yml` — `device_families` (and `device_to_gfx` once the gfx target is known)
->    - `.github/ISSUE_TEMPLATE/*.yml` — the hardware dropdowns
+>    - `.github/scripts/device_registry.json` — the issue-form hardware dropdowns; then run `python .github/scripts/gen_issue_template_playbooks.py` (don't hand-edit `.github/ISSUE_TEMPLATE/*.yml`)
 >    - `website/src/types/playbook.ts` and the dashboard route/label files — internal preview only
 > 2. **Only once a real runner exists — this is what schedules CI jobs:**
 >    - `.github/runners.json` — register the machine (name, os, group = the device tag)
@@ -247,7 +248,6 @@ To edit an existing playbook:
 | `required_platforms` | No | Subset of `tested_platforms` where CI failure blocks merges |
 | `published` | Yes | Set `true` to show on website |
 | `published_date` | Auto | `YYYY-MM-DD`, stamped by CI from git history. **Do not hand-edit** |
-| `updated_date` | Auto | `YYYY-MM-DD`, refreshed by CI on each change. **Do not hand-edit** |
 | `difficulty` | No | `"beginner"`, `"intermediate"`, or `"advanced"` |
 | `isNew` | Auto | `true` on the 3 most recently published playbooks, else `false`; set by CI. **Do not hand-edit** |
 | `isFeatured` | No | Displays prominently at top |
@@ -270,13 +270,17 @@ If you don't know the author, use the anonymous placeholder:
 "authors": [{ "name": "Anonymous", "github": null, "github_url": null, "type": "community" }]
 ```
 
-**Dates and the New tag are automatic.** The Playbook Metadata workflow stamps
-`published_date` / `updated_date` from git history (`published_date` is set once
-from the first commit and never changed; `updated_date` tracks the latest change),
-then sets `isNew` on the 3 most recently published playbooks and clears it on the
-rest. Leave all three out of new playbooks — CI fills them in via a PR after
-merge. A brand-new playbook ranks newest even before its date is stamped, so it
-is marked New immediately.
+**The publication date and the New tag are automatic.** The Playbook Metadata
+workflow stamps `published_date` from the first commit that added the playbook
+(set once, never changed), then sets `isNew` on the 3 most recently published
+playbooks and clears it on the rest. Leave both out of new playbooks — CI fills
+them in via a PR after merge. A brand-new playbook ranks newest even before its
+date is stamped, so it is marked New immediately.
+
+There is no "last updated" field. Editing a playbook does not re-date it, and a
+repo-wide sweep does not re-date every playbook. How current a playbook is shows
+on the site as **Last validated**, per device, from `validatedDate` /
+`validatedVersions` — i.e. from CI running the playbook on real hardware.
 
 ---
 

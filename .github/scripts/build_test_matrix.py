@@ -18,7 +18,7 @@ How --mode changed works:
     1. Materialise the base revision (git archive) into a temp tree.
     2. Harness check: if any file that governs how tests execute differs between
        base and head, run the FULL matrix. This is deny-by-default over
-       .github/scripts/ and test-playbooks.yml, minus HARNESS_EXCLUDED.
+       .github/scripts/, test-playbooks.yml and runners.json, minus HARNESS_EXCLUDED.
     3. Otherwise the extractor is identical on both sides, so compute a per-entry
        signature with THIS checkout's extractor against each tree and diff them.
        An entry runs if it is new, its matrix identity changed, its signature
@@ -39,6 +39,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -54,7 +55,10 @@ MATRIX_JOB_LIMIT = 256
 # Files that govern how tests execute. Deny-by-default: anything added under
 # these prefixes is covered without anyone remembering. Editing any of them
 # forces the full matrix, so signatures never have to model harness behaviour.
-HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml")
+# runners.json is in the list because drop_entries_without_runners() reads it, so
+# adding or removing a machine changes the matrix shape, not just where a job lands.
+HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml",
+                    ".github/runners.json")
 
 # Files under those prefixes that provably cannot change a playbook test verdict.
 # Omitting one only costs a needless full run; wrongly adding one hides a real
@@ -70,13 +74,20 @@ HARNESS_EXCLUDED = frozenset({
     ".github/scripts/create_failure_issues.py",    # if: failure() on main, post-verdict
     ".github/scripts/test_build_test_matrix.py",   # separate selector-tests job
     ".github/scripts/gen_issue_template_playbooks.py",  # validate-playbooks.yml
+    ".github/scripts/orchestrai_batch_verdict.py", # OrchestrAI workflows
     ".github/scripts/orchestrai_matrix.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_report.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_trigger.py",       # OrchestrAI workflows
     ".github/scripts/orchestrai_verdict.py",       # OrchestrAI workflows
+    ".github/scripts/orchestrai_wait_build.sh",    # OrchestrAI workflows
 })
 
 RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"
+
+# Devices tested only through OrchestrAI. They have no self-hosted runner on
+# purpose, so their entries, even required ones, are left out of this matrix.
+# Box SKUs never get a runner group (see VALID_DEVICES in run_playbook_tests.py).
+ORCHESTRAI_ONLY_DEVICES = frozenset({"grgh", "halo_box", "grgh_box"})
 
 
 def annotate(level: str, message: str) -> None:
@@ -114,6 +125,38 @@ def _load_runner_catalog() -> list[dict]:
             "labels": labels,
         })
     return catalog
+
+
+def drop_entries_without_runners(entries: list[dict]) -> list[dict]:
+    """Keep entries whose device has a runner for their OS in runners.json.
+
+    The rest are dropped with a notice: those of ORCHESTRAI_ONLY_DEVICES on purpose,
+    optional ones because they never block. A required entry of any other device
+    means its runner is missing from the catalog; fail, so that required coverage
+    never shrinks silently. An unreadable runners.json drops nothing (the workflow
+    then fails as before)."""
+    try:
+        data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
+        fleet = {(str(r.get("group", "")).lower(), str(r.get("os", "")).lower()) for r in data}
+    except (OSError, json.JSONDecodeError, AttributeError):
+        return entries
+    kept, dropped, lost = [], Counter(), set()
+    for e in entries:
+        device, platform = e["arch"].lower(), e["platform"].lower()
+        if (device, platform) in fleet:
+            kept.append(e)
+        elif e.get("required") and device not in ORCHESTRAI_ONLY_DEVICES:
+            lost.add(f"{platform}/{device}")
+        else:
+            dropped[f"{platform}/{device}"] += 1
+    for key, n in sorted(dropped.items()):
+        annotate("notice", f"{key}: no runner in runners.json; {n} entr{'y' if n == 1 else 'ies'} not scheduled")
+    if lost:
+        print(f"FATAL: required entries for {', '.join(sorted(lost))} have no runner in "
+              f"{RUNNERS_JSON.name}. Restore the runner, or add the device to "
+              "ORCHESTRAI_ONLY_DEVICES if only OrchestrAI tests it.", file=sys.stderr)
+        sys.exit(1)
+    return kept
 
 
 def validate_runner_label(label: str, platform: str, device: str) -> None:
@@ -244,32 +287,15 @@ def select_changed(base_tree: Path) -> list[dict]:
     return selected
 
 
-def tree_digest(path: Path) -> str:
-    """Hash a localized content subtree for conservative change detection."""
-    if not path.is_dir():
-        return ""
-    digest = hashlib.sha256()
-    for child in sorted(p for p in path.rglob("*") if p.is_file()):
-        digest.update(str(child.relative_to(path)).replace(os.sep, "/").encode())
-        digest.update(hashlib.sha256(child.read_bytes()).digest())
-    return digest.hexdigest()
-
-
 def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> list[dict]:
-    """Select localized entries whose overlay, metadata, or dependencies changed."""
+    """select_changed() for a locale: signatures of the materialized overlay.
+
+    Same rule as English, so a prose edit to an English playbook, its overlay, or
+    a shared dependency selects nothing; only a change to what would execute does.
+    """
     if harness_changed(base_tree):
         annotate("notice", "Test harness changed; running the full localized matrix")
         return head
-
-    head_dependencies = REPO_ROOT / "localized-playbooks" / locale / "dependencies"
-    base_dependencies = base_tree / "localized-playbooks" / locale / "dependencies"
-    if tree_digest(head_dependencies) != tree_digest(base_dependencies):
-        annotate("notice", "Localized dependencies changed; running the full matrix")
-        return head
-
-    english_dependencies_changed = tree_digest(
-        REPO_ROOT / "playbooks" / "dependencies"
-    ) != tree_digest(base_tree / "playbooks" / "dependencies")
 
     try:
         base_entries = R.build_localized_matrix_entries(base_tree, locale)
@@ -280,31 +306,29 @@ def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> 
     base_by_key = {
         (e["playbook"], e["platform"], e["arch"]): e for e in base_entries
     }
-    selected = []
+    selected, skipped = [], 0
     for entry in head:
         key = (entry["playbook"], entry["platform"], entry["arch"])
+        label = f"{locale}/{key[0]} ({key[1]}/{key[2]})"
         prior = base_by_key.get(key)
-        changed = prior != entry
-        for category in ("core", "supplemental"):
-            rel = Path("localized-playbooks") / locale / category / entry["playbook"]
-            if tree_digest(REPO_ROOT / rel) != tree_digest(base_tree / rel):
-                changed = True
-                break
-            if not entry.get("localized_only", True):
-                english_rel = Path("playbooks") / category / entry["playbook"]
-                if tree_digest(REPO_ROOT / english_rel) != tree_digest(
-                    base_tree / english_rel
-                ):
-                    changed = True
-                    break
-        if not entry.get("localized_only", True) and english_dependencies_changed:
-            changed = True
-        if changed:
-            selected.append(entry)
-    annotate(
-        "notice",
-        f"Selected {len(selected)} localized entries; skipped {len(head) - len(selected)} unchanged",
-    )
+        if prior is None:
+            annotate("notice", f"New localized matrix entry {label}")
+        elif prior != entry:
+            annotate("notice", f"Localized matrix metadata changed for {label}")
+        else:
+            head_sig = R.localized_entry_signature(
+                REPO_ROOT, locale, *key, entry["localized_only"])
+            base_sig = R.localized_entry_signature(
+                base_tree, locale, *key, prior["localized_only"])
+            if head_sig is None or base_sig is None:
+                annotate("warning", f"Cannot prove {label} unchanged; running it")
+            elif head_sig != base_sig:
+                annotate("notice", f"Tests changed for {label}")
+            else:
+                skipped += 1
+                continue
+        selected.append(entry)
+    annotate("notice", f"Selected {len(selected)} localized entries; skipped {skipped} unchanged")
     return selected
 
 
@@ -382,6 +406,12 @@ def main() -> None:
         )
         print(f"FATAL: no matrix entries match the requested filter(s): {filt}", file=sys.stderr)
         sys.exit(1)
+
+    # This workflow runs on self-hosted runners: an entry for a device and OS with
+    # no runner in runners.json would queue until it times out (e.g. grgh, which
+    # only OrchestrAI tests). Drop such entries and say so. After the filters, so a
+    # missing required runner only fails runs that would schedule it.
+    entries = drop_entries_without_runners(entries)
 
     # Targeting a single runner only makes sense once the OS and device are
     # pinned, because the label is ANDed with them: a halo hostname on an stx

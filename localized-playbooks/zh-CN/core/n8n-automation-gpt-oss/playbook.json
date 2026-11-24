@@ -128,5 +128,14 @@
     "llm",
     "lemonade"
   ],
-  "coverImage": "assets/workflow-overview.png"
+  "coverImage": "assets/workflow-overview.png",
+  "primaryModel": {
+    "halo_box": "Qwen3.5-35B-A3B",
+    "halo": "Qwen3.5-35B-A3B",
+    "stx": "Qwen3.5-9B",
+    "krk": "Qwen3.5-9B",
+    "rx7900xt": "Qwen3.5-9B",
+    "rx9070xt": "Qwen3.5-9B",
+    "r9700": "Qwen3.5-9B"
+  }
 }

@@ -169,9 +169,9 @@
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-CN": {
-      "files_scored": 80,
-      "mean": 93.5,
-      "min": 78,
+      "files_scored": 83,
+      "mean": 93.3,
+      "min": 72,
       "judge_model": "Claude-Opus-4.8"
     },
     "zh-TW": {
@@ -241,6 +241,12 @@
       "file": "playbooks/supplemental/pytorch-kernels/playbook.json",
       "score": 72,
       "issues": "Inconsistent terminology: 'jeder' vs 'kernele' for same term; 'GPU jeder po meri' awkward word order."
+    },
+    {
+      "locale": "zh-CN",
+      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "score": 72,
+      "issues": "Second line awkward phrasing; trademark symbol misplaced; '™' should follow LLMs/Unsloth not 大语言模型; reads unnaturally."
     },
     {
       "locale": "cs-CZ",
@@ -388,9 +394,9 @@
     },
     {
       "locale": "zh-CN",
-      "file": "playbooks/supplemental/unsloth-llms-finetuning/playbook.json",
+      "file": "playbooks/supplemental/clustering-rpc-server-4-node/playbook.json",
       "score": 78,
-      "issues": "Trademark symbol misplaced onto LLM instead of Unsloth; slight rephrasing but adequate."
+      "issues": "Title omits 'with RPC'; otherwise accurate and fluent."
     },
     {
       "locale": "zh-TW",
@@ -703,12 +709,6 @@
       "file": "playbooks/supplemental/amd-sync/playbook.json",
       "score": 82,
       "issues": "Title mistranslates brand 'AMD Sync' as 'синхронізацією AMD'; otherwise accurate and fluent."
-    },
-    {
-      "locale": "zh-CN",
-      "file": "playbooks/supplemental/clustering-rccl/playbook.json",
-      "score": 82,
-      "issues": "Title 'Clustering' rendered as verb '集群' is awkward; 'configured with RCCL' misattributes RCCL to devices rather than clustering method."
     },
     {
       "locale": "zh-TW",

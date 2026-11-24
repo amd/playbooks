@@ -121,7 +121,7 @@ PyTorch also exposes `torch.cuda._compile_kernel()`, a high-level shortcut to JI
 
 ## Installing Software Prerequisites
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 ### Prerequisites - Windows
 - Install latest: [AMD Adrenalin Software](https://www.amd.com/en/products/software/adrenalin.html)
 <!-- @device:end -->
@@ -143,7 +143,7 @@ source kernel-env/bin/activate
 <!-- @setup:id=activate-venv command="source kernel-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -181,7 +181,14 @@ kernel-env\Scripts\activate
 
 ### Installing Basic Dependencies
 <!-- @os:linux -->
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box -->
+> **Note:** ROCm and PyTorch come preinstalled on the Ryzen AI Halo, but this playbook
+> still needs them installed **inside your virtual environment**, exactly as on any other
+> Linux system. Custom kernel compilation requires the ROCm development headers
+> (`rocm[libraries,devel,...]`), which the preinstalled system packages do not expose to
+> the venv. Expand the section below and run the commands as written.
+<!-- @device:end -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 <!-- @require:rocm,pytorch -->
 <!-- @device:end -->
 <!-- @device:rx7900xt,rx9070xt,r9700 -->
@@ -190,7 +197,7 @@ kernel-env\Scripts\activate
 <!-- @os:end -->
 
 <!-- @os:windows -->
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @require:driver,rocm,pytorch -->
 <!-- @device:end -->
 

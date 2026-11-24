@@ -14,6 +14,9 @@
   "tested_platforms": {
     "halo": [
       "linux"
+    ],
+    "grgh": [
+      "linux"
     ]
   },
   "required_platforms": {
@@ -30,7 +33,7 @@
     ]
   },
   "difficulty": "advanced",
-  "isNew": true,
+  "isNew": false,
   "isFeatured": false,
   "developed": true,
   "published": true,
@@ -63,6 +66,5 @@
       "type": "community"
     }
   ],
-  "published_date": "2026-07-22",
-  "updated_date": "2026-10-09"
+  "published_date": "2026-07-22"
 }

@@ -38,6 +38,10 @@
       "linux",
       "windows"
     ],
+    "grgh": [
+      "linux",
+      "windows"
+    ],
     "stx": [
       "linux",
       "windows"
@@ -164,6 +168,5 @@
       "type": "amd"
     }
   ],
-  "published_date": "2026-07-16",
-  "updated_date": "2026-10-09"
+  "published_date": "2026-07-16"
 }

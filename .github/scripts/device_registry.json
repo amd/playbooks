@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for AMD hardware options in the issue templates. The device dropdowns in .github/ISSUE_TEMPLATE/bug_report.yml and playbook_proposal.yml are generated from this file by gen_issue_template_playbooks.py and verified in CI. Add a new device here (in display order) when new hardware ships; do not hand-edit the dropdowns.",
+  "_comment": "Source of the AMD hardware options in the issue forms. The device dropdowns in .github/ISSUE_TEMPLATE/bug_report.yml and playbook_proposal.yml are generated from this file by gen_issue_template_playbooks.py. Add a new device here (in display order) and run the generator; do not hand-edit the dropdowns. Other device lists are listed in playbooks/README.md under 'Adding a device'.",
   "devices": [
     { "tag": "halo_box",  "name": "AMD Ryzen AI Halo Developer Platform" },
     { "tag": "halo",      "name": "AMD Ryzen AI Max+" },
@@ -12,6 +12,7 @@
     { "tag": "grgp",      "name": "AMD Gorgon Point" },
     { "tag": "mdsp",      "name": "AMD Medusa Point" },
     { "tag": "rx7900xt",  "name": "AMD Radeon RX 7900 XT" },
+    { "tag": "w7900",     "name": "AMD Radeon PRO W7900" },
     { "tag": "rx9070xt",  "name": "AMD Radeon RX 9070 XT" },
     { "tag": "r9700",     "name": "AMD Radeon AI PRO R9700" }
   ]

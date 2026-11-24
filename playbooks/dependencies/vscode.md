@@ -16,7 +16,7 @@ VS Code can be installed from the **AMD Ryzen™ AI Developer Center**. Go to th
 <!-- @os:end -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 <!-- @os:windows -->
 
 1. Download the Windows installation executable from: https://update.code.visualstudio.com/latest/win32-x64-user/stable.

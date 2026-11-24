@@ -102,6 +102,7 @@ body:
         - "grgp - AMD Gorgon Point"
         - "mdsp - AMD Medusa Point"
         - "rx7900xt - AMD Radeon RX 7900 XT"
+        - "w7900 - AMD Radeon PRO W7900"
         - "rx9070xt - AMD Radeon RX 9070 XT"
         - "r9700 - AMD Radeon AI PRO R9700"
         # END generated devices

@@ -23,7 +23,7 @@ The example is designed to be practical and easy to modify, so you can use it as
 - How to fine-tune a LLM using SFT with Unsloth
 - How to save the fine-tuned result in local storage
 
-<!-- @device:halo,stx,krk -->
+<!-- @device:halo,grgh,stx,krk -->
 > **Note:** The fine-tuning techniques in this playbook require at least **64 GB of system RAM**, with at least **24 GB of it available to the GPU** (the 24 GB is part of the 64 GB, not in addition to it).
 <!-- @device:end -->
 
@@ -51,7 +51,7 @@ In this playbook, we use Unsloth together with **LoRA-based SFT**. That means th
 
 Unsloth also supports other training approaches, including QLoRA and reinforcement learning workflows. This playbook focuses on the simplest path first: a small LoRA fine-tuning example that users can run, understand, and extend.
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -83,7 +83,7 @@ source unsloth-env/bin/activate
 <!-- @setup:id=activate-venv command="source unsloth-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -117,7 +117,7 @@ python -m venv unsloth-env --system-site-packages
 <!-- @setup:id=activate-venv command="unsloth-env\Scripts\activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 Open a PowerShell terminal and create a virtual environment:
 <!-- @test:id=create-venv timeout=120 -->
 ```powershell
@@ -136,7 +136,7 @@ python -m venv unsloth-env
 
 **Install PyTorch with AMD ROCm™ software support** in the created virtual environment:
 
-<!-- @device:halo,halo_box -->
+<!-- @device:halo,grgh,halo_box -->
 <!-- @test:id=install-pytorch timeout=600 setup=activate-venv -->
 ```bash
 python -m pip install --index-url https://repo.amd.com/rocm/whl-multi-arch/ "torch[device-gfx1151]==2.12.0+rocm7.14.0" "torchvision[device-gfx1151]==0.27.0+rocm7.14.0" "torchaudio==2.11.0+rocm7.14.0"

@@ -27,7 +27,7 @@ This playbook will teach you how to run low-latency, expressive, and private spe
 - Conveys tone, emotion, and intent without awkward pauses
 - Enables global collaboration and faster decision-making
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## Setting the Memory Configuration
 
 <!-- @require:memory-config -->
@@ -59,7 +59,7 @@ source s2st-env/bin/activate
 <!-- @setup:id=activate-venv command="source s2st-env/bin/activate" -->
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 **Grant your user access to GPU devices** (log out and back in for this to take effect):
 
 ```bash
@@ -97,7 +97,7 @@ s2st-env\Scripts\activate
 
 <!-- @device:end -->
 
-<!-- @device:halo,stx,krk,rx7900xt,rx9070xt,r9700 -->
+<!-- @device:halo,grgh,stx,krk,rx7900xt,rx9070xt,r9700 -->
 On Windows, open a terminal in the directory of your choice and follow the commands to create a venv:
 
 <!-- @test:id=create-venv timeout=180 -->
@@ -210,11 +210,11 @@ This is the technical architecture of the speech-speech models:
 
 #### Download Scripts
 
-This playbook includes ready-to-use scripts. Please download all of them to the same directory as the environment you created.
+This playbook includes ready-to-use scripts. Please download all of them to the same directory.
 
 | Script | Description | Usage |
 |--------|-------------|-------|
-| [infer.py](assets/infer.py) | Basic LLM text generation | `python infer.py` |
+| [infer.py](assets/infer.py) | Speech-to-speech translation from an audio file | `python infer.py` |
 | [input1.wav](assets/input1.wav) | Example Audio file | N/A |
 | [lang_list.py](assets/lang_list.py) | Language Support File | N/A |
 | [gradio_demo.py](assets/gradio_demo.py) | Intuitive UI for Speech Translation | `python gradio_demo.py --no-share` |
@@ -402,9 +402,13 @@ Now that you have run a basic script example, the following instructions provide
 #### Run Gradio Locally
 
 ```bash
-python ./gradio_demo.py --no-share
+python gradio_demo.py --no-share
 ```
 Then, open your web browser at `http://127.0.0.1:7860` to access the UI.
+
+Under **Input Speech** you can either record from a microphone or upload an audio
+file — for example the `input1.wav` sample you downloaded earlier, which is useful if
+the machine has no microphone. Pick a target language, then click **Translate**.
 
 
 ### Gradio UI example:
@@ -527,7 +531,7 @@ PY
 ## Next Steps
 
 - Mix and match between dozens of languages for quick translation. 
-- Share your demo with others: Add --share to create a public link that anyone can access remotely, or deploy permanently using Hugging Face Spaces
+- Share your demo with others: Add `--share` to create a public link that anyone can access remotely, or deploy permanently using Hugging Face Spaces
 
 ## Resources
 

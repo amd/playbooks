@@ -57,11 +57,24 @@ def playbook_options() -> list[str]:
 
 def device_options() -> list[str]:
     """Return one `tag - Name` option per device, in registry order."""
-    registry = json.loads(DEVICE_REGISTRY.read_text(encoding="utf-8"))
-    devices = registry.get("devices", [])
-    if not devices:
-        sys.exit(f"error: no devices found in {DEVICE_REGISTRY}")
-    return [f"{d['tag']} - {d['name']}" for d in devices]
+    try:
+        registry = json.loads(DEVICE_REGISTRY.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        sys.exit(f"error: cannot read {DEVICE_REGISTRY}: {exc}")
+    devices = registry.get("devices") if isinstance(registry, dict) else None
+    if not isinstance(devices, list) or not devices:
+        sys.exit(f"error: {DEVICE_REGISTRY} needs a non-empty \"devices\" list")
+    options, seen = [], set()
+    for i, d in enumerate(devices):
+        tag = d.get("tag") if isinstance(d, dict) else None
+        name = d.get("name") if isinstance(d, dict) else None
+        if not (isinstance(tag, str) and tag.strip() and isinstance(name, str) and name.strip()):
+            sys.exit(f"error: devices[{i}] in {DEVICE_REGISTRY} needs a non-empty \"tag\" and \"name\"")
+        if tag in seen:
+            sys.exit(f"error: duplicate device tag '{tag}' in {DEVICE_REGISTRY}")
+        seen.add(tag)
+        options.append(f"{tag} - {name}")
+    return options
 
 
 def splice(current: str, options: list[str], begin: str, end: str, path: Path) -> str:
@@ -109,10 +122,12 @@ def main() -> int:
         (PLAYBOOK_PROPOSAL, None, devices),
     ]
 
+    # Build every form first so a bad marker in one file exits before any write.
+    results = [(path, path.read_text(encoding="utf-8"), build(path, pb, dev))
+               for path, pb, dev in targets]
+
     stale = False
-    for path, pb, dev in targets:
-        current = path.read_text(encoding="utf-8")
-        updated = build(path, pb, dev)
+    for path, current, updated in results:
         rel = path.relative_to(REPO_ROOT).as_posix()
         if current == updated:
             print(f"OK: {rel} is up to date.")

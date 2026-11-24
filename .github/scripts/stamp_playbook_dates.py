@@ -2,16 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Stamp published_date / updated_date into playbook.json from git history.
+"""Stamp published_date into playbook.json from git history.
 
-Run by the stamp-playbook-dates workflow after a push to main. For every
-reachable playbook (core + supplemental):
+Run by the playbook-metadata workflow after a push to main. For every reachable
+playbook (core + supplemental), published_date is set ONCE, to the first commit
+that added the playbook directory, if the field is missing or empty. It is never
+overwritten afterward, so the publication date is stable even as the playbook is
+edited.
 
-* published_date: set ONCE, to the first commit that added the playbook
-  directory, if the field is missing or empty. Never overwritten afterward, so
-  the publication date is stable even as the playbook is edited.
-* updated_date: always refreshed to the most recent commit touching the
-  playbook directory.
+There is deliberately no "last updated" counterpart. One used to be refreshed on
+every commit touching the directory, which meant a repo-wide sweep — or the
+metadata bot's own commit — re-dated every playbook at once and advertised a
+freshness none of them had earned. The honest freshness signal on this site is
+"last validated", which comes from CI actually running the playbook on hardware.
 
 Dates are YYYY-MM-DD (author date). Authors are hand-maintained metadata and are
 never touched here. Requires a full-history checkout (fetch-depth: 0).
@@ -46,37 +49,23 @@ def first_commit_date(rel_dir: str) -> str:
     return _git_date(["--diff-filter=A", "--format=%aI", "--", rel_dir])
 
 
-def latest_commit_date(rel_dir: str) -> str:
-    return _git_date(["-1", "--format=%aI", "--", rel_dir])
-
-
 def stamp(meta_path: Path) -> bool:
-    """Update dates in one playbook.json. Returns True if the file changed."""
+    """Stamp published_date in one playbook.json. Returns True if it changed."""
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    if meta.get("published_date"):
+        return False  # immutable once set
+
     rel_dir = meta_path.parent.relative_to(REPO_ROOT).as_posix()
     published = first_commit_date(rel_dir)
-    updated = latest_commit_date(rel_dir)
-    if not published and not updated:
-        return False  # no history (untracked / new in this same commit)
+    if not published:
+        return False  # no history (untracked / added in this same commit)
 
-    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    changed = False
-
-    # Set published_date only if missing/empty; then it is immutable.
-    if not meta.get("published_date") and published:
-        meta["published_date"] = published
-        changed = True
-
-    # Always refresh updated_date to the latest commit.
-    if updated and meta.get("updated_date") != updated:
-        meta["updated_date"] = updated
-        changed = True
-
-    if changed:
-        meta_path.write_text(
-            json.dumps(meta, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8", newline="\n",
-        )
-    return changed
+    meta["published_date"] = published
+    meta_path.write_text(
+        json.dumps(meta, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8", newline="\n",
+    )
+    return True
 
 
 def main() -> int:
