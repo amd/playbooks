@@ -47,6 +47,7 @@ body:
         - "lemonade-getting-started - Getting Started with Lemonade"
         - "llama-factory-finetuning - Fine-Tuning LLMs with LLaMA Factory"
         - "lmstudio-rocm-llms - Running and Serving LLMs with LM Studio"
+        - "microduck-rl - Training a MicroDuck Walking Policy with Reinforcement Learning"
         - "n8n-automation-gpt-oss - Automating Workflows with n8n and Local LLMs"
         - "ollama-getting-started - Getting Started with Ollama"
         - "open-webui-chat - Chatting with LLMs in Open WebUI"
