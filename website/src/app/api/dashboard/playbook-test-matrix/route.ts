@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import JSZip from "jszip";
+import { loadOrchestraiResults, type OrchestraiResult } from "@/lib/orchestrai-results";
 
 const REPO_OWNER = "amd";
 const REPO_NAME = "playbooks";
@@ -90,7 +91,49 @@ interface CellSummary {
   failed: number;
   skipped: number;
   totalTests: number;
-  status: "pass" | "fail" | "partial" | "no-tests";
+  status: "pass" | "fail" | "partial" | "no-tests" | "not-run" | "interrupted";
+  /** Set for cells read from the OrchestrAI CI workflow. */
+  orchestrai?: {
+    outcome: string;
+    runUrl: string;
+    jobUrl: string;
+    reason: string;
+    attempt: number;
+    firstOutcome: string;
+    required: boolean;
+    batchLabel: string;
+    coveredBy: string;
+  };
+}
+
+interface MatrixColumn {
+  id: string;
+  arch: string;
+  platform: string;
+  hardware: string;
+  os: string;
+}
+
+// Higher wins when one playbook appears in several batches of one system.
+const OUTCOME_SEVERITY: Record<string, number> = {
+  PASSED: 0,
+  NOT_RUN: 1,
+  INTERRUPTED: 2,
+  FAILED: 3,
+  ERROR: 3,
+};
+
+function orchestraiStatus(outcome: string): CellSummary["status"] {
+  switch (outcome) {
+    case "PASSED":
+      return "pass";
+    case "NOT_RUN":
+      return "not-run";
+    case "INTERRUPTED":
+      return "interrupted";
+    default:
+      return "fail";
+  }
 }
 
 function normalizePlatform(platform: string): string {
@@ -164,6 +207,130 @@ function classifyCell(summary: SummaryRaw): CellSummary["status"] {
   if (failed > 0) return "fail";
   if (passed === totalTests) return "pass";
   return "partial";
+}
+
+/** Device/OS combos that at least one playbook declares (tested/supported) or marks unsupported. */
+function declaredCombos(playbooks: PlaybookEntry[]): Set<string> {
+  const comboIds = new Set<string>();
+  for (const pb of playbooks) {
+    for (const combo of pb.combinations) comboIds.add(combo);
+    for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
+  }
+  return comboIds;
+}
+
+function buildColumns(comboIds: Set<string>): MatrixColumn[] {
+  const hwOrder = Object.keys(HARDWARE_LABELS);
+  return Array.from(comboIds)
+    .filter((comboId) => !isExcludedCombo(comboId))
+    .map((comboId) => {
+      const [arch, platform] = comboId.split("|");
+      return {
+        id: comboId,
+        arch,
+        platform,
+        hardware: combinationLabel(arch),
+        os: platform === "windows" ? "Windows" : "Linux",
+      };
+    })
+    .sort((a, b) => {
+      const hwA = hwOrder.indexOf(a.arch);
+      const hwB = hwOrder.indexOf(b.arch);
+      const hwOrderA = hwA === -1 ? 999 : hwA;
+      const hwOrderB = hwB === -1 ? 999 : hwB;
+      if (hwOrderA !== hwOrderB) return hwOrderA - hwOrderB;
+      if (a.hardware !== b.hardware) return a.hardware.localeCompare(b.hardware);
+      return a.os.localeCompare(b.os);
+    });
+}
+
+function buildRows(
+  playbooks: PlaybookEntry[],
+  columns: MatrixColumn[],
+  byPlaybookAndCombo: Map<string, CellSummary>
+) {
+  return playbooks.map((pb) => {
+    const cells: Record<string, CellSummary> = {};
+    for (const col of columns) {
+      const existing = byPlaybookAndCombo.get(`${pb.id}::${col.id}`);
+      if (existing) cells[col.id] = existing;
+    }
+    return {
+      playbookId: pb.id,
+      title: pb.title,
+      category: pb.category,
+      developed: pb.developed,
+      unsupportedReasons: pb.unsupportedReasons,
+      cells,
+    };
+  });
+}
+
+function orchestraiCell(r: OrchestraiResult): CellSummary {
+  return {
+    playbookId: r.playbookId,
+    platform: r.platform,
+    arch: r.arch,
+    passed: r.passed,
+    failed: r.failed,
+    skipped: r.skipped,
+    totalTests: r.totalTests,
+    status: orchestraiStatus(r.outcome),
+    orchestrai: {
+      outcome: r.outcome,
+      runUrl: r.runUrl,
+      jobUrl: r.jobUrl,
+      reason: r.reason,
+      attempt: r.attempt,
+      firstOutcome: r.firstOutcome,
+      required: r.required,
+      batchLabel: r.batchLabel,
+      coveredBy: r.coveredBy,
+    },
+  };
+}
+
+/** The matrix from an OrchestrAI CI run (test-playbooks-orchestrai.yml), for one locale. */
+async function orchestraiMatrix(
+  token: string,
+  playbooks: PlaybookEntry[],
+  runId: number | undefined,
+  locale: string
+) {
+  const loaded = await loadOrchestraiResults(token, runId);
+  const comboIds = declaredCombos(playbooks);
+  const byPlaybookAndCombo = new Map<string, CellSummary>();
+  const locales = new Set<string>([""]);
+
+  for (const r of loaded?.results ?? []) {
+    locales.add(r.locale);
+    if (r.locale !== locale) continue;
+    const comboId = combinationId(r.arch, r.platform);
+    comboIds.add(comboId);
+    const key = `${r.playbookId}::${comboId}`;
+    const prev = byPlaybookAndCombo.get(key)?.orchestrai;
+    const prevSeverity = prev ? OUTCOME_SEVERITY[prev.outcome] ?? 3 : -1;
+    if ((OUTCOME_SEVERITY[r.outcome] ?? 3) > prevSeverity) {
+      byPlaybookAndCombo.set(key, orchestraiCell(r));
+    }
+  }
+
+  const columns = buildColumns(comboIds);
+  return {
+    source: "orchestrai" as const,
+    locale,
+    locales: Array.from(locales).sort(),
+    run: loaded
+      ? {
+          id: loaded.run.id,
+          htmlUrl: loaded.run.html_url,
+          createdAt: loaded.run.created_at,
+          event: loaded.run.event,
+        }
+      : null,
+    columns,
+    rows: buildRows(playbooks, columns, byPlaybookAndCombo),
+  };
 }
 
 function loadPlaybooks(): PlaybookEntry[] {
@@ -357,54 +524,24 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const runIdParam = searchParams.get("run_id");
   const runId = runIdParam ? parseInt(runIdParam, 10) : undefined;
+  const source = searchParams.get("source") === "orchestrai" ? "orchestrai" : "github";
 
   try {
     const playbooks = loadPlaybooks();
+    if (source === "orchestrai") {
+      const locale = searchParams.get("locale") ?? "";
+      return NextResponse.json(await orchestraiMatrix(token, playbooks, runId, locale));
+    }
     const nightly = runId
       ? await getRunByIdLocal(token, runId)
       : await getLatestNightlyRunWithArtifacts(token);
     if (!nightly) {
-      // Columns are only the device/OS combos that at least one playbook
-      // actually declares (tested/supported) or marks unsupported.
-      const comboIds = new Set<string>();
-      for (const pb of playbooks) {
-        for (const combo of pb.combinations) comboIds.add(combo);
-        for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
-      }
-
-      const allColumns = Array.from(comboIds)
-        .filter((comboId) => !isExcludedCombo(comboId))
-        .map((comboId) => {
-          const [arch, platform] = comboId.split("|");
-          return {
-            id: comboId,
-            arch,
-            platform,
-            hardware: combinationLabel(arch),
-            os: platform === "windows" ? "Windows" : "Linux",
-          };
-        })
-        .sort((a, b) => {
-          const hwA = Object.keys(HARDWARE_LABELS).indexOf(a.arch);
-          const hwB = Object.keys(HARDWARE_LABELS).indexOf(b.arch);
-          const hwOrderA = hwA === -1 ? 999 : hwA;
-          const hwOrderB = hwB === -1 ? 999 : hwB;
-          if (hwOrderA !== hwOrderB) return hwOrderA - hwOrderB;
-          if (a.hardware !== b.hardware) return a.hardware.localeCompare(b.hardware);
-          return a.os.localeCompare(b.os);
-        });
-
+      const columns = buildColumns(declaredCombos(playbooks));
       return NextResponse.json({
+        source,
         run: null,
-        columns: allColumns,
-        rows: playbooks.map((pb) => ({
-          playbookId: pb.id,
-          title: pb.title,
-          category: pb.category,
-          developed: pb.developed,
-          unsupportedReasons: pb.unsupportedReasons,
-          cells: {},
-        })),
+        columns,
+        rows: buildRows(playbooks, columns, new Map()),
       });
     }
 
@@ -458,61 +595,19 @@ export async function GET(request: Request) {
     const summaryEntries = summaryEntriesNested.flat();
 
     const byPlaybookAndCombo = new Map<string, CellSummary>();
-    const comboIds = new Set<string>();
-
-    // Columns are only the device/OS combos that at least one playbook
-    // actually declares (tested/supported), marks unsupported, or has results for.
-    for (const pb of playbooks) {
-      for (const combo of pb.combinations) comboIds.add(combo);
-      for (const combo of Object.keys(pb.unsupportedReasons)) comboIds.add(combo);
-    }
-
+    // Columns: the declared combos plus any combo that has results.
+    const comboIds = declaredCombos(playbooks);
     for (const entry of summaryEntries) {
       if (!entry) continue;
       comboIds.add(entry.comboId);
       byPlaybookAndCombo.set(`${entry.cell.playbookId}::${entry.comboId}`, entry.cell);
     }
 
-    const columns = Array.from(comboIds)
-      .filter((comboId) => !isExcludedCombo(comboId))
-      .map((comboId) => {
-        const [arch, platform] = comboId.split("|");
-        return {
-          id: comboId,
-          arch,
-          platform,
-          hardware: combinationLabel(arch),
-          os: platform === "windows" ? "Windows" : "Linux",
-        };
-      })
-      .sort((a, b) => {
-        const hwA = Object.values(HARDWARE_LABELS).indexOf(a.hardware);
-        const hwB = Object.values(HARDWARE_LABELS).indexOf(b.hardware);
-        const hwOrderA = hwA === -1 ? 999 : hwA;
-        const hwOrderB = hwB === -1 ? 999 : hwB;
-        if (hwOrderA !== hwOrderB) return hwOrderA - hwOrderB;
-        if (a.hardware !== b.hardware) return a.hardware.localeCompare(b.hardware);
-        return a.os.localeCompare(b.os);
-      });
-
-    const rows = playbooks.map((pb) => {
-      const cells: Record<string, CellSummary> = {};
-      for (const col of columns) {
-        const key = `${pb.id}::${col.id}`;
-        const existing = byPlaybookAndCombo.get(key);
-        if (existing) cells[col.id] = existing;
-      }
-      return {
-        playbookId: pb.id,
-        title: pb.title,
-        category: pb.category,
-        developed: pb.developed,
-        unsupportedReasons: pb.unsupportedReasons,
-        cells,
-      };
-    });
+    const columns = buildColumns(comboIds);
+    const rows = buildRows(playbooks, columns, byPlaybookAndCombo);
 
     return NextResponse.json({
+      source,
       run: {
         id: nightly.run.id,
         htmlUrl: nightly.run.html_url,

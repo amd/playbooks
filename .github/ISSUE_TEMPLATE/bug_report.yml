@@ -56,6 +56,7 @@ body:
         - "pytorch-kernels - Building Custom GPU Kernels with PyTorch and AMD ROCm™"
         - "pytorch-rocm-llms - Running LLMs on PyTorch with AMD ROCm™ Software"
         - "speech2speech-translation - Real-Time Speech-to-Speech Translation"
+        - "thenoise-image-edit - Editing Images with TheNoise and Flux.2 Klein"
         - "unsloth-llms-finetuning - Fine-Tuning LLMs with Unsloth"
         - "vllm-inference - Getting Started with vLLM"
         - "vscode-qwen3-coder - Local LLM Coding with VSCode and Qwen3-Coder"

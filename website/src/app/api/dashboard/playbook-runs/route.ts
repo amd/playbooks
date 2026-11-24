@@ -4,6 +4,7 @@
 
 import { NextResponse } from "next/server";
 import { listRecentRuns } from "@/lib/github-test-results";
+import { ORCHESTRAI_WORKFLOW_FILE } from "@/lib/orchestrai-results";
 
 /**
  * GET /api/dashboard/playbook-runs
@@ -13,6 +14,8 @@ import { listRecentRuns } from "@/lib/github-test-results";
  *
  * Query params:
  *   per_page  – number of runs to return (default 20, max 50)
+ *   source    – "github" (test-playbooks.yml, default) or "orchestrai"
+ *               (test-playbooks-orchestrai.yml)
  */
 export async function GET(request: Request) {
   const token = process.env.DASHBOARD_GITHUB_TOKEN?.trim();
@@ -27,7 +30,8 @@ export async function GET(request: Request) {
   const perPage = Math.min(50, Math.max(1, parseInt(searchParams.get("per_page") ?? "20", 10)));
 
   try {
-    const runs = await listRecentRuns(token, perPage);
+    const workflow = searchParams.get("source") === "orchestrai" ? ORCHESTRAI_WORKFLOW_FILE : undefined;
+    const runs = await listRecentRuns(token, perPage, workflow);
     return NextResponse.json({ runs });
   } catch (err) {
     console.error("Failed to list playbook runs:", err);
