@@ -165,7 +165,8 @@ python .github/scripts/run_playbook_tests.py --playbook your-playbook-id --platf
 
 **CI behavior:**
 
-- Tests run automatically on PRs that modify playbook files
-- Tests run on self-hosted runners tagged with `Windows` and `halo`
+- A pull request runs the playbooks whose tests it changed on AMD hardware, through OrchestrAI: on one Ryzen APU and one Radeon GPU for each OS the playbook is tested on, preferring a device in `required_platforms`
+- Comment `!orc` on the pull request to run them on every device in `tested_platforms`
+- The nightly run tests every playbook on every device in `tested_platforms`
 - Tests run in the order they appear in the README
 - Test results are uploaded as artifacts for debugging

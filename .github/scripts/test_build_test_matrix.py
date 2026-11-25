@@ -48,10 +48,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS = (
     ".github/scripts/run_playbook_tests.py",
     ".github/scripts/build_test_matrix.py",
-    ".github/workflows/test-playbooks.yml",
-    # The builder reads this to drop devices with no runner group, so the
-    # fixture needs it or every device falls through unfiltered.
-    ".github/runners.json",
 )
 
 
@@ -69,38 +65,12 @@ def make_repo(path: Path) -> None:
     git("config", "commit.gpgsign", "false", cwd=path)
 
 
-# Synthetic runner groups pre-registered in the fixture's runners.json. The
-# builder drops devices with no runner group, so tests that invent a device need
-# it to exist in the catalog — and it has to be there in the BASE commit, since
-# runners.json is harness state and editing it mid-test forces the full matrix.
-FIXTURE_EXTRA_GROUPS = ("newdev", *(f"dev{i}" for i in range(200)))
-
-
 def graft_harness(dest: Path) -> None:
     """Copy the working tree's harness into dest so both sides match byte-for-byte."""
     for rel in HARNESS:
         target = dest / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO_ROOT / rel, target)
-    register_fixture_groups(dest)
-
-
-def register_fixture_groups(dest: Path) -> None:
-    """Append the synthetic test groups to the fixture's runner catalog."""
-    runners = dest / ".github" / "runners.json"
-    catalog = json.loads(runners.read_text(encoding="utf-8"))
-    catalog += [
-        {"name": f"fixture-{group}", "os": os_name, "group": group, "labels": []}
-        for group in FIXTURE_EXTRA_GROUPS
-        for os_name in ("Linux", "Windows")
-    ]
-    runners.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
-
-
-def fixture_runner_groups(fixture: Path) -> set[str]:
-    """Device groups the fixture's catalog actually has machines for."""
-    catalog = json.loads((fixture / ".github" / "runners.json").read_text(encoding="utf-8"))
-    return {r["group"] for r in catalog if r.get("group")}
 
 
 def populate_from_rev(dest: Path, rev: str) -> None:
@@ -193,8 +163,33 @@ class FixtureCase(unittest.TestCase):
         self.assertEqual(select(self.fx), [])
 
     def test_harness_change_forces_full_matrix(self):
-        self.edit(".github/workflows/test-playbooks.yml", lambda c: c + "\n# touched\n")
+        self.edit(".github/scripts/build_test_matrix.py", lambda c: c + "\n# touched\n")
         self.assertEqual(len(select(self.fx)), self.total)
+
+    def test_orchestrai_plumbing_change_selects_nothing(self):
+        """Where a playbook runs is not what it executes: `!orc` tests such a change."""
+        plumbing = (".github/workflows/test-playbooks-orchestrai.yml",
+                    ".github/orchestrai-config.yml", ".github/scripts/orchestrai_matrix.py")
+        for rel in plumbing:
+            path = self.fx / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("# v1\n")
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", "add OrchestrAI plumbing", cwd=self.fx)
+        for rel in plumbing:
+            (self.fx / rel).write_text("# v2\n")
+        self.assertEqual(select(self.fx), [])
+
+    def test_an_archived_script_change_selects_nothing(self):
+        """Nothing runs the device runner scripts kept in scripts/archive/."""
+        rel = ".github/scripts/archive/select_runners.py"
+        path = self.fx / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# v1\n")
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", "archive a script", cwd=self.fx)
+        path.write_text("# v2\n")
+        self.assertEqual(select(self.fx), [])
 
     def test_runner_change_forces_full_matrix(self):
         """The defect that motivated this design: editing the extractor must not cancel."""
@@ -230,60 +225,13 @@ class FixtureCase(unittest.TestCase):
         self.assertTrue(got, "entries with an unresolvable @var must be queued")
         self.assertTrue(all(e["playbook"] == pb for e in got))
 
-    def test_oversized_matrix_fails_loudly(self):
-        """More than 256 jobs must fail in the builder, not at Actions expansion."""
-        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
-        meta = json.loads(pj.read_text())
-        meta["tested_platforms"] = {f"dev{i}": ["linux", "windows"] for i in range(200)}
-        pj.write_text(json.dumps(meta, indent=2))
-        runners = self.fx / ".github" / "runners.json"  # runnable devices only count
-        runners.write_text(json.dumps(json.loads(runners.read_text()) + [
-            {"name": f"dev{i}-{o}", "os": o, "group": f"dev{i}", "labels": []}
-            for i in range(200) for o in ("Linux", "Windows")]))
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
-             "--github-output", os.devnull],
-            cwd=self.fx, capture_output=True, text=True,
-        )
-        self.assertNotEqual(proc.returncode, 0)
-        self.assertIn("256", proc.stderr)
-
-    def test_device_without_a_runner_group_is_dropped(self):
-        """A device no machine serves must not reach the matrix.
-
-        Its runs-on would match no runner, so the job queues until it times out
-        rather than failing — indistinguishable from a hung test. Such devices
-        are covered by the OrchestrAI workflow instead.
-        """
-        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
-        meta = json.loads(pj.read_text())
-        meta["tested_platforms"]["unserved"] = ["linux", "windows"]
-        pj.write_text(json.dumps(meta, indent=2))
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
-             "--github-output", os.devnull],
-            cwd=self.fx, capture_output=True, text=True, check=True,
-        )
-        entries = json.loads(proc.stdout)
-        self.assertEqual(len(entries), self.total, "an unserved device must add no jobs")
-        self.assertNotIn("unserved", {e["arch"] for e in entries})
-        self.assertIn("unserved", proc.stderr)
-
     def test_new_device_is_selected_even_though_signature_matches(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
         meta["tested_platforms"]["newdev"] = ["linux"]
         pj.write_text(json.dumps(meta, indent=2))
-        self.add_runner("newdev")  # a new device comes with its runner, already in base
-        git("add", "-A", ".github", cwd=self.fx)
-        git("commit", "-qm", "add newdev runner", cwd=self.fx)
         got = select(self.fx)
         self.assertEqual([(e["platform"], e["arch"]) for e in got], [("linux", "newdev")])
-
-    def add_runner(self, group):
-        runners = self.fx / ".github" / "runners.json"
-        runners.write_text(json.dumps(json.loads(runners.read_text())
-                                      + [{"name": f"{group}-0", "os": "Linux", "group": group, "labels": []}]))
 
     def add_tested_device(self, device):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
@@ -292,57 +240,20 @@ class FixtureCase(unittest.TestCase):
         pj.write_text(json.dumps(meta, indent=2))
         return pj.parent.name
 
-    def test_a_device_without_runners_is_not_scheduled(self):
-        """Devices only OrchestrAI tests (e.g. grgh) have no runner here."""
-        self.add_tested_device("norunner")
-        self.assertEqual(select(self.fx), [])
-
-    def test_a_runner_only_change_schedules_its_device(self):
-        """Adding a runner for an already-tested device must not wait for a playbook edit."""
-        runners = self.fx / ".github" / "runners.json"
-        fleet = runners.read_text()
-        dev, plat = next((e["arch"], e["platform"]) for e in select_all(self.fx))
-        runners.write_text(json.dumps([r for r in json.loads(fleet)
-                                       if (r["group"], r["os"].lower()) != (dev, plat)]))
-        git("add", "-A", cwd=self.fx)
-        git("commit", "-qm", f"{plat}/{dev} has no runner yet", cwd=self.fx)
-        runners.write_text(fleet)
-        self.assertIn((plat, dev), {(e["platform"], e["arch"]) for e in select(self.fx)})
-
-    def build_all(self):
-        return subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
-             "--github-output", os.devnull], cwd=self.fx, capture_output=True, text=True)
-
-    def require(self, device):
-        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
-        meta = json.loads(pj.read_text())
-        meta["tested_platforms"][device] = ["linux"]
-        meta.setdefault("required_platforms", {})[device] = ["linux"]
-        pj.write_text(json.dumps(meta, indent=2))
-
-    def test_a_required_entry_whose_runner_vanished_fails(self):
-        """An accidental catalog removal must not shrink required coverage silently."""
-        dev = next(e["arch"] for e in select_all(self.fx) if e["platform"] == "linux")
-        self.require(dev)
-        runners = self.fx / ".github" / "runners.json"
-        runners.write_text(json.dumps([r for r in json.loads(runners.read_text())
-                                       if (r["group"], r["os"].lower()) != (dev, "linux")]))
-        proc = self.build_all()
-        self.assertNotEqual(proc.returncode, 0)
-        self.assertIn(f"linux/{dev}", proc.stderr)
-
-    def test_a_required_orchestrai_only_entry_is_left_out(self):
-        self.require("grgh")
-        proc = self.build_all()
-        self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertNotIn("grgh", {e["arch"] for e in json.loads(proc.stdout)})
-
-    def test_runner_group_matches_the_device_regardless_of_case(self):
-        pb = self.add_tested_device("mixedcase")
-        self.add_runner("MixedCase")
+    def test_every_declared_device_is_selected(self):
+        """OrchestrAI tests every device; none is left out for want of a runner."""
+        pb = self.add_tested_device("unserved")
         got = {(e["playbook"], e["platform"], e["arch"]) for e in select(self.fx)}
-        self.assertIn((pb, "linux", "mixedcase"), got)
+        self.assertEqual(got, {(pb, "linux", "unserved")})
+
+    def test_keys_list_each_selected_entry_once(self):
+        """--keys hands the exact entries on: a PR that changed a playbook on one
+        device and OS does not run it on the others."""
+        pb = self.add_tested_device("unserved")
+        proc = subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed",
+             "--base", "HEAD", "--keys"], cwd=self.fx, capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(proc.stdout), [["", pb, "linux", "unserved"]])
 
     def test_required_flag_flip_is_selected(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
@@ -390,10 +301,7 @@ class FixtureCase(unittest.TestCase):
         """Dropping a device from tested_platforms must still run the lost entry."""
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
-        # Only a device with a runner group reaches the matrix at all; one
-        # without is absent on both sides, so dropping it selects nothing.
-        groups = fixture_runner_groups(self.fx)
-        dev = sorted(d for d in meta["tested_platforms"] if d in groups)[0]
+        dev = sorted(meta["tested_platforms"])[0]
         lost = meta["tested_platforms"].pop(dev)
         pj.write_text(json.dumps(meta, indent=2))
         got = select(self.fx)
@@ -598,59 +506,8 @@ class LocalizedFixtureCase(unittest.TestCase):
         self.assertTrue(self.select(), "localized dependency tests are not signed")
 
     def test_harness_change_forces_full_matrix(self):
-        self.append(".github/workflows/test-playbooks.yml", "\n# touched\n")
+        self.append(".github/scripts/run_playbook_tests.py", "\n# touched\n")
         self.assertEqual(len(self.select()), self.total)
-
-
-class LocalizedRunnerLabelCase(unittest.TestCase):
-    """The locale, platform/device, and optional host labels must stay distinct."""
-
-    @staticmethod
-    def build(*args) -> list[dict]:
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", *args],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return json.loads(proc.stdout)
-
-    def test_localized_entries_use_standard_dimensions_plus_locale(self):
-        entries = self.build("--mode", "all", "--locale", "zh-CN")
-        self.assertTrue(entries)
-        for entry in entries:
-            os_label = "Windows" if entry["platform"] == "windows" else "Linux"
-            expected = ["self-hosted", os_label, entry["arch"], "localized-zh-cn"]
-            self.assertEqual(json.loads(entry["runner"]), expected)
-            self.assertEqual(entry["runner_label"], "localized-zh-cn")
-            self.assertEqual(entry["target_runner_label"], "")
-            self.assertEqual(entry["runner_labels"], ",".join(expected))
-
-    def test_manual_target_does_not_replace_locale_label(self):
-        entries = self.build("--mode", "all", "--locale", "zh-CN")
-        candidate = entries[0]
-        os_label = "Windows" if candidate["platform"] == "windows" else "Linux"
-        catalog = json.loads((REPO_ROOT / ".github/runners.json").read_text(encoding="utf-8"))
-        runner = next(
-            item for item in catalog
-            if item["os"] == os_label and item["group"] == candidate["arch"]
-        )
-        targeted = self.build(
-            "--mode", "playbook",
-            "--playbook-id", candidate["playbook"],
-            "--locale", "zh-CN",
-            "--platform", candidate["platform"],
-            "--device", candidate["arch"],
-            "--runner-label", runner["name"],
-        )
-        self.assertTrue(targeted)
-        for entry in targeted:
-            labels = json.loads(entry["runner"])
-            self.assertEqual(entry["runner_label"], "localized-zh-cn")
-            self.assertEqual(entry["target_runner_label"], runner["name"])
-            self.assertIn("localized-zh-cn", labels)
-            self.assertIn(runner["name"], labels)
 
 
 class UnreachableBaseCase(unittest.TestCase):
@@ -814,7 +671,6 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite([loader.loadTestsFromTestCase(FixtureCase),
                                 loader.loadTestsFromTestCase(LocalizedFixtureCase),
-                                loader.loadTestsFromTestCase(LocalizedRunnerLabelCase),
                                 loader.loadTestsFromTestCase(UnreachableBaseCase)])
     if not args.quick:
         suite.addTests(loader.loadTestsFromTestCase(ReplayCase))

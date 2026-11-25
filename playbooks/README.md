@@ -128,27 +128,26 @@ Instructions for discrete Radeon GPUs
 
 Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to explicitly mark content for all devices. A device selector appears on the playbook page when `@device` tags are detected.
 
-> **Note — device tags vs. actual runners.** Some device IDs above are declared
+> **Note — device tags vs. tested hardware.** Some device IDs above are declared
 > for upcoming hardware (e.g. the Gorgon `grgh_box`/`grgp` and Medusa
-> `mdsh_box`/`mdsh`/`mdsp` tags) but do **not** yet have physical CI runners. A
-> tag can be *recognized* everywhere without being *tested*, so these are wired
-> only in the declarative places and deliberately left out of the two files that
-> actually schedule jobs. When the hardware arrives, wire a new tag up in this
-> order:
+> `mdsh_box`/`mdsh`/`mdsp` tags) but have no CI machines yet. A tag can be
+> *recognized* everywhere without being *tested*. CI runs every playbook on
+> OrchestrAI machines (`.github/workflows/test-playbooks-orchestrai.yml`); a
+> device is tested only once OrchestrAI has machines for it. When the hardware
+> arrives, wire a new tag up in this order:
 >
 > 1. **Recognition / display (already done for the tags above):**
 >    - `playbooks/README.md` — this device table
 >    - `.github/scripts/run_playbook_tests.py` — `VALID_DEVICES`
->    - `.github/workflows/test-playbooks.yml` and `restart-runners.yml` — the `device` / `group` dropdown choices
 >    - `.github/orchestrai-config.yml` — `device_families` (and `device_to_gfx` once the gfx target is known)
 >    - `.github/ISSUE_TEMPLATE/*.yml` — the hardware dropdowns
 >    - `website/src/types/playbook.ts` and the dashboard route/label files — internal preview only
-> 2. **Only once a real runner exists — this is what schedules CI jobs:**
->    - `.github/runners.json` — register the machine (name, os, group = the device tag)
+> 2. **Once OrchestrAI has machines for it — this is what schedules CI jobs:**
+>    - the `ORCHESTRAI_DEVICE_TAGS` repository variable — the device's machine tags
 >    - each playbook's `playbook.json` — add the tag under `tested_platforms` (and `required_platforms` if it should gate merges)
 >
-> Adding a tag to step 2 before a runner is registered queues jobs that never
-> run, so hold those two edits until the hardware is online.
+> A device missing from `ORCHESTRAI_DEVICE_TAGS` is left out of every run, so
+> declaring it in `tested_platforms` early tests nothing until its machines exist.
 
 ### Shared Content Tags
 
