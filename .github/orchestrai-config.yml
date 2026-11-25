@@ -97,6 +97,19 @@ pr_devices:
   ryzen_apu: [halo, stx, krk, grgh, halo_box]
   radeon: [rx9070xt, rx7900xt, r9700, w7900]
 
+# A pull request that changes this file runs the entries it makes run
+# differently (orchestrai_config_changes.py): those whose machines' tags,
+# sites or OS image, PLAYBOOK_DEVICE, provisioning or run settings differ, or
+# that a skip list no longer drops. One that changes the OrchestrAI scripts or
+# test-playbooks-orchestrai.yml reaches every entry. When more than
+# max_entries are reached, it runs one entry per OS and device family where the
+# change reaches the whole family, else one on each device it reaches, on the
+# first canary playbook the device runs. A change to run_settings or the
+# scripts therefore runs one playbook per OS on one APU and one Radeon GPU.
+config_change_runs:
+  max_entries: 8
+  canary_playbooks: [lemonade-getting-started, ollama-getting-started]
+
 # ---------------------------------------------------------------------------
 # Scheduling policy
 # ---------------------------------------------------------------------------
