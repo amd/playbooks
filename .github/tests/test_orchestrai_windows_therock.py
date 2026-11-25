@@ -92,6 +92,7 @@ class WindowsTheRockProvisioning(unittest.TestCase):
             steps = [step for job in workflow["jobs"].values() for step in job.get("steps", [])
                      if "orchestrai_trigger.py" in step.get("run", "")
                      and "--await-build" not in step.get("run", "")
+                     and "--await-runs" not in step.get("run", "")
                      and "--run-status" not in step.get("run", "")
                      and "--cancel" not in step.get("run", "")]
             self.assertTrue(steps, name)

@@ -339,14 +339,47 @@ jobs:
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
 
+  # The wait runner pool (the only one that reaches OrchestrAI) runs a few jobs
+  # at once. A Test job per batch waiting there for its machine held a slot each
+  # for hours, and queued every other run behind them: a pull request behind the
+  # nightly. This one job waits for all of the run's batches, so the run holds
+  # one slot; the Test jobs then start with their builds finished and take
+  # seconds. It never fails the run: a Test job still waits for its own batch.
+  await-runs:
+    name: Wait for OrchestrAI
+    needs: detect-and-trigger
+    if: needs.detect-and-trigger.outputs.has_entries == 'true' && needs.detect-and-trigger.outputs.run_ids != ''
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token: read the runs' status
+    # acquire_timeout 360 + max_duration 480 + 2 x 30 margin, plus overhead.
+    timeout-minutes: 960
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Wait for every batch's run to end
+        continue-on-error: true
+        env:
+          RUN_ID_MAP: ${{ needs.detect-and-trigger.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-runs
+
   test-batches:
     # One job per batch (not per playbook), its English and localized playbooks
     # together: it waits on the batch's build once and resolves each playbook
     # from it, so a full run needs ~1 runner per batch instead of one per
-    # playbook, and several runs no longer starve each other.
+    # playbook. It starts once Wait for OrchestrAI is done (or skipped, or gave
+    # up), so it normally finds its build finished.
     name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
-    needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_entries == 'true'
+    needs: [detect-and-trigger, await-runs]
+    if: >-
+      !cancelled() && needs.detect-and-trigger.result == 'success'
+      && needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
