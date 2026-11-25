@@ -112,14 +112,15 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
     def test_a_device_can_run_its_playbooks_as_another(self):
-        cfg = dict(load_config(), device_runs_as={"grgh": "halo"})
+        cfg = dict(load_config(), device_runs_as={"halo_box": "halo"})
         def device(arch):
             plan = trigger.make_plan(dict(BATCH, arch=arch, tags=["t"]), "refs/heads/main", cfg, 1,
                                      "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
             return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
-        self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
+        self.assertEqual(device("halo_box"), {("halo", ("t",))})  # machines still chosen by halo_box's tags
         self.assertEqual(device("stx"), {("stx", ("t",))})
-        self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
+        self.assertEqual(load_config()["device_runs_as"]["halo_box"], "halo")
+        self.assertNotIn("grgh", load_config()["device_runs_as"])  # runs as itself
 
     def test_every_configured_device_runs_as_a_device_the_runner_accepts(self):
         # run_playbook_tests.py exits 2 on a device outside VALID_DEVICES (box SKUs),
