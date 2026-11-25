@@ -34,6 +34,8 @@ Outputs:
     --dry-run prints each plan/builds payload and starts nothing.
     --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
     --run-status (RUN_ID env): status -> $GITHUB_OUTPUT, before a retry
+    --await-runs (RUN_ID_MAP env): wait until every run has ended (one job per
+                 workflow run, before the Test jobs)
 """
 
 import argparse
@@ -58,6 +60,8 @@ API_TIMEOUT = 30
 API_RETRY_SECONDS = 600
 BUILD_WAIT_MARGIN = 30 * 60
 POLL_SECONDS = 30
+# --await-runs reads every run of a workflow run each poll; once a minute is plenty.
+AWAIT_RUNS_POLL_SECONDS = 60
 TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
 
 
@@ -659,6 +663,65 @@ def await_build_main(config_path):
             f.write(f"build_url={url}\n")
 
 
+def max_duration_minutes(config_path):
+    """run_settings.max_duration from the config, read without PyYAML."""
+    text = open(config_path, encoding="utf-8").read()
+    m = re.search(r"^\s*max_duration:\s*(\d+)", text, re.M)
+    if not m:
+        raise ValueError(f"{config_path} has no run_settings.max_duration")
+    return int(m.group(1))
+
+
+def await_runs(cp, runs, wait_seconds):
+    """Wait until every run in runs ({batch_id: run id}) has ended; return the
+    batches still unfinished when the wait gave up. A run whose status cannot be
+    read is asked again on the next poll."""
+    pending = dict(runs)
+    deadline = time.monotonic() + wait_seconds
+    while pending:
+        for bid, rid in list(pending.items()):
+            try:
+                run = api(cp, "GET", f"/runs/{urllib.parse.quote(rid, safe='')}").get("run") or {}
+            except ValueError as exc:
+                print(f"::warning::{bid}: run status unavailable: {exc}", file=sys.stderr)
+                continue
+            if run.get("status") in TERMINAL:
+                print(f"  {bid}: {run['status']} ({len(runs) - len(pending) + 1}/{len(runs)})",
+                      file=sys.stderr)
+                del pending[bid]
+        if not pending or time.monotonic() >= deadline:
+            break
+        time.sleep(AWAIT_RUNS_POLL_SECONDS)
+    return sorted(pending)
+
+
+def await_runs_main(config_path):
+    """--await-runs: wait until every run Detect & Trigger started (RUN_ID_MAP)
+    has ended, so the Test jobs that read them start with their builds finished.
+
+    The runner pool that reaches OrchestrAI runs only a few jobs at once. A Test
+    job per batch that waited there for its machine (hours) held one slot per
+    batch, and queued every other run behind it: a pull request behind the
+    nightly. This wait holds one slot for the whole run. It never fails: a Test
+    job still waits for its own batch, so a wait that gives up only costs slots.
+    """
+    runs = json.loads(os.environ.get("RUN_ID_MAP") or "{}")
+    if not runs:
+        print("No OrchestrAI runs to wait for", file=sys.stderr)
+        return
+    try:
+        wait = ((acquire_timeout_minutes(config_path) + max_duration_minutes(config_path)) * 60
+                + 2 * BUILD_WAIT_MARGIN)
+        print(f"Waiting for {len(runs)} OrchestrAI run(s) to end ...", file=sys.stderr)
+        left = await_runs(control_plane(), runs, wait)
+    except ValueError as exc:
+        print(f"::warning::{exc}; each Test job waits for its own batch", file=sys.stderr)
+        return
+    if left:
+        print(f"::warning::still running when the wait gave up: {', '.join(left)}; "
+              f"their Test jobs wait for them", file=sys.stderr)
+
+
 def run_status_main():
     """--run-status: the Control Plane's status for one run (RUN_ID), written as
     status=<status> to $GITHUB_OUTPUT: never_started without a run, nothing when
@@ -715,6 +778,8 @@ def main():
                     help="wait for one batch's build (Test jobs); see await_build_main")
     ap.add_argument("--run-status", action="store_true",
                     help="write one run's Control Plane status (RUN_ID); see run_status_main")
+    ap.add_argument("--await-runs", action="store_true",
+                    help="wait until every run in RUN_ID_MAP has ended; see await_runs_main")
     ap.add_argument("--cancel", action="store_true",
                     help="cancel the runs in RUN_IDS (a cancelled Test job); see cancel_main")
     args = ap.parse_args()
@@ -726,6 +791,9 @@ def main():
         return
     if args.await_build:
         await_build_main(args.config)
+        return
+    if args.await_runs:
+        await_runs_main(args.config)
         return
 
     cfg = apply_env_overrides(load_config(args.config))

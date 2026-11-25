@@ -39,3 +39,7 @@ jobs:
         run: python3 .github/tests/test_orchestrai_command.py
       - name: Run localized batch tests
         run: python3 .github/tests/test_orchestrai_localized_batches.py
+      - name: Run failure issue tests
+        run: python3 .github/tests/test_orchestrai_failure_issues.py
+      - name: Run pull request device scope tests
+        run: python3 .github/tests/test_orchestrai_pr_devices.py

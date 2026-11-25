@@ -1410,8 +1410,8 @@ def list_playbook_ids(repo_root: Path) -> list[str]:
 def build_matrix_entries(repo_root: Path) -> list[dict]:
     """Expand every playbook.json into CI matrix entries.
 
-    Every tested device is listed, with or without a runner: build_test_matrix
-    drops entries no runner in .github/runners.json serves, after its filters.
+    Every tested device is listed, whether or not CI has machines for it:
+    orchestrai_matrix.py leaves out devices OrchestrAI has no machines for.
     """
     entries = []
     for playbook_id in list_playbook_ids(repo_root):

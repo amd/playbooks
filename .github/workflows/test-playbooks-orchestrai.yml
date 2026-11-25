@@ -2,22 +2,31 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# OrchestrAI playbook CI (opt-in, additive).
+# Playbook CI on hardware, through OrchestrAI.
 #
-# Runs each playbook on real AMD hardware through the OrchestrAI Control Plane
-# instead of on a device-attached GitHub runner. Detect & Trigger starts one run
-# per hardware batch with a GitHub OIDC token; each Test job waits on its batch's
-# pipeline build and reports that playbook's result. Settings and access rules:
-# .github/orchestrai-config.yml.
+# Runs each playbook on real AMD hardware through the OrchestrAI Control Plane.
+# Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
+# Wait for OrchestrAI waits for all of them on one runner, then each Test job
+# reads its batch's pipeline build and reports each playbook's result. Settings and access rules: .github/orchestrai-config.yml.
+#
+# - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
+#   at the PR's head commit, on one device per family (APU, Radeon) and OS
+#   (pr_devices in orchestrai-config.yml); `!orc` on the PR tests every
+#   declared device. A newer push cancels the older run. Fork PRs get no
+#   secrets or OIDC token, so they are not tested here; `!orc` refuses them too.
+# - schedule: every playbook, English and zh-CN. A playbook that fails opens a
+#   ci-test-failure issue (create_failure_issues.py).
+# - workflow_dispatch: the playbooks, devices, OSes and ref you pick.
 #
 # Required repo secrets:   ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN
 #   (read the pipeline builds; the workflow no-ops on a fork without them)
 # Required repo variables: ORCHESTRAI_V2_CI_API_URL, ORCHESTRAI_V2_OIDC_AUDIENCE,
 #   ORCHESTRAI_V2_PORTAL_URL, ORCHESTRAI_V2_WORKSPACE, and for ReportPortal
 #   reporting ORCHESTRAI_V2_RP_CREDENTIAL / ORCHESTRAI_V2_RP_PROJECT.
-#   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label. Each Test job waits for
-#   its batch's machines and build, and for one retry of each, up to 24 h;
-#   GitHub-hosted runners stop a job at 6 h.
+#   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label that reaches OrchestrAI.
+#   Wait for OrchestrAI waits for every batch's machines and build (up to 16 h)
+#   and a Test job for one retry of its batch; GitHub-hosted runners stop a
+#   job at 6 h.
 # Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
 #                          without inputs; default reportportal)
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
@@ -83,13 +92,9 @@ on:
         description: 'amd/playbooks branch, tag or commit to test'
         type: string
         default: main
-  # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
-  # keep the shared hardware fleet from being flooded. To test a PR, comment
-  # `!orc` on it (locale= adds its translations; see orchestrai-pr-command.yml) —
-  # that runs the PR's own head commit on demand. Re-enable auto-runs by adding a
-  # `pull_request:` block here;
-  # the detect step already handles the pull_request event (changed-playbooks
-  # diff) and the trigger step already sets PLAYBOOK_REPO/SHA from the PR head.
+  # Each push tests only the playbooks whose tests changed; a prose edit tests
+  # nothing. `!orc` on the PR (orchestrai-pr-command.yml) tests more on demand.
+  pull_request:
 
 permissions:
   contents: read
@@ -121,9 +126,12 @@ jobs:
       playbook_repo: ${{ steps.trigger.outputs.playbook_repo }}
       playbook_sha: ${{ steps.trigger.outputs.playbook_sha }}
     steps:
+      # A PR's head commit, not its merge commit: the machines test the head, and
+      # the localized comparison below holds only when this checkout is that commit.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || '' }}
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
@@ -142,7 +150,7 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) not set — skipping OrchestrAI run."
+            echo "::notice::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) not set — skipping OrchestrAI run. A pull request from a fork gets no secrets: it is not tested on hardware."
           fi
 
       - name: Detect English and localized playbooks
@@ -155,7 +163,6 @@ jobs:
           LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.sha }}
         run: |
           # BOTH: test English and zh-CN together, as automated runs and a
           # manual run with locale "all" do; otherwise one language.
@@ -189,14 +196,21 @@ jobs:
               LOCALIZED=$SELECTED
             fi
           elif [ "$EVENT_NAME" = "pull_request" ]; then
-            if ! CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
-              echo "::error::git diff failed (base $PR_BASE_SHA not in history?) — cannot determine changed playbooks"; exit 1
+            # The entries (playbook, OS, device) whose tests changed since the PR
+            # branched off: a prose edit selects nothing, a change to a shared
+            # dependency selects every playbook that uses it, and a change to the
+            # test runner selects all (build_test_matrix.py). Commits main gained
+            # since are not the PR's. ONLY keeps the run to those entries.
+            if ! BASE=$(git merge-base "$PR_BASE_SHA" HEAD); then
+              echo "::error::cannot find where the PR branched off $PR_BASE_SHA"; exit 1
             fi
-            ENGLISH=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            if ! LOCALIZED_CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- "localized-playbooks/$LOCALE/core/*" "localized-playbooks/$LOCALE/supplemental/*"); then
-              echo "::error::git diff failed for localized playbooks"; exit 1
-            fi
-            LOCALIZED=$(echo "$LOCALIZED_CHANGED" | grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" | sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            ENGLISH_KEYS=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --keys --allow-empty --github-output /dev/null)
+            LOCALIZED_KEYS=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --locale "$LOCALE" --keys --allow-empty --github-output /dev/null)
+            ENGLISH=$(jq -c '[.[][1]] | unique' <<< "$ENGLISH_KEYS")
+            LOCALIZED=$(jq -c '[.[][1]] | unique' <<< "$LOCALIZED_KEYS")
+            ONLY=$(jq -c -s 'add' <<< "$ENGLISH_KEYS $LOCALIZED_KEYS")
           else
             if [ "$BOTH" != true ] && [ -z "$LOCALE" ]; then
               ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -212,6 +226,7 @@ jobs:
           echo "english=${ENGLISH:-[]}" >> "$GITHUB_OUTPUT"
           echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
           echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
+          echo "only=${ONLY:-}" >> "$GITHUB_OUTPUT"
 
       # The machines test playbook_repo@playbook_ref (orchestrai_trigger.py), and
       # a manual run may name another commit than this checkout. The localized
@@ -242,12 +257,16 @@ jobs:
       # English and localized playbooks share batches: one run, on one machine,
       # per device and OS. A localized playbook that would execute exactly what
       # its English version in the same batch does is not run again; it reports
-      # the English result (orchestrai_matrix.py).
+      # the English result (orchestrai_matrix.py). A pull request tests each
+      # playbook on one APU and one Radeon GPU per OS (pr_devices in
+      # orchestrai-config.yml); `!orc` on the PR tests every declared device.
       - name: Build the matrix and batches
         id: build
         if: steps.gate.outputs.enabled == 'true'
         env:
           COVER_LOCALIZED: ${{ steps.tested.outputs.cover }}
+          DEVICE_SCOPE: ${{ github.event_name == 'pull_request' && 'representative' || 'all' }}
+          ONLY_ENTRIES: ${{ steps.detect.outputs.only }}
           PLAYBOOKS: ${{ steps.detect.outputs.english }}
           LOCALE: ${{ steps.detect.outputs.locale }}
           LOCALIZED_PLAYBOOKS: ${{ steps.detect.outputs.localized }}
@@ -304,8 +323,8 @@ jobs:
           ORCHESTRAI_PLAYBOOK_SHA: ${{ github.event.pull_request.head.sha }}
           ORCHESTRAI_PLAYBOOK_REF: ${{ inputs.playbook_ref }}
           # reportportal (default, also the nightly) or api; the repo variable
-          # sets it for runs without inputs.
-          ORCHESTRAI_REPORTING: ${{ inputs.reporting || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          # sets it for runs without inputs. A PR's results stay in OrchestrAI.
+          ORCHESTRAI_REPORTING: ${{ inputs.reporting || (github.event_name == 'pull_request' && 'api') || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
           ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
           ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
           ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
@@ -332,14 +351,47 @@ jobs:
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
 
+  # The wait runner pool (the only one that reaches OrchestrAI) runs a few jobs
+  # at once. A Test job per batch waiting there for its machine held a slot each
+  # for hours, and queued every other run behind them: a pull request behind the
+  # nightly. This one job waits for all of the run's batches, so the run holds
+  # one slot; the Test jobs then start with their builds finished and take
+  # seconds. It never fails the run: a Test job still waits for its own batch.
+  await-runs:
+    name: Wait for OrchestrAI
+    needs: detect-and-trigger
+    if: needs.detect-and-trigger.outputs.has_entries == 'true' && needs.detect-and-trigger.outputs.run_ids != ''
+    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
+    permissions:
+      contents: read
+      id-token: write  # GitHub OIDC token: read the runs' status
+    # acquire_timeout 360 + max_duration 480 + 2 x 30 margin, plus overhead.
+    timeout-minutes: 960
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Wait for every batch's run to end
+        continue-on-error: true
+        env:
+          RUN_ID_MAP: ${{ needs.detect-and-trigger.outputs.run_ids }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
+        run: python3 .github/scripts/orchestrai_trigger.py --await-runs
+
   test-batches:
     # One job per batch (not per playbook), its English and localized playbooks
     # together: it waits on the batch's build once and resolves each playbook
     # from it, so a full run needs ~1 runner per batch instead of one per
-    # playbook, and several runs no longer starve each other.
+    # playbook. It starts once Wait for OrchestrAI is done (or skipped, or gave
+    # up), so it normally finds its build finished.
     name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
-    needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_entries == 'true'
+    needs: [detect-and-trigger, await-runs]
+    if: >-
+      !cancelled() && needs.detect-and-trigger.result == 'success'
+      && needs.detect-and-trigger.outputs.has_entries == 'true'
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
@@ -662,6 +714,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
+      issues: write  # ci-test-failure issues for failures on main
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -673,6 +726,22 @@ jobs:
           # Every batch that should report: one without an artifact is NO RESULTS.
           EXPECTED_BATCHES: ${{ needs.detect-and-trigger.outputs.batch_matrix }}
         run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
+      # One issue per playbook that failed on a device and OS, or a comment on its
+      # open one, when main itself was tested: the nightly, or a manual run of main.
+      # A PR's failures are its author's to fix, and stay on the PR.
+      - name: Open issues for failed playbooks
+        if: >-
+          !cancelled() && github.ref == 'refs/heads/main'
+          && (github.event_name == 'schedule'
+              || (github.event_name == 'workflow_dispatch' && inputs.playbook_ref == 'main'))
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ needs.detect-and-trigger.outputs.playbook_sha || github.sha }}
+        run: |
+          python3 .github/scripts/create_failure_issues.py --repo "$REPO" \
+            --results-dir batch-results --run-url "$RUN_URL" --sha "$SHA"
 
   test-gate:
     name: Test Gate (Required)
