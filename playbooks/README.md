@@ -140,7 +140,7 @@ Content outside `@device` tags is always shown. Use `<!-- @device:all -->` to ex
 >    - `playbooks/README.md` — this device table
 >    - `.github/scripts/run_playbook_tests.py` — `VALID_DEVICES`
 >    - `.github/orchestrai-config.yml` — `device_families` (and `device_to_gfx` once the gfx target is known)
->    - `.github/ISSUE_TEMPLATE/*.yml` — the hardware dropdowns
+>    - `.github/scripts/device_registry.json` — the issue-form hardware dropdowns; then run `python .github/scripts/gen_issue_template_playbooks.py` (don't hand-edit `.github/ISSUE_TEMPLATE/*.yml`)
 >    - `website/src/types/playbook.ts` and the dashboard route/label files — internal preview only
 > 2. **Once OrchestrAI has machines for it — this is what schedules CI jobs:**
 >    - the `ORCHESTRAI_DEVICE_TAGS` repository variable — the device's machine tags
