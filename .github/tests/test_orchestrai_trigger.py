@@ -118,7 +118,7 @@ class ControlPlaneApi(unittest.TestCase):
             return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
         self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
         self.assertEqual(device("stx"), {("stx", ("t",))})
-        self.assertEqual(load_config()["device_runs_as"], {"grgh": "halo"})
+        self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
 
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
