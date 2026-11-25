@@ -55,6 +55,7 @@ device_to_gfx:
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
+  w7900:    "gfx1100"
   rx9070xt: "gfx120X"
   r9700:    "gfx120X"
   # TODO: gfx targets for unreleased SKUs unknown until hardware is available.
@@ -79,6 +80,7 @@ device_families:
   stx:      "ryzen_apu"
   krk:      "ryzen_apu"
   rx7900xt: "radeon"
+  w7900:    "radeon"
   rx9070xt: "radeon"
   r9700:    "radeon"
 
@@ -194,6 +196,7 @@ device_names:
   stx:      "Strix"
   krk:      "Krackan"
   rx7900xt: "RX 7900 XT"
+  w7900:    "PRO W7900"
   rx9070xt: "RX 9070 XT"
   r9700:    "R9700"
 
@@ -204,6 +207,7 @@ device_names:
 # that shares another's silicon: grgh is gfx1151 like halo.
 device_runs_as:
   grgh: halo
+  w7900: rx7900xt
 
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never

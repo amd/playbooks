@@ -122,6 +122,7 @@ Instructions for discrete Radeon GPUs
 | `grgp` | Gorgon Point | AMD Ryzen™ AI 400 HX |
 | `mdsp` | Medusa Point | AMD Ryzen™ AI 500 HX |
 | `rx7900xt` | Radeon RX 7900 XT | AMD Radeon™ 7000 Series Graphics |
+| `w7900` | Radeon PRO W7900 | AMD Radeon™ PRO W7900 |
 | `rx9070xt` | Radeon RX 9070 XT | AMD Radeon™ 9000 Series Graphics |
 | `r9700` | Radeon AI Pro R9700 | AMD Radeon™ 9000 Series Graphics |
 
