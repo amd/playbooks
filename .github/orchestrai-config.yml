@@ -41,8 +41,9 @@ test_path_template: "L4-sys/playbooks/{platform}/sys_func-playbook_runner"
 # repo variable as a JSON map, e.g.:
 #   {"halo":["<tag>"],"stx":["<tag>"],"rx7900xt":["<tag>"]}
 # Every device a playbook.json declares must appear in that map, or the matrix
-# builder skips it with a warning. Keep the device set in sync with the native
-# runner's VALID_DEVICES in .github/scripts/run_playbook_tests.py.
+# builder skips it with a warning. A device outside the runner's VALID_DEVICES
+# (.github/scripts/run_playbook_tests.py), such as a box SKU, needs a
+# device_runs_as entry below.
 device_to_tags: {}
 
 # Device -> gfx target. The TheRock tarball is multi-arch, so this is only used
@@ -207,6 +208,8 @@ device_names:
 # that shares another's silicon: grgh is gfx1151 like halo. Box SKUs (halo_box,
 # grgh_box, mdsh_box) are display-only names that run_playbook_tests.py rejects
 # (it exits 2 before any test), so they run as the device of their silicon.
+# Their README @device blocks are then not tested: a box runs its device's
+# blocks, which install everything on the stock CI image.
 device_runs_as:
   grgh: halo
   w7900: rx7900xt

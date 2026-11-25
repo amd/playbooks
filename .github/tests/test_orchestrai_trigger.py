@@ -128,6 +128,8 @@ class ControlPlaneApi(unittest.TestCase):
         runs_as = cfg.get("device_runs_as") or {}
         devices = set(cfg["device_families"]) | set(cfg["device_to_gfx"])
         self.assertEqual({d for d in devices if runs_as.get(d, d) not in VALID_DEVICES}, set())
+        # One hop only: a target that is itself remapped is never followed.
+        self.assertEqual(set(runs_as.values()) & set(runs_as), set())
 
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
