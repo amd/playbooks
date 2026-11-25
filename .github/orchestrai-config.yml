@@ -204,10 +204,15 @@ device_names:
 # device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
 # README @device blocks, @var values and the test library's per-device
 # dependencies treat it exactly like that one. For a device no README names yet
-# that shares another's silicon: grgh is gfx1151 like halo.
+# that shares another's silicon: grgh is gfx1151 like halo. Box SKUs (halo_box,
+# grgh_box, mdsh_box) are display-only names that run_playbook_tests.py rejects
+# (it exits 2 before any test), so they run as the device of their silicon.
 device_runs_as:
   grgh: halo
   w7900: rx7900xt
+  halo_box: halo
+  grgh_box: halo
+  mdsh_box: mdsh
 
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never

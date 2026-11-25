@@ -120,6 +120,15 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertEqual(device("stx"), {("stx", ("t",))})
         self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
 
+    def test_every_configured_device_runs_as_a_device_the_runner_accepts(self):
+        # run_playbook_tests.py exits 2 on a device outside VALID_DEVICES (box SKUs),
+        # before any test runs: zenith-getting-started failed that way on halo_box.
+        from run_playbook_tests import VALID_DEVICES
+        cfg = load_config()
+        runs_as = cfg.get("device_runs_as") or {}
+        devices = set(cfg["device_families"]) | set(cfg["device_to_gfx"])
+        self.assertEqual({d for d in devices if runs_as.get(d, d) not in VALID_DEVICES}, set())
+
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
         def sessions(arch, platform):
