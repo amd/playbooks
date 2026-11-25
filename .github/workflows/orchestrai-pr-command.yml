@@ -13,9 +13,6 @@
 #                                 and every locale under localized-playbooks/)
 #   !orc a device=halo,stx     -> only those devices
 #   !orc a platform=linux      -> only that OS
-#   !localized-orc [<locale>] [all|a,b,c]
-#                              -> one locale, as before locale= existed: with no
-#                                 playbooks named, the ones the PR changed there
 #
 # Options combine and may come in any order. Every language of a device and OS
 # shares one batch, so one machine (orchestrai_matrix.py). A typo in a playbook,
@@ -52,13 +49,13 @@ permissions:
 # any "LGTM" would cancel a running !orc. Keep the condition in sync with the
 # command job's `if:`.
 concurrency:
-  group: ${{ (github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && format('orchestrai-orc-{0}', github.event.issue.number) || format('orchestrai-orc-ignored-{0}', github.run_id) }}
+  group: ${{ (github.event.issue.pull_request && startsWith(github.event.comment.body, '!orc') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) && format('orchestrai-orc-{0}', github.event.issue.number) || format('orchestrai-orc-ignored-{0}', github.run_id) }}
   cancel-in-progress: true
 
 jobs:
   command:
     name: OrchestrAI PR command
-    if: github.event.issue.pull_request && (startsWith(github.event.comment.body, '!orc') || startsWith(github.event.comment.body, '!localized-orc')) && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '!orc') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read

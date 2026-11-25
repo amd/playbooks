@@ -24,14 +24,6 @@ in which languages, on which devices and OSes:
                                            version's tests)
     !orc a device=halo,stx platform=linux  only those devices and OSes
 
-`!localized-orc`, the command from before `locale=`, still works as it did:
-
-    !localized-orc                         the localized playbooks the PR
-                                           changed, in the one locale it changed
-    !localized-orc zh-CN                   the zh-CN playbooks the PR changed
-    !localized-orc zh-CN all|a,b           those zh-CN playbooks
-    !localized-orc all|a,b                 those playbooks in the repo's only locale
-
 Options may come in any order; `locales=`, `devices=` and `platforms=` work too.
 English is `en`. A locale, device, OS or playbook that does not exist is an
 error, so a typo fails the command instead of testing nothing.
@@ -59,7 +51,6 @@ from pathlib import Path
 import yaml
 
 COMMAND = "!orc"
-LOCALIZED_COMMAND = "!localized-orc"
 CATEGORIES = ("core", "supplemental")
 PLATFORMS = ("linux", "windows")
 OPTION_NAMES = {
@@ -171,42 +162,9 @@ def changed_playbooks(changed):
     return by_locale
 
 
-def parse_localized(body, changed, root):
-    """parse() for `!localized-orc [<locale>] [all|a,b]`: one locale, and with
-    no playbooks named, only the playbooks the PR changed in that locale."""
-    words = body.splitlines()[0].split()[1:]
-    available = available_locales(root)
-
-    def changed_in(locale):  # a playbook the PR deleted is not tested
-        ids = changed_playbooks(changed).get(locale, set()) & set(playbooks_in(root, locale))
-        return sorted(ids), {"locales": [locale]}
-
-    if len(words) >= 2:  # <locale> all|a,b
-        return parse(f"{COMMAND} {' '.join(words[1:])} locale={words[0]}")
-    if words and words[0] in available:  # <locale>
-        return changed_in(words[0])
-    if words:  # all|a,b in the only locale
-        if len(available) != 1:
-            raise CommandError(f"name the locale: `{LOCALIZED_COMMAND} <locale> {words[0]}` "
-                               f"(available: {', '.join(available) or 'none'})")
-        return parse(f"{COMMAND} {words[0]} locale={available[0]}")
-    changed_locales = sorted(loc for loc in changed_playbooks(changed) if loc)
-    if not changed_locales:
-        return [], {}  # nothing to test
-    if len(changed_locales) > 1:
-        raise CommandError(
-            f"the PR changes localized playbooks in {', '.join(changed_locales)}; "
-            f"name one (`{LOCALIZED_COMMAND} <locale>`) or use `{COMMAND}`, which tests them all")
-    return changed_in(changed_locales[0])
-
-
 def resolve(body, changed, root, config_path):
     """(languages, devices, platforms, filters, notes) for one command."""
-    words = (body or "").strip().split(None, 1)
-    if words and words[0] == LOCALIZED_COMMAND:
-        selection, options = parse_localized(body.strip(), changed, root)
-    else:
-        selection, options = parse(body)
+    selection, options = parse(body)
     devices = resolve_filters(options.get("devices", []), known_devices(config_path), "device")
     platforms = resolve_filters(options.get("platforms", []), set(PLATFORMS), "platform")
     locales = resolve_locales(options["locales"], root) if "locales" in options else None
