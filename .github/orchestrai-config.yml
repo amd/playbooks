@@ -353,12 +353,13 @@ skip_playbook_devices:
 # Per-run pipeline settings
 # ---------------------------------------------------------------------------
 run_settings:
-  # minutes, whole batch. superset_tags folds a device's untagged playbooks into
-  # its 64/128 GB batch (~20 in a row on Halo), so this is as high as the Test
-  # jobs' 330-minute build wait allows while keeping 30 min for the build to
-  # wind down. Raising it means raising that wait, which must stay under
-  # GitHub's 360-minute job timeout.
-  max_duration: 300
+  # minutes, whole batch. A batch runs every playbook of its device and OS in a
+  # row, English and localized (superset_tags folds the untagged ones into the
+  # 64/128 GB batch): about 30 on Halo, ~340 min on Windows. The Test jobs wait
+  # this + 30 min for the build (orchestrai_wait_build.sh reads it here); their
+  # timeout-minutes and RETRY_START_LIMIT_MINUTES in
+  # test-playbooks-orchestrai.yml and orchestrai-pr-command.yml budget for 480.
+  max_duration: 480
   max_test_case_duration: 90   # minutes, single playbook
   # Minutes the Control Plane queues a batch for machines (including quota
   # waits) before dropping it as NOT_RUN. Not counted in max_duration.

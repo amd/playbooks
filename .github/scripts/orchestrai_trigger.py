@@ -49,6 +49,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from orchestrai_keys import group_id, split_key
+
 # Control Plane CI API timing. Transient errors (network, 5xx, 429) are retried
 # for API_RETRY_SECONDS. A run waits for machines for its acquire_timeout; ours
 # waits that long plus BUILD_WAIT_MARGIN for its build.
@@ -144,7 +146,8 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
     rs = cfg["run_settings"]
 
     groups = []
-    for pb_id in batch["playbooks"]:
+    for key in batch["playbooks"]:
+        locale, pb_id = split_key(key)
         variables = {
             "PLAYBOOK_REPO": repo,
             "PLAYBOOK_SHA": sha,
@@ -155,13 +158,12 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
             "PLAYBOOK_DEVICE": (cfg.get("device_runs_as") or {}).get(device, device),
             "ROCM_MULTI_ARCH_INDEX_URL": rocm_index_url,
         }
-        locale = batch.get("locale", "")
         if locale:
-            localized_only = batch.get("localized_only", {}).get(pb_id, True)
+            localized_only = batch.get("localized_only", {}).get(key, True)
             if not isinstance(localized_only, bool):
                 raise ValueError(
                     f"Localized OrchestrAI batch has non-boolean localized_only "
-                    f"for {pb_id!r}"
+                    f"for {key!r}"
                 )
             variables["PLAYBOOK_LOCALE"] = locale
             variables["PLAYBOOK_LOCALIZED_ONLY"] = str(localized_only).lower()
@@ -172,7 +174,7 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
         if hf_token:
             variables["HF_TOKEN"] = hf_token
         group = {
-            "id": f"playbook-{pb_id}",
+            "id": group_id(key),
             "level": "L4-sys",
             "tests": [test],
             "maas_tags": tags,
@@ -201,6 +203,11 @@ def make_plan(batch, git_ref, cfg, machines_per_hw_group, repo, sha, rocm_index_
 
 
 WINDOWS_THEROCK_SCRIPT = "InstallationScripts/gfx/windows-therock-tarball.ps1"
+
+
+def batch_playbook_ids(batch):
+    """The playbook IDs a batch runs, in order, each once whatever its languages."""
+    return list(dict.fromkeys(split_key(key)[1] for key in batch.get("playbooks", [])))
 
 
 def make_builds(batch, cfg):
@@ -348,7 +355,7 @@ def make_builds(batch, cfg):
                 build_vars["driver_source"] = source
             if sources_json:
                 build_vars["driver_sources_json"] = sources_json
-        if "cvml" in batch.get("playbooks", []):
+        if "cvml" in batch_playbook_ids(batch):
             npu_xrt_url = prov.get("ryzenai_npu_xrt_url", "")
             if not npu_xrt_url:
                 missing.append("ORCHESTRAI_RYZENAI_NPU_XRT_URL")
@@ -366,7 +373,7 @@ def make_builds(batch, cfg):
     # {script, reboot_after}.
     extra_map = cfg.get("extra_install_scripts", {})
     seen = {s.get("script") for s in scripts}
-    for pb_id in batch.get("playbooks", []):
+    for pb_id in batch_playbook_ids(batch):
         for entry in extra_map.get(pb_id, []):
             plats = entry.get("platforms")
             if plats and platform not in plats:

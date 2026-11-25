@@ -54,7 +54,7 @@ class BatchMatrix(unittest.TestCase):
 
     def test_localized_batches_are_batches_too(self):
         matrix = [{"playbook": "a", "platform": "linux", "arch": "halo", "required": False,
-                   "batch_id": "localized/zh-CN/linux/halo", "locale": "zh-CN"}]
+                   "batch_id": "linux/halo", "locale": "zh-CN", "key": "zh-CN/a"}]
         self.assertEqual([(b["label"], b["locale"]) for b in batch_matrix(matrix, {"halo": "Halo"})],
                          [("Halo · Linux [zh-CN]", "zh-CN")])
 
@@ -385,14 +385,14 @@ class Workflows(unittest.TestCase):
         self.assertIs(wf["concurrency"]["cancel-in-progress"], True)  # why this is needed
         # Cancelled while the command job runs: its own last step.
         step = next(s for s in wf["jobs"]["command"]["steps"] if "--cancel" in s.get("run", ""))
-        # Or failed after starting runs: test-playbooks is then skipped and nothing reads them.
+        # Or failed after starting runs: test-batches is then skipped and nothing reads them.
         self.assertTrue(step["if"].startswith("(cancelled() || failure())"))
         # It runs in the PR's checkout: isolated, so a json.py there is never imported.
         self.assertIn("python3 -I -c '", step["run"])
         self.assertEqual(step["env"]["RUN_ID_MAP"], "${{ steps.trigger.outputs.run_ids }}")
         # Cancelled later, including batches whose Test jobs never started.
         job = wf["jobs"]["cancel-runs"]
-        self.assertEqual(job["needs"], ["command", "test-playbooks"])
+        self.assertEqual(job["needs"], ["command", "test-batches"])
         self.assertTrue(job["if"].startswith("cancelled()"))
         self.assertEqual(job["permissions"]["id-token"], "write")
         step = next(s for s in job["steps"] if "--cancel" in s.get("run", ""))
@@ -415,6 +415,16 @@ class Workflows(unittest.TestCase):
         self.assertIn(f"({condition}) && format('orchestrai-orc-", group)
         self.assertIn("|| format('orchestrai-orc-ignored-{0}', github.run_id)", group)
 
+    def test_the_orc_comment_reports_every_batch(self):
+        jobs = self.load("orchestrai-pr-command.yml")["jobs"]
+        upload = next(s for s in jobs["test-batches"]["steps"] if "upload-artifact" in s.get("uses", ""))
+        self.assertTrue(upload["with"]["name"].startswith("batch-results-"))
+        report = jobs["report"]["steps"]
+        download = next(s for s in report if "download-artifact" in s.get("uses", ""))
+        self.assertEqual(download["with"]["pattern"], "batch-results-*")
+        step = next(s for s in report if "orchestrai_report.py" in s.get("run", ""))
+        self.assertIn("outputs.batch_matrix", step["env"]["EXPECTED_BATCHES"])
+
     def test_a_retry_tests_the_commit_the_first_attempt_resolved(self):
         jobs = self.load("test-playbooks-orchestrai.yml")["jobs"]
         self.assertIn("steps.trigger.outputs.playbook_sha", jobs["detect-and-trigger"]["outputs"]["playbook_sha"])
@@ -431,7 +441,7 @@ class Workflows(unittest.TestCase):
         for s in command:
             if ".github/scripts/" in s.get("run", ""):
                 self.assertIn(".orc/.github/scripts/", s["run"], s.get("name"))
-        for name in ("test-playbooks", "report"):
+        for name in ("test-batches", "report"):
             for s in jobs[name]["steps"]:
                 if "checkout" in s.get("uses", ""):
                     self.assertNotIn("ref", s.get("with") or {}, name)

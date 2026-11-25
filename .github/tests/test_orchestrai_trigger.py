@@ -118,7 +118,7 @@ class ControlPlaneApi(unittest.TestCase):
             return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
         self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
         self.assertEqual(device("stx"), {("stx", ("t",))})
-        self.assertEqual(load_config()["device_runs_as"], {"grgh": "halo"})
+        self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
 
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
@@ -535,7 +535,7 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_every_test_job_waits_for_its_own_batch(self):
         for name, job in (("test-playbooks-orchestrai.yml", "test-batches"),
-                          ("orchestrai-pr-command.yml", "test-playbooks")):
+                          ("orchestrai-pr-command.yml", "test-batches")):
             steps = self.load(name)["jobs"][job]["steps"]
             ids = [s.get("id") for s in steps]
             self.assertLess(ids.index("build"), ids.index("wait"), name)
@@ -593,8 +593,10 @@ class AcquireTimeoutValidation(unittest.TestCase):
         # One attempt: the wait for its build to start (acquire_timeout + margin),
         # then orchestrai_wait_build.sh's poll of the build itself, plus explicit
         # overhead for checkout, verdicts, upload and summaries.
+        # The build wait is max_duration + 30 min, read from the config.
         with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
-            build_wait = int(re.search(r"DEADLINE=\$\(\(SECONDS \+ (\d+) \* 60\)\)", f.read()).group(1))
+            self.assertIn("DEADLINE=$((SECONDS + (MAX_DURATION + 30) * 60))", f.read())
+        build_wait = load_config()["run_settings"]["max_duration"] + 30
         attempt = (load_config()["run_settings"]["acquire_timeout"] + trigger.BUILD_WAIT_MARGIN / 60
                    + build_wait)
         overhead = 30
@@ -602,7 +604,7 @@ class AcquireTimeoutValidation(unittest.TestCase):
         for name in ("test-playbooks-orchestrai.yml", "orchestrai-pr-command.yml"):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 workflows[name] = yaml.safe_load(f)
-        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-playbooks"]
+        orc = workflows["orchestrai-pr-command.yml"]["jobs"]["test-batches"]
         self.assertGreaterEqual(orc["timeout-minutes"], attempt + overhead)
         # The batch job: one attempt, then a retry only while a whole one still fits.
         batch = workflows["test-playbooks-orchestrai.yml"]["jobs"]["test-batches"]
@@ -728,8 +730,11 @@ class FoldIntoCapacityBatch(unittest.TestCase):
             os.chdir(old_cwd)
         if not batches:
             self.skipTest("no zh-CN playbooks for this selection")
-        self.assertEqual(sorted(batches), ["localized/zh-CN/linux/halo+ram_128gb"])
+        # One language per run (!orc locale=zh-CN): the batch ID names no locale.
+        self.assertEqual(sorted(batches), ["linux/halo+ram_128gb"])
         self.assertEqual({e["batch_id"] for e in matrix}, set(batches))
+        self.assertTrue(all(key.startswith("zh-CN/")
+                            for key in batches["linux/halo+ram_128gb"]["playbooks"]))
 
 
 class OpenHandsProvisioning(unittest.TestCase):

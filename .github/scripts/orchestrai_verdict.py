@@ -15,7 +15,8 @@ per-group rollup to its summary.json:
                                infrastructure_reason}
     expected_groups = ["playbook-a", ...]          # every group the batch planned
 
-keyed by the submission group id (independent of completion order). This script
+keyed by the submission group id (independent of completion order; a localized
+playbook's is playbook-<locale>-<id>, see orchestrai_keys.py). This script
 resolves THIS playbook's verdict, preferring that rollup and falling back to the
 build console's per-suite lifecycle if the rollup is absent.
 
@@ -42,6 +43,7 @@ Usage:
 
 Env:
     BUILD_URL, ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN, PLAYBOOK_ID, PLATFORM
+    PLAYBOOK_LOCALE   optional; the localized playbook's locale ("" = English)
 
 Outputs:
     test-results/summary.json   (per-playbook counts + outcome, for artifact upload)
@@ -59,6 +61,8 @@ import sys
 import time
 import urllib.error
 import urllib.request
+
+from orchestrai_keys import group_id, member_key
 
 COUNT_KEYS = ("passed", "failed", "skipped", "errors")
 
@@ -236,20 +240,20 @@ def status_from_group(grp):
     return "NOT_RUN" if unrun else "PASSED"
 
 
-def suite_start(console, playbook):
-    """The console's 'Started suite' line for this playbook, or None."""
-    esc = re.escape(playbook)
-    return re.search(rf'Started suite "playbook-{esc} #\d+".*?id=([0-9a-fA-F-]+)',
+def suite_start(console, group_key):
+    """The console's 'Started suite' line for this playbook's group, or None."""
+    esc = re.escape(group_key)
+    return re.search(rf'Started suite "{esc} #\d+".*?id=([0-9a-fA-F-]+)',
                      console or "")  # fetch() returns None when the console is unreachable
 
 
-def status_from_console(console, playbook):
+def status_from_console(console, group_key):
     """Fallback: the console exposes the per-playbook suite lifecycle even when
     summary.json has no group for it:
         Started suite "playbook-<id> #<n>" ... id=<sid>
         Finished item <sid> -> PASSED|FAILED
     """
-    m = suite_start(console, playbook)
+    m = suite_start(console, group_key)
     if not m:
         return None
     sid = m.group(1)
@@ -466,7 +470,8 @@ def _run():
               file=sys.stderr)
         sys.exit(EXIT_FAILED)
 
-    group_key = f"playbook-{playbook}"
+    locale = os.environ.get("PLAYBOOK_LOCALE", "")
+    group_key = group_id(member_key(playbook, locale))
 
     def finish(status, grp=None, reason=None, summary=None, how="", cause=None):
         """Write the artifact, annotate, and exit with the mapped code."""
@@ -525,8 +530,8 @@ def _run():
     if status is None:
         console = fetch(f"{build_url}consoleText", user, token)
         console_read = console is not None
-        console_started = suite_start(console, playbook) is not None
-        status = status_from_console(console, playbook)
+        console_started = suite_start(console, group_key) is not None
+        status = status_from_console(console, group_key)
         if status:
             how = "console suite lifecycle"
 
