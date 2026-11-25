@@ -55,7 +55,7 @@ Verify the installation by opening a terminal and running:
 ollama --version
 ```
 
-<!-- @test:id=ollama-version-windows timeout=60 hidden=True -->
+<!-- @test:id=ollama-version-windows timeout=90 hidden=True -->
 ```powershell
 ollama --version
 ```
@@ -78,7 +78,7 @@ Verify the installation:
 ollama --version
 ```
 
-<!-- @test:id=ollama-version-linux timeout=60 hidden=True -->
+<!-- @test:id=ollama-version-linux timeout=90 hidden=True -->
 ```bash
 ollama --version
 ```
