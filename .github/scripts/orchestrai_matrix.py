@@ -119,7 +119,7 @@ def runs_same_tests(entry, device, root):
 
 
 def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_playbooks=None,
-          root=None, languages=None, cover_localized=True, device_scope="all"):
+          root=None, languages=None, cover_localized=True, device_scope="all", only=None):
     """Matrix entries and batches for English and localized playbooks.
 
     Without localized_playbooks, `playbooks` are in `locale` ("" = English):
@@ -133,6 +133,11 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
 
     device_scope="representative" keeps one device per family and OS for each
     playbook (see representative()); "all" keeps every declared device.
+
+    only, a set of (locale, playbook, platform, device) with "" for English,
+    keeps just those entries: a pull request's run tests the entries whose
+    tests it changed (build_test_matrix.py), not every OS and device of a
+    playbook it touched. None keeps every entry.
     """
     if device_scope not in DEVICE_SCOPES:
         raise ValueError(f"device scope must be one of {', '.join(DEVICE_SCOPES)}, "
@@ -227,6 +232,9 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
         matrix = [e for e in matrix if e["arch"] in devices]
     if platforms:
         matrix = [e for e in matrix if e["platform"] in platforms]
+    if only is not None:
+        matrix = [e for e in matrix
+                  if (e.get("locale", ""), e["playbook"], e["platform"], e["arch"]) in only]
 
     # 3) Skip offline/unsupported devices
     matrix = [e for e in matrix if e["arch"] not in skip_devices]
@@ -456,6 +464,11 @@ def main():
              "OS, from pr_devices: a pull request's run); env DEVICE_SCOPE",
     )
     ap.add_argument(
+        "--only", default=os.environ.get("ONLY_ENTRIES", ""),
+        help='JSON list of [locale, playbook, platform, device] ("" = English) to keep; '
+             "empty keeps every entry (env ONLY_ENTRIES)",
+    )
+    ap.add_argument(
         "--locale",
         default=os.environ.get("LOCALE", ""),
         help="Locale under localized-playbooks; empty selects canonical English",
@@ -500,6 +513,19 @@ def main():
         localized = None if args.localized_playbooks is None else parse_ids(args.localized_playbooks)
         anything = bool(playbooks or localized)
 
+    only = None
+    if args.only.strip():
+        try:
+            only = {tuple(item) for item in json.loads(args.only)}
+        except (json.JSONDecodeError, TypeError) as exc:
+            print(f"::error::--only is not a JSON list of [locale, playbook, platform, device]: {exc}",
+                  file=sys.stderr)
+            sys.exit(1)
+        if any(len(item) != 4 for item in only):
+            print("::error::--only entries must be [locale, playbook, platform, device]",
+                  file=sys.stderr)
+            sys.exit(1)
+
     cfg = load_config(args.config)
     # Internal MAAS broker tags are not committed to this (public) repo; they
     # come from the ORCHESTRAI_DEVICE_TAGS variable (a JSON device->tags map).
@@ -522,7 +548,7 @@ def main():
         matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms,
                                 locale=args.locale, localized_playbooks=localized,
                                 languages=languages, cover_localized=not args.no_cover_localized,
-                                device_scope=args.device_scope)
+                                device_scope=args.device_scope, only=only)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:

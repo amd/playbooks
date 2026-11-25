@@ -196,17 +196,21 @@ jobs:
               LOCALIZED=$SELECTED
             fi
           elif [ "$EVENT_NAME" = "pull_request" ]; then
-            # The playbooks whose tests changed since the PR branched off: a prose
-            # edit selects nothing, a change to a shared dependency selects every
-            # playbook that uses it, and a change to the test runner selects all
-            # (build_test_matrix.py). Commits main gained since are not the PR's.
+            # The entries (playbook, OS, device) whose tests changed since the PR
+            # branched off: a prose edit selects nothing, a change to a shared
+            # dependency selects every playbook that uses it, and a change to the
+            # test runner selects all (build_test_matrix.py). Commits main gained
+            # since are not the PR's. ONLY keeps the run to those entries.
             if ! BASE=$(git merge-base "$PR_BASE_SHA" HEAD); then
               echo "::error::cannot find where the PR branched off $PR_BASE_SHA"; exit 1
             fi
-            ENGLISH=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
-              --ids --allow-empty --github-output /dev/null)
-            LOCALIZED=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
-              --locale "$LOCALE" --ids --allow-empty --github-output /dev/null)
+            ENGLISH_KEYS=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --keys --allow-empty --github-output /dev/null)
+            LOCALIZED_KEYS=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --locale "$LOCALE" --keys --allow-empty --github-output /dev/null)
+            ENGLISH=$(jq -c '[.[][1]] | unique' <<< "$ENGLISH_KEYS")
+            LOCALIZED=$(jq -c '[.[][1]] | unique' <<< "$LOCALIZED_KEYS")
+            ONLY=$(jq -c -s 'add' <<< "$ENGLISH_KEYS $LOCALIZED_KEYS")
           else
             if [ "$BOTH" != true ] && [ -z "$LOCALE" ]; then
               ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -222,6 +226,7 @@ jobs:
           echo "english=${ENGLISH:-[]}" >> "$GITHUB_OUTPUT"
           echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
           echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
+          echo "only=${ONLY:-}" >> "$GITHUB_OUTPUT"
 
       # The machines test playbook_repo@playbook_ref (orchestrai_trigger.py), and
       # a manual run may name another commit than this checkout. The localized
@@ -261,6 +266,7 @@ jobs:
         env:
           COVER_LOCALIZED: ${{ steps.tested.outputs.cover }}
           DEVICE_SCOPE: ${{ github.event_name == 'pull_request' && 'representative' || 'all' }}
+          ONLY_ENTRIES: ${{ steps.detect.outputs.only }}
           PLAYBOOKS: ${{ steps.detect.outputs.english }}
           LOCALE: ${{ steps.detect.outputs.locale }}
           LOCALIZED_PLAYBOOKS: ${{ steps.detect.outputs.localized }}

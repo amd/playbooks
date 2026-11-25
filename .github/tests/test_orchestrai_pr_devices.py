@@ -125,6 +125,21 @@ class Build(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.build("some")
 
+    def test_only_the_entries_the_pull_request_changed_run(self):
+        # The PR changed p's Linux tests only: its Windows entries do not run,
+        # and of the Linux ones one APU and one Radeon GPU do.
+        only = {("", "p", "linux", d) for d in DEVICES}
+        with contextlib.redirect_stderr(io.StringIO()):
+            matrix, batches = build(["p"], CFG, root=self.root, device_scope="representative",
+                                    only=only)
+        self.assertEqual(sorted(batches), ["linux/halo", "linux/rx9070xt"])
+        with contextlib.redirect_stderr(io.StringIO()):
+            matrix, _ = build(["p"], CFG, root=self.root, only={("", "p", "windows", "stx")})
+        self.assertEqual([(e["platform"], e["arch"]) for e in matrix], [("windows", "stx")])
+        with contextlib.redirect_stderr(io.StringIO()):
+            matrix, _ = build(["p"], CFG, root=self.root, only=None)
+        self.assertEqual(len(matrix), 14)
+
 
 class Config(unittest.TestCase):
     def test_the_shipped_lists_name_known_devices_of_their_family(self):
@@ -141,6 +156,11 @@ class Config(unittest.TestCase):
         step = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if s.get("id") == "build")
         self.assertEqual(step["env"]["DEVICE_SCOPE"],
                          "${{ github.event_name == 'pull_request' && 'representative' || 'all' }}")
+        # A pull request hands the selector's exact entries on, not just playbook IDs.
+        self.assertEqual(step["env"]["ONLY_ENTRIES"], "${{ steps.detect.outputs.only }}")
+        detect = next(s for s in wf["jobs"]["detect-and-trigger"]["steps"] if s.get("id") == "detect")
+        self.assertEqual(detect["run"].count("--keys"), 2)
+        self.assertIn('echo "only=${ONLY:-}"', detect["run"])
         cmd = yaml.load((GITHUB / "workflows" / "orchestrai-pr-command.yml").read_text(),
                         Loader=yaml.BaseLoader)
         for job in cmd["jobs"].values():
