@@ -6,11 +6,13 @@
 #
 # Runs each playbook on real AMD hardware through the OrchestrAI Control Plane.
 # Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
-# each Test job waits on its batch's pipeline build and reports that playbook's
-# result. Settings and access rules: .github/orchestrai-config.yml.
+# Wait for OrchestrAI waits for all of them on one runner, then each Test job
+# reads its batch's pipeline build and reports each playbook's result. Settings and access rules: .github/orchestrai-config.yml.
 #
 # - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
-#   at the PR's head commit. A newer push cancels the older run. Fork PRs get no
+#   at the PR's head commit, on one device per family (APU, Radeon) and OS
+#   (pr_devices in orchestrai-config.yml); `!orc` on the PR tests every
+#   declared device. A newer push cancels the older run. Fork PRs get no
 #   secrets or OIDC token, so they are not tested here; `!orc` refuses them too.
 # - schedule: every playbook, English and zh-CN. A playbook that fails opens a
 #   ci-test-failure issue (create_failure_issues.py).
@@ -21,9 +23,10 @@
 # Required repo variables: ORCHESTRAI_V2_CI_API_URL, ORCHESTRAI_V2_OIDC_AUDIENCE,
 #   ORCHESTRAI_V2_PORTAL_URL, ORCHESTRAI_V2_WORKSPACE, and for ReportPortal
 #   reporting ORCHESTRAI_V2_RP_CREDENTIAL / ORCHESTRAI_V2_RP_PROJECT.
-#   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label. Each Test job waits for
-#   its batch's machines and build, and for one retry of each, up to 24 h;
-#   GitHub-hosted runners stop a job at 6 h.
+#   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label that reaches OrchestrAI.
+#   Wait for OrchestrAI waits for every batch's machines and build (up to 16 h)
+#   and a Test job for one retry of its batch; GitHub-hosted runners stop a
+#   job at 6 h.
 # Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
 #                          without inputs; default reportportal)
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
@@ -249,12 +252,15 @@ jobs:
       # English and localized playbooks share batches: one run, on one machine,
       # per device and OS. A localized playbook that would execute exactly what
       # its English version in the same batch does is not run again; it reports
-      # the English result (orchestrai_matrix.py).
+      # the English result (orchestrai_matrix.py). A pull request tests each
+      # playbook on one APU and one Radeon GPU per OS (pr_devices in
+      # orchestrai-config.yml); `!orc` on the PR tests every declared device.
       - name: Build the matrix and batches
         id: build
         if: steps.gate.outputs.enabled == 'true'
         env:
           COVER_LOCALIZED: ${{ steps.tested.outputs.cover }}
+          DEVICE_SCOPE: ${{ github.event_name == 'pull_request' && 'representative' || 'all' }}
           PLAYBOOKS: ${{ steps.detect.outputs.english }}
           LOCALE: ${{ steps.detect.outputs.locale }}
           LOCALIZED_PLAYBOOKS: ${{ steps.detect.outputs.localized }}

@@ -84,6 +84,19 @@ device_families:
   rx9070xt: "radeon"
   r9700:    "radeon"
 
+# A pull request's automatic run (DEVICE_SCOPE=representative) tests each
+# changed playbook on one device per family and OS instead of every device it
+# declares: per OS, the first device in its family's list below that the
+# playbook tests there, preferring one where it is required. A playbook on halo
+# and rx9070xt for Linux and Windows runs four times, not fourteen. A device
+# missing from its family's list comes after the listed ones; a family with no
+# list keeps all its devices. The nightly, manual runs and `!orc` (every device
+# the changed playbooks declare) are unchanged. Ordered by how many machines
+# OrchestrAI has (halo 85, rx9070xt 76, stx 35, rx7900xt 23, r9700 7).
+pr_devices:
+  ryzen_apu: [halo, stx, krk, grgh, halo_box]
+  radeon: [rx9070xt, rx7900xt, r9700, w7900]
+
 # ---------------------------------------------------------------------------
 # Scheduling policy
 # ---------------------------------------------------------------------------
