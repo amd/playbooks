@@ -37,7 +37,9 @@ With --locale alone, --playbooks are that locale's (one language). With
 the batches. --languages names the playbooks of any number of languages ("" or
 "en" = English), all sharing the batches; it replaces the three above.
 --devices and --platforms narrow the run; a name no device or OS has is an
-error, never a run that silently tests nothing.
+error, never a run that silently tests nothing. --device-scope representative
+(a pull request's run) keeps one device per family and OS (pr_devices in the
+config).
 
 Writes matrix=/batches=/has_entries= (and english_matrix=/localized_matrix=)
 to $GITHUB_OUTPUT when set; --print also dumps a human-readable summary + JSON
@@ -117,7 +119,7 @@ def runs_same_tests(entry, device, root):
 
 
 def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_playbooks=None,
-          root=None, languages=None, cover_localized=True):
+          root=None, languages=None, cover_localized=True, device_scope="all"):
     """Matrix entries and batches for English and localized playbooks.
 
     Without localized_playbooks, `playbooks` are in `locale` ("" = English):
@@ -128,7 +130,13 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
 
     cover_localized=False runs every localized entry: the comparison reads
     `root`, so it is only valid when the machines test that same commit.
+
+    device_scope="representative" keeps one device per family and OS for each
+    playbook (see representative()); "all" keeps every declared device.
     """
+    if device_scope not in DEVICE_SCOPES:
+        raise ValueError(f"device scope must be one of {', '.join(DEVICE_SCOPES)}, "
+                         f"not {device_scope!r}")
     root = Path(root) if root else Path.cwd()
     if languages is not None:
         # English first: the batches list their English members first.
@@ -265,6 +273,16 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
               f"(add device_to_tags + device_to_gfx entries to enable)", file=sys.stderr)
         matrix = [e for e in matrix if e["arch"] in device_to_tags]
 
+    # 4b') A pull request's run: one device per family and OS (pr_devices).
+    if device_scope == "representative":
+        kept = representative(matrix, cfg)
+        left_out = sorted({f"{e['arch']} ({e['platform']})" for e in matrix if e not in kept})
+        if left_out:
+            print(f"::notice::One device per family and OS for a pull request; not tested "
+                  f"here: {', '.join(left_out)}. Comment !orc on the PR to test every device "
+                  f"the changed playbooks declare.", file=sys.stderr)
+        matrix = kept
+
     # 4c) A localized entry whose English entry runs on the same device and OS
     #     in this run, executing exactly the same tests, is not run a second
     #     time on that machine: it reports the English result (covered_by).
@@ -309,6 +327,38 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
     fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for)
 
     return matrix, batches
+
+
+DEVICE_SCOPES = ("all", "representative")
+
+
+def representative(matrix, cfg):
+    """The entries a pull request's run keeps: for each playbook, OS and device
+    family (device_families), the entries on one device. That device is the
+    first in the family's pr_devices list among those the playbook tests on
+    that OS, preferring one where it is required, so the Test Gate still checks
+    a required device when there is one. Every language of a playbook gets the
+    same device, so a localized entry can still be covered by its English one.
+    A device whose family has no pr_devices list is always kept."""
+    families = cfg.get("device_families") or {}
+    order = cfg.get("pr_devices") or {}
+
+    def group(e):
+        return (e["playbook"], e["platform"], families.get(e["arch"]))
+
+    def rank(device, required):
+        listed = order.get(families.get(device)) or []
+        position = listed.index(device) if device in listed else len(listed)
+        return (not required, position, device)
+
+    candidates = {}  # group -> {device: required on it in any language}
+    for e in matrix:
+        if order.get(families.get(e["arch"])):
+            devices = candidates.setdefault(group(e), {})
+            devices[e["arch"]] = devices.get(e["arch"], False) or bool(e["required"])
+    chosen = {g: min(devices, key=lambda d: rank(d, devices[d]))
+              for g, devices in candidates.items()}
+    return [e for e in matrix if group(e) not in chosen or chosen[group(e)] == e["arch"]]
 
 
 def fold_into_capacity_batches(matrix, batches, cfg, batch_id_for, tags_for):
@@ -400,6 +450,12 @@ def main():
              "another commit than this checkout, which the comparison reads",
     )
     ap.add_argument(
+        "--device-scope", choices=DEVICE_SCOPES,
+        default=os.environ.get("DEVICE_SCOPE") or "all",
+        help="all (every declared device) or representative (one device per family and "
+             "OS, from pr_devices: a pull request's run); env DEVICE_SCOPE",
+    )
+    ap.add_argument(
         "--locale",
         default=os.environ.get("LOCALE", ""),
         help="Locale under localized-playbooks; empty selects canonical English",
@@ -465,7 +521,8 @@ def main():
     else:
         matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms,
                                 locale=args.locale, localized_playbooks=localized,
-                                languages=languages, cover_localized=not args.no_cover_localized)
+                                languages=languages, cover_localized=not args.no_cover_localized,
+                                device_scope=args.device_scope)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
