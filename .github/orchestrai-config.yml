@@ -222,7 +222,10 @@ device_names:
 # README @device blocks, @var values and the test library's per-device
 # dependencies treat it exactly like that one. It does not mean the two are the
 # same card. Two cases:
-#   - grgh (Gorgon Halo): no README names it yet, and it is gfx1151 like halo.
+#   - grgh (Gorgon Halo, gfx1151 like halo): READMEs name it next to halo, but
+#     the test library's per-playbook dependency lists (which model is primed
+#     from Artifactory) name only halo and halo_box. Remove this entry once
+#     they name grgh too.
 #   - Box SKUs (halo_box, grgh_box, mdsh_box) are display-only names that
 #     run_playbook_tests.py rejects (it exits 2 before any test), so they run as
 #     the device of their silicon. Their README @device blocks are then not
