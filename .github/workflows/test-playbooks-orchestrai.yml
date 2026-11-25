@@ -213,6 +213,32 @@ jobs:
           echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
           echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
 
+      # The machines test playbook_repo@playbook_ref (orchestrai_trigger.py), and
+      # a manual run may name another commit than this checkout. The localized
+      # comparison below reads this checkout, so it applies only when both are
+      # the same commit; otherwise every localized playbook runs.
+      - name: Compare the tested commit with this checkout
+        id: tested
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          TESTED_REPO: ${{ github.event.pull_request.head.repo.clone_url }}
+          TESTED_SHA: ${{ github.event.pull_request.head.sha }}
+          TESTED_REF: ${{ inputs.playbook_ref }}
+        run: |
+          repo=${TESTED_REPO:-$(python3 -c "import yaml; print(yaml.safe_load(open('.github/orchestrai-config.yml'))['playbook_repo'])")}
+          ref=${TESTED_SHA:-${TESTED_REF:-main}}
+          tested=
+          if git fetch --quiet --no-tags "$repo" "$ref"; then
+            tested=$(git rev-parse FETCH_HEAD)
+          fi
+          head=$(git rev-parse HEAD)
+          if [ -n "$tested" ] && [ "$tested" = "$head" ]; then
+            echo "cover=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The machines test $repo@$ref (${tested:-unresolved}), not this checkout ($head): every localized playbook runs"
+            echo "cover=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # English and localized playbooks share batches: one run, on one machine,
       # per device and OS. A localized playbook that would execute exactly what
       # its English version in the same batch does is not run again; it reports
@@ -221,6 +247,7 @@ jobs:
         id: build
         if: steps.gate.outputs.enabled == 'true'
         env:
+          COVER_LOCALIZED: ${{ steps.tested.outputs.cover }}
           PLAYBOOKS: ${{ steps.detect.outputs.english }}
           LOCALE: ${{ steps.detect.outputs.locale }}
           LOCALIZED_PLAYBOOKS: ${{ steps.detect.outputs.localized }}

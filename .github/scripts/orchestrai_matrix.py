@@ -117,7 +117,7 @@ def runs_same_tests(entry, device, root):
 
 
 def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_playbooks=None,
-          root=None, languages=None):
+          root=None, languages=None, cover_localized=True):
     """Matrix entries and batches for English and localized playbooks.
 
     Without localized_playbooks, `playbooks` are in `locale` ("" = English):
@@ -125,6 +125,9 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
     are in `locale`. `languages` ({locale: playbooks}, "" = English) replaces
     all three and takes any number of locales. Every language shares batches,
     so a device and OS is one OrchestrAI run on one machine for all of them.
+
+    cover_localized=False runs every localized entry: the comparison reads
+    `root`, so it is only valid when the machines test that same commit.
     """
     root = Path(root) if root else Path.cwd()
     if languages is not None:
@@ -268,7 +271,8 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
     #     The device is the one the runner extracts for (device_runs_as).
     english = {(e["playbook"], e["platform"], e["arch"]) for e in matrix if not e.get("locale")}
     for e in matrix:
-        if (e.get("locale") and (e["playbook"], e["platform"], e["arch"]) in english
+        if (cover_localized and e.get("locale")
+                and (e["playbook"], e["platform"], e["arch"]) in english
                 and runs_same_tests(e, runs_as.get(e["arch"], e["arch"]), root)):
             e["covered_by"] = member_key(e["playbook"])
 
@@ -389,6 +393,13 @@ def main():
                     help='comma-separated platform list (empty/"all" = linux+windows)')
     ap.add_argument("--print", action="store_true", dest="do_print")
     ap.add_argument(
+        "--no-cover-localized", action="store_true",
+        default=os.environ.get("COVER_LOCALIZED", "").lower() == "false",
+        help="run every localized entry, even one that executes what its English "
+             "entry does (env COVER_LOCALIZED=false): for when the machines test "
+             "another commit than this checkout, which the comparison reads",
+    )
+    ap.add_argument(
         "--locale",
         default=os.environ.get("LOCALE", ""),
         help="Locale under localized-playbooks; empty selects canonical English",
@@ -454,7 +465,7 @@ def main():
     else:
         matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms,
                                 locale=args.locale, localized_playbooks=localized,
-                                languages=languages)
+                                languages=languages, cover_localized=not args.no_cover_localized)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:

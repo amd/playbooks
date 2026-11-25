@@ -11,6 +11,7 @@ Usage:
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -96,6 +97,37 @@ class Selection(Repo):
         self.assertEqual(self.languages("!orc a\r\nplease also test b\n"), {"": ["a"]})
 
 
+class LocalizedOrc(Repo):
+    """`!localized-orc`, from before locale=, keeps its meaning: one locale."""
+    CHANGED = Selection.CHANGED
+
+    def test_bare_tests_the_localized_changes_of_the_one_changed_locale(self):
+        zh_only = "playbooks/core/a/README.md\nlocalized-playbooks/zh-CN/core/b/README.md"
+        self.assertEqual(self.languages("!localized-orc", zh_only), {"zh-CN": ["b"]})
+        self.assertEqual(self.languages("!localized-orc", "playbooks/core/a/README.md"), {})
+        self.assertIn("zh-CN; name one", self.error("!localized-orc", self.CHANGED))
+
+    def test_a_locale_alone_tests_its_changes(self):
+        self.assertEqual(self.languages("!localized-orc zh-CN", self.CHANGED), {"zh-CN": ["b"]})
+        self.assertEqual(self.languages("!localized-orc ja", self.CHANGED), {"ja": ["a"]})
+        # A localized playbook the PR deleted is not tested.
+        deleted = "localized-playbooks/zh-CN/core/gone/README.md"
+        self.assertEqual(self.languages("!localized-orc zh-CN", deleted), {})
+
+    def test_a_locale_and_playbooks(self):
+        self.assertEqual(self.languages("!localized-orc zh-CN all"), {"zh-CN": ["a", "b"]})
+        self.assertEqual(self.languages("!localized-orc zh-CN a, b"), {"zh-CN": ["a", "b"]})
+        _, _, _, filters = self.run_command("!localized-orc ja a")
+        self.assertEqual(filters, "locales: ja")
+        self.assertIn("unknown locale `zh-TW`", self.error("!localized-orc zh-TW a"))
+        self.assertIn("no such playbook in ja: `c`", self.error("!localized-orc ja c"))
+
+    def test_playbooks_alone_need_a_single_locale(self):
+        self.assertIn("name the locale", self.error("!localized-orc a"))
+        shutil.rmtree(self.root / "localized-playbooks/ja")
+        self.assertEqual(self.languages("!localized-orc all"), {"zh-CN": ["a", "b"]})
+
+
 class Filters(Repo):
     def test_devices_and_platforms(self):
         _, devices, platforms, filters = self.run_command("!orc a device=halo,STX platform=linux")
@@ -132,7 +164,7 @@ class Errors(Repo):
         self.assertIn("cannot be combined", self.error("!orc all a"))
         self.assertIn("not a playbook ID", self.error("!orc ../etc"))
         self.assertIn("not an `!orc` command", self.error("!orchestrate a"))
-        self.assertIn("not an `!orc` command", self.error("!localized-orc zh-CN a"))
+        self.assertIn("not an `!orc` command", self.error("!localized-orcs zh-CN a"))
 
     def test_a_locale_name_cannot_escape_the_directory(self):
         self.assertIn("unknown locale", self.error("!orc a locale=../playbooks"))

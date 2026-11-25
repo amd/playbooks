@@ -117,6 +117,12 @@ class Batches(unittest.TestCase):
             _, batches = self.build(["same"], ["same"])
         self.assertIn("zh-CN/same", batches["linux/halo"]["playbooks"])
 
+    def test_every_translation_runs_when_the_machines_test_another_commit(self):
+        # The comparison reads this checkout; a manual run may test another ref.
+        _, batches = self.build(["same"], ["same"], cover_localized=False)
+        self.assertEqual(batches["linux/halo"]["playbooks"], ["same", "zh-CN/same"])
+        self.assertNotIn("covered", batches["linux/halo"])
+
     def test_one_language_alone_is_unchanged(self):
         # !orc locale=zh-CN: the locale's playbooks only, nothing to compare with.
         _, batches = build(["same", "china-only"], CFG, locale="zh-CN", root=self.repo.root)
