@@ -180,6 +180,17 @@ class FixtureCase(unittest.TestCase):
             (self.fx / rel).write_text("# v2\n")
         self.assertEqual(select(self.fx), [])
 
+    def test_an_archived_script_change_selects_nothing(self):
+        """Nothing runs the device runner scripts kept in scripts/archive/."""
+        rel = ".github/scripts/archive/select_runners.py"
+        path = self.fx / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# v1\n")
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", "archive a script", cwd=self.fx)
+        path.write_text("# v2\n")
+        self.assertEqual(select(self.fx), [])
+
     def test_runner_change_forces_full_matrix(self):
         """The defect that motivated this design: editing the extractor must not cancel."""
         self.edit(".github/scripts/run_playbook_tests.py", lambda c: c + "\n# touched\n")

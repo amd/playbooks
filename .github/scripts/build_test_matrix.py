@@ -63,6 +63,10 @@ HARNESS_PREFIXES = (".github/scripts/",)
 # The OrchestrAI CI plumbing (orchestrai_*, the workflows, orchestrai-config.yml)
 # decides where and on what a playbook runs, not what it executes; a change to it
 # is tested with `!orc`, not by sending every playbook to every machine.
+# Directories under those prefixes whose files nothing runs: the device runner
+# scripts kept for reference (archive/README.md).
+HARNESS_EXCLUDED_DIRS = (".github/scripts/archive/",)
+
 HARNESS_EXCLUDED = frozenset({
     ".github/scripts/translate_playbook.py",       # translation tooling
     ".github/scripts/disclaimers.json",            # translation tooling
@@ -104,7 +108,7 @@ def harness_files(root: Path) -> dict[str, bytes]:
             rel = str(path.relative_to(root)).replace(os.sep, "/")
             if "__pycache__" in path.relative_to(root).parts or rel.endswith(".pyc"):
                 continue
-            if rel in HARNESS_EXCLUDED:
+            if rel in HARNESS_EXCLUDED or rel.startswith(HARNESS_EXCLUDED_DIRS):
                 continue
             mode = b"\x01" if os.access(path, os.X_OK) else b"\x00"
             content = path.read_bytes().replace(b"\r\n", b"\n")
