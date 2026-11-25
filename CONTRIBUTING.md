@@ -63,9 +63,11 @@ its maintainers see it.
 
    If you cannot test on a device you want to target, say so in the pull request
    rather than leaving the device out.
-4. **We test it.** CI runs your tests on the AMD self-hosted runners for the
-   devices the playbook targets. Expect review comments, and expect to iterate
-   on the hardware combinations you could not test yourself.
+4. **We test it.** CI runs your tests on AMD hardware, through OrchestrAI, for
+   the devices the playbook targets. A pull request from a fork is not tested
+   automatically; a maintainer tests it before merging. Expect review comments,
+   and expect to iterate on the hardware combinations you could not test
+   yourself.
 
 A pull request that adds a playbook without an approved proposal will be closed
 with a pointer back to this page.

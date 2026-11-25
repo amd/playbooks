@@ -2,13 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 #
-# OrchestrAI playbook CI (opt-in, additive).
+# Playbook CI on hardware, through OrchestrAI.
 #
-# Runs each playbook on real AMD hardware through the OrchestrAI Control Plane
-# instead of on a device-attached GitHub runner. Detect & Trigger starts one run
-# per hardware batch with a GitHub OIDC token; each Test job waits on its batch's
-# pipeline build and reports that playbook's result. Settings and access rules:
-# .github/orchestrai-config.yml.
+# Runs each playbook on real AMD hardware through the OrchestrAI Control Plane.
+# Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
+# each Test job waits on its batch's pipeline build and reports that playbook's
+# result. Settings and access rules: .github/orchestrai-config.yml.
+#
+# - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
+#   at the PR's head commit. A newer push cancels the older run. Fork PRs get no
+#   secrets or OIDC token, so they are not tested here; `!orc` refuses them too.
+# - schedule: every playbook, English and zh-CN. A playbook that fails opens a
+#   ci-test-failure issue (create_failure_issues.py).
+# - workflow_dispatch: the playbooks, devices, OSes and ref you pick.
 #
 # Required repo secrets:   ORCHESTRAI_PIPELINE_USER, ORCHESTRAI_PIPELINE_TOKEN
 #   (read the pipeline builds; the workflow no-ops on a fork without them)
@@ -83,13 +89,9 @@ on:
         description: 'amd/playbooks branch, tag or commit to test'
         type: string
         default: main
-  # No pull_request trigger: PR runs are opt-in, not automatic on every push, to
-  # keep the shared hardware fleet from being flooded. To test a PR, comment
-  # `!orc` on it (locale= adds its translations; see orchestrai-pr-command.yml) —
-  # that runs the PR's own head commit on demand. Re-enable auto-runs by adding a
-  # `pull_request:` block here;
-  # the detect step already handles the pull_request event (changed-playbooks
-  # diff) and the trigger step already sets PLAYBOOK_REPO/SHA from the PR head.
+  # Each push tests only the playbooks whose tests changed; a prose edit tests
+  # nothing. `!orc` on the PR (orchestrai-pr-command.yml) tests more on demand.
+  pull_request:
 
 permissions:
   contents: read
@@ -121,9 +123,12 @@ jobs:
       playbook_repo: ${{ steps.trigger.outputs.playbook_repo }}
       playbook_sha: ${{ steps.trigger.outputs.playbook_sha }}
     steps:
+      # A PR's head commit, not its merge commit: the machines test the head, and
+      # the localized comparison below holds only when this checkout is that commit.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || '' }}
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
@@ -142,7 +147,7 @@ jobs:
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) not set — skipping OrchestrAI run."
+            echo "::notice::OrchestrAI secrets (ORCHESTRAI_PIPELINE_USER/ORCHESTRAI_PIPELINE_TOKEN) not set — skipping OrchestrAI run. A pull request from a fork gets no secrets: it is not tested on hardware."
           fi
 
       - name: Detect English and localized playbooks
@@ -155,7 +160,6 @@ jobs:
           LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.sha }}
         run: |
           # BOTH: test English and zh-CN together, as automated runs and a
           # manual run with locale "all" do; otherwise one language.
@@ -189,14 +193,17 @@ jobs:
               LOCALIZED=$SELECTED
             fi
           elif [ "$EVENT_NAME" = "pull_request" ]; then
-            if ! CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- 'playbooks/core/*' 'playbooks/supplemental/*'); then
-              echo "::error::git diff failed (base $PR_BASE_SHA not in history?) — cannot determine changed playbooks"; exit 1
+            # The playbooks whose tests changed since the PR branched off: a prose
+            # edit selects nothing, a change to a shared dependency selects every
+            # playbook that uses it, and a change to the test runner selects all
+            # (build_test_matrix.py). Commits main gained since are not the PR's.
+            if ! BASE=$(git merge-base "$PR_BASE_SHA" HEAD); then
+              echo "::error::cannot find where the PR branched off $PR_BASE_SHA"; exit 1
             fi
-            ENGLISH=$(echo "$CHANGED" | grep -E '^playbooks/(core|supplemental)/[^/]+/' | sed 's|playbooks/[^/]*/\([^/]*\)/.*|\1|' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
-            if ! LOCALIZED_CHANGED=$(git diff --name-only "$PR_BASE_SHA" "$HEAD_SHA" -- "localized-playbooks/$LOCALE/core/*" "localized-playbooks/$LOCALE/supplemental/*"); then
-              echo "::error::git diff failed for localized playbooks"; exit 1
-            fi
-            LOCALIZED=$(echo "$LOCALIZED_CHANGED" | grep -E "^localized-playbooks/$LOCALE/(core|supplemental)/[^/]+/" | sed "s|localized-playbooks/$LOCALE/[^/]*/\([^/]*\)/.*|\1|" | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            ENGLISH=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --ids --allow-empty --github-output /dev/null)
+            LOCALIZED=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
+              --locale "$LOCALE" --ids --allow-empty --github-output /dev/null)
           else
             if [ "$BOTH" != true ] && [ -z "$LOCALE" ]; then
               ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -304,8 +311,8 @@ jobs:
           ORCHESTRAI_PLAYBOOK_SHA: ${{ github.event.pull_request.head.sha }}
           ORCHESTRAI_PLAYBOOK_REF: ${{ inputs.playbook_ref }}
           # reportportal (default, also the nightly) or api; the repo variable
-          # sets it for runs without inputs.
-          ORCHESTRAI_REPORTING: ${{ inputs.reporting || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
+          # sets it for runs without inputs. A PR's results stay in OrchestrAI.
+          ORCHESTRAI_REPORTING: ${{ inputs.reporting || (github.event_name == 'pull_request' && 'api') || vars.ORCHESTRAI_REPORTING || 'reportportal' }}
           ORCHESTRAI_V2_RP_PROJECT: ${{ vars.ORCHESTRAI_V2_RP_PROJECT }}
           ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
           ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
@@ -662,6 +669,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
+      issues: write  # ci-test-failure issues for failures on main
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -673,6 +681,22 @@ jobs:
           # Every batch that should report: one without an artifact is NO RESULTS.
           EXPECTED_BATCHES: ${{ needs.detect-and-trigger.outputs.batch_matrix }}
         run: python3 .github/scripts/orchestrai_batch_verdict.py --merge batch-results
+      # One issue per playbook that failed on a device and OS, or a comment on its
+      # open one, when main itself was tested: the nightly, or a manual run of main.
+      # A PR's failures are its author's to fix, and stay on the PR.
+      - name: Open issues for failed playbooks
+        if: >-
+          !cancelled() && github.ref == 'refs/heads/main'
+          && (github.event_name == 'schedule'
+              || (github.event_name == 'workflow_dispatch' && inputs.playbook_ref == 'main'))
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ needs.detect-and-trigger.outputs.playbook_sha || github.sha }}
+        run: |
+          python3 .github/scripts/create_failure_issues.py --repo "$REPO" \
+            --results-dir batch-results --run-url "$RUN_URL" --sha "$SHA"
 
   test-gate:
     name: Test Gate (Required)
