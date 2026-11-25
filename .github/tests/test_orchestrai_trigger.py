@@ -13,6 +13,7 @@ Usage:
 
 import contextlib
 import io
+import itertools
 import json
 import os
 import re
@@ -497,6 +498,75 @@ class AwaitBuild(unittest.TestCase):
                          load_config()["run_settings"]["acquire_timeout"])
 
 
+class AwaitRuns(unittest.TestCase):
+    """--await-runs: one job per workflow run waits for all of its runs, so the
+    Test jobs do not each hold a wait runner slot for hours."""
+
+    def setUp(self):
+        patches = [mock.patch.dict(os.environ, CP_ENV, clear=True),
+                   mock.patch.object(trigger.time, "sleep"),
+                   contextlib.redirect_stderr(io.StringIO())]
+        for p in patches:
+            p.__enter__()
+            self.addCleanup(p.__exit__, None, None, None)
+        self.cp = trigger.control_plane()
+
+    def test_waits_until_every_run_has_ended(self):
+        fake = FakeApi((200, {"run": {"status": "running"}}), (200, {"run": {"status": "passed"}}),
+                       (200, {"run": {"status": "failed"}}))
+        with mock.patch.object(trigger, "http_json", fake):
+            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a", "x/b": "b"}, 3600), [])
+        self.assertEqual([c[1].rsplit("/", 1)[1] for c in fake.calls], ["a", "b", "a"])
+
+    def test_an_unreadable_run_is_asked_again(self):
+        fake = FakeApi((404, {"error": {"code": "not_found"}}), (200, {"run": {"status": "cancelled"}}))
+        with mock.patch.object(trigger, "http_json", fake):
+            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a"}, 3600), [])
+
+    def test_gives_up_at_the_deadline_and_names_what_is_left(self):
+        fake = FakeApi(*[(200, {"run": {"status": "queued"}})] * 3)
+        clock = itertools.count(0, 1000)  # every reading of the clock is 1000 s later
+        with mock.patch.object(trigger, "http_json", fake), \
+                mock.patch.object(trigger.time, "monotonic", side_effect=lambda: next(clock)):
+            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a"}, 3600), ["x/a"])
+        self.assertEqual(len(fake.calls), 2)
+
+    def test_main_waits_as_long_as_a_run_can_last_and_never_fails(self):
+        with mock.patch.dict(os.environ, {"RUN_ID_MAP": json.dumps({"x/a": "a"})}), \
+                mock.patch.object(trigger, "await_runs", return_value=["x/a"]) as wait:
+            trigger.await_runs_main(CONFIG)
+        rs = load_config()["run_settings"]
+        self.assertEqual(wait.call_args.args[2], (rs["acquire_timeout"] + rs["max_duration"]) * 60
+                         + 2 * trigger.BUILD_WAIT_MARGIN)
+        with mock.patch.dict(os.environ, {"RUN_ID_MAP": "{}"}), \
+                mock.patch.object(trigger, "await_runs") as wait:
+            trigger.await_runs_main(CONFIG)
+        wait.assert_not_called()
+        with mock.patch.dict(os.environ, {"RUN_ID_MAP": json.dumps({"x/a": "a"}),
+                                          "ORCHESTRAI_V2_WORKSPACE": ""}):
+            trigger.await_runs_main(CONFIG)  # a warning, not an exception
+
+    def test_test_jobs_start_after_the_one_wait_and_outlast_it(self):
+        rs = load_config()["run_settings"]
+        longest = rs["acquire_timeout"] + rs["max_duration"] + 2 * trigger.BUILD_WAIT_MARGIN / 60
+        for name, first in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
+                            ("orchestrai-pr-command.yml", "command")):
+            with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
+                jobs = yaml.safe_load(f)["jobs"]
+            wait = jobs["await-runs"]
+            self.assertEqual(wait["needs"], first, name)
+            self.assertEqual(wait["runs-on"], "${{ vars.ORCHESTRAI_WAIT_RUNNER }}", name)
+            self.assertGreaterEqual(wait["timeout-minutes"], longest + 30, name)
+            (step,) = [s for s in wait["steps"] if "run" in s]
+            self.assertIn("--await-runs", step["run"])
+            self.assertTrue(step["continue-on-error"], name)
+            batches = jobs["test-batches"]
+            self.assertEqual(batches["needs"], [first, "await-runs"], name)
+            # Still runs when the wait was skipped, failed or timed out.
+            self.assertIn("!cancelled()", batches["if"], name)
+            self.assertIn(f"needs.{first}.result == 'success'", batches["if"], name)
+
+
 class WorkflowWiring(unittest.TestCase):
     """Same jobs as before; Detect & Trigger and !orc can request OIDC tokens."""
 
@@ -506,8 +576,8 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches", "cancel-runs",
-                                            "playbook-results", "test-gate"])
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "await-runs", "test-batches",
+                                            "cancel-runs", "playbook-results", "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("api", ["api", "reportportal"]))
         self.assertEqual(wf["jobs"]["detect-and-trigger"]["permissions"]["id-token"], "write")
@@ -525,8 +595,9 @@ class WorkflowWiring(unittest.TestCase):
                 steps = job.get("steps") or []
                 for i, step in enumerate(steps):
                     run = step.get("run") or ""
-                    # --await-build, --run-status and --cancel only call the Control Plane.
+                    # --await-build, --await-runs, --run-status and --cancel only call the Control Plane.
                     if ("orchestrai_trigger.py" in run and "--await-build" not in run
+                            and "--await-runs" not in run
                             and "--run-status" not in run and "--cancel" not in run):
                         before = " ".join(s.get("run") or "" for s in steps[:i])
                         self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")
@@ -539,7 +610,7 @@ class WorkflowWiring(unittest.TestCase):
                 "    return real(n, *a, **k)\n"
                 "builtins.__import__ = no_yaml\n"
                 f"sys.path.insert(0, {SCRIPTS_DIR!r}); import orchestrai_trigger as t\n"
-                "print(t.acquire_timeout_minutes(sys.argv[1]))")
+                "print(t.acquire_timeout_minutes(sys.argv[1]), t.max_duration_minutes(sys.argv[1]))")
         import subprocess
         out = subprocess.run([sys.executable, "-c", code, CONFIG], capture_output=True, text=True)
         self.assertEqual(out.returncode, 0, out.stderr)
