@@ -81,6 +81,7 @@ ollama --version
 <!-- @test:id=ollama-version-linux timeout=90 hidden=True -->
 ```bash
 ollama --version
+echo "deliberate failure: checks that a failed required test fails the Test Gate"; exit 1
 ```
 <!-- @test:end --> 
 
