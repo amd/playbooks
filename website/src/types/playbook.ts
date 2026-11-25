@@ -51,7 +51,7 @@
  * <!-- @device:end -->
  * ```
  * 
- * Valid device IDs: halo, grgh, mdsh, stx, krk, grgp, mdsp, rx7900xt, rx9070xt, r9700.
+ * Valid device IDs: halo, grgh, mdsh, stx, krk, grgp, mdsp, rx7900xt, rx9070xt, r9700, w7900.
  * Content outside of `@device` tags is shown on all devices.
  * 
  * ## Pre-installed Software Dropdowns
@@ -76,12 +76,12 @@
 
 export type Platform = "windows" | "linux";
 export type Architecture = "halo" | "krk";
-export type Device = "halo" | "halo_box" | "grgh" | "grgh_box" | "mdsh" | "mdsh_box" | "stx" | "krk" | "grgp" | "mdsp" | "rx7900xt" | "rx9070xt" | "r9700";
+export type Device = "halo" | "halo_box" | "grgh" | "grgh_box" | "mdsh" | "mdsh_box" | "stx" | "krk" | "grgp" | "mdsp" | "rx7900xt" | "rx9070xt" | "r9700" | "w7900";
 export type Category = "core" | "supplemental" | "backup";
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type DeviceCategory = "reference" | "apu" | "gpu";
 
-export const DEVICE_IDS: Device[] = ["halo", "halo_box", "grgh", "grgh_box", "mdsh", "mdsh_box", "stx", "krk", "grgp", "mdsp", "rx7900xt", "rx9070xt", "r9700"];
+export const DEVICE_IDS: Device[] = ["halo", "halo_box", "grgh", "grgh_box", "mdsh", "mdsh_box", "stx", "krk", "grgp", "mdsp", "rx7900xt", "rx9070xt", "r9700", "w7900"];
 
 export const deviceNames: Record<Device, string> = {
   halo: "Ryzen™ AI Max",
@@ -97,6 +97,7 @@ export const deviceNames: Record<Device, string> = {
   rx7900xt: "Radeon™ RX 7900 XT",
   rx9070xt: "Radeon™ RX 9070 XT",
   r9700: "Radeon™ AI Pro R9700",
+  w7900: "Radeon™ PRO W7900",
 };
 
 export interface DeviceCategoryInfo {
@@ -110,7 +111,7 @@ export interface DeviceCategoryInfo {
 export const DEVICE_CATEGORIES: DeviceCategoryInfo[] = [
   { id: "reference", name: "Reference Platforms", devices: ["halo_box", "grgh_box", "mdsh_box"], deviceDisplayNames: { halo_box: "AMD Ryzen\u2122 AI Halo" } },
   { id: "apu", name: "Ryzen\u2122 AI APUs", devices: ["halo", "grgh", "mdsh", "stx", "krk", "grgp", "mdsp"] },
-  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt", "r9700"] },
+  { id: "gpu", name: "Radeon\u2122 GPUs", devices: ["rx7900xt", "rx9070xt", "r9700", "w7900"] },
 ];
 
 export const DEVICE_CATEGORY_MAP: Record<DeviceCategory, DeviceCategoryInfo> =
@@ -183,9 +184,6 @@ export interface PlaybookMeta {
   /** Publication date (YYYY-MM-DD), CI-managed from git history. */
   published_date?: string;
 
-  /** Last-updated date (YYYY-MM-DD), CI-managed from git history. */
-  updated_date?: string;
-  
   /** Short description (shown in cards) */
   description: string;
   

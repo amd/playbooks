@@ -93,12 +93,6 @@
       "typeVersion": 1.6
     },
     {
-      "parameters": {
-        "model": "gpt-oss-120b-mxfp-GGUF",
-        "options": {
-          "maxTokens": 1024
-        }
-      },
       "type": "@n8n/n8n-nodes-langchain.lmChatLemonade",
       "typeVersion": 1,
       "position": [

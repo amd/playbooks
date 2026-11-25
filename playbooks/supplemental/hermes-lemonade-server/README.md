@@ -46,7 +46,8 @@ By the end of this playbook you will be able to:
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
 - [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent)
-  ```bash 
+  ```bash
+  sudo apt update && sudo apt upgrade -y
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
@@ -55,14 +56,19 @@ By the end of this playbook you will be able to:
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- Podman (Optional, for sandboxing Hermes Agent). Install inside WSL:
-  ```bash 
-  sudo apt-get install -y podman
-  ```
+- Podman (Optional, for sandboxing Hermes Agent). Podman runs *inside* WSL, so
+  install it after you set WSL up — see [Install Podman in WSL](#install-podman-in-wsl).
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman is pre-installed on Halo Box and no setup is required
+<!-- @os:linux -->
+> Podman is pre-installed on the Ryzen AI Halo and no setup is required.
+<!-- @os:end -->
+<!-- @os:windows -->
+> **Note:** Podman being pre-installed on the Ryzen AI Halo applies to the Windows host
+> only. WSL is a separate Linux environment, so Podman still has to be installed inside
+> it before sandboxing will work — see [Install Podman in WSL](#install-podman-in-wsl).
+<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
@@ -246,7 +252,9 @@ We run Hermes Agent inside WSL and connect it to Lemonade running natively on Wi
 
 ### Install WSL and Ubuntu
 
-Open PowerShell as Administrator and install the WSL kernel:
+Open PowerShell as Administrator. If WSL is not already present, install the kernel
+(on systems that ship with WSL — including the Ryzen AI Halo — this is a no-op and can
+be skipped):
 
 ```powershell
 wsl --install --no-distribution
@@ -269,11 +277,22 @@ systemd=true
 EOF
 ```
 
-Restart WSL:
+Restart WSL. Name the distribution explicitly — a bare `wsl` reopens the system
+default, which on many systems is a newer Ubuntu than the one this playbook uses:
 
 ```powershell
 wsl --shutdown
-wsl
+wsl -d Ubuntu-24.04
+```
+
+### Install Podman in WSL
+
+Podman runs inside WSL, so install it there (optional, needed only for sandboxing).
+Update the package lists first — `apt-get install` fails on a fresh distro without it:
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt-get install -y podman
 ```
 
 ### Bridge Lemonade from Windows into WSL
@@ -386,7 +405,7 @@ finally {
 <!-- @os:end -->
 
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sudo bash -s -- --skip-setup
 ```
 
 The `--skip-setup` flag skips the interactive setup wizard so you can configure the model backend manually in the next step.
