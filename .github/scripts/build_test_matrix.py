@@ -9,8 +9,8 @@ Test Selection
 
 Picks the playbook entries a pull request has to test, for
 test-playbooks-orchestrai.yml. Each entry is one playbook on one OS and device;
-`--ids` prints the selected playbook IDs, which OrchestrAI runs on every device
-and OS they declare.
+`--keys` prints them as [locale, playbook, platform, device], which
+orchestrai_matrix.py --only runs.
 
 Modes:
     --mode all                              every entry
@@ -243,9 +243,9 @@ def main() -> None:
                         help="Keep only entries for this OS")
     parser.add_argument("--device", choices=sorted(R.VALID_DEVICES),
                         help="Keep only entries for this device")
-    parser.add_argument("--ids", action="store_true",
-                        help="Print the selected playbook IDs (a sorted JSON list) "
-                             "instead of the entries")
+    parser.add_argument("--keys", action="store_true",
+                        help="Print the selected entries as a sorted JSON list of "
+                             "[locale, playbook, platform, device] (\"\" = English)")
     parser.add_argument(
         "--locale",
         default="",
@@ -307,8 +307,9 @@ def main() -> None:
         print(f"FATAL: no matrix entries match the requested filter(s): {filt}", file=sys.stderr)
         sys.exit(1)
 
-    if args.ids:
-        entries = sorted({e["playbook"] for e in entries})
+    if args.keys:
+        entries = sorted({(e.get("locale", ""), e["playbook"], e["platform"], e["arch"])
+                          for e in entries})
 
     matrix = json.dumps(entries)
     output_path = args.github_output or (

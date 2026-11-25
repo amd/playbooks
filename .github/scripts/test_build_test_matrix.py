@@ -235,13 +235,14 @@ class FixtureCase(unittest.TestCase):
         got = {(e["playbook"], e["platform"], e["arch"]) for e in select(self.fx)}
         self.assertEqual(got, {(pb, "linux", "unserved")})
 
-    def test_ids_lists_each_selected_playbook_once(self):
+    def test_keys_list_each_selected_entry_once(self):
+        """--keys hands the exact entries on: a PR that changed a playbook on one
+        device and OS does not run it on the others."""
         pb = self.add_tested_device("unserved")
-        self.add_tested_device("newdev")
         proc = subprocess.run(
             [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed",
-             "--base", "HEAD", "--ids"], cwd=self.fx, capture_output=True, text=True, check=True)
-        self.assertEqual(json.loads(proc.stdout), [pb])
+             "--base", "HEAD", "--keys"], cwd=self.fx, capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(proc.stdout), [["", pb, "linux", "unserved"]])
 
     def test_required_flag_flip_is_selected(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
