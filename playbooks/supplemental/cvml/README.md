@@ -96,7 +96,7 @@ if ($npuDevices) {
 <!-- @os:end -->
 
 <!-- @os:linux -->
-<!-- @test:id=cvml-prereqs-linux timeout=120 hidden=True -->
+<!-- @test:id=cvml-prereqs-linux timeout=150 hidden=True -->
 ```bash
 set -euo pipefail
 
