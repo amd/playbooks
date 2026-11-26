@@ -32,9 +32,9 @@ REQUIREMENTS = [
     "unilab-rl==1.0.0",
     "unisim-core==1.0.0",
     "tensordict==0.14.3",
-    # unilab-rl 1.0.0 asks for rsl-rl-lib>=5.0.0 but only works with 5.x: the
-    # 6.0 runner expects process_env_step to return a step dict.
-    "rsl-rl-lib==5.5.2",
+    # UniLab 1.0 accepts any rsl-rl-lib>=5; 6.0 changed the logger API and
+    # breaks training (AttributeError in rsl_rl/utils/logger.py).
+    "rsl-rl-lib<6",
 ]
 
 
