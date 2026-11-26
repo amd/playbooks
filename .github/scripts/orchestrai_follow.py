@@ -12,8 +12,10 @@ batch's pipeline build. It prints, as they happen:
 
     stage 05-L4-sys (System)
     machine MNB-UCICD-DT494
-    PASSED         comfyui-image-gen                 (1/27 done)
-    ERROR          zh-CN/hermes-lemonade-server      (3/27 done)
+    1/27 playbooks done
+    PASSED         comfyui-image-gen
+    3/27 playbooks done
+    ERROR          zh-CN/hermes-lemonade-server
 
 It reads the build's console as it grows (Jenkins progressiveText, only the new
 part on each poll) for the stage, the machine and the done count, and the run's
@@ -63,9 +65,11 @@ RESULTS_RETRY_SECONDS = 60
 CATCH_UP_POLLS = 10
 # After the build: one read retrying FINAL_RESULTS_RETRY_SECONDS, then reads
 # every FINAL_POLL_SECONDS for FINAL_CATCH_UP_SECONDS while rows are missing.
-# All of it (with a poll's sleep and a console read before: about 5 min at
-# worst) ends before orchestrai_wait_build.sh stops the follower, 6 min after
-# the build.
+# At worst, from the build's end: a poll's sleep (30 s), a console read
+# (HTTP_TIMEOUT), that read (30 s plus one OIDC and one API call, 60 s), the
+# catch-up (90 s) and its last read (15 s plus 60 s): about 7 min, within the
+# 8 min orchestrai_wait_build.sh waits before it stops the follower. Normally
+# the rows are there and it ends within seconds.
 FINAL_RESULTS_RETRY_SECONDS = 30
 FINAL_POLL_SECONDS = 15
 FINAL_CATCH_UP_SECONDS = 90
@@ -223,18 +227,20 @@ class Follower:
                 self.pairs.append((last_group, sessions[0]))
         elif m := TRACKING.match(line):
             sessions = SESSION_ID.findall(m.group(1))
-            mapping = pair_sessions(sessions, list(self.names), self.submitted, self.pairs, self.one_each)
-            mapping.update((s, self.session_group[s]) for s in sessions if s in self.session_group)
-            if len(mapping) < len(sessions):
-                say(f"{len(mapping)} of {len(sessions)} sessions matched to their playbook; "
-                    "the others show by session id, and the next step names them all")
-            self.session_group.update(mapping)
+            if self.submitted or self.pairs or not all(s in self.session_group for s in sessions):
+                # A repeated line with no new evidence keeps what was proven.
+                mapping = pair_sessions(sessions, list(self.names), self.submitted, self.pairs, self.one_each)
+                mapping.update((s, self.session_group[s]) for s in sessions if s in self.session_group)
+                if len(mapping) < len(sessions) and (self.submitted or self.pairs):
+                    say(f"{len(mapping)} of {len(sessions)} sessions matched to their playbook; "
+                        "the others show by session id, and the next step names them all")
+                self.session_group.update(mapping)
             self.submitted, self.pairs = [], []
         elif m := COUNT.search(line):
             done, total = int(m.group(3)), int(m.group(4))
             # A job that starts late finds tests already done: report them too.
             ended = done != self.done and (self.done is not None or done > 0)
-            if self.done is None:
+            if done != self.done or total != self.total:
                 say(f"{done}/{total} playbooks done")
             self.done, self.total = done, total
             return ended
@@ -251,7 +257,9 @@ class Follower:
             answer = trigger.api(self.cp, "GET", f"/runs/{urllib.parse.quote(self.run_id, safe='')}/tests",
                                  retry_seconds=retry_seconds)
         except ValueError as exc:
-            if isinstance(exc, trigger.Refused) and re.search(r"HTTP 40[13]\b", str(exc)):
+            # 401/403 is final, even when an earlier attempt of the same call
+            # failed (then api() raises a plain ValueError, not Refused).
+            if re.search(r"HTTP 40[13]\b", str(exc)):
                 say(f"test results not readable ({exc}); the next step shows every outcome")
                 self.results_ok = False  # not allowed: asking again changes nothing
                 return
@@ -284,9 +292,7 @@ class Follower:
                 extra.append(f"attempt {attempt}")
             if test.get("flaky"):
                 extra.append("flaky")
-            if self.total:
-                extra.append(f"{self.done}/{self.total} done")
-            say(f"{outcome:<15}{name:<45}" + (f" ({', '.join(extra)})" if extra else ""))
+            say((f"{outcome:<15}{name:<45}" + (f" ({', '.join(extra)})" if extra else "")).rstrip())
 
     def behind(self):
         """True while fewer results are recorded than the console counts done."""

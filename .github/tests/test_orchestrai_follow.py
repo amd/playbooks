@@ -87,10 +87,11 @@ class Follower(unittest.TestCase):
         self.assertIn("stage 05-L4-sys (White-Box)", out)
         self.assertIn("machine MNB-UCICD-DT494", out)
         self.assertIn("0/2 playbooks done", out)
-        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(1/2 done\)")
+        # Each count as it moves, then the results it brought.
+        self.assertRegex(out, r"1/2 playbooks done\n.*PASSED\s+comfyui-image-gen\n")
         # Its submit line and session line are not adjacent, but it is the one
         # session left after the anchored one: proven.
-        self.assertRegex(out, r"ERROR\s+zh-CN/gaia-agents\s+\(1/2 done\)")
+        self.assertRegex(out, r"ERROR\s+zh-CN/gaia-agents\n")
         self.assertNotIn("matched", out)
         self.assertEqual([c[0] for c in calls], ["/runs/r1/tests"])
 
@@ -216,7 +217,7 @@ class Follower(unittest.TestCase):
     def test_odd_rows_do_not_stop_the_follower(self):
         tests = {"tests": ["not a row", row("sess-1795656621871974896", attempt="2", recorded_at=None)]}
         _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
-        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(1/2 done\)")
+        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\n")
         _, out, _ = self.run_polls(FakeConsole(CONSOLE), [{"tests": {"oops": 1}}])
         self.assertNotIn("PASSED", out)
 
@@ -232,6 +233,22 @@ class Follower(unittest.TestCase):
         self.assertIn("comfyui-image-gen", out)
         self.assertIn("zh-CN/gaia-agents", out)
 
+    def test_a_403_after_a_failed_attempt_still_stops_reading(self):
+        # api() raises a plain ValueError when an earlier attempt of the call failed.
+        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
+        late_403 = ValueError("CI API GET /runs/r1/tests: HTTP 403 forbidden: no results:read")
+        _, out, calls = self.run_polls(console, [late_403])
+        self.assertEqual(len(calls), 1)
+        self.assertIn("test results not readable", out)
+
+    def test_a_repeated_tracking_line_keeps_the_names(self):
+        tracking = [line for line in CONSOLE.splitlines() if "Tracking sessions" in line][0]
+        repeated = CONSOLE + tracking + "\n"
+        f, out, _ = self.run_polls(FakeConsole(repeated), [TESTS])
+        self.assertNotIn("matched", out)
+        self.assertEqual(len(f.session_group), 2)
+
     def test_without_a_run_only_the_console_is_followed(self):
         _, out, calls = self.run_polls(FakeConsole(CONSOLE), [], run_id="", cp={})
         self.assertEqual(calls, [])
@@ -240,7 +257,7 @@ class Follower(unittest.TestCase):
     def test_an_unproven_session_shows_by_its_suite(self):
         tests = {"tests": [row("sess-9", "error", attempt=2)]}
         _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
-        self.assertRegex(out, r"ERROR\s+05-L4-sys_sess-9\s+\(attempt 2, 1/2 done\)")
+        self.assertRegex(out, r"ERROR\s+05-L4-sys_sess-9\s+\(attempt 2\)")
 
     def test_a_garbled_console_names_nothing_it_cannot_prove(self):
         # comfyui's submit line was cut by another writer: one group is lost,
