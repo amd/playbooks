@@ -608,8 +608,8 @@ def run_progress(run, show_link=False, now=None, cp=None):
     queued_at = run.get("queued_at")
     # Whole seconds only: fromisoformat before Python 3.11 reads no fraction
     # but 3 or 6 digits, and a minute count needs none. UTC only (Z, +00:00);
-    # another offset is left out rather than misread.
-    m = re.fullmatch(r"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\d+)?(?:Z|[+-]00:?00)?",
+    # another offset, or none, is left out rather than misread.
+    m = re.fullmatch(r"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\d+)?(?:Z|[+-]00:?00)",
                      queued_at) if isinstance(queued_at, str) else None
     if status == "queued" and m:
         since = datetime.datetime.fromisoformat(m.group(1)).replace(tzinfo=datetime.timezone.utc)

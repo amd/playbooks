@@ -330,7 +330,7 @@ class RunProgress(unittest.TestCase):
                          "running https://portal.example/#/runs/r%201?presentation=page")
 
     def test_an_unreadable_queued_at_is_left_out(self):
-        for stamp in ("soon", "2026-11-26T16:59:59-05:00"):
+        for stamp in ("soon", "2026-11-26T16:59:59-05:00", "2026-11-26T21:59:59"):
             self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": stamp}, now=self.NOW),
                              "queued (waiting for machines)", stamp)
         self.assertEqual(trigger.run_progress({}), "unknown")
