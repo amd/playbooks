@@ -35,7 +35,9 @@ Outputs:
     --await-build (Test jobs, RUN_ID/BATCH_ID env): build_url -> $GITHUB_OUTPUT
     --run-status (RUN_ID env): status -> $GITHUB_OUTPUT, before a retry
     --await-runs (RUN_ID_MAP env): wait until every run has ended (one job per
-                 workflow run, before the Test jobs)
+                 workflow run, before the Test jobs); with CHECK_ID_MAP and
+                 RUN_URL_MAP, moves each batch's check run along
+                 (orchestrai_checks.py)
 """
 
 import argparse
@@ -672,10 +674,11 @@ def max_duration_minutes(config_path):
     return int(m.group(1))
 
 
-def await_runs(cp, runs, wait_seconds):
+def await_runs(cp, runs, wait_seconds, on_status=None):
     """Wait until every run in runs ({batch_id: run id}) has ended; return the
     batches still unfinished when the wait gave up. A run whose status cannot be
-    read is asked again on the next poll."""
+    read is asked again on the next poll. on_status(batch_id, run) sees every
+    run read (the batch check runs, orchestrai_checks.Updater)."""
     pending = dict(runs)
     deadline = time.monotonic() + wait_seconds
     while pending:
@@ -685,6 +688,8 @@ def await_runs(cp, runs, wait_seconds):
             except ValueError as exc:
                 print(f"::warning::{bid}: run status unavailable: {exc}", file=sys.stderr)
                 continue
+            if on_status:
+                on_status(bid, run)
             if run.get("status") in TERMINAL:
                 print(f"  {bid}: {run['status']} ({len(runs) - len(pending) + 1}/{len(runs)})",
                       file=sys.stderr)
@@ -709,11 +714,17 @@ def await_runs_main(config_path):
     if not runs:
         print("No OrchestrAI runs to wait for", file=sys.stderr)
         return
+    # One check run per batch (CHECK_ID_MAP from Detect & Trigger) follows its run.
+    on_status = None
+    check_ids = json.loads(os.environ.get("CHECK_ID_MAP") or "{}")
+    if check_ids:
+        from orchestrai_checks import Updater
+        on_status = Updater(check_ids, json.loads(os.environ.get("RUN_URL_MAP") or "{}")).update
     try:
         wait = ((acquire_timeout_minutes(config_path) + max_duration_minutes(config_path)) * 60
                 + 2 * BUILD_WAIT_MARGIN)
         print(f"Waiting for {len(runs)} OrchestrAI run(s) to end ...", file=sys.stderr)
-        left = await_runs(control_plane(), runs, wait)
+        left = await_runs(control_plane(), runs, wait, on_status)
     except ValueError as exc:
         print(f"::warning::{exc}; each Test job waits for its own batch", file=sys.stderr)
         return

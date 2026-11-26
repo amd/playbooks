@@ -43,3 +43,5 @@ jobs:
         run: python3 .github/tests/test_orchestrai_failure_issues.py
       - name: Run pull request device scope tests
         run: python3 .github/tests/test_orchestrai_pr_devices.py
+      - name: Run batch check run tests
+        run: python3 .github/tests/test_orchestrai_checks.py

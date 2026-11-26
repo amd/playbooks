@@ -8,6 +8,8 @@
 # Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
 # Wait for OrchestrAI waits for all of them on one runner, then each Test job
 # reads its batch's pipeline build and reports each playbook's result. Settings and access rules: .github/orchestrai-config.yml.
+# Meanwhile one check run per batch (orchestrai_checks.py), on the tested commit,
+# shows each batch's state: waiting for machines, running, then its verdict.
 #
 # - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
 #   at the PR's head commit, on one device per family (APU, Radeon) and OS
@@ -113,8 +115,10 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_CONTROL_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
+      checks: write  # one check run per batch
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
+      check_ids: ${{ steps.checks.outputs.check_ids }}
       english_matrix: ${{ steps.prepare-matrices.outputs.english_matrix }}
       batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
       batches: ${{ steps.prepare-matrices.outputs.batches }}
@@ -335,6 +339,21 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py
 
+      # One check run per batch on the tested commit (the PR head, else this
+      # run's commit), so each batch shows on the PR or commit while Wait for
+      # OrchestrAI holds the batch jobs back. Visibility only: never fails.
+      - name: Create a check run per batch
+        id: checks
+        if: steps.trigger.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BATCH_MATRIX: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+          RUN_URLS: ${{ steps.trigger.outputs.run_urls }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 .github/scripts/orchestrai_checks.py --create
+
       # A superseded PR run (cancel-in-progress) can be cancelled mid-trigger:
       # stop the runs already started (the trigger records each as it starts).
       # A failed job skips test-batches, so nothing would read its runs either.
@@ -351,12 +370,22 @@ jobs:
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
 
+      - name: Cancel the check runs this job created
+        if: (cancelled() || failure()) && steps.checks.outputs.check_ids != ''
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ steps.checks.outputs.check_ids }}
+        run: python3 .github/scripts/orchestrai_checks.py --cancel
+
   # The wait runner pool (the only one that reaches OrchestrAI) runs a few jobs
   # at once. A Test job per batch waiting there for its machine held a slot each
   # for hours, and queued every other run behind them: a pull request behind the
   # nightly. This one job waits for all of the run's batches, so the run holds
   # one slot; the Test jobs then start with their builds finished and take
   # seconds. It never fails the run: a Test job still waits for its own batch.
+  # As it polls, it moves each batch's check run along (orchestrai_checks.py).
   await-runs:
     name: Wait for OrchestrAI
     needs: detect-and-trigger
@@ -364,6 +393,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
+      checks: write  # each batch's check run
       id-token: write  # GitHub OIDC token: read the runs' status
     # acquire_timeout 360 + max_duration 480 + 2 x 30 margin, plus overhead.
     timeout-minutes: 960
@@ -374,6 +404,9 @@ jobs:
       - name: Wait for every batch's run to end
         continue-on-error: true
         env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_ID_MAP: ${{ needs.detect-and-trigger.outputs.check_ids }}
+          RUN_URL_MAP: ${{ needs.detect-and-trigger.outputs.run_urls }}
           RUN_ID_MAP: ${{ needs.detect-and-trigger.outputs.run_ids }}
           ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
@@ -395,6 +428,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
+      checks: write  # finish this batch's check run
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
     # Each attempt waits for machines (acquire_timeout 360 min + 30) and then for
     # the build (max_duration 480 min + 30): up to 900 min. The retry starts only
@@ -662,6 +696,28 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
+      # The batch's check run gets its verdict from the final batch.json (after
+      # any retry); a cancelled job marks it cancelled. Never fails the job.
+      - name: Finish the batch's check run
+        if: "!cancelled()"
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_ID: ${{ fromJson(needs.detect-and-trigger.outputs.check_ids || '{}')[matrix.batch_id] }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
+        run: python3 .github/scripts/orchestrai_checks.py --finish test-results/batch.json
+
+      - name: Cancel the batch's check run
+        if: cancelled()
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.check_ids || '{}')[matrix.batch_id] }}
+        run: python3 .github/scripts/orchestrai_checks.py --cancel
+
       - name: Batch result
         if: always()
         env:
@@ -690,6 +746,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      checks: write  # mark the batches' check runs cancelled
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -705,6 +762,15 @@ jobs:
         run: |
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
+      # Every batch's check run still open, including those whose Test job never
+      # started; finished ones keep their verdict.
+      - name: Cancel the check runs
+        if: always() && needs.detect-and-trigger.outputs.check_ids != ''
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ needs.detect-and-trigger.outputs.check_ids }}
+        run: python3 .github/scripts/orchestrai_checks.py --cancel
 
   playbook-results:
     # PASS / FAIL / NOT RUN for each system (device + OS), then the full gate.
