@@ -598,23 +598,28 @@ def failure_reason(run):
     return "; ".join(found)[:800]
 
 
-def run_progress(run, show_link=False, now=None):
+def run_progress(run, show_link=False, now=None, cp=None):
     """One line on what a run is doing: its status, how long it has been queued
     (from its queued_at, so a Test job that started late counts the whole wait)
-    and, with show_link, its Portal page."""
+    and, with show_link, its Portal page (the run's own link, else the Portal
+    address in cp)."""
     status = run.get("status") or "unknown"
     text = status + (" (waiting for machines)" if status == "queued" else "")
     queued_at = run.get("queued_at")
-    if status == "queued" and isinstance(queued_at, str):
-        try:
-            since = datetime.datetime.fromisoformat(queued_at.replace("Z", "+00:00"))
-            now = now or datetime.datetime.now(datetime.timezone.utc)
-            minutes = int((now - since).total_seconds() // 60)
-            if minutes > 0:
-                text += f", {minutes} min so far"
-        except (ValueError, TypeError):
-            pass
+    # Whole seconds only: fromisoformat before Python 3.11 reads no fraction
+    # but 3 or 6 digits, and a minute count needs none. UTC only (Z, +00:00);
+    # another offset is left out rather than misread.
+    m = re.fullmatch(r"(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\d+)?(?:Z|[+-]00:?00)?",
+                     queued_at) if isinstance(queued_at, str) else None
+    if status == "queued" and m:
+        since = datetime.datetime.fromisoformat(m.group(1)).replace(tzinfo=datetime.timezone.utc)
+        now = now or datetime.datetime.now(datetime.timezone.utc)
+        minutes = int((now - since).total_seconds() // 60)
+        if minutes > 0:
+            text += f", {minutes} min so far"
     link = run.get("url") or run.get("portal_url")
+    if not link and cp and run.get("id"):
+        link = f"{cp['portal_url']}/#/runs/{urllib.parse.quote(str(run['id']), safe='')}?presentation=page"
     return text + (f" {link}" if show_link and link else "")
 
 
@@ -636,7 +641,7 @@ def await_builds(cp, runs, wait_seconds):
             status, now = run.get("status") or "unknown", time.monotonic()
             last = seen.get(bid)
             if last is None or last[0] != status or now - last[1] >= QUEUED_REPORT_SECONDS:
-                print(f"  {bid}: {run_progress(run, show_link=last is None)}", file=sys.stderr, flush=True)
+                print(f"  {bid}: {run_progress(run, show_link=last is None, cp=cp)}", file=sys.stderr, flush=True)
                 seen[bid] = (status, now)
             url = run.get("pipeline_url") or ""
             # Until Jenkins starts the build this is its queue item, which never

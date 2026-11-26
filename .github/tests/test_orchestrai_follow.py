@@ -98,8 +98,9 @@ class Follower(unittest.TestCase):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
         console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
         _, out, calls = self.run_polls(console, [TESTS, TESTS])
-        # Once when the count moved, once more when the build ended.
-        self.assertEqual([c[1] for c in calls], [follow.RESULTS_RETRY_SECONDS] * 2)
+        # Once when the count moved, once more (retrying less) when the build ended.
+        self.assertEqual([c[1] for c in calls], [follow.RESULTS_RETRY_SECONDS,
+                                                 follow.FINAL_RESULTS_RETRY_SECONDS])
         self.assertEqual(out.count("comfyui-image-gen"), 1)
 
     def test_a_job_that_starts_late_reports_what_is_already_done(self):
@@ -179,6 +180,50 @@ class Follower(unittest.TestCase):
         tests = {"tests": [row("sess-1795656621871974896", execution_id="exec-1")]}
         _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
         self.assertIn("comfyui-image-gen", out)
+
+    def test_after_the_build_the_last_rows_are_waited_for(self):
+        # The last test ends as the build does; its row comes a little later.
+        f, out, calls = self.run_polls(FakeConsole(CONSOLE), [{"tests": []}])
+        self.assertTrue(f.behind())
+        answers = [{"tests": []}, TESTS]
+        clock = [0.0]
+
+        def sleep(seconds):
+            clock[0] += seconds
+        printed = io.StringIO()
+        with mock.patch.object(follow.trigger, "api", lambda *a, **k: answers.pop(0)), \
+                mock.patch.object(follow.time, "sleep", sleep), \
+                mock.patch.object(follow.time, "monotonic", lambda: clock[0]), \
+                contextlib.redirect_stdout(printed):
+            f.finish(follow.FINAL_CATCH_UP_SECONDS)
+        self.assertIn("comfyui-image-gen", printed.getvalue())
+        self.assertFalse(f.behind())
+        self.assertEqual(clock[0], 2 * follow.FINAL_POLL_SECONDS)
+
+    def test_after_the_build_the_wait_for_rows_is_bounded(self):
+        f, _, _ = self.run_polls(FakeConsole(CONSOLE), [{"tests": []}])
+        clock = [0.0]
+
+        def sleep(seconds):
+            clock[0] += seconds
+        with mock.patch.object(follow.trigger, "api", return_value={"tests": []}), \
+                mock.patch.object(follow.time, "sleep", sleep), \
+                mock.patch.object(follow.time, "monotonic", lambda: clock[0]), \
+                contextlib.redirect_stdout(io.StringIO()):
+            f.finish(follow.FINAL_CATCH_UP_SECONDS)
+        self.assertLessEqual(clock[0], follow.FINAL_CATCH_UP_SECONDS + follow.FINAL_POLL_SECONDS)
+
+    def test_odd_rows_do_not_stop_the_follower(self):
+        tests = {"tests": ["not a row", row("sess-1795656621871974896", attempt="2", recorded_at=None)]}
+        _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
+        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(1/2 done\)")
+        _, out, _ = self.run_polls(FakeConsole(CONSOLE), [{"tests": {"oops": 1}}])
+        self.assertNotIn("PASSED", out)
+
+    def test_machines_per_group_defaults_to_the_config_as_the_trigger_does(self):
+        config = os.path.join(os.path.dirname(HERE), "orchestrai-config.yml")
+        self.assertEqual(follow.default_machines_per_hw_group(config), "1")
+        self.assertEqual(follow.default_machines_per_hw_group(os.path.join(HERE, "missing.yml")), "")
 
     def test_rows_without_an_execution_id_are_each_printed(self):
         tests = {"tests": [row("sess-1795656621871974896", execution_id=None),

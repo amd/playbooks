@@ -319,9 +319,20 @@ class RunProgress(unittest.TestCase):
                          "running https://p/b")
         self.assertEqual(trigger.run_progress({"status": "running", "url": "https://p/a"}), "running")
 
+    def test_any_fraction_of_a_second_is_read_on_any_python(self):
+        for stamp in ("2026-11-26T21:59:59.12345Z", "2026-11-26T21:59:59.123456789Z", "2026-11-26T21:59:59+00:00"):
+            self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": stamp}, now=self.NOW),
+                             "queued (waiting for machines), 47 min so far", stamp)
+
+    def test_without_a_link_in_the_run_the_portal_page_is_built(self):
+        cp = {"portal_url": "https://portal.example"}
+        self.assertEqual(trigger.run_progress({"id": "r 1", "status": "running"}, show_link=True, cp=cp),
+                         "running https://portal.example/#/runs/r%201?presentation=page")
+
     def test_an_unreadable_queued_at_is_left_out(self):
-        self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": "soon"}, now=self.NOW),
-                         "queued (waiting for machines)")
+        for stamp in ("soon", "2026-11-26T16:59:59-05:00"):
+            self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": stamp}, now=self.NOW),
+                             "queued (waiting for machines)", stamp)
         self.assertEqual(trigger.run_progress({}), "unknown")
 
 

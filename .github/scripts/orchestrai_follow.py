@@ -38,7 +38,6 @@ above 1 a group may get several sessions, and only adjacent lines name them).
 """
 
 import base64
-import http.client
 import json
 import os
 import re
@@ -52,20 +51,24 @@ import orchestrai_trigger as trigger
 from orchestrai_keys import group_id
 
 POLL_SECONDS = 30
-HTTP_TIMEOUT = 30
+# A job that starts late reads hours of console at once: give it time.
+HTTP_TIMEOUT = 120
 # The longest a build can run (max_duration) plus the time it takes to wind down.
 WIND_DOWN_SECONDS = 30 * 60
 # How long one read of the test results retries; a failed read is tried again
-# when the next test ends, and once more when the build ends. The last read
-# (at most a poll's sleep, a console read, and this retry plus one call: about
-# 3 min) ends before orchestrai_wait_build.sh stops the follower, 5 min after
-# the build.
+# on the next polls after a test ends (CATCH_UP_POLLS), and when the build ends.
 RESULTS_RETRY_SECONDS = 60
 # After a test ends, the results are read on each poll until its row is there,
 # at most this many polls (5 min).
 CATCH_UP_POLLS = 10
-# What a read can raise on the way: urllib's errors are OSErrors.
-READ_ERRORS = (OSError, ValueError, http.client.HTTPException)
+# After the build: one read retrying FINAL_RESULTS_RETRY_SECONDS, then reads
+# every FINAL_POLL_SECONDS for FINAL_CATCH_UP_SECONDS while rows are missing.
+# All of it (with a poll's sleep and a console read before: about 5 min at
+# worst) ends before orchestrai_wait_build.sh stops the follower, 6 min after
+# the build.
+FINAL_RESULTS_RETRY_SECONDS = 30
+FINAL_POLL_SECONDS = 15
+FINAL_CATCH_UP_SECONDS = 90
 
 TIMESTAMP = re.compile(r"^\[\d{4}-\d\d-\d\dT[\d:.]+Z\]\s?")
 STAGE = re.compile(r"^── (\S.*?) ──")
@@ -94,8 +97,9 @@ class Console:
 
     def read(self):
         """New complete lines since the last read; sets self.more. Raises one
-        of READ_ERRORS (a redirect is an HTTPError, an answer that is not the
-        build's console a ValueError). The whole new part is read: start and
+        of OSError, http.client.HTTPException or ValueError (a redirect is an
+        HTTPError, an answer that is not the build's console a ValueError);
+        main() counts any of them as a failed poll. The whole new part is read: start and
         X-Text-Size count the raw log, which Jenkins sends with its notes
         stripped, so only Jenkins can say where the next read starts."""
         req = urllib.request.Request(f"{self.url}?start={self.start}",
@@ -191,6 +195,7 @@ class Follower:
         # Polls left to read the results again after a test ended: its row can
         # be recorded a little after the console's count moves.
         self.catch_up = 0
+        self.recorded = 0         # rows in the last answer
 
     def on_line(self, line):
         """What one console line says; True when a test has just ended."""
@@ -255,8 +260,10 @@ class Follower:
             self.results_failing = True
             return
         self.results_failing = False
-        rows = answer.get("tests") or []
-        if len(rows) >= (self.done or 0):
+        rows = answer.get("tests") if isinstance(answer.get("tests"), list) else []
+        rows = [t for t in rows if isinstance(t, dict)]
+        self.recorded = len(rows)
+        if not self.behind():
             self.catch_up = 0  # every test the console counts is recorded
         fresh = []
         for test in rows:
@@ -266,29 +273,44 @@ class Follower:
             if key not in self.reported:
                 self.reported.add(key)
                 fresh.append(test)
-        for test in sorted(fresh, key=lambda t: t.get("recorded_at") or ""):
+        for test in sorted(fresh, key=lambda t: str(t.get("recorded_at") or "")):
             sid = SESSION_ID.search(f"{test.get('execution_id') or ''} {test.get('suite') or ''}")
             group = self.session_group.get(sid.group(1)) if sid else None
             name = (self.names.get(group) or group) if group else (test.get("suite") or test.get("name") or "?")
-            outcome = (test.get("outcome") or "?").upper()
+            outcome = str(test.get("outcome") or "?").upper()
+            attempt = test.get("attempt")
             extra = []
-            if (test.get("attempt") or 1) > 1:
-                extra.append(f"attempt {test['attempt']}")
+            if isinstance(attempt, int) and attempt > 1:
+                extra.append(f"attempt {attempt}")
             if test.get("flaky"):
                 extra.append("flaky")
             if self.total:
                 extra.append(f"{self.done}/{self.total} done")
             say(f"{outcome:<15}{name:<45}" + (f" ({', '.join(extra)})" if extra else ""))
 
+    def behind(self):
+        """True while fewer results are recorded than the console counts done."""
+        return self.results_ok and self.recorded < (self.done or 0)
+
     def poll(self):
         ended = any([self.on_line(line) for line in self.console.read()])
         if ended:
             self.catch_up = CATCH_UP_POLLS
-        if ended or not self.console.more:
+        if not self.console.more:
+            self.report_results(FINAL_RESULTS_RETRY_SECONDS)
+        elif ended:
             self.report_results()
         elif self.catch_up > 0:  # a test ended but its row was not there yet
             self.catch_up -= 1
             self.report_results()
+
+    def finish(self, seconds):
+        """After the build: the last rows can be recorded a little after its
+        end; read again, for at most seconds, until they are all there."""
+        end = time.monotonic() + seconds
+        while self.behind() and time.monotonic() < end:
+            time.sleep(FINAL_POLL_SECONDS)
+            self.report_results(FINAL_POLL_SECONDS)
 
 
 def batch_names():
@@ -314,10 +336,11 @@ def main():
             cp = trigger.control_plane()
         except ValueError:
             cp = None
-    # More than one machine per hardware group may give a group several sessions.
-    one_each = os.environ.get("FOLLOW_MACHINES_PER_HW_GROUP", "").strip() in ("", "1")
-    follower = Follower(Console(build_url, user, token), run_id, cp, batch_names(), one_each)
     config = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "orchestrai-config.yml")
+    # More than one machine per hardware group may give a group several
+    # sessions. The same value the trigger uses: the input, else the config's.
+    machines = os.environ.get("FOLLOW_MACHINES_PER_HW_GROUP", "").strip() or default_machines_per_hw_group(config)
+    follower = Follower(Console(build_url, user, token), run_id, cp, batch_names(), machines in ("", "1"))
     try:
         limit = trigger.max_duration_minutes(config) * 60 + WIND_DOWN_SECONDS
     except (OSError, ValueError):
@@ -328,16 +351,27 @@ def main():
         try:
             follower.poll()
             failures = 0
-        except READ_ERRORS as exc:
+        except Exception as exc:  # noqa: BLE001 -- a bad answer must not end the progress
             failures += 1
             if failures == 10:  # ~5 min unreadable: stop; the wait goes on without us
                 say(f"stopped following: build console unreadable ({type(exc).__name__}: {exc})")
                 return
         if not follower.console.more:
+            follower.finish(FINAL_CATCH_UP_SECONDS)
             if follower.total:
                 say(f"build finished: {follower.done}/{follower.total} done")
             return
         time.sleep(POLL_SECONDS)
+
+
+def default_machines_per_hw_group(config_path):
+    """run_settings.default_machines_per_hw_group, read without PyYAML, or ''."""
+    try:
+        text = open(config_path, encoding="utf-8").read()
+    except OSError:
+        return ""
+    m = re.search(r"^\s*default_machines_per_hw_group:\s*(\d+)", text, re.M)
+    return m.group(1) if m else ""
 
 
 if __name__ == "__main__":

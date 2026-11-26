@@ -52,9 +52,9 @@ while [ "$SECONDS" -lt "$DEADLINE" ]; do
     # resolved per-playbook in the next step from summary.json.
     if [ "$building" = "False" ] && [ -n "$result" ]; then
       echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1
-      # Up to 5 min for the follower to print the last results (its last read
-      # takes about 3 min at most; RESULTS_RETRY_SECONDS in orchestrai_follow.py).
-      for _ in $(seq 60); do
+      # Up to 6 min for the follower to print the last results (its reads after
+      # the build take about 5 min at worst; FINAL_* in orchestrai_follow.py).
+      for _ in $(seq 72); do
         if [ -z "$(jobs -rp)" ]; then break; fi
         sleep 5
       done
