@@ -113,14 +113,14 @@ class Follower(unittest.TestCase):
 
     def test_unreadable_results_are_said_once_and_read_again_later(self):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        # Down when the test ended; no test ends on the next poll, so nothing
-        # is asked then; asked again when the build ends.
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
+        # Down when the test ended; asked again on the next poll (catching up
+        # on that test), then not until the build ends.
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "", "")
         down = ValueError("HTTP 503")
-        _, out, calls = self.run_polls(console, [down, TESTS])
+        _, out, calls = self.run_polls(console, [down, TESTS, TESTS])
         self.assertEqual(out.count("test results unavailable"), 1)
         self.assertIn("comfyui-image-gen", out)  # printed once the API answered again
-        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(calls), 3)
 
     def test_a_refusal_stops_reading_the_results(self):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
@@ -138,6 +138,47 @@ class Follower(unittest.TestCase):
         _, out, _ = self.run_polls(console, [failed, passed])
         self.assertRegex(out, r"FAILED\s+comfyui-image-gen")
         self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(attempt 2")
+
+    def test_a_row_recorded_after_the_count_moves_is_read_on_the_next_poll(self):
+        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "", "")
+        # The count moved, but the row is not recorded yet; it is on the next poll.
+        _, out, calls = self.run_polls(console, [{"tests": []}, TESTS, TESTS])
+        self.assertIn("comfyui-image-gen", out)
+        # Not asked again once caught up, until the build ends.
+        self.assertEqual(len(calls), 3)
+
+    def test_only_a_403_or_401_stops_reading_a_404_is_tried_again(self):
+        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
+        missing = follow.trigger.Refused("CI API GET /runs/r1/tests: HTTP 404 not_found: no results yet")
+        _, out, calls = self.run_polls(console, [missing, TESTS])
+        self.assertEqual(len(calls), 2)
+        self.assertIn("comfyui-image-gen", out)
+
+    def test_a_line_with_two_sessions_names_both_and_stops_gap_filling(self):
+        two = CONSOLE.replace("session(s): sess-1795656621871974896",
+                              "session(s): sess-1795656621871974896,sess-1795656621871974897")
+        two = two.replace("Tracking sessions: sess-1795656621871974896,",
+                          "Tracking sessions: sess-1795656621871974896,sess-1795656621871974897,")
+        tests = {"tests": [row("sess-1795656621871974897"), row("sess-1795656621951187895", "error")]}
+        f, out, _ = self.run_polls(FakeConsole(two), [tests])
+        self.assertEqual(f.session_group["sess-1795656621871974897"], "playbook-comfyui-image-gen")
+        # gaia's lines are not adjacent: with two sessions in one group, its
+        # place is not proven.
+        self.assertNotIn("gaia-agents", out)
+        self.assertIn("2 of 3 sessions matched", out)
+
+    def test_more_machines_per_group_names_only_adjacent_lines(self):
+        f = follow.Follower(FakeConsole(CONSOLE), "", {}, NAMES, one_each=False)
+        with contextlib.redirect_stdout(io.StringIO()):
+            f.poll()
+        self.assertEqual(f.session_group, {"sess-1795656621871974896": "playbook-comfyui-image-gen"})
+
+    def test_the_session_is_found_in_the_suite_when_the_execution_id_has_none(self):
+        tests = {"tests": [row("sess-1795656621871974896", execution_id="exec-1")]}
+        _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
+        self.assertIn("comfyui-image-gen", out)
 
     def test_rows_without_an_execution_id_are_each_printed(self):
         tests = {"tests": [row("sess-1795656621871974896", execution_id=None),

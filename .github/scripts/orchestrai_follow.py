@@ -33,7 +33,8 @@ Inputs (env): STARTED_BUILD_URL, ORCHESTRAI_PIPELINE_USER/TOKEN (the build's
 console), RUN_ID and ORCHESTRAI_V2_* (the run's test results; without them the
 outcomes are not shown, the rest is), FOLLOW_PLAYBOOKS (the JSON list of the
 batch's members, e.g. ["foo", "zh-CN/foo"]: which groups the build runs, not
-their order).
+their order), FOLLOW_MACHINES_PER_HW_GROUP (the run's machines_per_hw_group;
+above 1 a group may get several sessions, and only adjacent lines name them).
 """
 
 import base64
@@ -60,6 +61,9 @@ WIND_DOWN_SECONDS = 30 * 60
 # 3 min) ends before orchestrai_wait_build.sh stops the follower, 5 min after
 # the build.
 RESULTS_RETRY_SECONDS = 60
+# After a test ends, the results are read on each poll until its row is there,
+# at most this many polls (5 min).
+CATCH_UP_POLLS = 10
 # What a read can raise on the way: urllib's errors are OSErrors.
 READ_ERRORS = (OSError, ValueError, http.client.HTTPException)
 
@@ -113,7 +117,7 @@ class Console:
         return [TIMESTAMP.sub("", line.decode("utf-8", errors="replace").rstrip("\r")) for line in lines]
 
 
-def pair_sessions(sessions, groups, submitted, pairs):
+def pair_sessions(sessions, groups, submitted, pairs, one_each=True):
     """{session: group} for the sessions the console proves, {} on any
     contradiction.
 
@@ -128,14 +132,15 @@ def pair_sessions(sessions, groups, submitted, pairs):
     anchors when they exactly fill the sessions between them; and, when one
     group's line was lost and one session is left, that one. Nothing relies on
     the order of the batch's groups. Unless every group of the batch has a
-    session (no batch, or a group whose submit failed) only the anchors are
-    proven: a group without a session could shift the rest."""
+    session (no batch, or a group whose submit failed), and unless each has
+    exactly one (one_each), only the anchors are proven: a group without a
+    session, or with two, could shift the rest."""
     n = len(sessions)
     known = set(groups or ())
     if known:
         submitted = [g for g in submitted if g in known]
         pairs = [(g, s) for g, s in pairs if g in known]
-    complete = bool(known) and len(known) == n
+    complete = one_each and bool(known) and len(known) == n
     if len(set(submitted)) != len(submitted) or (complete and len(submitted) > n):
         return {}
     where = {s: i for i, s in enumerate(sessions)}
@@ -170,9 +175,12 @@ def pair_sessions(sessions, groups, submitted, pairs):
 
 
 class Follower:
-    def __init__(self, console, run_id, cp, names=None):
+    def __init__(self, console, run_id, cp, names=None, one_each=True):
         self.console, self.run_id, self.cp = console, run_id, cp
         self.names = dict(names or {})  # group id -> the batch's key (zh-CN/foo)
+        # Each group runs in one session (one machine per hardware group); a
+        # "-> session(s)" line naming two turns this off for the build.
+        self.one_each = one_each
         self.stage = self.machine = None
         self.submitted, self.pairs, self.last_group = [], [], None
         self.session_group = {}   # sess-N -> group id
@@ -180,6 +188,9 @@ class Follower:
         self.reported = set()     # rows already printed
         self.results_ok = bool(run_id and cp)
         self.results_failing = False
+        # Polls left to read the results again after a test ended: its row can
+        # be recorded a little after the console's count moves.
+        self.catch_up = 0
 
     def on_line(self, line):
         """What one console line says; True when a test has just ended."""
@@ -199,11 +210,16 @@ class Follower:
             self.last_group = m.group(1)
         elif m := SESSIONS.match(line):
             sessions = SESSION_ID.findall(m.group(1))
-            if last_group and len(sessions) == 1:
+            if len(sessions) > 1:
+                self.one_each = False
+                if last_group:  # proven by the adjacent lines, all of them
+                    self.session_group.update((s, last_group) for s in sessions)
+            elif last_group:
                 self.pairs.append((last_group, sessions[0]))
         elif m := TRACKING.match(line):
             sessions = SESSION_ID.findall(m.group(1))
-            mapping = pair_sessions(sessions, list(self.names), self.submitted, self.pairs)
+            mapping = pair_sessions(sessions, list(self.names), self.submitted, self.pairs, self.one_each)
+            mapping.update((s, self.session_group[s]) for s in sessions if s in self.session_group)
             if len(mapping) < len(sessions):
                 say(f"{len(mapping)} of {len(sessions)} sessions matched to their playbook; "
                     "the others show by session id, and the next step names them all")
@@ -221,24 +237,29 @@ class Follower:
 
     def report_results(self, retry_seconds=RESULTS_RETRY_SECONDS):
         """Print each test result recorded since the last call. A failed read
-        is said once and tried again when the next test ends or the build does."""
+        is said once and tried again when the next test ends or the build does.
+        The answer is every test of the run: the CI API and the Portal behind
+        it do not page this list."""
         if not self.results_ok:
             return
         try:
             answer = trigger.api(self.cp, "GET", f"/runs/{urllib.parse.quote(self.run_id, safe='')}/tests",
                                  retry_seconds=retry_seconds)
-        except trigger.Refused as exc:
-            say(f"test results not readable ({exc}); the next step shows every outcome")
-            self.results_ok = False  # a definite refusal: asking again changes nothing
-            return
         except ValueError as exc:
+            if isinstance(exc, trigger.Refused) and re.search(r"HTTP 40[13]\b", str(exc)):
+                say(f"test results not readable ({exc}); the next step shows every outcome")
+                self.results_ok = False  # not allowed: asking again changes nothing
+                return
             if not self.results_failing:
                 say(f"test results unavailable for now ({exc}); trying again when the next test ends")
             self.results_failing = True
             return
         self.results_failing = False
+        rows = answer.get("tests") or []
+        if len(rows) >= (self.done or 0):
+            self.catch_up = 0  # every test the console counts is recorded
         fresh = []
-        for test in answer.get("tests") or []:
+        for test in rows:
             # A row whose outcome or attempt changes is printed again.
             key = json.dumps([test.get(k) for k in
                               ("execution_id", "suite", "name", "attempt", "outcome", "recorded_at")])
@@ -246,7 +267,7 @@ class Follower:
                 self.reported.add(key)
                 fresh.append(test)
         for test in sorted(fresh, key=lambda t: t.get("recorded_at") or ""):
-            sid = SESSION_ID.search(test.get("execution_id") or test.get("suite") or "")
+            sid = SESSION_ID.search(f"{test.get('execution_id') or ''} {test.get('suite') or ''}")
             group = self.session_group.get(sid.group(1)) if sid else None
             name = (self.names.get(group) or group) if group else (test.get("suite") or test.get("name") or "?")
             outcome = (test.get("outcome") or "?").upper()
@@ -261,7 +282,12 @@ class Follower:
 
     def poll(self):
         ended = any([self.on_line(line) for line in self.console.read()])
+        if ended:
+            self.catch_up = CATCH_UP_POLLS
         if ended or not self.console.more:
+            self.report_results()
+        elif self.catch_up > 0:  # a test ended but its row was not there yet
+            self.catch_up -= 1
             self.report_results()
 
 
@@ -288,7 +314,9 @@ def main():
             cp = trigger.control_plane()
         except ValueError:
             cp = None
-    follower = Follower(Console(build_url, user, token), run_id, cp, batch_names())
+    # More than one machine per hardware group may give a group several sessions.
+    one_each = os.environ.get("FOLLOW_MACHINES_PER_HW_GROUP", "").strip() in ("", "1")
+    follower = Follower(Console(build_url, user, token), run_id, cp, batch_names(), one_each)
     config = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "orchestrai-config.yml")
     try:
         limit = trigger.max_duration_minutes(config) * 60 + WIND_DOWN_SECONDS

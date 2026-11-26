@@ -59,7 +59,8 @@ API_TIMEOUT = 30
 API_RETRY_SECONDS = 600
 BUILD_WAIT_MARGIN = 30 * 60
 POLL_SECONDS = 30
-# A run still waiting for machines is reported this often in the job log.
+# A run whose status does not change (usually: queued, waiting for machines)
+# is reported again this often in the job log.
 QUEUED_REPORT_SECONDS = 10 * 60
 TERMINAL = {"passed", "failed", "unstable", "cancelled", "error"}
 

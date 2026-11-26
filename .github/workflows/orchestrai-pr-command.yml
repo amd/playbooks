@@ -275,7 +275,8 @@ jobs:
       fail-fast: false
       # !orc tests every declared device (as many batches as the nightly), and
       # each job holds a wait runner for its batch's whole run: leave the rest
-      # of the pool to pull requests (see test-playbooks-orchestrai.yml).
+      # of the pool to pull requests (see test-playbooks-orchestrai.yml; the cap
+      # is per run).
       max-parallel: ${{ fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8') }}
       matrix:
         include: ${{ fromJson(needs.command.outputs.batch_matrix) }}

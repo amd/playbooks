@@ -32,7 +32,8 @@
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
 #                          ORCHESTRAI_MAX_PARALLEL_BATCHES (default 8): how many
 #                          Test jobs of a scheduled, manual or !orc run hold a
-#                          wait runner at once; pull requests are not capped
+#                          wait runner at once (each run on its own); a pull
+#                          request's run may use up to 16
 # Required for Linux Radeon batches: ORCHESTRAI_LINUX_DRIVER_SOURCE points to
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
@@ -385,9 +386,11 @@ jobs:
     strategy:
       fail-fast: false
       # Every job holds a wait runner for its batch's whole run (hours). A pull
-      # request has a few batches; the nightly about 30, so it takes at most
-      # ORCHESTRAI_MAX_PARALLEL_BATCHES runners and leaves the rest of the pool
-      # to pull requests. A batch held back is still listed, Queued, and its
+      # request has a few batches (at most 16 at once); the nightly about 30, so
+      # it takes at most ORCHESTRAI_MAX_PARALLEL_BATCHES runners and leaves the
+      # rest of the pool to pull requests. The cap is per workflow run: two
+      # capped runs at once (the nightly and a manual run or !orc) can take the
+      # whole pool. A batch held back is still listed, Queued, and its
       # OrchestrAI run is not delayed: Detect & Trigger started them all, so the
       # job finds it further along (or done) when its turn comes.
       max-parallel: ${{ github.event_name == 'pull_request' && 16 || fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8') }}
@@ -422,6 +425,7 @@ jobs:
           # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           FOLLOW_PLAYBOOKS: ${{ toJson(matrix.playbooks) }}
+          FOLLOW_MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # !cancelled(): a cancelled job must reach the cancel step below without
@@ -575,6 +579,7 @@ jobs:
           # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           FOLLOW_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
+          FOLLOW_MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       - name: Resolve the retried playbooks
