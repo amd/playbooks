@@ -699,23 +699,162 @@ New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
 $env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
+$env:PYTHONUNBUFFERED = "1"      # keep the server log complete when it is stopped
+$env:PYTHONIOENCODING = "utf-8"  # a traceback must not fail to print to the log file
 
+$port = 8080
+$url = "http://127.0.0.1:$port/health"
+$readyTimeoutSec = 240
 $logOut = Join-Path $work "openwebui-ci-out.log"
 $logErr = Join-Path $work "openwebui-ci-err.log"
-$p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+$bodyFile = Join-Path $work "openwebui-ci-health.txt"
+Remove-Item $logOut, $logErr, $bodyFile -Force -ErrorAction SilentlyContinue
+
+# Log lines without terminal colours or anything that looks like a credential
+function Format-SafeLines([string[]]$lines) {
+  if (-not $lines -or $lines.Count -eq 0) { return "  (empty)" }
+  $safe = foreach ($l in $lines) {
+    $s = $l -replace "\x1b\[[0-9;?]*[A-Za-z]", ""
+    $s = $s -replace '(?i)((secret|token|password|passwd|api[_-]?key|authorization)[A-Za-z_]*["'']?\s*[:=]\s*["'']?)[^\s"'',]+', '$1<redacted>'
+    $s = $s -replace '(?i)(bearer\s+)\S+', '$1<redacted>'
+    $s = $s -replace '(://[^/\s:@]+:)[^@\s/]+@', '$1<redacted>@'
+    if ($s.Length -gt 300) { $s = $s.Substring(0, 300) + " ..." }
+    "  $s"
+  }
+  return ($safe -join "`n")
+}
+
+function Get-SafeLogTail([string]$path, [int]$count) {
+  if (-not (Test-Path $path)) { return "  (no log file)" }
+  return Format-SafeLines @(Get-Content -LiteralPath $path -Encoding UTF8 -Tail $count -ErrorAction SilentlyContinue)
+}
+
+# The process and every process it started since (open-webui.exe runs python.exe)
+function Get-ProcessTree([int]$rootId, [datetime]$since) {
+  $all = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
+  $ids = New-Object System.Collections.Generic.List[int]
+  $ids.Add($rootId)
+  for ($k = 0; $k -lt $ids.Count; $k++) {
+    foreach ($c in $all) {
+      if ($c.ParentProcessId -eq $ids[$k] -and -not $ids.Contains([int]$c.ProcessId) -and $c.CreationDate -ge $since.AddSeconds(-2)) {
+        $ids.Add([int]$c.ProcessId)
+      }
+    }
+  }
+  return $ids
+}
+
+$listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($listener) {
+  $owner = Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
+  throw "Port $port is already in use by PID $($listener.OwningProcess) ($($owner.ProcessName)); /health would not test this server."
+}
+
+$py = Join-Path $venv "Scripts\python.exe"
+$version = & $py -c "import importlib.metadata as m; print(m.version('open-webui'))"
+Write-Host "open-webui $version; python: $py; server: $ow serve --port $port; working directory: $work; DATA_DIR: $dataDir"
+
+# Known open-webui 0.13.5 bug (open-webui/open-webui#35075, fixed upstream by #35077, not yet released):
+# importing the server creates a temp folder under the hard-coded '/tmp', i.e. <drive>:\tmp on Windows,
+# so startup fails with FileNotFoundError where that folder does not exist. While the installed version
+# still has that line, provide the folder for this run only.
+$driveTmp = Join-Path ([IO.Path]::GetPathRoot($work)) "tmp"
+$managedPy = Join-Path $venv "Lib\site-packages\open_webui\utils\machines\managed.py"
+$createdTmp = $false
+$tmpBefore = @()
+if ((Test-Path $managedPy) -and (Select-String -LiteralPath $managedPy -SimpleMatch "dir='/tmp'))" -Quiet)) {
+  if (Test-Path $driveTmp) {
+    $tmpBefore = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+  } else {
+    New-Item -ItemType Directory -Path $driveTmp | Out-Null
+    $createdTmp = $true
+    Write-Host "WARNING: open-webui $version needs $driveTmp to start (upstream bug open-webui#35075); created it for this run"
+  }
+}
+
+$started = Get-Date
+$p = $null
+$ok = $false
+$failure = $null
+$exitCode = "n/a (still running, stopped by this test)"
+$probes = New-Object System.Collections.Generic.List[string]
 try {
-  $ok = $false
-  for ($i=0; $i -lt 90; $i++) {
-    $health = curl.exe -s --max-time 2 http://127.0.0.1:8080/health
-    if ($health) { $ok = $true; break }
+  $p = Start-Process -FilePath $ow -ArgumentList "serve --port $port" -WorkingDirectory $work -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+  $null = $p.Handle  # keeps ExitCode readable after the process exits
+  Write-Host "Started open-webui (PID $($p.Id)); waiting up to $readyTimeoutSec s for HTTP 2xx from $url"
+  $last = ""
+  while ($true) {
+    $elapsed = [int]((Get-Date) - $started).TotalSeconds
+    if ($p.HasExited) {
+      $exitCode = $p.ExitCode
+      $failure = "Open WebUI exited during startup with exit code $exitCode after $elapsed s (see the server log below)"
+      break
+    }
+    Remove-Item $bodyFile -Force -ErrorAction SilentlyContinue
+    $code = & curl.exe -s -o $bodyFile -w '%{http_code}' --max-time 3 --noproxy 127.0.0.1 $url
+    $curlExit = $LASTEXITCODE
+    $body = ""
+    if (Test-Path $bodyFile) { $body = [string](Get-Content -LiteralPath $bodyFile -Raw -ErrorAction SilentlyContinue) }
+    if ($body.Length -gt 200) { $body = $body.Substring(0, 200) }
+    $result = "curl exit $curlExit, HTTP $code"
+    if ($body) { $result += ", body $($body.Trim())" }
+    if ($result -ne $last) { $probes.Add("  $elapsed s: $result"); $last = $result }
+    if ($code -match '^2\d\d$' -and $body -match '"status"\s*:\s*true') { $ok = $true; break }
+    if ($elapsed -ge $readyTimeoutSec) {
+      $failure = "Open WebUI did not answer $url with HTTP 2xx within $readyTimeoutSec s (PID $($p.Id) still running)"
+      break
+    }
     Start-Sleep -Seconds 1
   }
-  if (-not $ok) { throw "Open WebUI not ready on http://127.0.0.1:8080" }
-  Write-Host "OK: Open WebUI is responding on /health"
+}
+catch {
+  $failure = "Could not run open-webui: $($_.Exception.Message)"
 }
 finally {
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  if ($p) {
+    $tree = Get-ProcessTree $p.Id $started
+    $eap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & taskkill.exe /F /T /PID $p.Id *> $null
+    foreach ($id in $tree) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+    $ErrorActionPreference = $eap
+    $left = @()
+    for ($w = 0; $w -lt 20; $w++) {
+      $left = @($tree | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
+      if ($left.Count -eq 0) { break }
+      Start-Sleep -Milliseconds 500
+    }
+    if ($left.Count -gt 0) {
+      $msg = "Open WebUI processes still running after cleanup: $($left -join ', ')"
+      if ($failure) { $failure += "; $msg" } else { $failure = $msg }
+    }
+  }
+  if ($createdTmp) {
+    Remove-Item -LiteralPath $driveTmp -Recurse -Force -ErrorAction SilentlyContinue
+  } elseif (Test-Path $driveTmp) {
+    Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue |
+      Where-Object { $tmpBefore -notcontains $_.FullName -and $_.CreationTime -ge $started.AddSeconds(-2) } |
+      Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+  }
 }
+
+$elapsed = [int]((Get-Date) - $started).TotalSeconds
+if ($failure) {
+  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitCode)"
+  Write-Host "Health probes (changes only):"
+  if ($probes.Count) { Write-Host ($probes -join "`n") } else { Write-Host "  (none)" }
+  $errorLines = @(Select-String -LiteralPath $logErr, $logOut -Pattern '(Error|Exception)\b' -ErrorAction SilentlyContinue | Select-Object -Last 5 | ForEach-Object { $_.Line })
+  if ($errorLines.Count) {
+    Write-Host "Last error lines:"
+    Write-Host (Format-SafeLines $errorLines)
+  }
+  Write-Host "Server stderr (last 60 lines, $logErr):"
+  Write-Host (Get-SafeLogTail $logErr 60)
+  Write-Host "Server stdout (last 30 lines, $logOut):"
+  Write-Host (Get-SafeLogTail $logOut 30)
+  throw $failure
+}
+Write-Host "OK: Open WebUI answered $url with HTTP 2xx after $elapsed s; server stopped"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
