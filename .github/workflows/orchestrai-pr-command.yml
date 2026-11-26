@@ -64,6 +64,7 @@ jobs:
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+      batches: ${{ steps.prepare-matrices.outputs.batches }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
@@ -244,41 +245,14 @@ jobs:
           RUN_IDS=$(python3 -I -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .orc/.github/scripts/orchestrai_trigger.py --cancel
 
-  # One job waits for all of the command's runs, so the command holds one slot
-  # of the small wait runner pool instead of one per batch for hours (see
-  # test-playbooks-orchestrai.yml). It never fails the command.
-  await-runs:
-    name: Wait for OrchestrAI
-    needs: command
-    if: needs.command.outputs.has_entries == 'true' && needs.command.outputs.run_ids != ''
-    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
-    permissions:
-      contents: read
-      id-token: write  # GitHub OIDC token: read the runs' status
-    timeout-minutes: 960
-    steps:
-      # The controller's revision (this workflow's), not the PR head.
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-      - name: Wait for every batch's run to end
-        continue-on-error: true
-        env:
-          RUN_ID_MAP: ${{ needs.command.outputs.run_ids }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
-        run: python3 .github/scripts/orchestrai_trigger.py --await-runs
-
   test-batches:
     # One job per batch (not per playbook), every language together: it waits
     # on the batch's build once and resolves each playbook from it, as the
     # nightly's batch jobs do (test-playbooks-orchestrai.yml), without their
-    # automatic retry: comment !orc again to re-run what did not run. It starts
-    # once Wait for OrchestrAI is done, so it normally finds its build finished.
+    # automatic retry: comment !orc again to re-run what did not run. Each job
+    # waits for its own batch and prints its progress as it happens.
     name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
-    needs: [command, await-runs]
+    needs: command
     if: >-
       !cancelled() && needs.command.result == 'success'
       && needs.command.outputs.has_entries == 'true'
@@ -294,7 +268,10 @@ jobs:
     continue-on-error: ${{ toJson(matrix.required) == '[]' }}
     strategy:
       fail-fast: false
-      max-parallel: 16
+      # !orc tests every declared device (as many batches as the nightly), and
+      # each job holds a wait runner for its batch's whole run: leave the rest
+      # of the pool to pull requests (see test-playbooks-orchestrai.yml).
+      max-parallel: ${{ fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '10') }}
       matrix:
         include: ${{ fromJson(needs.command.outputs.batch_matrix) }}
     steps:
@@ -326,6 +303,14 @@ jobs:
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+          # The live progress follower (orchestrai_follow.py) also reads the run,
+          # and the batch's playbooks in plan order to name its sessions.
+          RUN_ID: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
+          FOLLOW_BATCHES: ${{ needs.command.outputs.batches }}
+          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # Each playbook's verdict: PASSED, FAILED, or NOT_RUN/INTERRUPTED
