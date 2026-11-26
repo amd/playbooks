@@ -334,6 +334,58 @@ def load_merged_metadata(locale: str, category: str, playbook_id: str, repo_root
     return metadata
 
 
+def _git_paths(directory: Path, repo_root: Path, *args: str) -> Optional[list[str]]:
+    """Paths ``git ls-files <args>`` lists under ``directory``, relative to it.
+
+    None when git cannot answer (no git, not a work tree, dubious ownership).
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-c", f"safe.directory={repo_root.resolve().as_posix()}",
+             "-C", str(directory), "ls-files", "-z", *args, "--", "."],
+            capture_output=True, timeout=120, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return [p for p in proc.stdout.decode("utf-8", "surrogateescape").split("\0") if p]
+
+
+def copy_playbook_sources(source: Path, destination: Path, repo_root: Path) -> None:
+    """Copy the files git tracks under ``source`` into ``destination``.
+
+    An English playbook folder is also English runs' working directory: its
+    assets/ keeps what they created (a venv, a cloned repository, training
+    output). A localized run copies the English folder, so copying all of it
+    hands those to the localized run, whose own steps then fail ("destination
+    path 'LlamaFactory' already exists") or quietly reuse the English run's
+    venv. Tracked files are the playbook; everything else is left behind.
+    Their working-tree content is copied, so the runner's README patches stay.
+    When git cannot tell (no git, not a checkout, nothing tracked) the whole
+    folder is copied, as before.
+    """
+    tracked = _git_paths(source, repo_root)
+    if not tracked:
+        shutil.copytree(source, destination, dirs_exist_ok=True)
+        return
+    for rel in tracked:
+        src = source / rel
+        dst = destination / rel
+        if src.is_dir():  # a tracked symlink to a folder, or a submodule
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        elif src.is_file():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+        # else: deleted in the work tree, so not part of this playbook now
+    left = _git_paths(source, repo_root, "--others", "--directory")
+    if left:
+        shown = ", ".join(p.rstrip("/") for p in left[:5])
+        more = f" and {len(left) - 5} more" if len(left) > 5 else ""
+        print(f"Not copied from {source} (not tracked by git, e.g. left by an "
+              f"earlier run): {shown}{more}")
+
+
 def materialize_localized_playbook(
     locale: str,
     playbook_id: str,
@@ -359,12 +411,11 @@ def materialize_localized_playbook(
         )
 
     localized_source = matches[0]
-    layers = [localized_source]
     if not localized_only:
-        layers.insert(0, repo_root / "playbooks" / localized_source.parent.name / playbook_id)
-    for layer in layers:
-        if layer.is_dir():
-            shutil.copytree(layer, destination, dirs_exist_ok=True)
+        english = repo_root / "playbooks" / localized_source.parent.name / playbook_id
+        if english.is_dir():
+            copy_playbook_sources(english, destination, repo_root)
+    shutil.copytree(localized_source, destination, dirs_exist_ok=True)
     if not (destination / "README.md").is_file():
         raise ValueError(
             f"No effective README.md found for localized playbook "
