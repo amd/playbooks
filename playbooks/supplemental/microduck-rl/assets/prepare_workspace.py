@@ -6,14 +6,18 @@
 """Check out the pinned MicroDuck repositories and install the training packages.
 
 Run this inside the ROCm PyTorch container from the playbook, after check_rocm.py.
-The container already provides HIP PyTorch. This script does not reinstall torch,
-so pip cannot replace that build with a CPU wheel.
+The container already provides HIP PyTorch. This script does not reinstall torch:
+every pip call is constrained to the installed ROCm PyTorch stack, so pip cannot
+replace that build with a CPU or CUDA wheel.
 """
 
 import importlib
+import json
 import shlex
 import subprocess
 import sys
+import sysconfig
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -33,6 +37,113 @@ REQUIREMENTS = [
 
 def run(*args: str) -> None:
     subprocess.run(args, check=True)
+
+
+# The ROCm PyTorch stack: torch and its companions, the ROCm runtime wheels, and
+# anything else built for ROCm. pip may add packages around it, never replace it.
+STACK_NAMES = ["torch", "torchvision", "torchaudio", "triton", "pytorch-triton-rocm"]
+STACK_PREFIXES = ["rocm", "amd-torch-"]
+
+# Run by the target interpreter: its ROCm stack ({name: version}) and the names
+# of every distribution it can import.
+INVENTORY = r"""
+import importlib.metadata as md, json, re, sys
+names, prefixes = json.loads(sys.argv[1]), tuple(json.loads(sys.argv[2]))
+stack, seen = {}, set()
+for dist in md.distributions():
+    name = dist.metadata["Name"]
+    if not name:
+        continue
+    key = re.sub(r"[-_.]+", "-", name).lower()
+    seen.add(key)
+    if key in names or key.startswith(prefixes) or "rocm" in dist.version.partition("+")[2]:
+        stack.setdefault(key, dist.version)
+json.dump({"stack": stack, "names": sorted(seen)}, sys.stdout)
+"""
+
+# Run by the target interpreter after installation: the torch the lab will
+# train with, where it comes from, and one operation on the GPU.
+GPU_CHECK = r"""
+import sys, torch
+print("Interpreter:", sys.executable)
+print("PyTorch:", torch.__version__, "from", torch.__file__)
+print("ROCm / HIP:", torch.version.hip)
+count = torch.cuda.device_count()
+print("Visible AMD GPUs:", count)
+if not torch.version.hip or count < 1:
+    sys.exit("ROCm PyTorch or GPU access is unavailable after package installation.")
+x = torch.ones(8, device="cuda")
+if float((x + x).sum()) != 16.0:
+    sys.exit("A tensor operation on the GPU returned a wrong result.")
+print("GPU check passed on:", torch.cuda.get_device_name(0))
+"""
+
+
+def inventory(python: Path) -> dict:
+    output = subprocess.check_output(
+        [str(python), "-c", INVENTORY, json.dumps(STACK_NAMES), json.dumps(STACK_PREFIXES)],
+        text=True,
+    )
+    return json.loads(output)
+
+
+def pip_install(python: Path, *args: str) -> None:
+    """Run pip install in ``python`` without changing its ROCm PyTorch stack.
+
+    The installed stack is written to a constraints file, so pip either keeps
+    it or stops with a conflict. It cannot swap torch for a PyPI wheel that
+    pulls in CUDA packages.
+    """
+    before = inventory(python)
+    if "torch" not in before["stack"]:
+        raise SystemExit(f"pip cannot see the torch that {python} imports, so it could replace it.")
+    pins = sorted(before["stack"].items())
+    kept = ", ".join(f"{n}=={v}" for n, v in pins)
+    print("Keeping the ROCm PyTorch stack:", kept, flush=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        constraints = Path(tmp) / "rocm-stack.txt"
+        constraints.write_text("".join(f"{n}=={v}\n" for n, v in pins), encoding="utf-8")
+        result = subprocess.run(
+            [str(python), "-m", "pip", "install", "--constraint", str(constraints), *args],
+            check=False,
+        )
+    if result.returncode != 0:
+        raise SystemExit(
+            "pip install failed; see its output above. If pip reports a conflict with "
+            "one of the kept packages, this interpreter's PyTorch does not fit UniLab "
+            "1.0 (torch>=2.8,<2.12): use the ROCm PyTorch container from the playbook."
+        )
+
+    after = inventory(python)
+    changed = [
+        f"{name} {version} -> {after['stack'].get(name, 'removed')}"
+        for name, version in pins
+        if after["stack"].get(name) != version
+    ]
+    cuda = [
+        name
+        for name in sorted(set(after["names"]) - set(before["names"]))
+        if name.startswith(("nvidia-", "cuda-"))
+    ]
+    if changed or cuda:
+        raise SystemExit(
+            "pip changed the ROCm PyTorch stack: " + "; ".join(changed + cuda)
+        )
+
+
+def is_system_python() -> bool:
+    """True for the operating system's Python, whose packages belong to apt.
+
+    The image's ``/opt/venv``, any other virtual environment and a conda
+    environment are the lab's to change. Ubuntu's ``/usr/bin/python3`` is not:
+    pip cannot uninstall apt's packages (no RECORD file), and changing them can
+    break the system. Some hosts delete the EXTERNALLY-MANAGED marker, so the
+    Debian ``dist-packages`` layout counts as well.
+    """
+    if sys.prefix != sys.base_prefix:
+        return False
+    marker = Path(sysconfig.get_path("stdlib")) / "EXTERNALLY-MANAGED"
+    return marker.is_file() or "dist-packages" in sysconfig.get_path("purelib")
 
 
 def checkout(repo: str, dest: Path, sha: str, sparse: Optional[list[str]] = None) -> None:
@@ -85,9 +196,11 @@ def select_python() -> Path:
 
     The official image keeps that build in ``/opt/venv``. A nested virtual
     environment only sees Debian's system site-packages, so it cannot see that
-    torch. Create ``microduck-venv`` only when the current interpreter has no HIP.
+    torch. Create ``microduck-venv`` only when the current interpreter has no HIP,
+    or when it is the system Python: the venv then sees the system's PyTorch,
+    and the lab's packages go into the venv instead of the system.
     """
-    if has_hip(sys.executable):
+    if has_hip(sys.executable) and not is_system_python():
         return Path(sys.executable)
     venv_python = lab_paths.VENV_BIN / "python"
     if not venv_python.is_file():
@@ -111,11 +224,8 @@ def main() -> None:
     lab_paths.LOG_ROOT.mkdir(parents=True, exist_ok=True)
     python = select_python()
 
-    run(
-        str(python),
-        "-m",
-        "pip",
-        "install",
+    pip_install(
+        python,
         "--upgrade-strategy",
         "only-if-needed",
         "--no-cache-dir",
@@ -139,11 +249,8 @@ def main() -> None:
     if not (lab_paths.DEMO / "model_950.pt").is_file():
         raise RuntimeError("Reference checkpoint is missing from the pinned checkout")
 
-    run(
-        str(python),
-        "-m",
-        "pip",
-        "install",
+    pip_install(
+        python,
         "--no-cache-dir",
         "--no-deps",
         "-e",
@@ -151,16 +258,7 @@ def main() -> None:
     )
     importlib.invalidate_caches()
 
-    hip_check = subprocess.run(
-        [
-            str(python),
-            "-c",
-            "import torch, sys; "
-            "sys.exit(0 if torch.version.hip and torch.cuda.device_count() else 1)",
-        ],
-        check=False,
-    )
-    if hip_check.returncode != 0:
+    if subprocess.run([str(python), "-c", GPU_CHECK], check=False).returncode != 0:
         raise SystemExit(
             "ROCm PyTorch or GPU access is unavailable after package installation."
         )
