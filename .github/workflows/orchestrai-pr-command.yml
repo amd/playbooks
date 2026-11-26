@@ -228,7 +228,7 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .orc/.github/scripts/orchestrai_trigger.py --config .orc/.github/orchestrai-config.yml
 
-      # One check run per batch on the PR head (orchestrai_checks.py), so the
+      # One check run per batch on the PR head (orchestrai_trigger.py --checks-*), so the
       # PR's Checks tab shows each batch while Wait for OrchestrAI holds the
       # batch jobs back. Visibility only: never fails.
       - name: Create a check run per batch
@@ -242,7 +242,7 @@ jobs:
           BATCH_MATRIX: ${{ steps.prepare-matrices.outputs.batch_matrix }}
           RUN_URLS: ${{ steps.trigger.outputs.run_urls }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
-        run: python3 .orc/.github/scripts/orchestrai_checks.py --create
+        run: python3 .orc/.github/scripts/orchestrai_trigger.py --checks-create
 
       # A newer !orc cancels this one (concurrency above). Runs already started
       # would otherwise keep queueing for or holding machines for hours; the
@@ -269,12 +269,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ steps.checks.outputs.check_ids }}
-        run: python3 .orc/.github/scripts/orchestrai_checks.py --cancel
+        run: python3 .orc/.github/scripts/orchestrai_trigger.py --checks-cancel
 
   # One job waits for all of the command's runs, so the command holds one slot
   # of the small wait runner pool instead of one per batch for hours (see
   # test-playbooks-orchestrai.yml). It never fails the command. As it polls,
-  # it moves each batch's check run along (orchestrai_checks.py).
+  # it moves each batch's check run along (orchestrai_trigger.py --checks-*).
   await-runs:
     name: Wait for OrchestrAI
     needs: command
@@ -402,7 +402,7 @@ jobs:
           CHECK_ID: ${{ fromJson(needs.command.outputs.check_ids || '{}')[matrix.batch_id] }}
           BATCH_JSON: ${{ toJson(matrix) }}
           RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
-        run: python3 .github/scripts/orchestrai_checks.py --finish test-results/batch.json
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-finish test-results/batch.json
 
       - name: Cancel the batch's check run
         if: cancelled()
@@ -411,7 +411,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ fromJson(needs.command.outputs.check_ids || '{}')[matrix.batch_id] }}
-        run: python3 .github/scripts/orchestrai_checks.py --cancel
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
       - name: Batch result
         if: always()
@@ -464,7 +464,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ needs.command.outputs.check_ids }}
-        run: python3 .github/scripts/orchestrai_checks.py --cancel
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
   report:
     needs: [command, test-batches]

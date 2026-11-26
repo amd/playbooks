@@ -8,7 +8,7 @@
 # Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
 # Wait for OrchestrAI waits for all of them on one runner, then each Test job
 # reads its batch's pipeline build and reports each playbook's result. Settings and access rules: .github/orchestrai-config.yml.
-# Meanwhile one check run per batch (orchestrai_checks.py), on the tested commit,
+# Meanwhile one check run per batch (orchestrai_trigger.py --checks-*), on the tested commit,
 # shows each batch's state: waiting for machines, running, then its verdict.
 #
 # - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
@@ -352,7 +352,7 @@ jobs:
           BATCH_MATRIX: ${{ steps.prepare-matrices.outputs.batch_matrix }}
           RUN_URLS: ${{ steps.trigger.outputs.run_urls }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: python3 .github/scripts/orchestrai_checks.py --create
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-create
 
       # A superseded PR run (cancel-in-progress) can be cancelled mid-trigger:
       # stop the runs already started (the trigger records each as it starts).
@@ -377,7 +377,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ steps.checks.outputs.check_ids }}
-        run: python3 .github/scripts/orchestrai_checks.py --cancel
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
   # The wait runner pool (the only one that reaches OrchestrAI) runs a few jobs
   # at once. A Test job per batch waiting there for its machine held a slot each
@@ -385,7 +385,7 @@ jobs:
   # nightly. This one job waits for all of the run's batches, so the run holds
   # one slot; the Test jobs then start with their builds finished and take
   # seconds. It never fails the run: a Test job still waits for its own batch.
-  # As it polls, it moves each batch's check run along (orchestrai_checks.py).
+  # As it polls, it moves each batch's check run along (orchestrai_trigger.py --checks-*).
   await-runs:
     name: Wait for OrchestrAI
     needs: detect-and-trigger
@@ -707,7 +707,7 @@ jobs:
           CHECK_ID: ${{ fromJson(needs.detect-and-trigger.outputs.check_ids || '{}')[matrix.batch_id] }}
           BATCH_JSON: ${{ toJson(matrix) }}
           RUN_URL: ${{ fromJson(needs.detect-and-trigger.outputs.run_urls || '{}')[matrix.batch_id] }}
-        run: python3 .github/scripts/orchestrai_checks.py --finish test-results/batch.json
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-finish test-results/batch.json
 
       - name: Cancel the batch's check run
         if: cancelled()
@@ -716,7 +716,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.check_ids || '{}')[matrix.batch_id] }}
-        run: python3 .github/scripts/orchestrai_checks.py --cancel
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
       - name: Batch result
         if: always()
@@ -770,7 +770,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CHECK_IDS: ${{ needs.detect-and-trigger.outputs.check_ids }}
-        run: python3 .github/scripts/orchestrai_checks.py --cancel
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
   playbook-results:
     # PASS / FAIL / NOT RUN for each system (device + OS), then the full gate.

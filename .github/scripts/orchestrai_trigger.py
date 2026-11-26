@@ -36,8 +36,10 @@ Outputs:
     --run-status (RUN_ID env): status -> $GITHUB_OUTPUT, before a retry
     --await-runs (RUN_ID_MAP env): wait until every run has ended (one job per
                  workflow run, before the Test jobs); with CHECK_ID_MAP and
-                 RUN_URL_MAP, moves each batch's check run along
-                 (orchestrai_checks.py)
+                 RUN_URL_MAP, moves each batch's check run along (CheckUpdater)
+    --checks-create / --checks-finish FILE / --checks-cancel: one GitHub check
+                 run per batch (GITHUB_TOKEN with checks: write); see
+                 checks_create_main, checks_finish_main, checks_cancel_main
 """
 
 import argparse
@@ -52,6 +54,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
 
 from orchestrai_keys import group_id, split_key
 
@@ -678,7 +682,7 @@ def await_runs(cp, runs, wait_seconds, on_status=None):
     """Wait until every run in runs ({batch_id: run id}) has ended; return the
     batches still unfinished when the wait gave up. A run whose status cannot be
     read is asked again on the next poll. on_status(batch_id, run) sees every
-    run read (the batch check runs, orchestrai_checks.Updater)."""
+    run read (the batch check runs, CheckUpdater)."""
     pending = dict(runs)
     deadline = time.monotonic() + wait_seconds
     while pending:
@@ -718,8 +722,7 @@ def await_runs_main(config_path):
     on_status = None
     check_ids = json.loads(os.environ.get("CHECK_ID_MAP") or "{}")
     if check_ids:
-        from orchestrai_checks import Updater
-        on_status = Updater(check_ids, json.loads(os.environ.get("RUN_URL_MAP") or "{}")).update
+        on_status = CheckUpdater(check_ids, json.loads(os.environ.get("RUN_URL_MAP") or "{}")).update
     try:
         wait = ((acquire_timeout_minutes(config_path) + max_duration_minutes(config_path)) * 60
                 + 2 * BUILD_WAIT_MARGIN)
@@ -781,6 +784,229 @@ def cancel_main():
             print(f"::warning::run {rid} was not cancelled: {exc}", file=sys.stderr)
 
 
+# ---------------------------------------------------------------------------
+# One GitHub check run per batch. Wait for OrchestrAI holds one runner for the
+# whole workflow run, and GitHub shows the batch jobs only once it is done.
+# Until then each batch has a check run on the tested commit (the pull
+# request's Checks tab, or the commit), named after it, with its run linked:
+#
+#     Detect & Trigger   --checks-create   queued, "Waiting for machines"
+#     Wait for OrchestrAI --await-runs     moves it along (CheckUpdater)
+#     Test job           --checks-finish   the batch's verdict (batch.json)
+#     cancel paths       --checks-cancel   cancelled, unless it finished
+#
+# Visibility only: Test Gate (Required) still decides the run, and every
+# failure here is a warning that never fails a job. GITHUB_TOKEN needs
+# checks: write. Kept in this script, not one of its own: a new file under
+# .github/scripts/ would count as a test-harness change for the playbook
+# selection (build_test_matrix.py HARNESS_EXCLUDED).
+# ---------------------------------------------------------------------------
+
+CHECK_ATTEMPTS = 3
+# GitHub caps a check run's output summary at 65535 characters.
+CHECK_SUMMARY_LIMIT = 60000
+
+
+def _warn(msg):
+    print(f"::warning::{msg}", file=sys.stderr)
+
+
+def _utc_now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def github_api(method, path, body=None):
+    """Call the GitHub REST API for this repository; return the JSON body, or
+    None after a warning. Network errors, 5xx and rate limits are retried."""
+    token = os.environ.get("GITHUB_TOKEN", "")
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if not token or not repo:
+        _warn("check runs need GITHUB_TOKEN and GITHUB_REPOSITORY")
+        return None
+    url = f"{os.environ.get('GITHUB_API_URL', 'https://api.github.com')}/repos/{repo}{path}"
+    data = None if body is None else json.dumps(body).encode()
+    headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
+               "X-GitHub-Api-Version": "2022-11-28", "Content-Type": "application/json"}
+    for attempt in range(CHECK_ATTEMPTS):
+        req = urllib.request.Request(url, data=data, method=method, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=API_TIMEOUT) as resp:
+                raw = resp.read()
+            return json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as exc:
+            retry = exc.code >= 500 or exc.code == 429 or (
+                exc.code == 403 and exc.headers.get("x-ratelimit-remaining") == "0")
+            detail = f"HTTP {exc.code}"
+        except (OSError, ValueError) as exc:
+            retry, detail = True, type(exc).__name__
+        if not retry or attempt == CHECK_ATTEMPTS - 1:
+            _warn(f"GitHub {method} {path}: {detail}")
+            return None
+        time.sleep(2 ** (attempt + 1))
+    return None
+
+
+def check_name(label):
+    return f"{os.environ.get('CHECK_PREFIX') or 'OrchestrAI'} · {label}"
+
+
+def check_links(run_url):
+    server = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+    workflow = (f"{server}/{os.environ.get('GITHUB_REPOSITORY', '')}"
+                f"/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}")
+    return " · ".join(([f"[OrchestrAI run]({run_url})"] if run_url else [])
+                      + [f"[Workflow run]({workflow})"])
+
+
+def checks_create_main():
+    """--checks-create: one queued check run per batch (BATCH_MATRIX, RUN_URLS,
+    HEAD_SHA); check_ids={batch_id: id} -> $GITHUB_OUTPUT, rewritten after each
+    so a cancelled step still hands on the ones it made."""
+    head_sha = os.environ.get("HEAD_SHA", "")
+    if not head_sha:
+        _warn("no HEAD_SHA: no check runs")
+        return
+    batches = json.loads(os.environ.get("BATCH_MATRIX") or "[]")
+    run_urls = json.loads(os.environ.get("RUN_URLS") or "{}")
+    out = os.environ.get("GITHUB_OUTPUT")
+    ids = {}
+    for batch in batches:
+        bid = batch["batch_id"]
+        run_url = run_urls.get(bid, "")
+        title = "Waiting for machines" if run_url else "No OrchestrAI run was started"
+        body = {"name": check_name(batch.get("label") or bid), "head_sha": head_sha,
+                "status": "queued", "external_id": bid,
+                "output": {"title": title,
+                           "summary": f"{batch.get('count', len(batch.get('playbooks', [])))} "
+                                      f"playbook(s). {check_links(run_url)}"}}
+        if run_url:
+            body["details_url"] = run_url
+        made = github_api("POST", "/check-runs", body)
+        if made and made.get("id"):
+            ids[bid] = made["id"]
+            if out:
+                with open(out, "a") as f:
+                    f.write(f"check_ids={json.dumps(ids)}\n")
+    print(f"Created {len(ids)} of {len(batches)} check run(s)", file=sys.stderr)
+
+
+def check_state(run):
+    """(GitHub status, title) for an OrchestrAI run, as the Control Plane reports it."""
+    status = run.get("status") or ""
+    build = run.get("pipeline_url") or ""
+    if status in TERMINAL:
+        # The run's status is not the batch's verdict: the Test job reads each
+        # playbook's result and may retry the ones that never ran.
+        return "in_progress", f"Run {status}; reading results"
+    if build and "/queue/" not in build:
+        return "in_progress", "Tests running"
+    if status in ("", "queued"):
+        message = run.get("message")
+        return "queued", ("Waiting for machines"
+                          + (f": {message}" if isinstance(message, str) and message else ""))[:200]
+    return "in_progress", f"Preparing machines ({status})"
+
+
+class CheckUpdater:
+    """Moves each batch's check run along as Wait for OrchestrAI polls its run.
+    Calls GitHub only when the status or title changes; never raises."""
+
+    def __init__(self, check_ids, run_urls=None):
+        self.check_ids = check_ids
+        self.run_urls = run_urls or {}
+        self.last = {}
+
+    def update(self, bid, run):
+        try:
+            cid = self.check_ids.get(bid)
+            if not cid:
+                return
+            status, title = check_state(run)
+            if self.last.get(bid) == (status, title):
+                return
+            body = {"status": status,
+                    "output": {"title": title, "summary": check_links(self.run_urls.get(bid, ""))}}
+            if status == "in_progress" and (self.last.get(bid) or ("queued",))[0] != "in_progress":
+                body["started_at"] = _utc_now()
+            if github_api("PATCH", f"/check-runs/{cid}", body) is not None:
+                self.last[bid] = (status, title)
+        except Exception as exc:  # visibility only: never stop the wait
+            _warn(f"{bid}: check run not updated: {exc}")
+
+
+def check_conclusion(rows, batch):
+    """(conclusion, title) for a batch from its final batch.json rows."""
+    from orchestrai_batch_verdict import batch_failed, system_status
+    if not rows:
+        return "neutral", "No results"
+    passed = sum(r["outcome"] == "PASSED" for r in rows)
+    title = f"{passed} of {len(rows)} playbook(s) passed"
+    state = system_status(rows)
+    if state == "PASS":
+        return "success", title
+    if state == "NOT RUN":
+        # Required playbooks that never ran fail the gate; say so here too.
+        return ("failure" if batch_failed(rows, batch) else "neutral"), f"Not run: {title}"
+    return "failure", title
+
+
+def checks_finish_main(path):
+    """--checks-finish FILE: the batch's verdict (CHECK_ID, BATCH_JSON, RUN_URL)
+    from its final batch.json; a missing file means no results."""
+    cid = os.environ.get("CHECK_ID", "")
+    if not cid:
+        print("No check run for this batch", file=sys.stderr)
+        return
+    batch = json.loads(os.environ.get("BATCH_JSON") or "{}")
+    run_url = os.environ.get("RUN_URL", "")
+    try:
+        rows = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        rows = []
+    result, title = check_conclusion(rows, batch)
+    summary = check_links(run_url)
+    if rows:
+        from orchestrai_batch_verdict import table
+        summary += "\n\n" + table(rows, run_url)
+    github_api("PATCH", f"/check-runs/{cid}", {
+        "status": "completed", "conclusion": result, "completed_at": _utc_now(),
+        "output": {"title": title, "summary": summary[:CHECK_SUMMARY_LIMIT]}})
+    print(f"check run {cid}: {result} ({title})", file=sys.stderr)
+
+
+def checks_cancel_main():
+    """--checks-cancel: mark each check run in CHECK_IDS (a {batch_id: id} map,
+    or ids separated by spaces) cancelled, unless it already finished."""
+    raw = (os.environ.get("CHECK_IDS") or "").strip()
+    if not raw:
+        return
+    ids = list(json.loads(raw).values()) if raw.startswith("{") else raw.split()
+    for cid in ids:
+        current = github_api("GET", f"/check-runs/{cid}")
+        if current is None or current.get("status") == "completed":
+            continue
+        github_api("PATCH", f"/check-runs/{cid}", {
+            "status": "completed", "conclusion": "cancelled", "completed_at": _utc_now(),
+            "output": {"title": "Cancelled",
+                       "summary": f"The workflow run was cancelled. {check_links('')}"}})
+
+
+def checks_main(args):
+    """The --checks-* modes; True when one ran. Never raises: visibility only."""
+    try:
+        if args.checks_create:
+            checks_create_main()
+        elif args.checks_finish:
+            checks_finish_main(args.checks_finish)
+        elif args.checks_cancel:
+            checks_cancel_main()
+        else:
+            return False
+    except Exception as exc:
+        _warn(f"check runs: {type(exc).__name__}: {exc}")
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=".github/orchestrai-config.yml")
@@ -793,7 +1019,15 @@ def main():
                     help="wait until every run in RUN_ID_MAP has ended; see await_runs_main")
     ap.add_argument("--cancel", action="store_true",
                     help="cancel the runs in RUN_IDS (a cancelled Test job); see cancel_main")
+    ap.add_argument("--checks-create", action="store_true",
+                    help="one check run per batch; see checks_create_main")
+    ap.add_argument("--checks-finish", metavar="BATCH_JSON_FILE",
+                    help="the batch's check run verdict; see checks_finish_main")
+    ap.add_argument("--checks-cancel", action="store_true",
+                    help="cancel the unfinished check runs in CHECK_IDS; see checks_cancel_main")
     args = ap.parse_args()
+    if checks_main(args):
+        return
     if args.cancel:
         cancel_main()
         return

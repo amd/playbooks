@@ -94,6 +94,7 @@ class WindowsTheRockProvisioning(unittest.TestCase):
                      and "--await-build" not in step.get("run", "")
                      and "--await-runs" not in step.get("run", "")
                      and "--run-status" not in step.get("run", "")
+                     and "--checks-" not in step.get("run", "")
                      and "--cancel" not in step.get("run", "")]
             self.assertTrue(steps, name)
             for step in steps:

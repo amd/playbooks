@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-Regression tests for orchestrai_checks.py: one GitHub check run per OrchestrAI
+Regression tests for orchestrai_trigger.py --checks-*: one GitHub check run per OrchestrAI
 batch, created by Detect & Trigger, moved along by Wait for OrchestrAI,
 finished by the batch's Test job and cancelled by the cancel paths.
 
@@ -28,8 +28,9 @@ GITHUB_DIR = os.path.dirname(HERE)
 SCRIPTS_DIR = os.path.join(GITHUB_DIR, "scripts")
 sys.path.insert(0, SCRIPTS_DIR)
 
-import orchestrai_checks as checks  # noqa: E402
 import orchestrai_trigger as trigger  # noqa: E402
+
+checks = trigger
 
 ENV = {"GITHUB_TOKEN": "t", "GITHUB_REPOSITORY": "amd/playbooks",
        "GITHUB_SERVER_URL": "https://github.com", "GITHUB_RUN_ID": "9"}
@@ -52,23 +53,20 @@ class Base(unittest.TestCase):
 
 class Describe(unittest.TestCase):
     def test_each_stage_of_a_run(self):
-        self.assertEqual(checks.describe({"status": "queued"}), ("queued", "Waiting for machines"))
-        self.assertEqual(checks.describe({"status": "queued", "message": "2 of 3 machines ready"}),
+        self.assertEqual(checks.check_state({"status": "queued"}), ("queued", "Waiting for machines"))
+        self.assertEqual(checks.check_state({"status": "queued", "message": "2 of 3 machines ready"}),
                          ("queued", "Waiting for machines: 2 of 3 machines ready"))
-        self.assertEqual(checks.describe({"status": "running", "pipeline_url": "https://j/queue/item/4/"}),
+        self.assertEqual(checks.check_state({"status": "running", "pipeline_url": "https://j/queue/item/4/"}),
                          ("in_progress", "Preparing machines (running)"))
-        self.assertEqual(checks.describe({"status": "running", "pipeline_url": "https://j/job/p/7/"}),
+        self.assertEqual(checks.check_state({"status": "running", "pipeline_url": "https://j/job/p/7/"}),
                          ("in_progress", "Tests running"))
 
     def test_an_ended_run_is_not_yet_the_batch_verdict(self):
         """The Test job reads each playbook and may retry: only it completes the check."""
         for status in checks.TERMINAL:
-            state, title = checks.describe({"status": status})
+            state, title = checks.check_state({"status": status})
             self.assertEqual(state, "in_progress")
             self.assertIn(status, title)
-
-    def test_terminal_statuses_match_the_trigger(self):
-        self.assertEqual(checks.TERMINAL, trigger.TERMINAL)
 
 
 class Create(Base):
@@ -77,11 +75,11 @@ class Create(Base):
         posted = []
         gh = mock.Mock(side_effect=lambda m, p, b=None: posted.append(b) or {"id": 100 + len(posted)})
         with tempfile.NamedTemporaryFile("r", delete=False) as out, \
-                mock.patch.object(checks, "github", gh), \
+                mock.patch.object(checks, "github_api", gh), \
                 mock.patch.dict(os.environ, {"HEAD_SHA": "f" * 40, "GITHUB_OUTPUT": out.name,
                                              "BATCH_MATRIX": json.dumps([BATCH, other]),
                                              "RUN_URLS": json.dumps({"linux/halo": "https://cp/#/runs/r1"})}):
-            checks.create_main()
+            checks.checks_create_main()
             lines = open(out.name).read().splitlines()
         os.unlink(out.name)
         self.assertEqual([b["name"] for b in posted],
@@ -96,25 +94,25 @@ class Create(Base):
 
     def test_a_prefix_tells_the_pr_command_apart(self):
         gh = mock.Mock(return_value={"id": 1})
-        with mock.patch.object(checks, "github", gh), \
+        with mock.patch.object(checks, "github_api", gh), \
                 mock.patch.dict(os.environ, {"HEAD_SHA": "f" * 40, "CHECK_PREFIX": "OrchestrAI !orc",
                                              "BATCH_MATRIX": json.dumps([BATCH])}):
-            checks.create_main()
+            checks.checks_create_main()
         self.assertEqual(gh.call_args.args[2]["name"], "OrchestrAI !orc · Strix Halo · Linux")
 
     def test_without_a_commit_nothing_is_created(self):
         gh = mock.Mock()
-        with mock.patch.object(checks, "github", gh), \
+        with mock.patch.object(checks, "github_api", gh), \
                 mock.patch.dict(os.environ, {"BATCH_MATRIX": json.dumps([BATCH])}):
-            checks.create_main()
+            checks.checks_create_main()
         gh.assert_not_called()
 
 
 class Update(Base):
     def test_github_is_called_only_when_the_state_changes(self):
         gh = mock.Mock(return_value={})
-        up = checks.Updater({"linux/halo": 7}, {"linux/halo": "https://cp/#/runs/r1"})
-        with mock.patch.object(checks, "github", gh):
+        up = checks.CheckUpdater({"linux/halo": 7}, {"linux/halo": "https://cp/#/runs/r1"})
+        with mock.patch.object(checks, "github_api", gh):
             for run in ({"status": "queued"}, {"status": "queued"},
                         {"status": "running", "pipeline_url": "https://j/job/p/7/"},
                         {"status": "running", "pipeline_url": "https://j/job/p/7/"},
@@ -127,17 +125,17 @@ class Update(Base):
         self.assertIn("https://cp/#/runs/r1", bodies[0]["output"]["summary"])
 
     def test_a_failed_update_is_tried_again_and_never_raises(self):
-        up = checks.Updater({"linux/halo": 7})
-        with mock.patch.object(checks, "github", return_value=None) as gh:
+        up = checks.CheckUpdater({"linux/halo": 7})
+        with mock.patch.object(checks, "github_api", return_value=None) as gh:
             up.update("linux/halo", {"status": "queued"})
             up.update("linux/halo", {"status": "queued"})
         self.assertEqual(gh.call_count, 2)  # GitHub did not take it: ask again
-        with mock.patch.object(checks, "github", side_effect=RuntimeError("boom")):
+        with mock.patch.object(checks, "github_api", side_effect=RuntimeError("boom")):
             up.update("linux/halo", {"status": "running"})  # a warning, not an exception
 
     def test_a_batch_without_a_check_is_left_alone(self):
-        with mock.patch.object(checks, "github") as gh:
-            checks.Updater({}).update("linux/halo", {"status": "queued"})
+        with mock.patch.object(checks, "github_api") as gh:
+            checks.CheckUpdater({}).update("linux/halo", {"status": "queued"})
         gh.assert_not_called()
 
     def test_the_wait_reports_every_run_it_reads(self):
@@ -171,10 +169,10 @@ class Finish(Base):
             if rows is not None:
                 with open(path, "w") as f:
                     json.dump(rows, f)
-            with mock.patch.object(checks, "github", gh), \
+            with mock.patch.object(checks, "github_api", gh), \
                     mock.patch.dict(os.environ, {"CHECK_ID": check_id, "BATCH_JSON": json.dumps(BATCH),
                                                  "RUN_URL": "https://cp/#/runs/r1"}):
-                checks.finish_main(path)
+                checks.checks_finish_main(path)
         return gh
 
     def test_verdicts(self):
@@ -213,14 +211,14 @@ class Cancel(Base):
             return {}
         for ids in (json.dumps({"x": 1, "y": 2, "z": 3}), "1 2 3"):
             patched.clear()
-            with mock.patch.object(checks, "github", side_effect=gh), \
+            with mock.patch.object(checks, "github_api", side_effect=gh), \
                     mock.patch.dict(os.environ, {"CHECK_IDS": ids}):
-                checks.cancel_main()
+                checks.checks_cancel_main()
             self.assertEqual(patched, [("2", "cancelled"), ("3", "cancelled")], ids)
 
     def test_errors_never_fail_the_step(self):
-        with mock.patch.object(checks, "create_main", side_effect=KeyError("batch_id")), \
-                mock.patch.object(sys, "argv", ["orchestrai_checks.py", "--create"]):
+        with mock.patch.object(checks, "checks_create_main", side_effect=KeyError("batch_id")), \
+                mock.patch.object(sys, "argv", ["orchestrai_trigger.py", "--checks-create"]):
             checks.main()
 
 
@@ -235,13 +233,22 @@ class Workflows(unittest.TestCase):
             for job_id, job in self.load(name)["jobs"].items():
                 for step in job.get("steps") or []:
                     run = step.get("run") or ""
-                    uses_checks = "orchestrai_checks.py" in run or "CHECK_ID_MAP" in (step.get("env") or {})
+                    uses_checks = "--checks-" in run or "CHECK_ID_MAP" in (step.get("env") or {})
                     if not uses_checks:
                         continue
                     where = f"{name}:{job_id}: {step.get('name')}"
                     self.assertEqual(job["permissions"].get("checks"), "write", where)
                     self.assertTrue(step.get("continue-on-error"), where)
                     self.assertIn("github.token", step["env"]["GITHUB_TOKEN"], where)
+
+    def test_no_new_script_makes_a_pr_test_every_playbook(self):
+        """A new file under .github/scripts/ is a test-harness change for the
+        playbook selection (build_test_matrix.py): it sends every playbook to
+        hardware. The check runs live in orchestrai_trigger.py for that reason."""
+        sys.path.insert(0, SCRIPTS_DIR)
+        import build_test_matrix
+        self.assertIn(".github/scripts/orchestrai_trigger.py", build_test_matrix.HARNESS_EXCLUDED)
+        self.assertFalse(os.path.exists(os.path.join(SCRIPTS_DIR, "orchestrai_checks.py")))
 
     def test_checks_are_created_finished_and_cancelled(self):
         for name, first in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
