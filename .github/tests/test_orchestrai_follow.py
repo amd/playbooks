@@ -191,9 +191,11 @@ class PairSessions(unittest.TestCase):
                                        [("playbook-c", "sess-2")])
         self.assertEqual(mapping, {"sess-2": "playbook-c"})
         self.assertEqual(follow.pair_sessions(self.S, [], self.G, []), {})
-        # With the batch, a failed submit shows as fewer sessions than groups.
+        # With the batch, a failed submit shows as fewer sessions than groups:
+        # only the anchors are named then.
         self.assertEqual(follow.pair_sessions(["sess-1", "sess-2"], ["playbook-a", "playbook-b", "playbook-c"],
-                                              ["playbook-a", "playbook-c"], [("playbook-c", "sess-2")]), {})
+                                              ["playbook-a", "playbook-b", "playbook-c"],
+                                              [("playbook-c", "sess-2")]), {"sess-2": "playbook-c"})
 
     def test_with_a_lost_line_only_what_anchors_pin_down_is_named(self):
         # b's line was lost. a is anchored at sess-1; b can be anywhere in

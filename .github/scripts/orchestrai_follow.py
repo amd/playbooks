@@ -127,16 +127,16 @@ def pair_sessions(sessions, groups, submitted, pairs):
     Proven: a session of a pair (an anchor); the surviving groups between two
     anchors when they exactly fill the sessions between them; and, when one
     group's line was lost and one session is left, that one. Nothing relies on
-    the order of the batch's groups. Without groups only the anchors are
-    proven: a group whose submit failed (no session) could shift the rest."""
+    the order of the batch's groups. Unless every group of the batch has a
+    session (no batch, or a group whose submit failed) only the anchors are
+    proven: a group without a session could shift the rest."""
     n = len(sessions)
     known = set(groups or ())
     if known:
-        if len(known) != n:
-            return {}  # not this build's groups, or a group whose submit failed
         submitted = [g for g in submitted if g in known]
         pairs = [(g, s) for g, s in pairs if g in known]
-    if len(set(submitted)) != len(submitted) or len(submitted) > n:
+    complete = bool(known) and len(known) == n
+    if len(set(submitted)) != len(submitted) or (complete and len(submitted) > n):
         return {}
     where = {s: i for i, s in enumerate(sessions)}
     rank = {g: i for i, g in enumerate(submitted)}
@@ -150,7 +150,7 @@ def pair_sessions(sessions, groups, submitted, pairs):
     if positions != sorted(positions) or len(set(positions)) != len(positions):
         return {}
     mapping = {sessions[anchors[g]]: g for g in anchored}
-    if not known:
+    if not complete:
         return mapping
     lost = n - len(submitted)
     open_gaps = []

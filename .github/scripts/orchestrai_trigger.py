@@ -37,6 +37,7 @@ Outputs:
 """
 
 import argparse
+import datetime
 import hashlib
 import http.client
 import json
@@ -596,14 +597,33 @@ def failure_reason(run):
     return "; ".join(found)[:800]
 
 
+def run_progress(run, show_link=False, now=None):
+    """One line on what a run is doing: its status, how long it has been queued
+    (from its queued_at, so a Test job that started late counts the whole wait)
+    and, with show_link, its Portal page."""
+    status = run.get("status") or "unknown"
+    text = status + (" (waiting for machines)" if status == "queued" else "")
+    queued_at = run.get("queued_at")
+    if status == "queued" and isinstance(queued_at, str):
+        try:
+            since = datetime.datetime.fromisoformat(queued_at.replace("Z", "+00:00"))
+            now = now or datetime.datetime.now(datetime.timezone.utc)
+            minutes = int((now - since).total_seconds() // 60)
+            if minutes > 0:
+                text += f", {minutes} min so far"
+        except (ValueError, TypeError):
+            pass
+    link = run.get("url") or run.get("portal_url")
+    return text + (f" {link}" if show_link and link else "")
+
+
 def await_builds(cp, runs, wait_seconds):
     """Wait until each run has started its pipeline build; {batch_id: build URL}.
 
     Says in the job log what each run is doing as it changes (queued for
     machines, running), and every QUEUED_REPORT_SECONDS while it does not."""
     urls, pending = {}, dict(runs)
-    start = time.monotonic()
-    deadline = start + wait_seconds
+    deadline = time.monotonic() + wait_seconds
     seen = {}  # batch_id -> (status, when last reported)
     while pending and time.monotonic() < deadline:
         for bid, rid in list(pending.items()):
@@ -615,11 +635,7 @@ def await_builds(cp, runs, wait_seconds):
             status, now = run.get("status") or "unknown", time.monotonic()
             last = seen.get(bid)
             if last is None or last[0] != status or now - last[1] >= QUEUED_REPORT_SECONDS:
-                waited = int((now - start) // 60)
-                note = " (waiting for machines)" if status == "queued" else ""
-                link = f" {run['url']}" if last is None and run.get("url") else ""
-                print(f"  {bid}: {status}{note}" + (f", {waited} min so far" if waited else "") + link,
-                      file=sys.stderr, flush=True)
+                print(f"  {bid}: {run_progress(run, show_link=last is None)}", file=sys.stderr, flush=True)
                 seen[bid] = (status, now)
             url = run.get("pipeline_url") or ""
             # Until Jenkins starts the build this is its queue item, which never

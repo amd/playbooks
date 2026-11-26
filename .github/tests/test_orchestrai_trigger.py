@@ -278,6 +278,52 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
         self.assertIn("run b ended error without a build: error=no image", err.getvalue())
 
+    def test_the_wait_says_what_the_run_does_as_it_changes(self):
+        queued = {"run": {"id": "a", "status": "queued", "url": "https://portal/#/runs/a",
+                          "queued_at": "2026-11-26T22:00:00Z"}}
+        # 22 polls queued, 30 s apart: 10.5 min.
+        fake = FakeApi(*[(200, queued)] * 22,
+                       (200, {"run": {"id": "a", "status": "running", "pipeline_url": "https://j/job/p/9"}}))
+        clock = [0.0]
+
+        def sleep(seconds):
+            clock[0] += seconds
+        err = io.StringIO()
+        with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err), \
+                mock.patch.object(trigger.time, "monotonic", lambda: clock[0]), \
+                mock.patch.object(trigger.time, "sleep", sleep):
+            trigger.await_builds(self.cp, {"x/a": "a"}, 24 * 3600)
+        lines = [line.strip() for line in err.getvalue().splitlines()]
+        queued_lines = [line for line in lines if "queued" in line]
+        # The first poll, with the link, then again only once 10 min have passed.
+        self.assertEqual(len(queued_lines), 2, lines)
+        self.assertTrue(queued_lines[0].endswith("https://portal/#/runs/a"))
+        self.assertNotIn("https://", queued_lines[1])
+        self.assertIn("x/a: running", lines)
+        self.assertIn("x/a: build https://j/job/p/9/", lines)
+
+
+class RunProgress(unittest.TestCase):
+
+    NOW = trigger.datetime.datetime(2026, 11, 26, 22, 47, tzinfo=trigger.datetime.timezone.utc)
+
+    def test_a_queued_run_counts_its_wait_from_when_it_was_queued(self):
+        # A Test job held back by max-parallel still shows the run's whole wait.
+        run = {"status": "queued", "queued_at": "2026-11-26T21:59:59.123456Z"}
+        self.assertEqual(trigger.run_progress(run, now=self.NOW), "queued (waiting for machines), 47 min so far")
+
+    def test_the_link_is_the_runs_page_from_either_field(self):
+        self.assertEqual(trigger.run_progress({"status": "running", "url": "https://p/a"}, show_link=True),
+                         "running https://p/a")
+        self.assertEqual(trigger.run_progress({"status": "running", "portal_url": "https://p/b"}, show_link=True),
+                         "running https://p/b")
+        self.assertEqual(trigger.run_progress({"status": "running", "url": "https://p/a"}), "running")
+
+    def test_an_unreadable_queued_at_is_left_out(self):
+        self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": "soon"}, now=self.NOW),
+                         "queued (waiting for machines)")
+        self.assertEqual(trigger.run_progress({}), "unknown")
+
 
 class ReportingSwitch(unittest.TestCase):
     """reportportal adds the required ReportPortal publisher; api does not."""
