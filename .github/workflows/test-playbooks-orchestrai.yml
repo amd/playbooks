@@ -30,7 +30,7 @@
 # Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
 #                          without inputs; default reportportal)
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
-#                          ORCHESTRAI_MAX_PARALLEL_BATCHES (default 10): how many
+#                          ORCHESTRAI_MAX_PARALLEL_BATCHES (default 8): how many
 #                          Test jobs of a scheduled, manual or !orc run hold a
 #                          wait runner at once; pull requests are not capped
 # Required for Linux Radeon batches: ORCHESTRAI_LINUX_DRIVER_SOURCE points to
@@ -384,7 +384,7 @@ jobs:
       # to pull requests. A batch held back is still listed, Queued, and its
       # OrchestrAI run is not delayed: Detect & Trigger started them all, so the
       # job finds it further along (or done) when its turn comes.
-      max-parallel: ${{ github.event_name == 'pull_request' && 16 || fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '10') }}
+      max-parallel: ${{ github.event_name == 'pull_request' && 16 || fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8') }}
       matrix:
         include: ${{ fromJson(needs.detect-and-trigger.outputs.batch_matrix) }}
     steps:

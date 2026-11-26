@@ -506,7 +506,9 @@ class PerBatchWait(unittest.TestCase):
             batches = jobs["test-batches"]
             self.assertEqual(batches["needs"], first, name)
             self.assertIn(f"needs.{first}.result == 'success'", batches["if"], name)
-            self.assertIn("vars.ORCHESTRAI_MAX_PARALLEL_BATCHES", str(batches["strategy"]["max-parallel"]), name)
+            cap = str(batches["strategy"]["max-parallel"])
+            # 8 of the 16 wait runners by default: the rest stay free for pull requests.
+            self.assertIn("vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8'", cap, name)
             # The build waits start the live follower, which reads the run too.
             waits = [s for s in batches["steps"] if "orchestrai_wait_build.sh" in (s.get("run") or "")]
             self.assertTrue(waits, name)
