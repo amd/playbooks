@@ -5,6 +5,7 @@
 """orchestrai_follow.py: a batch's live progress in its Test job's log."""
 
 import contextlib
+import http.client
 import http.server
 import io
 import os
@@ -97,9 +98,8 @@ class Follower(unittest.TestCase):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
         console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
         _, out, calls = self.run_polls(console, [TESTS, TESTS])
-        # Once when the count moved, once more, retrying longer, when the build ended.
-        self.assertEqual([c[1] for c in calls], [follow.RESULTS_RETRY_SECONDS,
-                                                 follow.FINAL_RESULTS_RETRY_SECONDS])
+        # Once when the count moved, once more when the build ended.
+        self.assertEqual([c[1] for c in calls], [follow.RESULTS_RETRY_SECONDS] * 2)
         self.assertEqual(out.count("comfyui-image-gen"), 1)
 
     def test_a_job_that_starts_late_reports_what_is_already_done(self):
@@ -113,12 +113,14 @@ class Follower(unittest.TestCase):
 
     def test_unreadable_results_are_said_once_and_read_again_later(self):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        # Down when the test ended; no test ends on the next poll, so nothing
+        # is asked then; asked again when the build ends.
         console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
         down = ValueError("HTTP 503")
-        _, out, calls = self.run_polls(console, [down, down, TESTS])
+        _, out, calls = self.run_polls(console, [down, TESTS])
         self.assertEqual(out.count("test results unavailable"), 1)
         self.assertIn("comfyui-image-gen", out)  # printed once the API answered again
-        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(calls), 2)
 
     def test_a_refusal_stops_reading_the_results(self):
         first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
@@ -228,11 +230,11 @@ class PairSessions(unittest.TestCase):
                          dict(zip(self.S, self.G)))
 
     def test_batch_names_map_groups_to_the_batch_keys(self):
-        env = {"FOLLOW_BATCHES": '{"windows/stx": {"playbooks": ["a", "zh-CN/b"]}}', "BATCH_ID": "windows/stx"}
-        with mock.patch.dict(os.environ, env, clear=True):
+        with mock.patch.dict(os.environ, {"FOLLOW_PLAYBOOKS": '["a", "zh-CN/b"]'}, clear=True):
             self.assertEqual(follow.batch_names(), {"playbook-a": "a", "playbook-zh-CN-b": "zh-CN/b"})
-        with mock.patch.dict(os.environ, {"FOLLOW_BATCHES": "not json"}, clear=True):
-            self.assertEqual(follow.batch_names(), {})
+        for bad in ("not json", '{"a": 1}', ""):
+            with mock.patch.dict(os.environ, {"FOLLOW_PLAYBOOKS": bad}, clear=True):
+                self.assertEqual(follow.batch_names(), {}, bad)
 
 
 class Console(unittest.TestCase):
@@ -240,7 +242,7 @@ class Console(unittest.TestCase):
     def response(self, body, size, more):
         resp = mock.MagicMock()
         resp.__enter__.return_value = resp
-        resp.read.side_effect = lambda n: body[:n]
+        resp.read.return_value = body
         resp.headers = {"X-More-Data": "true" if more else "false"}
         if size is not None:
             resp.headers["X-Text-Size"] = str(size)
@@ -271,13 +273,30 @@ class Console(unittest.TestCase):
         self.assertEqual(console.read(), [])
         self.assertEqual(console.read(), ["[05-L4-sys]   → session(s): sess-1", ""])
 
-    def test_a_cut_read_asks_to_read_on(self):
-        with mock.patch.object(follow, "MAX_CHUNK", 8):
-            console = self.console(self.response(b"0123456789\n", 11, False))
-            console.read()
-        self.assertTrue(console.truncated)
-        self.assertTrue(console.more)
-        self.assertEqual(console.start, 8)
+    def test_the_next_read_starts_where_jenkins_says(self):
+        # Jenkins sends the text without its console notes, so the next start is
+        # its X-Text-Size, not the length of what came.
+        console = self.console(self.response(b"abc\n", 900, True), self.response(b"", 900, True))
+        console.read()
+        console.read()
+        self.assertTrue(console.opener.open.call_args.args[0].full_url.endswith("?start=900"))
+
+    def test_a_cut_answer_is_a_read_error_the_follower_survives(self):
+        follower = mock.Mock(total=None)
+        follower.console.more = True
+
+        def poll():
+            if follower.poll.call_count == 1:
+                raise http.client.IncompleteRead(b"x")  # not an OSError
+            follower.console.more = False  # the build ended
+        follower.poll.side_effect = poll
+        env = {"STARTED_BUILD_URL": "https://j/job/p/9/", "ORCHESTRAI_PIPELINE_USER": "u",
+               "ORCHESTRAI_PIPELINE_TOKEN": "t"}
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(follow, "Follower", return_value=follower), \
+                mock.patch.object(follow.time, "sleep"), contextlib.redirect_stdout(io.StringIO()):
+            follow.main()
+        self.assertEqual(follower.poll.call_count, 2)
 
     def test_an_answer_that_is_not_the_console_is_an_error_not_the_end(self):
         console = self.console(self.response(b"<html>Sign in</html>", None, False))

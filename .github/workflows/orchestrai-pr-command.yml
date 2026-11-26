@@ -64,7 +64,6 @@ jobs:
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
-      batches: ${{ steps.prepare-matrices.outputs.batches }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
@@ -308,7 +307,7 @@ jobs:
           # The live progress follower (orchestrai_follow.py) also reads the run,
           # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
-          FOLLOW_BATCHES: ${{ needs.command.outputs.batches }}
+          FOLLOW_PLAYBOOKS: ${{ toJson(matrix.playbooks) }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # Each playbook's verdict: PASSED, FAILED, or NOT_RUN/INTERRUPTED

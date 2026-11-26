@@ -20,12 +20,12 @@ echo "Waiting for OrchestrAI pipeline build ..."
 NETRC="$(mktemp)"
 # Live progress (stage, machine, each playbook's outcome) printed while this
 # loop waits; orchestrai_follow.py only prints and never decides anything here.
-FOLLOW_PID=""
+# It is this shell's only background job, so `jobs -p` names it while it
+# runs, never a process that has since reused its PID.
 if [ "${ORCHESTRAI_FOLLOW:-1}" != "0" ] && command -v python3 >/dev/null; then
   python3 "$(dirname "$0")/orchestrai_follow.py" &
-  FOLLOW_PID=$!
 fi
-trap 'rm -f "$NETRC"; if [ -n "$FOLLOW_PID" ]; then kill "$FOLLOW_PID" 2>/dev/null || true; fi' EXIT
+trap 'rm -f "$NETRC"; FOLLOWER=$(jobs -rp); if [ -n "$FOLLOWER" ]; then kill $FOLLOWER 2>/dev/null || true; fi' EXIT
 NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
 printf 'machine %s login %s password %s\n' \
   "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
@@ -52,10 +52,10 @@ while [ "$SECONDS" -lt "$DEADLINE" ]; do
     # resolved per-playbook in the next step from summary.json.
     if [ "$building" = "False" ] && [ -n "$result" ]; then
       echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1
-      # Up to 3 min for the follower to print the last results; its final read
-      # of them retries for less (FINAL_RESULTS_RETRY_SECONDS, orchestrai_follow.py).
-      for _ in $(seq 36); do
-        if [ -z "$FOLLOW_PID" ] || ! kill -0 "$FOLLOW_PID" 2>/dev/null; then break; fi
+      # Up to 5 min for the follower to print the last results (its last read
+      # takes about 3 min at most; RESULTS_RETRY_SECONDS in orchestrai_follow.py).
+      for _ in $(seq 60); do
+        if [ -z "$(jobs -rp)" ]; then break; fi
         sleep 5
       done
       break

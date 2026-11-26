@@ -31,12 +31,13 @@ the verdict step decides each playbook's result; nothing here can fail the job.
 
 Inputs (env): STARTED_BUILD_URL, ORCHESTRAI_PIPELINE_USER/TOKEN (the build's
 console), RUN_ID and ORCHESTRAI_V2_* (the run's test results; without them the
-outcomes are not shown, the rest is), FOLLOW_BATCHES and BATCH_ID (the
-trigger's batches, {batch_id: {"playbooks": [...]}}: which groups the build
-runs, not their order).
+outcomes are not shown, the rest is), FOLLOW_PLAYBOOKS (the JSON list of the
+batch's members, e.g. ["foo", "zh-CN/foo"]: which groups the build runs, not
+their order).
 """
 
 import base64
+import http.client
 import json
 import os
 import re
@@ -51,17 +52,16 @@ from orchestrai_keys import group_id
 
 POLL_SECONDS = 30
 HTTP_TIMEOUT = 30
-# One poll reads at most this much new console; a busy build writes far less
-# in POLL_SECONDS, and a job that starts late reads on at once until caught up.
-MAX_CHUNK = 4 << 20
 # The longest a build can run (max_duration) plus the time it takes to wind down.
 WIND_DOWN_SECONDS = 30 * 60
 # How long one read of the test results retries; a failed read is tried again
-# when the next test ends, and once more, for longer, when the build ends. The
-# final read must end before orchestrai_wait_build.sh stops the follower, 180 s
-# after the build has ended.
+# when the next test ends, and once more when the build ends. The last read
+# (at most a poll's sleep, a console read, and this retry plus one call: about
+# 3 min) ends before orchestrai_wait_build.sh stops the follower, 5 min after
+# the build.
 RESULTS_RETRY_SECONDS = 60
-FINAL_RESULTS_RETRY_SECONDS = 90
+# What a read can raise on the way: urllib's errors are OSErrors.
+READ_ERRORS = (OSError, ValueError, http.client.HTTPException)
 
 TIMESTAMP = re.compile(r"^\[\d{4}-\d\d-\d\dT[\d:.]+Z\]\s?")
 STAGE = re.compile(r"^── (\S.*?) ──")
@@ -86,28 +86,25 @@ class Console:
         self.url = build_url.rstrip("/") + "/logText/progressiveText"
         self.auth = "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode()
         self.opener = urllib.request.build_opener(trigger._NoRedirect)
-        self.start, self.more, self.partial, self.truncated = 0, True, b"", False
+        self.start, self.more, self.partial = 0, True, b""
 
     def read(self):
-        """New complete lines since the last read; sets self.more. Raises
-        OSError (a redirect is an HTTPError) or ValueError when the answer is
-        not the build's console."""
+        """New complete lines since the last read; sets self.more. Raises one
+        of READ_ERRORS (a redirect is an HTTPError, an answer that is not the
+        build's console a ValueError). The whole new part is read: start and
+        X-Text-Size count the raw log, which Jenkins sends with its notes
+        stripped, so only Jenkins can say where the next read starts."""
         req = urllib.request.Request(f"{self.url}?start={self.start}",
                                      headers={"Authorization": self.auth})
         with self.opener.open(req, timeout=HTTP_TIMEOUT) as resp:
-            raw = resp.read(MAX_CHUNK)
+            raw = resp.read()
             size = resp.headers.get("X-Text-Size", "")
             more = resp.headers.get("X-More-Data", "")
         # A login page or a proxy's answer: not the console, and not its end.
         if not size.isdigit():
             raise ValueError("the answer is not a Jenkins console (no X-Text-Size)")
         self.more = more.lower() == "true"
-        self.truncated = len(raw) >= MAX_CHUNK
-        if self.truncated:  # the rest comes on the next read, at once
-            self.start += len(raw)
-            self.more = True
-        else:
-            self.start = int(size)
+        self.start = int(size)
         # Split bytes, not text: a character cut at a read's end ("→", "──")
         # is decoded whole, with the rest of its line, on the next read.
         lines = (self.partial + raw).split(b"\n")
@@ -166,8 +163,6 @@ def pair_sessions(sessions, groups, submitted, pairs):
             mapping.update((sessions[k], g) for k, g in zip(slots, between))
         else:
             open_gaps.append((slots, between))
-    if sum(len(slots) - len(between) for slots, between in open_gaps) != lost:
-        return {}
     if lost == 1 and len(open_gaps) == 1 and len(open_gaps[0][0]) == 1:
         (missing,) = known - set(submitted)
         mapping[sessions[open_gaps[0][0][0]]] = missing
@@ -226,7 +221,7 @@ class Follower:
 
     def report_results(self, retry_seconds=RESULTS_RETRY_SECONDS):
         """Print each test result recorded since the last call. A failed read
-        is said once and tried again next time."""
+        is said once and tried again when the next test ends or the build does."""
         if not self.results_ok:
             return
         try:
@@ -266,18 +261,18 @@ class Follower:
 
     def poll(self):
         ended = any([self.on_line(line) for line in self.console.read()])
-        if not self.console.more:
-            self.report_results(FINAL_RESULTS_RETRY_SECONDS)
-        elif ended or self.results_failing:
+        if ended or not self.console.more:
             self.report_results()
 
 
 def batch_names():
-    """{group id: member key} of the batch the build runs (FOLLOW_BATCHES[BATCH_ID]), or {}."""
+    """{group id: member key} of the batch the build runs (FOLLOW_PLAYBOOKS), or {}."""
     try:
-        batch = json.loads(os.environ.get("FOLLOW_BATCHES") or "{}").get(os.environ.get("BATCH_ID", "")) or {}
-        return {group_id(key): key for key in batch.get("playbooks") or []}
-    except (ValueError, AttributeError, TypeError):
+        members = json.loads(os.environ.get("FOLLOW_PLAYBOOKS") or "[]")
+        if not isinstance(members, list):
+            return {}
+        return {group_id(key): key for key in members if isinstance(key, str)}
+    except (ValueError, TypeError):
         return {}
 
 
@@ -305,7 +300,7 @@ def main():
         try:
             follower.poll()
             failures = 0
-        except (OSError, ValueError) as exc:  # urllib errors are OSErrors
+        except READ_ERRORS as exc:
             failures += 1
             if failures == 10:  # ~5 min unreadable: stop; the wait goes on without us
                 say(f"stopped following: build console unreadable ({type(exc).__name__}: {exc})")
@@ -314,8 +309,7 @@ def main():
             if follower.total:
                 say(f"build finished: {follower.done}/{follower.total} done")
             return
-        if not follower.console.truncated:  # catching up: read on at once
-            time.sleep(POLL_SECONDS)
+        time.sleep(POLL_SECONDS)
 
 
 if __name__ == "__main__":

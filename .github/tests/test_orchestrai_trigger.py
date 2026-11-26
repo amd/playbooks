@@ -515,7 +515,7 @@ class PerBatchWait(unittest.TestCase):
                         "ORCHESTRAI_V2_PORTAL_URL", "ORCHESTRAI_V2_WORKSPACE"):
                 self.assertEqual(batches["env"][key], f"${{{{ vars.{key} }}}}", name)
             for step in waits:
-                for key in ("RUN_ID", "FOLLOW_BATCHES", "STARTED_BUILD_URL", "ORCHESTRAI_PIPELINE_TOKEN"):
+                for key in ("RUN_ID", "FOLLOW_PLAYBOOKS", "STARTED_BUILD_URL", "ORCHESTRAI_PIPELINE_TOKEN"):
                     self.assertIn(key, step["env"], f"{name}: {step['name']}")
                 self.assertEqual(batches["permissions"]["id-token"], "write", name)
         with open(os.path.join(GITHUB_DIR, "workflows", "test-playbooks-orchestrai.yml")) as f:
@@ -526,7 +526,7 @@ class PerBatchWait(unittest.TestCase):
         with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
             script = f.read()
         self.assertIn('orchestrai_follow.py" &', script)
-        self.assertIn('kill "$FOLLOW_PID"', script)
+        self.assertIn("FOLLOWER=$(jobs -rp)", script)  # the trap stops it, by job
 
 
 class WorkflowWiring(unittest.TestCase):

@@ -421,7 +421,7 @@ jobs:
           # The live progress follower (orchestrai_follow.py) also reads the run,
           # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
-          FOLLOW_BATCHES: ${{ needs.detect-and-trigger.outputs.batches }}
+          FOLLOW_PLAYBOOKS: ${{ toJson(matrix.playbooks) }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # !cancelled(): a cancelled job must reach the cancel step below without
@@ -574,7 +574,7 @@ jobs:
           # The live progress follower (orchestrai_follow.py) also reads the run,
           # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
-          FOLLOW_BATCHES: ${{ steps.pick.outputs.batches_json }}
+          FOLLOW_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       - name: Resolve the retried playbooks
