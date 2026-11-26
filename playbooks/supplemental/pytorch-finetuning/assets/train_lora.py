@@ -65,6 +65,32 @@ def cleanup_gpu_memory():
         print(f"[Warning] during cleanup: {e}")
 
 
+def load_train_split(repo_id):
+    """load_dataset(repo_id, split="train"), read from the local Hugging Face cache when it is there.
+
+    load_dataset(repo_id) asks the Hugging Face API for the dataset's revision even
+    when its files are cached, and unauthenticated API calls can be rate-limited
+    (HTTP 429). So when the cache holds a snapshot of the dataset, load its .jsonl
+    files directly. Otherwise load_dataset(repo_id) runs as usual: it downloads the
+    dataset, or with HF_DATASETS_OFFLINE=1 fails without calling the Hub.
+    """
+    from pathlib import Path
+    from huggingface_hub import snapshot_download
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
+    try:
+        snapshot = Path(snapshot_download(repo_id, repo_type="dataset", local_files_only=True))
+    except LocalEntryNotFoundError:
+        print(f"{repo_id} is not in the local Hugging Face cache; loading it with load_dataset")
+        return load_dataset(repo_id, split="train")
+    files = sorted(str(p) for p in snapshot.glob("*.jsonl"))
+    if not files:
+        print(f"Cached snapshot {snapshot} has no .jsonl file; loading {repo_id} with load_dataset")
+        return load_dataset(repo_id, split="train")
+    print(f"Loading {repo_id} at revision {snapshot.name} from the local Hugging Face cache")
+    return load_dataset("json", data_files=files, split="train")
+
+
 # -----------------------
 # Model Configuration
 # -----------------------
@@ -107,7 +133,7 @@ if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
 n_samples = 8 if QUICK_TRAIN else 1000
 if QUICK_TRAIN:
     print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
-ds = load_dataset("databricks/databricks-dolly-15k", split="train").shuffle(seed=42).select(range(n_samples))
+ds = load_train_split("databricks/databricks-dolly-15k").shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     if "messages" in ex:
