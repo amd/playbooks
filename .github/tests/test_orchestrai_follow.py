@@ -120,6 +120,23 @@ class Follower(unittest.TestCase):
         self.assertIn("comfyui-image-gen", out)  # printed once the API answered again
         self.assertEqual(len(calls), 3)
 
+    def test_a_refusal_stops_reading_the_results(self):
+        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
+        refused = follow.trigger.Refused("HTTP 403 forbidden: no results:read")
+        _, out, calls = self.run_polls(console, [refused])
+        self.assertEqual(len(calls), 1)
+        self.assertIn("test results not readable", out)
+
+    def test_a_row_that_changes_is_printed_again(self):
+        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
+        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
+        failed = {"tests": [row("sess-1795656621871974896", "failed")]}
+        passed = {"tests": [row("sess-1795656621871974896", "passed", attempt=2)]}
+        _, out, _ = self.run_polls(console, [failed, passed])
+        self.assertRegex(out, r"FAILED\s+comfyui-image-gen")
+        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(attempt 2")
+
     def test_rows_without_an_execution_id_are_each_printed(self):
         tests = {"tests": [row("sess-1795656621871974896", execution_id=None),
                            row("sess-1795656621951187895", execution_id=None)]}
@@ -164,7 +181,17 @@ class PairSessions(unittest.TestCase):
 
     def test_every_submit_line_surviving_names_every_session(self):
         self.assertEqual(self.pair(self.G, []), dict(zip(self.S, self.G)))
-        self.assertEqual(follow.pair_sessions(self.S, [], self.G, []), dict(zip(self.S, self.G)))
+
+    def test_without_the_batch_only_anchors_are_named(self):
+        # a's submit failed (no session); b's line was lost. Filling the gap
+        # with the surviving lines would print b's result under a's name.
+        mapping = follow.pair_sessions(["sess-1", "sess-2"], [], ["playbook-a", "playbook-c"],
+                                       [("playbook-c", "sess-2")])
+        self.assertEqual(mapping, {"sess-2": "playbook-c"})
+        self.assertEqual(follow.pair_sessions(self.S, [], self.G, []), {})
+        # With the batch, a failed submit shows as fewer sessions than groups.
+        self.assertEqual(follow.pair_sessions(["sess-1", "sess-2"], ["playbook-a", "playbook-b", "playbook-c"],
+                                              ["playbook-a", "playbook-c"], [("playbook-c", "sess-2")]), {})
 
     def test_with_a_lost_line_only_what_anchors_pin_down_is_named(self):
         # b's line was lost. a is anchored at sess-1; b can be anywhere in
@@ -235,6 +262,22 @@ class Console(unittest.TestCase):
         self.assertEqual(urls, ["https://j/job/p/9/logText/progressiveText?start=0",
                                 "https://j/job/p/9/logText/progressiveText?start=40"])
         self.assertFalse(console.more)
+
+    def test_a_character_cut_between_two_reads_is_read_whole(self):
+        line = "[2026-11-26T01:30:21.975Z] [05-L4-sys]   → session(s): sess-1\n".encode()
+        cut = line.index("→".encode()) + 1  # inside the 3-byte arrow
+        console = self.console(self.response(line[:cut], cut, True),
+                               self.response(line[cut:], len(line), False))
+        self.assertEqual(console.read(), [])
+        self.assertEqual(console.read(), ["[05-L4-sys]   → session(s): sess-1", ""])
+
+    def test_a_cut_read_asks_to_read_on(self):
+        with mock.patch.object(follow, "MAX_CHUNK", 8):
+            console = self.console(self.response(b"0123456789\n", 11, False))
+            console.read()
+        self.assertTrue(console.truncated)
+        self.assertTrue(console.more)
+        self.assertEqual(console.start, 8)
 
     def test_an_answer_that_is_not_the_console_is_an_error_not_the_end(self):
         console = self.console(self.response(b"<html>Sign in</html>", None, False))

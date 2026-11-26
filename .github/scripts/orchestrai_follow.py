@@ -33,7 +33,7 @@ Inputs (env): STARTED_BUILD_URL, ORCHESTRAI_PIPELINE_USER/TOKEN (the build's
 console), RUN_ID and ORCHESTRAI_V2_* (the run's test results; without them the
 outcomes are not shown, the rest is), FOLLOW_BATCHES and BATCH_ID (the
 trigger's batches, {batch_id: {"playbooks": [...]}}: which groups the build
-runs).
+runs, not their order).
 """
 
 import base64
@@ -52,14 +52,16 @@ from orchestrai_keys import group_id
 POLL_SECONDS = 30
 HTTP_TIMEOUT = 30
 # One poll reads at most this much new console; a busy build writes far less
-# in POLL_SECONDS, and a job that starts late catches up over a few polls.
+# in POLL_SECONDS, and a job that starts late reads on at once until caught up.
 MAX_CHUNK = 4 << 20
 # The longest a build can run (max_duration) plus the time it takes to wind down.
 WIND_DOWN_SECONDS = 30 * 60
 # How long one read of the test results retries; a failed read is tried again
-# when the next test ends, and once more, for longer, when the build ends.
+# when the next test ends, and once more, for longer, when the build ends. The
+# final read must end before orchestrai_wait_build.sh stops the follower, 180 s
+# after the build has ended.
 RESULTS_RETRY_SECONDS = 60
-FINAL_RESULTS_RETRY_SECONDS = 300
+FINAL_RESULTS_RETRY_SECONDS = 90
 
 TIMESTAMP = re.compile(r"^\[\d{4}-\d\d-\d\dT[\d:.]+Z\]\s?")
 STAGE = re.compile(r"^── (\S.*?) ──")
@@ -84,7 +86,7 @@ class Console:
         self.url = build_url.rstrip("/") + "/logText/progressiveText"
         self.auth = "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode()
         self.opener = urllib.request.build_opener(trigger._NoRedirect)
-        self.start, self.more, self.partial = 0, True, ""
+        self.start, self.more, self.partial, self.truncated = 0, True, b"", False
 
     def read(self):
         """New complete lines since the last read; sets self.more. Raises
@@ -100,15 +102,18 @@ class Console:
         if not size.isdigit():
             raise ValueError("the answer is not a Jenkins console (no X-Text-Size)")
         self.more = more.lower() == "true"
-        if len(raw) >= MAX_CHUNK:  # a short read: the rest comes on the next poll
+        self.truncated = len(raw) >= MAX_CHUNK
+        if self.truncated:  # the rest comes on the next read, at once
             self.start += len(raw)
             self.more = True
         else:
             self.start = int(size)
-        lines = (self.partial + raw.decode("utf-8", errors="replace")).split("\n")
+        # Split bytes, not text: a character cut at a read's end ("→", "──")
+        # is decoded whole, with the rest of its line, on the next read.
+        lines = (self.partial + raw).split(b"\n")
         # An unfinished last line waits for the rest, unless nothing more comes.
-        self.partial = lines.pop() if self.more else ""
-        return [TIMESTAMP.sub("", line.rstrip("\r")) for line in lines]
+        self.partial = lines.pop() if self.more else b""
+        return [TIMESTAMP.sub("", line.decode("utf-8", errors="replace").rstrip("\r")) for line in lines]
 
 
 def pair_sessions(sessions, groups, submitted, pairs):
@@ -125,16 +130,15 @@ def pair_sessions(sessions, groups, submitted, pairs):
     Proven: a session of a pair (an anchor); the surviving groups between two
     anchors when they exactly fill the sessions between them; and, when one
     group's line was lost and one session is left, that one. Nothing relies on
-    the order of the batch's groups."""
+    the order of the batch's groups. Without groups only the anchors are
+    proven: a group whose submit failed (no session) could shift the rest."""
     n = len(sessions)
-    if groups:
-        known = set(groups)
+    known = set(groups or ())
+    if known:
         if len(known) != n:
-            return {}  # not this build's groups (or a level with other tests)
+            return {}  # not this build's groups, or a group whose submit failed
         submitted = [g for g in submitted if g in known]
         pairs = [(g, s) for g, s in pairs if g in known]
-    else:
-        known = None
     if len(set(submitted)) != len(submitted) or len(submitted) > n:
         return {}
     where = {s: i for i, s in enumerate(sessions)}
@@ -149,6 +153,8 @@ def pair_sessions(sessions, groups, submitted, pairs):
     if positions != sorted(positions) or len(set(positions)) != len(positions):
         return {}
     mapping = {sessions[anchors[g]]: g for g in anchored}
+    if not known:
+        return mapping
     lost = n - len(submitted)
     open_gaps = []
     bounds = [(-1, -1)] + [(anchors[g], rank[g]) for g in anchored] + [(n, len(submitted))]
@@ -162,7 +168,7 @@ def pair_sessions(sessions, groups, submitted, pairs):
             open_gaps.append((slots, between))
     if sum(len(slots) - len(between) for slots, between in open_gaps) != lost:
         return {}
-    if known is not None and lost == 1 and len(open_gaps) == 1 and len(open_gaps[0][0]) == 1:
+    if lost == 1 and len(open_gaps) == 1 and len(open_gaps[0][0]) == 1:
         (missing,) = known - set(submitted)
         mapping[sessions[open_gaps[0][0][0]]] = missing
     return mapping
@@ -226,6 +232,10 @@ class Follower:
         try:
             answer = trigger.api(self.cp, "GET", f"/runs/{urllib.parse.quote(self.run_id, safe='')}/tests",
                                  retry_seconds=retry_seconds)
+        except trigger.Refused as exc:
+            say(f"test results not readable ({exc}); the next step shows every outcome")
+            self.results_ok = False  # a definite refusal: asking again changes nothing
+            return
         except ValueError as exc:
             if not self.results_failing:
                 say(f"test results unavailable for now ({exc}); trying again when the next test ends")
@@ -234,8 +244,9 @@ class Follower:
         self.results_failing = False
         fresh = []
         for test in answer.get("tests") or []:
-            key = test.get("execution_id") or json.dumps(
-                [test.get(k) for k in ("suite", "name", "attempt", "outcome", "recorded_at")])
+            # A row whose outcome or attempt changes is printed again.
+            key = json.dumps([test.get(k) for k in
+                              ("execution_id", "suite", "name", "attempt", "outcome", "recorded_at")])
             if key not in self.reported:
                 self.reported.add(key)
                 fresh.append(test)
@@ -303,7 +314,8 @@ def main():
             if follower.total:
                 say(f"build finished: {follower.done}/{follower.total} done")
             return
-        time.sleep(POLL_SECONDS)
+        if not follower.console.truncated:  # catching up: read on at once
+            time.sleep(POLL_SECONDS)
 
 
 if __name__ == "__main__":

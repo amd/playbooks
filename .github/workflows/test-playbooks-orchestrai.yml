@@ -419,7 +419,7 @@ jobs:
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
           # The live progress follower (orchestrai_follow.py) also reads the run,
-          # and the batch's playbooks in plan order to name its sessions.
+          # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           FOLLOW_BATCHES: ${{ needs.detect-and-trigger.outputs.batches }}
         run: bash .github/scripts/orchestrai_wait_build.sh
@@ -572,7 +572,7 @@ jobs:
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
           # The live progress follower (orchestrai_follow.py) also reads the run,
-          # and the batch's playbooks in plan order to name its sessions.
+          # and which playbooks the batch runs, to name its sessions.
           RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           FOLLOW_BATCHES: ${{ steps.pick.outputs.batches_json }}
         run: bash .github/scripts/orchestrai_wait_build.sh
