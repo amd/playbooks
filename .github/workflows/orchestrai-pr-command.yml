@@ -266,6 +266,12 @@ jobs:
     timeout-minutes: 960
     # A batch with no required playbook shows its failures without failing the run.
     continue-on-error: ${{ toJson(matrix.required) == '[]' }}
+    # The Control Plane CI API, for every step that reads the batch's run.
+    env:
+      ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+      ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+      ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+      ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
     strategy:
       fail-fast: false
       # !orc tests every declared device (as many batches as the nightly), and
@@ -289,10 +295,6 @@ jobs:
         env:
           RUN_ID: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
           BATCH_ID: ${{ matrix.batch_id }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --await-build
 
       - name: Wait for OrchestrAI pipeline build
@@ -307,10 +309,6 @@ jobs:
           # and the batch's playbooks in plan order to name its sessions.
           RUN_ID: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
           FOLLOW_BATCHES: ${{ needs.command.outputs.batches }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # Each playbook's verdict: PASSED, FAILED, or NOT_RUN/INTERRUPTED
@@ -337,10 +335,6 @@ jobs:
         timeout-minutes: 5
         env:
           RUN_IDS: ${{ fromJson(needs.command.outputs.run_ids || '{}')[matrix.batch_id] }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
       - name: Batch result

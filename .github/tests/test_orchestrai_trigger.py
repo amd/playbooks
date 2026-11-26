@@ -13,7 +13,6 @@ Usage:
 
 import contextlib
 import io
-import itertools
 import json
 import os
 import re
@@ -512,9 +511,11 @@ class PerBatchWait(unittest.TestCase):
             # The build waits start the live follower, which reads the run too.
             waits = [s for s in batches["steps"] if "orchestrai_wait_build.sh" in (s.get("run") or "")]
             self.assertTrue(waits, name)
+            for key in ("ORCHESTRAI_V2_CI_API_URL", "ORCHESTRAI_V2_OIDC_AUDIENCE",
+                        "ORCHESTRAI_V2_PORTAL_URL", "ORCHESTRAI_V2_WORKSPACE"):
+                self.assertEqual(batches["env"][key], f"${{{{ vars.{key} }}}}", name)
             for step in waits:
-                for key in ("RUN_ID", "ORCHESTRAI_V2_CI_API_URL", "ORCHESTRAI_V2_OIDC_AUDIENCE",
-                            "ORCHESTRAI_V2_WORKSPACE", "STARTED_BUILD_URL", "ORCHESTRAI_PIPELINE_TOKEN"):
+                for key in ("RUN_ID", "FOLLOW_BATCHES", "STARTED_BUILD_URL", "ORCHESTRAI_PIPELINE_TOKEN"):
                     self.assertIn(key, step["env"], f"{name}: {step['name']}")
                 self.assertEqual(batches["permissions"]["id-token"], "write", name)
         with open(os.path.join(GITHUB_DIR, "workflows", "test-playbooks-orchestrai.yml")) as f:
