@@ -66,29 +66,30 @@ def cleanup_gpu_memory():
 
 
 def load_train_split(repo_id):
-    """load_dataset(repo_id, split="train"), read from the local Hugging Face cache when it is there.
+    """load_dataset(repo_id, split="train"); offline, read the dataset's file from the Hugging Face cache.
 
-    load_dataset(repo_id) asks the Hugging Face API for the dataset's revision even
-    when its files are cached, and unauthenticated API calls can be rate-limited
-    (HTTP 429). So when the cache holds a snapshot of the dataset, load its .jsonl
-    files directly. Otherwise load_dataset(repo_id) runs as usual: it downloads the
-    dataset, or with HF_DATASETS_OFFLINE=1 fails without calling the Hub.
+    Even with HF_DATASETS_OFFLINE=1, load_dataset(repo_id) reads only the datasets
+    library's own prepared cache, not files already in the Hugging Face hub cache
+    (as CI primes them with snapshot_download). So offline, when the cached snapshot
+    holds exactly one .jsonl file, load that file. Online, or with any other cache
+    layout, load_dataset(repo_id) runs as usual.
     """
-    from pathlib import Path
-    from huggingface_hub import snapshot_download
-    from huggingface_hub.errors import LocalEntryNotFoundError
+    offline = any(os.environ.get(v, "").upper() in ("1", "ON", "YES", "TRUE")
+                  for v in ("HF_DATASETS_OFFLINE", "HF_HUB_OFFLINE"))
+    if offline:
+        from pathlib import Path
+        from huggingface_hub import snapshot_download
+        from huggingface_hub.errors import LocalEntryNotFoundError
 
-    try:
-        snapshot = Path(snapshot_download(repo_id, repo_type="dataset", local_files_only=True))
-    except LocalEntryNotFoundError:
-        print(f"{repo_id} is not in the local Hugging Face cache; loading it with load_dataset")
-        return load_dataset(repo_id, split="train")
-    files = sorted(str(p) for p in snapshot.glob("*.jsonl"))
-    if not files:
-        print(f"Cached snapshot {snapshot} has no .jsonl file; loading {repo_id} with load_dataset")
-        return load_dataset(repo_id, split="train")
-    print(f"Loading {repo_id} at revision {snapshot.name} from the local Hugging Face cache")
-    return load_dataset("json", data_files=files, split="train")
+        try:
+            snapshot = Path(snapshot_download(repo_id, repo_type="dataset", local_files_only=True))
+        except LocalEntryNotFoundError:
+            snapshot = None
+        files = sorted(snapshot.glob("*.jsonl")) if snapshot else []
+        if len(files) == 1:
+            print(f"Offline: loading {repo_id} at revision {snapshot.name} from the Hugging Face cache")
+            return load_dataset("json", data_files=str(files[0]), split="train")
+    return load_dataset(repo_id, split="train")
 
 
 # -----------------------
