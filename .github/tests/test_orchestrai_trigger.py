@@ -121,6 +121,11 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertEqual(device("stx"), {("stx", ("t",))})
         self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
 
+    def test_grgh_asks_for_its_own_image_on_each_platform(self):
+        images = load_config()["device_os_images"]["grgh"]
+        self.assertEqual(images, {"linux": "custom/debian-13-rex-a16-afo-v2-custom-test",
+                                  "windows": "windows/windows-11-26300-9457-halo-zenith-v4-custom-test"})
+
     def test_a_device_image_reaches_only_that_device_and_platform(self):
         cfg = dict(load_config(), device_os_images={"grgh": {"windows": "windows/custom-x"}})
         def sessions(arch, platform):
