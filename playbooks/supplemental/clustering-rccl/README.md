@@ -163,7 +163,8 @@ On Machine 1, launch the vLLM server. This will automatically download the model
 ```bash
 vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --port 7000 \
-  --host 0.0.0.0 \
+  --host <MACHINE_1_IP> \
+  --api-key <API_KEY> \
   --max-model-len 32768 \
   --gpu-memory-utilization 0.9 \
   --dtype float16 \
@@ -174,12 +175,18 @@ vllm serve Qwen/Qwen3.5-397B-A17B-GPTQ-Int4 \
   --reasoning-parser qwen3
 ```
 
+> **Note**: Replace the placeholders in the command above:
+>
+> - `<MACHINE_1_IP>`: Replace with the IP address of Machine 1 from [Step 1: Start the Ray Head Node](#step-1-start-the-ray-head-node-machine-1)
+> - `<API_KEY>`: a secret key of your choice (e.g., `Secret1234`). Clients must send this key to use the API, so keep it private
+
 #### Parameter Reference
 
 | Flag | Purpose |
 |------|---------|
 | `--port` | Port to serve the HTTP API on |
-| `--host` | IP address to bind the server to (`0.0.0.0` for all interfaces) |
+| `--host` | IP address to bind the server to (Machine 1's cluster IP, so the API is only reachable on the cluster network) |
+| `--api-key` | Secret key clients must provide to access the API |
 | `--max-model-len` | Maximum context length in tokens |
 | `--gpu-memory-utilization` | Fraction of GPU memory to allocate (0.0–1.0) |
 | `--dtype` | Data type for model weights |
@@ -201,10 +208,10 @@ To connect Open WebUI to your vLLM endpoint:
 2. Click the **+** on **Manage OpenAI API Connections**
 3. Set the **Connection Type** to **External**
 4. Set the **URL** to `http://<MACHINE_1_IP>:7000/v1`
-5. Under **Auth**, select **None** from the dropdown
+5. Under **Auth**, select **Bearer** and enter the same `<API_KEY>` you set in `--api-key`
 6. Leave **Model IDs** empty to automatically discover all models from the endpoint
 
-> **Finding `<MACHINE_1_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address. If accessing Open WebUI from Machine 1 itself, you can use `http://localhost:7000/v1`.
+> **Note**: Replace `<MACHINE_1_IP>` with the IP address of Machine 1 from [Step 1: Start the Ray Head Node](#step-1-start-the-ray-head-node-machine-1).
 
 ![Open WebUI connection settings for the vLLM endpoint](assets/openwebui-connection.png)
 

@@ -359,21 +359,25 @@ At load time, llama.cpp shards the model across both nodes. Once loaded, inferen
 On Machine 2, start the RPC server to expose its GPU resources to the controller:
 <!-- @os:linux -->
 ```bash
-./ggml-rpc-server -p 50053 -c --host 0.0.0.0
+./ggml-rpc-server -p 50053 -c --host <RPC_WORKER_IP>
 ```
+
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
 <!-- @os:end -->
 
 <!-- @os:windows -->
 ```powershell
-.\ggml-rpc-server.exe -p 50053 -c --host 0.0.0.0
+.\ggml-rpc-server.exe -p 50053 -c --host <RPC_WORKER_IP>
 ```
+
+> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
 <!-- @os:end -->
 
 | Flag | Purpose |
 |------|---------|
 | `-p` | Port to broadcast the RPC server on |
 | `-c` | Enables a local cache for large tensors, avoiding repeated network transfers during model loading |
-| `--host` | IP address to bind the RPC server to (`0.0.0.0` for all interfaces) |
+| `--host` | IP address to bind the RPC server to (Machine 2's cluster IP) |
 
 For more options, refer to the [llama.cpp RPC documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
@@ -396,7 +400,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
+> **Note**: Replace `<RPC_WORKER_IP>` with the IP address of Machine 2 from [Step 1: Start the RPC Server](#step-1-start-the-rpc-server-machine-2).
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -412,7 +416,7 @@ With the RPC server running on Machine 2, launch inference from Machine 1 using 
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
+> **Note**: Replace `<RPC_WORKER_IP>` with the IP address of Machine 2 from [Step 1: Start the RPC Server](#step-1-start-the-rpc-server-machine-2).
 
 <!-- @os:end -->
 
@@ -432,12 +436,17 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -fa on \
   -ngl 999 \
   -lm none \
-  --host 0.0.0.0 \
+  --host <HOST_IP> \
   --port 8081 \
+  --api-key <API_KEY> \
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `hostname -I | awk '{print $1}'` to find its local IP address.
+> **Note**: Replace the placeholders in the command above:
+>
+> - `<HOST_IP>`: Run `hostname -I | awk '{print $1}'` on Machine 1 to find its IP address
+> - `<RPC_WORKER_IP>`: Replace with the IP address of Machine 2 from [Step 1: Start the RPC Server](#step-1-start-the-rpc-server-machine-2)
+> - `<API_KEY>`: a secret key of your choice (e.g., `Secret1234`). Clients must send this key to use the API, so keep it private
 <!-- @os:end -->
 
 <!-- @os:windows -->
@@ -450,25 +459,22 @@ Once running, `llama-cli` displays model loading progress and enters an interact
   -fa on `
   -ngl 999 `
   -lm none `
-  --host 0.0.0.0 `
+  --host <HOST_IP> `
   --port 8081 `
+  --api-key <API_KEY> `
   --rpc <RPC_WORKER_IP>:50053
 ```
 
-> **Finding `<RPC_WORKER_IP>`**: On Machine 2, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
+> **Note**: Replace the placeholders in the command above:
+>
+> - `<HOST_IP>`: Run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) on Machine 1 to find its IP address
+> - `<RPC_WORKER_IP>`: Replace with the IP address of Machine 2 from [Step 1: Start the RPC Server](#step-1-start-the-rpc-server-machine-2)
+> - `<API_KEY>`: a secret key of your choice (e.g., `Secret1234`). Clients must send this key to use the API, so keep it private
 <!-- @os:end -->
 
-Once started, open `http://<HOST_IP>:8081` in your browser to access the built-in web UI. This provides a browser-based chat interface for interacting with the model:
+Once started, open `http://<HOST_IP>:8081` in your browser to access the built-in web UI and enter your API key in the web UI settings when prompted. This provides a browser-based chat interface for interacting with the model:
 
 ![llama-server web UI running GLM 4.7 across two nodes](assets/llama-server-example.png)
-
-<!-- @os:linux -->
-> **Finding `<HOST_IP>`**: On Machine 1, run `hostname -I | awk '{print $1}'` to find its local IP address.
-<!-- @os:end -->
-
-<!-- @os:windows -->
-> **Finding `<HOST_IP>`**: On Machine 1, run `ipconfig | findstr /C:"IPv4"` in Terminal (Powershell) to find its local IP address.
-<!-- @os:end -->
 
 #### Parameter Reference
 
@@ -479,14 +485,15 @@ Once started, open `http://<HOST_IP>:8081` in your browser to access the built-i
 | `-fa on` | Enables rocWMMA Flash Attention for improved performance on AMD GPUs |
 | `-ngl 999` | Offloads all model layers to the GPU |
 | `-lm none` | Sets the model load mode to `none`, disabling memory-mapping to reduce load times when model size exceeds system RAM but fits in VRAM |
-| `--host` | IP to bind `llama-server` to (`llama-server` only) |
+| `--host` | IP to bind `llama-server` to (Machine 1's cluster IP) (`llama-server` only) |
 | `--port` | Port to serve the HTTP API on (`llama-server` only) |
+| `--api-key` | Secret key clients must provide to access the API (`llama-server` only) |
 | `--rpc` | Comma-separated list of RPC worker endpoints (`IP:port`) |
 
 For full parameter usage, refer to the [llama-cli documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/main/README.md) and [llama-server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md).
 
 ## Next Steps
 
-- **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081` with any placeholder API key (e.g., `none`) to connect to your cluster
+- **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081/v1` using the API key you set in `--api-key` to connect to your cluster
 - **Explore other models**: Browse quantized GGUFs on [Hugging Face](https://huggingface.co/models?search=gguf) to find models that fit within your cluster's combined GPU memory
 - **Scale to four nodes**: Add two more Ryzen AI Halo systems as additional RPC workers to access models at the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <IP1>:50053,<IP2>:50053,<IP3>:50053`)
