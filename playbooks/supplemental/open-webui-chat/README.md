@@ -729,19 +729,32 @@ function Get-SafeLogTail([string]$path, [int]$count) {
   return Format-SafeLines @(Get-Content -LiteralPath $path -Encoding UTF8 -Tail $count -ErrorAction SilentlyContinue)
 }
 
-# The process and every process it started since (open-webui.exe runs python.exe)
+# Every process the server started since $since (open-webui.exe runs python.exe), each with its
+# start time so that a PID Windows later gives to an unrelated process is not mistaken for it.
+# The server process itself is not listed: $p holds its handle, so its PID cannot be reused.
 function Get-ProcessTree([int]$rootId, [datetime]$since) {
   $all = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
   $ids = New-Object System.Collections.Generic.List[int]
   $ids.Add($rootId)
+  $tree = @()
   for ($k = 0; $k -lt $ids.Count; $k++) {
     foreach ($c in $all) {
       if ($c.ParentProcessId -eq $ids[$k] -and -not $ids.Contains([int]$c.ProcessId) -and $c.CreationDate -ge $since.AddSeconds(-2)) {
         $ids.Add([int]$c.ProcessId)
+        $tree += [pscustomobject]@{ Id = [int]$c.ProcessId; StartTime = $c.CreationDate }
       }
     }
   }
-  return $ids
+  return $tree
+}
+
+# The processes of $tree that still run: same PID and same start time
+function Get-LiveProcesses($tree) {
+  $now = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
+  return @($tree | Where-Object {
+    $t = $_
+    @($now | Where-Object { [int]$_.ProcessId -eq $t.Id -and $_.CreationDate -eq $t.StartTime }).Count -gt 0
+  })
 }
 
 $listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -751,7 +764,16 @@ if ($listener) {
 }
 
 $py = Join-Path $venv "Scripts\python.exe"
-$version = & $py -c "import importlib.metadata as m; print(m.version('open-webui'))"
+# Informational only: a failing probe (or Python writing to stderr) must not stop the test
+$eap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+try {
+  $versionOut = @(& $py -c "import importlib.metadata as m; print(m.version('open-webui'))" 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $versionOut.Count) { $version = ([string]$versionOut[-1]).Trim() }
+  else { $version = "(version unknown: probe exit code $LASTEXITCODE)" }
+}
+catch { $version = "(version unknown: $($_.Exception.Message))" }
+finally { $ErrorActionPreference = $eap }
 Write-Host "open-webui $version; python: $py; server: $ow serve --port $port; working directory: $work; DATA_DIR: $dataDir"
 
 # Known open-webui 0.13.5 bug (open-webui/open-webui#35075, fixed upstream by #35077, not yet released):
@@ -776,7 +798,8 @@ $started = Get-Date
 $p = $null
 $ok = $false
 $failure = $null
-$exitCode = "n/a (still running, stopped by this test)"
+$exitCode = $null
+$stoppedByTest = $false
 $probes = New-Object System.Collections.Generic.List[string]
 try {
   $p = Start-Process -FilePath $ow -ArgumentList "serve --port $port" -WorkingDirectory $work -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
@@ -812,15 +835,18 @@ catch {
 }
 finally {
   if ($p) {
-    $tree = Get-ProcessTree $p.Id $started
+    if ($p.HasExited) { if ($null -eq $exitCode) { $exitCode = $p.ExitCode } } else { $stoppedByTest = $true }
+    $tree = @(Get-ProcessTree $p.Id $started)
     $eap = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     & taskkill.exe /F /T /PID $p.Id *> $null
-    foreach ($id in $tree) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
+    Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+    foreach ($c in (Get-LiveProcesses $tree)) { Stop-Process -Id $c.Id -Force -ErrorAction SilentlyContinue }
     $ErrorActionPreference = $eap
     $left = @()
     for ($w = 0; $w -lt 20; $w++) {
-      $left = @($tree | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
+      $left = @(Get-LiveProcesses $tree | ForEach-Object { $_.Id })
+      if (-not $p.HasExited) { $left = @($p.Id) + $left }
       if ($left.Count -eq 0) { break }
       Start-Sleep -Milliseconds 500
     }
@@ -829,18 +855,22 @@ finally {
       if ($failure) { $failure += "; $msg" } else { $failure = $msg }
     }
   }
-  if ($createdTmp) {
-    Remove-Item -LiteralPath $driveTmp -Recurse -Force -ErrorAction SilentlyContinue
-  } elseif (Test-Path $driveTmp) {
+  # Remove only what this run created: its open-webui-* folders, then <drive>:\tmp if the test made it and it is empty
+  if (Test-Path -LiteralPath $driveTmp) {
     Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue |
       Where-Object { $tmpBefore -notcontains $_.FullName -and $_.CreationTime -ge $started.AddSeconds(-2) } |
       Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    if ($createdTmp) {
+      try { [IO.Directory]::Delete($driveTmp, $false) }  # fails, and keeps the folder, when anything else is in it
+      catch { Write-Host "Kept $driveTmp, which this test created: something else wrote to it during the run" }
+    }
   }
 }
 
 $elapsed = [int]((Get-Date) - $started).TotalSeconds
 if ($failure) {
-  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitCode)"
+  $exitText = if ($null -ne $exitCode) { "$exitCode" } elseif ($stoppedByTest) { "n/a (still running, stopped by this test)" } else { "n/a (not started)" }
+  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitText)"
   Write-Host "Health probes (changes only):"
   if ($probes.Count) { Write-Host ($probes -join "`n") } else { Write-Host "  (none)" }
   $errorLines = @(Select-String -LiteralPath $logErr, $logOut -Pattern '(Error|Exception)\b' -ErrorAction SilentlyContinue | Select-Object -Last 5 | ForEach-Object { $_.Line })
