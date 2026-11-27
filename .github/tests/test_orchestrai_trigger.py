@@ -112,14 +112,26 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertNotIn("result_publishers", fake.calls[1][3]["plan_document"]["document"]["run_settings"])
 
     def test_a_device_can_run_its_playbooks_as_another(self):
-        cfg = dict(load_config(), device_runs_as={"grgh": "halo"})
+        cfg = dict(load_config(), device_runs_as={"halo_box": "halo"})
         def device(arch):
             plan = trigger.make_plan(dict(BATCH, arch=arch, tags=["t"]), "refs/heads/main", cfg, 1,
                                      "https://github.com/amd/playbooks", "a" * 40, "https://index.example")
             return {(g["variables"]["PLAYBOOK_DEVICE"], tuple(g["maas_tags"])) for g in plan["groups"]}
-        self.assertEqual(device("grgh"), {("halo", ("t",))})  # machines still chosen by grgh's tags
+        self.assertEqual(device("halo_box"), {("halo", ("t",))})  # machines still chosen by halo_box's tags
         self.assertEqual(device("stx"), {("stx", ("t",))})
-        self.assertEqual(load_config()["device_runs_as"]["grgh"], "halo")
+        self.assertEqual(load_config()["device_runs_as"]["halo_box"], "halo")
+        self.assertNotIn("grgh", load_config()["device_runs_as"])  # runs as itself
+
+    def test_every_configured_device_runs_as_a_device_the_runner_accepts(self):
+        # run_playbook_tests.py exits 2 on a device outside VALID_DEVICES (box SKUs),
+        # before any test runs: zenith-getting-started failed that way on halo_box.
+        from run_playbook_tests import VALID_DEVICES
+        cfg = load_config()
+        runs_as = cfg.get("device_runs_as") or {}
+        devices = set(cfg["device_families"]) | set(cfg["device_to_gfx"])
+        self.assertEqual({d for d in devices if runs_as.get(d, d) not in VALID_DEVICES}, set())
+        # One hop only: a target that is itself remapped is never followed.
+        self.assertEqual(set(runs_as.values()) & set(runs_as), set())
 
     def test_grgh_asks_for_its_own_image_on_each_platform(self):
         images = load_config()["device_os_images"]["grgh"]

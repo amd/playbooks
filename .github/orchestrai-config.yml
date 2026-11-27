@@ -41,8 +41,9 @@ test_path_template: "L4-sys/playbooks/{platform}/sys_func-playbook_runner"
 # repo variable as a JSON map, e.g.:
 #   {"halo":["<tag>"],"stx":["<tag>"],"rx7900xt":["<tag>"]}
 # Every device a playbook.json declares must appear in that map, or the matrix
-# builder skips it with a warning. Keep the device set in sync with the native
-# runner's VALID_DEVICES in .github/scripts/run_playbook_tests.py.
+# builder skips it with a warning. A device outside the runner's VALID_DEVICES
+# (.github/scripts/run_playbook_tests.py), such as a box SKU, needs a
+# device_runs_as entry below.
 device_to_tags: {}
 
 # Device -> gfx target. The TheRock tarball is multi-arch, so this is only used
@@ -55,7 +56,7 @@ device_to_gfx:
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
-  w7900:    "gfx1100"
+  w7900:    "gfx110X"   # Navi 31, like rx7900xt
   rx9070xt: "gfx120X"
   r9700:    "gfx120X"
   # TODO: gfx targets for unreleased SKUs unknown until hardware is available.
@@ -92,7 +93,9 @@ device_families:
 # missing from its family's list comes after the listed ones; a family with no
 # list keeps all its devices. The nightly, manual runs and `!orc` (every device
 # the changed playbooks declare) are unchanged. Ordered by how many machines
-# OrchestrAI has (halo 85, rx9070xt 76, stx 35, rx7900xt 23, r9700 7).
+# OrchestrAI has in Markham (halo 76, rx9070xt 60, stx 31, rx7900xt 5,
+# r9700 5). w7900 (9) stays last: it is a 48 GB workstation card, so a PR
+# checks the consumer card a playbook names before it.
 pr_devices:
   ryzen_apu: [halo, stx, krk, grgh, halo_box]
   radeon: [rx9070xt, rx7900xt, r9700, w7900]
@@ -196,6 +199,7 @@ device_site_ids:
   halo_box: *markham
   stx:      *markham
   rx7900xt: *markham
+  w7900:    *markham
   rx9070xt: *markham
   r9700:    *markham
   grgh:     *markham
@@ -216,11 +220,21 @@ device_names:
 # Device -> the device its playbooks run as. Machines are still chosen by the
 # device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
 # README @device blocks, @var values and the test library's per-device
-# dependencies treat it exactly like that one. For a device no README names yet
-# that shares another's silicon: grgh is gfx1151 like halo.
+# dependencies treat it exactly like that one. It does not mean the two are the
+# same card. Box SKUs (halo_box, grgh_box, mdsh_box) are display-only names that
+# run_playbook_tests.py rejects (it exits 2 before any test), so they run as the
+# device of their silicon. Their README @device blocks are then not tested: a
+# box runs its device's blocks, which install everything on the stock CI image.
+# grgh (Gorgon Halo) is not here: it runs as itself. READMEs name it next to
+# halo, and so do the test library's per-playbook dependency lists
+# (SW-Infra-EMU/ucicd-test-library#7297), so it gets halo's models.
+# w7900 (PRO W7900, 48 GB) is not here: it runs as itself. It shares Navi 31
+# with rx7900xt (20 GB), so a README that wants the same steps on both names
+# both: <!-- @device:rx7900xt,w7900 -->.
 device_runs_as:
-  grgh: halo
-  w7900: rx7900xt
+  halo_box: halo
+  grgh_box: grgh
+  mdsh_box: mdsh
 
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
