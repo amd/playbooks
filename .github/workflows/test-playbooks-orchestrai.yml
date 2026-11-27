@@ -6,8 +6,9 @@
 #
 # Runs each playbook on real AMD hardware through the OrchestrAI Control Plane.
 # Detect & Trigger starts one run per hardware batch with a GitHub OIDC token;
-# Wait for OrchestrAI waits for all of them on one runner, then each Test job
-# reads its batch's pipeline build and reports each playbook's result. Settings and access rules: .github/orchestrai-config.yml.
+# Each Test job then waits for its own batch's run, shows its progress live in
+# its log (orchestrai_follow.py), and reports each playbook's result from the
+# batch's pipeline build. Settings and access rules: .github/orchestrai-config.yml.
 #
 # - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
 #   at the PR's head commit, on one device per family (APU, Radeon) and OS
@@ -24,12 +25,15 @@
 #   ORCHESTRAI_V2_PORTAL_URL, ORCHESTRAI_V2_WORKSPACE, and for ReportPortal
 #   reporting ORCHESTRAI_V2_RP_CREDENTIAL / ORCHESTRAI_V2_RP_PROJECT.
 #   ORCHESTRAI_WAIT_RUNNER: a self-hosted runner label that reaches OrchestrAI.
-#   Wait for OrchestrAI waits for every batch's machines and build (up to 16 h)
-#   and a Test job for one retry of its batch; GitHub-hosted runners stop a
-#   job at 6 h.
+#   Each Test job waits there for its batch's machines and build, and one retry
+#   (up to 24 h); GitHub-hosted runners stop a job at 6 h.
 # Optional repo variables: ORCHESTRAI_REPORTING (reportportal|api, for runs
 #                          without inputs; default reportportal)
 #                          ORCHESTRAI_CONTROL_RUNNER (default ubuntu-latest)
+#                          ORCHESTRAI_MAX_PARALLEL_BATCHES (default 8): how many
+#                          Test jobs of a scheduled, manual or !orc run hold a
+#                          wait runner at once (each run on its own); a pull
+#                          request's run may use up to 16
 # Required for Linux Radeon batches: ORCHESTRAI_LINUX_DRIVER_SOURCE points to
 # the approved amdgpu-install package held in repository configuration.
 # Required for ROCm Python dependencies: ORCHESTRAI_ROCM_MULTI_ARCH_INDEX_URL
@@ -351,44 +355,14 @@ jobs:
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
 
-  # The wait runner pool (the only one that reaches OrchestrAI) runs a few jobs
-  # at once. A Test job per batch waiting there for its machine held a slot each
-  # for hours, and queued every other run behind them: a pull request behind the
-  # nightly. This one job waits for all of the run's batches, so the run holds
-  # one slot; the Test jobs then start with their builds finished and take
-  # seconds. It never fails the run: a Test job still waits for its own batch.
-  await-runs:
-    name: Wait for OrchestrAI
-    needs: detect-and-trigger
-    if: needs.detect-and-trigger.outputs.has_entries == 'true' && needs.detect-and-trigger.outputs.run_ids != ''
-    runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
-    permissions:
-      contents: read
-      id-token: write  # GitHub OIDC token: read the runs' status
-    # acquire_timeout 360 + max_duration 480 + 2 x 30 margin, plus overhead.
-    timeout-minutes: 960
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          persist-credentials: false
-      - name: Wait for every batch's run to end
-        continue-on-error: true
-        env:
-          RUN_ID_MAP: ${{ needs.detect-and-trigger.outputs.run_ids }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
-        run: python3 .github/scripts/orchestrai_trigger.py --await-runs
-
   test-batches:
     # One job per batch (not per playbook), its English and localized playbooks
     # together: it waits on the batch's build once and resolves each playbook
     # from it, so a full run needs ~1 runner per batch instead of one per
-    # playbook. It starts once Wait for OrchestrAI is done (or skipped, or gave
-    # up), so it normally finds its build finished.
+    # playbook. Each job waits for its own batch and prints its progress as it
+    # happens, so every batch shows in the graph and on the PR while it runs.
     name: "${{ matrix.label }} (${{ matrix.count }} playbooks)"
-    needs: [detect-and-trigger, await-runs]
+    needs: detect-and-trigger
     if: >-
       !cancelled() && needs.detect-and-trigger.result == 'success'
       && needs.detect-and-trigger.outputs.has_entries == 'true'
@@ -403,8 +377,23 @@ jobs:
     timeout-minutes: 1440
     # A batch with no required playbook shows its failures without failing the run.
     continue-on-error: ${{ toJson(matrix.required) == '[]' }}
+    # The Control Plane CI API, for every step that reads the batch's run.
+    env:
+      ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
+      ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
+      ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
+      ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
     strategy:
       fail-fast: false
+      # Every job holds a wait runner for its batch's whole run (hours). A pull
+      # request has a few batches (at most 16 at once); the nightly about 30, so
+      # it takes at most ORCHESTRAI_MAX_PARALLEL_BATCHES runners and leaves the
+      # rest of the pool to pull requests. The cap is per workflow run: two
+      # capped runs at once (the nightly and a manual run or !orc) can take the
+      # whole pool. A batch held back is still listed, Queued, and its
+      # OrchestrAI run is not delayed: Detect & Trigger started them all, so the
+      # job finds it further along (or done) when its turn comes.
+      max-parallel: ${{ github.event_name == 'pull_request' && 16 || fromJson(vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8') }}
       matrix:
         include: ${{ fromJson(needs.detect-and-trigger.outputs.batch_matrix) }}
     steps:
@@ -422,10 +411,6 @@ jobs:
         env:
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           BATCH_ID: ${{ matrix.batch_id }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --await-build
 
       - name: Wait for OrchestrAI pipeline build
@@ -436,6 +421,11 @@ jobs:
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+          # The live progress follower (orchestrai_follow.py) also reads the run,
+          # and which playbooks the batch runs, to name its sessions.
+          RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          FOLLOW_PLAYBOOKS: ${{ toJson(matrix.playbooks) }}
+          FOLLOW_MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       # !cancelled(): a cancelled job must reach the cancel step below without
@@ -474,10 +464,6 @@ jobs:
           FIRST_WAIT: ${{ steps.wait.outcome }}
           FIRST_UNCONFIRMED: ${{ contains(fromJson(needs.detect-and-trigger.outputs.unconfirmed || '[]'), matrix.batch_id) }}
           RUN_ID: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
           # 1440 - a whole attempt (900) - time to resolve, upload and report.
           RETRY_START_LIMIT_MINUTES: 480
         run: |
@@ -563,10 +549,6 @@ jobs:
           ORCHESTRAI_V2_RP_CREDENTIAL: ${{ vars.ORCHESTRAI_V2_RP_CREDENTIAL }}
           ORCHESTRAI_V2_WINDOWS_IMAGE: ${{ vars.ORCHESTRAI_V2_WINDOWS_IMAGE }}
           ORCHESTRAI_V2_LINUX_IMAGE: ${{ vars.ORCHESTRAI_V2_LINUX_IMAGE }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: |
           if [ -z "$ORCHESTRAI_PLAYBOOK_SHA" ]; then
             echo "::error::Detect & Trigger recorded no playbook commit; not retrying"; exit 1
@@ -582,10 +564,6 @@ jobs:
         env:
           RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
           BATCH_ID: ${{ matrix.batch_id }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --await-build
 
       - name: Wait for the retry's build
@@ -597,6 +575,11 @@ jobs:
           BATCH_ID: ${{ matrix.batch_id }}
           ORCHESTRAI_PIPELINE_USER: ${{ secrets.ORCHESTRAI_PIPELINE_USER }}
           ORCHESTRAI_PIPELINE_TOKEN: ${{ secrets.ORCHESTRAI_PIPELINE_TOKEN }}
+          # The live progress follower (orchestrai_follow.py) also reads the run,
+          # and which playbooks the batch runs, to name its sessions.
+          RUN_ID: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
+          FOLLOW_PLAYBOOKS: ${{ steps.pick.outputs.playbooks }}
+          FOLLOW_MACHINES_PER_HW_GROUP: ${{ github.event.inputs.machines_per_hw_group || '' }}
         run: bash .github/scripts/orchestrai_wait_build.sh
 
       - name: Resolve the retried playbooks
@@ -642,10 +625,6 @@ jobs:
         timeout-minutes: 5
         env:
           RUN_IDS: ${{ fromJson(needs.detect-and-trigger.outputs.run_ids || '{}')[matrix.batch_id] }} ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
       # So is a retry whose build was not seen to finish (it started no build
@@ -656,10 +635,6 @@ jobs:
         timeout-minutes: 5
         env:
           RUN_IDS: ${{ fromJson(steps.retry_trigger.outputs.run_ids || '{}')[matrix.batch_id] }}
-          ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
-          ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
-          ORCHESTRAI_V2_PORTAL_URL: ${{ vars.ORCHESTRAI_V2_PORTAL_URL }}
-          ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
       - name: Batch result

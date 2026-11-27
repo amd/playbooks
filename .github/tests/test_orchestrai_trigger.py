@@ -13,7 +13,6 @@ Usage:
 
 import contextlib
 import io
-import itertools
 import json
 import os
 import re
@@ -291,6 +290,63 @@ class ControlPlaneApi(unittest.TestCase):
         self.assertEqual(urls, {"x/a": "https://j/job/p/9/"})
         self.assertIn("run b ended error without a build: error=no image", err.getvalue())
 
+    def test_the_wait_says_what_the_run_does_as_it_changes(self):
+        queued = {"run": {"id": "a", "status": "queued", "url": "https://portal/#/runs/a",
+                          "queued_at": "2026-11-26T22:00:00Z"}}
+        # 22 polls queued, 30 s apart: 10.5 min.
+        fake = FakeApi(*[(200, queued)] * 22,
+                       (200, {"run": {"id": "a", "status": "running", "pipeline_url": "https://j/job/p/9"}}))
+        clock = [0.0]
+
+        def sleep(seconds):
+            clock[0] += seconds
+        err = io.StringIO()
+        with mock.patch.object(trigger, "http_json", fake), contextlib.redirect_stderr(err), \
+                mock.patch.object(trigger.time, "monotonic", lambda: clock[0]), \
+                mock.patch.object(trigger.time, "sleep", sleep):
+            trigger.await_builds(self.cp, {"x/a": "a"}, 24 * 3600)
+        lines = [line.strip() for line in err.getvalue().splitlines()]
+        queued_lines = [line for line in lines if "queued" in line]
+        # The first poll, with the link, then again only once 10 min have passed.
+        self.assertEqual(len(queued_lines), 2, lines)
+        self.assertTrue(queued_lines[0].endswith("https://portal/#/runs/a"))
+        self.assertNotIn("https://", queued_lines[1])
+        self.assertIn("x/a: running", lines)
+        self.assertIn("x/a: build https://j/job/p/9/", lines)
+
+
+class RunProgress(unittest.TestCase):
+
+    NOW = trigger.datetime.datetime(2026, 11, 26, 22, 47, tzinfo=trigger.datetime.timezone.utc)
+
+    def test_a_queued_run_counts_its_wait_from_when_it_was_queued(self):
+        # A Test job held back by max-parallel still shows the run's whole wait.
+        run = {"status": "queued", "queued_at": "2026-11-26T21:59:59.123456Z"}
+        self.assertEqual(trigger.run_progress(run, now=self.NOW), "queued (waiting for machines), 47 min so far")
+
+    def test_the_link_is_the_runs_page_from_either_field(self):
+        self.assertEqual(trigger.run_progress({"status": "running", "url": "https://p/a"}, show_link=True),
+                         "running https://p/a")
+        self.assertEqual(trigger.run_progress({"status": "running", "portal_url": "https://p/b"}, show_link=True),
+                         "running https://p/b")
+        self.assertEqual(trigger.run_progress({"status": "running", "url": "https://p/a"}), "running")
+
+    def test_any_fraction_of_a_second_is_read_on_any_python(self):
+        for stamp in ("2026-11-26T21:59:59.12345Z", "2026-11-26T21:59:59.123456789Z", "2026-11-26T21:59:59+00:00"):
+            self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": stamp}, now=self.NOW),
+                             "queued (waiting for machines), 47 min so far", stamp)
+
+    def test_without_a_link_in_the_run_the_portal_page_is_built(self):
+        cp = {"portal_url": "https://portal.example"}
+        self.assertEqual(trigger.run_progress({"id": "r 1", "status": "running"}, show_link=True, cp=cp),
+                         "running https://portal.example/#/runs/r%201?presentation=page")
+
+    def test_an_unreadable_queued_at_is_left_out(self):
+        for stamp in ("soon", "2026-11-26T16:59:59-05:00", "2026-11-26T21:59:59"):
+            self.assertEqual(trigger.run_progress({"status": "queued", "queued_at": stamp}, now=self.NOW),
+                             "queued (waiting for machines)", stamp)
+        self.assertEqual(trigger.run_progress({}), "unknown")
+
 
 class ReportingSwitch(unittest.TestCase):
     """reportportal adds the required ReportPortal publisher; api does not."""
@@ -504,73 +560,42 @@ class AwaitBuild(unittest.TestCase):
                          load_config()["run_settings"]["acquire_timeout"])
 
 
-class AwaitRuns(unittest.TestCase):
-    """--await-runs: one job per workflow run waits for all of its runs, so the
-    Test jobs do not each hold a wait runner slot for hours."""
+class PerBatchWait(unittest.TestCase):
+    """Each Test job waits for its own batch, so every batch shows in the graph
+    while it runs; the runs that are not pull requests are capped so they leave
+    wait runners to pull requests."""
 
-    def setUp(self):
-        patches = [mock.patch.dict(os.environ, CP_ENV, clear=True),
-                   mock.patch.object(trigger.time, "sleep"),
-                   contextlib.redirect_stderr(io.StringIO())]
-        for p in patches:
-            p.__enter__()
-            self.addCleanup(p.__exit__, None, None, None)
-        self.cp = trigger.control_plane()
-
-    def test_waits_until_every_run_has_ended(self):
-        fake = FakeApi((200, {"run": {"status": "running"}}), (200, {"run": {"status": "passed"}}),
-                       (200, {"run": {"status": "failed"}}))
-        with mock.patch.object(trigger, "http_json", fake):
-            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a", "x/b": "b"}, 3600), [])
-        self.assertEqual([c[1].rsplit("/", 1)[1] for c in fake.calls], ["a", "b", "a"])
-
-    def test_an_unreadable_run_is_asked_again(self):
-        fake = FakeApi((404, {"error": {"code": "not_found"}}), (200, {"run": {"status": "cancelled"}}))
-        with mock.patch.object(trigger, "http_json", fake):
-            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a"}, 3600), [])
-
-    def test_gives_up_at_the_deadline_and_names_what_is_left(self):
-        fake = FakeApi(*[(200, {"run": {"status": "queued"}})] * 3)
-        clock = itertools.count(0, 1000)  # every reading of the clock is 1000 s later
-        with mock.patch.object(trigger, "http_json", fake), \
-                mock.patch.object(trigger.time, "monotonic", side_effect=lambda: next(clock)):
-            self.assertEqual(trigger.await_runs(self.cp, {"x/a": "a"}, 3600), ["x/a"])
-        self.assertEqual(len(fake.calls), 2)
-
-    def test_main_waits_as_long_as_a_run_can_last_and_never_fails(self):
-        with mock.patch.dict(os.environ, {"RUN_ID_MAP": json.dumps({"x/a": "a"})}), \
-                mock.patch.object(trigger, "await_runs", return_value=["x/a"]) as wait:
-            trigger.await_runs_main(CONFIG)
-        rs = load_config()["run_settings"]
-        self.assertEqual(wait.call_args.args[2], (rs["acquire_timeout"] + rs["max_duration"]) * 60
-                         + 2 * trigger.BUILD_WAIT_MARGIN)
-        with mock.patch.dict(os.environ, {"RUN_ID_MAP": "{}"}), \
-                mock.patch.object(trigger, "await_runs") as wait:
-            trigger.await_runs_main(CONFIG)
-        wait.assert_not_called()
-        with mock.patch.dict(os.environ, {"RUN_ID_MAP": json.dumps({"x/a": "a"}),
-                                          "ORCHESTRAI_V2_WORKSPACE": ""}):
-            trigger.await_runs_main(CONFIG)  # a warning, not an exception
-
-    def test_test_jobs_start_after_the_one_wait_and_outlast_it(self):
-        rs = load_config()["run_settings"]
-        longest = rs["acquire_timeout"] + rs["max_duration"] + 2 * trigger.BUILD_WAIT_MARGIN / 60
+    def test_test_jobs_start_with_detect_and_wait_for_their_own_batch(self):
         for name, first in (("test-playbooks-orchestrai.yml", "detect-and-trigger"),
                             ("orchestrai-pr-command.yml", "command")):
             with open(os.path.join(GITHUB_DIR, "workflows", name)) as f:
                 jobs = yaml.safe_load(f)["jobs"]
-            wait = jobs["await-runs"]
-            self.assertEqual(wait["needs"], first, name)
-            self.assertEqual(wait["runs-on"], "${{ vars.ORCHESTRAI_WAIT_RUNNER }}", name)
-            self.assertGreaterEqual(wait["timeout-minutes"], longest + 30, name)
-            (step,) = [s for s in wait["steps"] if "run" in s]
-            self.assertIn("--await-runs", step["run"])
-            self.assertTrue(step["continue-on-error"], name)
+            self.assertNotIn("await-runs", jobs, name)
             batches = jobs["test-batches"]
-            self.assertEqual(batches["needs"], [first, "await-runs"], name)
-            # Still runs when the wait was skipped, failed or timed out.
-            self.assertIn("!cancelled()", batches["if"], name)
+            self.assertEqual(batches["needs"], first, name)
             self.assertIn(f"needs.{first}.result == 'success'", batches["if"], name)
+            cap = str(batches["strategy"]["max-parallel"])
+            # 8 of the 16 wait runners by default: the rest stay free for pull requests.
+            self.assertIn("vars.ORCHESTRAI_MAX_PARALLEL_BATCHES || '8'", cap, name)
+            # The build waits start the live follower, which reads the run too.
+            waits = [s for s in batches["steps"] if "orchestrai_wait_build.sh" in (s.get("run") or "")]
+            self.assertTrue(waits, name)
+            for key in ("ORCHESTRAI_V2_CI_API_URL", "ORCHESTRAI_V2_OIDC_AUDIENCE",
+                        "ORCHESTRAI_V2_PORTAL_URL", "ORCHESTRAI_V2_WORKSPACE"):
+                self.assertEqual(batches["env"][key], f"${{{{ vars.{key} }}}}", name)
+            for step in waits:
+                for key in ("RUN_ID", "FOLLOW_PLAYBOOKS", "STARTED_BUILD_URL", "ORCHESTRAI_PIPELINE_TOKEN"):
+                    self.assertIn(key, step["env"], f"{name}: {step['name']}")
+                self.assertEqual(batches["permissions"]["id-token"], "write", name)
+        with open(os.path.join(GITHUB_DIR, "workflows", "test-playbooks-orchestrai.yml")) as f:
+            cap = yaml.safe_load(f)["jobs"]["test-batches"]["strategy"]["max-parallel"]
+        self.assertIn("github.event_name == 'pull_request'", cap)
+
+    def test_the_wait_script_runs_the_follower_and_stops_it(self):
+        with open(os.path.join(GITHUB_DIR, "scripts", "orchestrai_wait_build.sh")) as f:
+            script = f.read()
+        self.assertIn('orchestrai_follow.py" &', script)
+        self.assertIn("FOLLOWER=$(jobs -rp)", script)  # the trap stops it, by job
 
 
 class WorkflowWiring(unittest.TestCase):
@@ -582,7 +607,7 @@ class WorkflowWiring(unittest.TestCase):
 
     def test_jobs_reporting_input_and_oidc_permission(self):
         wf = self.load("test-playbooks-orchestrai.yml")
-        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "await-runs", "test-batches",
+        self.assertEqual(list(wf["jobs"]), ["detect-and-trigger", "test-batches",
                                             "cancel-runs", "playbook-results", "test-gate"])
         reporting = wf["on"]["workflow_dispatch"]["inputs"]["reporting"]
         self.assertEqual((reporting["default"], reporting["options"]), ("api", ["api", "reportportal"]))
@@ -601,9 +626,8 @@ class WorkflowWiring(unittest.TestCase):
                 steps = job.get("steps") or []
                 for i, step in enumerate(steps):
                     run = step.get("run") or ""
-                    # --await-build, --await-runs, --run-status and --cancel only call the Control Plane.
+                    # --await-build, --run-status and --cancel only call the Control Plane.
                     if ("orchestrai_trigger.py" in run and "--await-build" not in run
-                            and "--await-runs" not in run
                             and "--run-status" not in run and "--cancel" not in run):
                         before = " ".join(s.get("run") or "" for s in steps[:i])
                         self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")

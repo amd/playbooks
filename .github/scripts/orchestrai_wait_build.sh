@@ -18,7 +18,14 @@ echo "Waiting for OrchestrAI pipeline build ..."
 # process on a shared/persistent self-hosted runner. mktemp creates the
 # file 0600; printf is a shell builtin, so the token never hits argv.
 NETRC="$(mktemp)"
-trap 'rm -f "$NETRC"' EXIT
+# Live progress (stage, machine, each playbook's outcome) printed while this
+# loop waits; orchestrai_follow.py only prints and never decides anything here.
+# It is this shell's only background job, so `jobs -p` names it while it
+# runs, never a process that has since reused its PID.
+if [ "${ORCHESTRAI_FOLLOW:-1}" != "0" ] && command -v python3 >/dev/null; then
+  python3 "$(dirname "$0")/orchestrai_follow.py" &
+fi
+trap 'rm -f "$NETRC"; FOLLOWER=$(jobs -rp); if [ -n "$FOLLOWER" ]; then kill $FOLLOWER 2>/dev/null || true; fi' EXIT
 NETRC_HOST=$(printf '%s' "$BUILD_URL" | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://##; s#[:/].*$##')
 printf 'machine %s login %s password %s\n' \
   "$NETRC_HOST" "$ORCHESTRAI_PIPELINE_USER" "$ORCHESTRAI_PIPELINE_TOKEN" > "$NETRC"
@@ -44,7 +51,14 @@ while [ "$SECONDS" -lt "$DEADLINE" ]; do
     # The batch result reflects ALL its playbooks; this job's verdict is
     # resolved per-playbook in the next step from summary.json.
     if [ "$building" = "False" ] && [ -n "$result" ]; then
-      echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1; break
+      echo "Batch build finished: $result (per-playbook verdict resolved next)"; finished=1
+      # Up to 8 min for the follower to print the last results (about 7 min at
+      # worst, normally seconds; FINAL_* in orchestrai_follow.py).
+      for _ in $(seq 96); do
+        if [ -z "$(jobs -rp)" ]; then break; fi
+        sleep 5
+      done
+      break
     fi
   else
     fails=$((fails + 1))
