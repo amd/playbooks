@@ -51,6 +51,9 @@ def row(session, outcome="passed", **extra):
 
 TESTS = {"tests": [row("sess-1795656621871974896"), row("sess-1795656621951187895", "error")]}
 
+# The stage in which the pipeline records the run's results.
+REPORT = "[2026-11-26T09:30:26.000Z] ── 06-Report (results) ──\n"
+
 
 class FakeConsole:
     def __init__(self, *chunks):
@@ -81,43 +84,52 @@ class Follower(unittest.TestCase):
                     break
         return f, out.getvalue(), calls
 
-    def test_prints_stage_machine_and_each_playbook_by_its_batch_name(self):
+    def test_prints_stage_machine_outcomes_and_each_playbook_by_its_batch_name(self):
         _, out, calls = self.run_polls(FakeConsole(CONSOLE), [TESTS])
         self.assertIn("stage 02-Plan", out)
         self.assertIn("stage 05-L4-sys (White-Box)", out)
         self.assertIn("machine MNB-UCICD-DT494", out)
-        self.assertIn("0/2 playbooks done", out)
-        # Each count as it moves, then the results it brought.
-        self.assertRegex(out, r"1/2 playbooks done\n.*PASSED\s+comfyui-image-gen\n")
+        self.assertIn("0/2 playbooks done\n", out)
+        # Each test's outcome, live, from the console's own line.
+        self.assertIn("1/2 playbooks done (1 passed)", out)
+        self.assertRegex(out, r"PASSED\s+comfyui-image-gen\n")
         # Its submit line and session line are not adjacent, but it is the one
         # session left after the anchored one: proven.
         self.assertRegex(out, r"ERROR\s+zh-CN/gaia-agents\n")
         self.assertNotIn("matched", out)
         self.assertEqual([c[0] for c in calls], ["/runs/r1/tests"])
 
-    def test_results_are_read_when_a_test_ends_and_each_printed_once(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
+    def test_results_are_read_from_the_report_stage_and_each_printed_once(self):
+        # The pipeline records the results in its report stage: none are asked
+        # for while tests run, then once then, and once more at the build's end.
+        console = FakeConsole(CONSOLE, REPORT, "")
         _, out, calls = self.run_polls(console, [TESTS, TESTS])
-        # Once when the count moved, once more (retrying less) when the build ended.
         self.assertEqual([c[1] for c in calls], [follow.RESULTS_RETRY_SECONDS,
                                                  follow.FINAL_RESULTS_RETRY_SECONDS])
         self.assertEqual(out.count("comfyui-image-gen"), 1)
+        self.assertLess(out.index("1/2 playbooks done"), out.index("stage 06-Report"))
+
+    def test_results_published_again_in_another_shape_are_not_printed_twice(self):
+        # Seen live: after the publish step the same rows came back with
+        # another suite, name and recorded_at.
+        again = {"tests": [dict(t, suite=None, name=t["execution_id"][:-6], recorded_at="2026-11-26T02:18:00Z")
+                           for t in TESTS["tests"]]}
+        _, out, _ = self.run_polls(FakeConsole(CONSOLE, REPORT, ""), [TESTS, again])
+        self.assertEqual(out.count("comfyui-image-gen"), 1)
+        self.assertEqual(out.count("gaia-agents"), 1)
 
     def test_a_job_that_starts_late_reports_what_is_already_done(self):
-        late = CONSOLE.replace("0/2 tests", "1/2 tests").replace("0 done", "1 done")
-        console = FakeConsole(late, "")
+        console = FakeConsole(CONSOLE + REPORT, "")
         f = follow.Follower(console, "r1", {"x": 1}, NAMES)
         out = io.StringIO()
         with mock.patch.object(follow.trigger, "api", return_value=TESTS), contextlib.redirect_stdout(out):
-            f.poll()  # still building, but tests are already done
+            f.poll()  # still building, but already reporting
         self.assertIn("comfyui-image-gen", out.getvalue())
 
     def test_unreadable_results_are_said_once_and_read_again_later(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        # Down when the test ended; asked again on the next poll (catching up
-        # on that test), then not until the build ends.
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "", "")
+        # Down when the report stage began; asked again on the next poll, then
+        # not until the build ends.
+        console = FakeConsole(CONSOLE, REPORT, "", "", "")
         down = ValueError("HTTP 503")
         _, out, calls = self.run_polls(console, [down, TESTS, TESTS])
         self.assertEqual(out.count("test results unavailable"), 1)
@@ -125,38 +137,39 @@ class Follower(unittest.TestCase):
         self.assertEqual(len(calls), 3)
 
     def test_a_refusal_stops_reading_the_results(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
+        console = FakeConsole(CONSOLE, REPORT, "", "")
         refused = follow.trigger.Refused("HTTP 403 forbidden: no results:read")
         _, out, calls = self.run_polls(console, [refused])
         self.assertEqual(len(calls), 1)
         self.assertIn("test results not readable", out)
 
     def test_a_row_that_changes_is_printed_again(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
         failed = {"tests": [row("sess-1795656621871974896", "failed")]}
         passed = {"tests": [row("sess-1795656621871974896", "passed", attempt=2)]}
-        _, out, _ = self.run_polls(console, [failed, passed])
+        _, out, _ = self.run_polls(FakeConsole(CONSOLE, REPORT, ""), [failed, passed])
         self.assertRegex(out, r"FAILED\s+comfyui-image-gen")
         self.assertRegex(out, r"PASSED\s+comfyui-image-gen\s+\(attempt 2")
 
-    def test_a_row_recorded_after_the_count_moves_is_read_on_the_next_poll(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "", "")
-        # The count moved, but the row is not recorded yet; it is on the next poll.
+    def test_rows_recorded_after_the_report_stage_began_are_read_on_the_next_poll(self):
+        console = FakeConsole(CONSOLE, REPORT, "", "", "")
         _, out, calls = self.run_polls(console, [{"tests": []}, TESTS, TESTS])
         self.assertIn("comfyui-image-gen", out)
-        # Not asked again once caught up, until the build ends.
+        # Not asked again once every counted test has its row, until the build ends.
         self.assertEqual(len(calls), 3)
 
     def test_only_a_403_or_401_stops_reading_a_404_is_tried_again(self):
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "")
         missing = follow.trigger.Refused("CI API GET /runs/r1/tests: HTTP 404 not_found: no results yet")
-        _, out, calls = self.run_polls(console, [missing, TESTS])
+        _, out, calls = self.run_polls(FakeConsole(CONSOLE, REPORT, ""), [missing, TESTS])
         self.assertEqual(len(calls), 2)
         self.assertIn("comfyui-image-gen", out)
+
+    def test_outcomes_are_counted_by_kind(self):
+        more = CONSOLE + """\
+[2026-11-26T01:51:16.496Z] [05-L4-sys]   ✗ sys_func-playbook_runner: error [10.5.124.213 MNB-UCICD-DT494]
+[2026-11-26T01:51:25.715Z] [05-L4-sys]   0 active, 2 done (2/2 tests) — 1260s elapsed
+"""
+        _, out, _ = self.run_polls(FakeConsole(more), [TESTS])
+        self.assertIn("2/2 playbooks done (1 passed, 1 error)", out)
 
     def test_a_line_with_two_sessions_names_both_and_stops_gap_filling(self):
         two = CONSOLE.replace("session(s): sess-1795656621871974896",
@@ -257,7 +270,7 @@ class Follower(unittest.TestCase):
     def test_an_unproven_session_shows_by_its_suite(self):
         tests = {"tests": [row("sess-9", "error", attempt=2)]}
         _, out, _ = self.run_polls(FakeConsole(CONSOLE), [tests])
-        self.assertRegex(out, r"ERROR\s+05-L4-sys_sess-9\s+\(attempt 2\)")
+        self.assertRegex(out, r"ERROR\s+session sess-9\s+\(attempt 2\)")
 
     def test_a_garbled_console_names_nothing_it_cannot_prove(self):
         # comfyui's submit line was cut by another writer: one group is lost,

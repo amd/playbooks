@@ -12,21 +12,26 @@ batch's pipeline build. It prints, as they happen:
 
     stage 05-L4-sys (System)
     machine MNB-UCICD-DT494
-    1/27 playbooks done
+    1/27 playbooks done (1 passed)
+    3/27 playbooks done (2 passed, 1 error)
+    ...
+    stage 06-Report (results)
     PASSED         comfyui-image-gen
-    3/27 playbooks done
     ERROR          zh-CN/hermes-lemonade-server
 
 It reads the build's console as it grows (Jenkins progressiveText, only the new
-part on each poll) for the stage, the machine and the done count, and the run's
-test results (CI API GET /runs/{id}/tests, results:read) for each outcome as
-it is recorded.
+part on each poll): the stage, the machine, and each test's outcome as it ends
+("✓ ...: passed", "✗ ...: failed"), counted on the done line. The console does
+not say which playbook a test was.
 
-A test row names only the runner test and its pipeline session, so the
-playbook comes from the console, and only where the console proves it (see
-pair_sessions): other processes write to the console at the same time and can
-garble or drop a line. A session the console does not prove is shown by its
-session id, never under a playbook name it may not be.
+The run's test results (CI API GET /runs/{id}/tests, results:read) do, with
+the session of each, but the pipeline records them only in its report stage,
+so they are read from then on (and at the build's end), and print each
+playbook's outcome by name. A row names only the runner test and its session:
+the playbook comes from the console, and only where the console proves it (see
+pair_sessions), since other processes write to the console at the same time
+and can garble or drop a line. A session the console does not prove is shown
+by its session id, never under a playbook name it may not be.
 
 It only prints. orchestrai_wait_build.sh decides when the build is done, and
 the verdict step decides each playbook's result; nothing here can fail the job.
@@ -58,11 +63,13 @@ HTTP_TIMEOUT = 120
 # The longest a build can run (max_duration) plus the time it takes to wind down.
 WIND_DOWN_SECONDS = 30 * 60
 # How long one read of the test results retries; a failed read is tried again
-# on the next polls after a test ends (CATCH_UP_POLLS), and when the build ends.
+# on the next polls of the report stage (CATCH_UP_POLLS), and when the build ends.
 RESULTS_RETRY_SECONDS = 60
-# After a test ends, the results are read on each poll until its row is there,
-# at most this many polls (5 min).
+# From the report stage, the results are read on each poll until every test the
+# console counted has its row, at most this many polls (5 min).
 CATCH_UP_POLLS = 10
+# The stage in which the pipeline records the run's test results.
+REPORT_STAGE = "06-Report"
 # After the build: one read retrying FINAL_RESULTS_RETRY_SECONDS, then reads
 # every FINAL_POLL_SECONDS for FINAL_CATCH_UP_SECONDS while rows are missing.
 # At worst, from the build's end: a poll's sleep (30 s), a console read
@@ -82,6 +89,7 @@ GROUP = re.compile(r"^\[[^\]]+\] Submitting group (\S+)(?: to machine \S+)? \(.*
 SESSIONS = re.compile(r"^\[[^\]]+\]\s+→ session\(s\): (sess-\d+(?:,sess-\d+)*)$")
 TRACKING = re.compile(r"^\[[^\]]+\] Tracking sessions: (sess-\d+(?:,sess-\d+)*)$")
 COUNT = re.compile(r"\b(\d+) active, (\d+) done \((\d+)/(\d+) tests\)")
+OUTCOME = re.compile(r"^\[[^\]]+\]\s+[✓✗]\s+\S+: (\w+) \[")
 SESSION_ID = re.compile(r"(sess-\d+)")
 
 
@@ -193,6 +201,8 @@ class Follower:
         self.submitted, self.pairs, self.last_group = [], [], None
         self.session_group = {}   # sess-N -> group id
         self.done = self.total = None
+        self.tally = {}           # console outcome -> tests that ended so
+        self.reporting = False    # the report stage has begun
         self.reported = set()     # rows already printed
         self.results_ok = bool(run_id and cp)
         self.results_failing = False
@@ -202,7 +212,8 @@ class Follower:
         self.recorded = 0         # rows in the last answer
 
     def on_line(self, line):
-        """What one console line says; True when a test has just ended."""
+        """What one console line says; True when the run's results are due
+        (the report stage began, or a job that started late finds it begun)."""
         if not line.strip():
             return False  # a blank line is not a lost one: "directly followed" skips it
         last_group, self.last_group = self.last_group, None
@@ -210,6 +221,11 @@ class Follower:
             if m.group(1) != self.stage:
                 self.stage = m.group(1)
                 say(f"stage {self.stage}")
+                if self.stage.startswith(REPORT_STAGE) and not self.reporting:
+                    self.reporting = True
+                    return True
+        elif m := OUTCOME.match(line):
+            self.tally[m.group(1)] = self.tally.get(m.group(1), 0) + 1
         elif m := MACHINE.search(line):
             if m.group(1) != self.machine:
                 self.machine = m.group(1)
@@ -238,17 +254,15 @@ class Follower:
             self.submitted, self.pairs = [], []
         elif m := COUNT.search(line):
             done, total = int(m.group(3)), int(m.group(4))
-            # A job that starts late finds tests already done: report them too.
-            ended = done != self.done and (self.done is not None or done > 0)
             if done != self.done or total != self.total:
-                say(f"{done}/{total} playbooks done")
+                so_far = ", ".join(f"{n} {outcome}" for outcome, n in self.tally.items())
+                say(f"{done}/{total} playbooks done" + (f" ({so_far})" if so_far else ""))
             self.done, self.total = done, total
-            return ended
         return False
 
     def report_results(self, retry_seconds=RESULTS_RETRY_SECONDS):
         """Print each test result recorded since the last call. A failed read
-        is said once and tried again when the next test ends or the build does.
+        is said once and tried again on the next polls or when the build ends.
         The answer is every test of the run: the CI API and the Portal behind
         it do not page this list."""
         if not self.results_ok:
@@ -264,7 +278,7 @@ class Follower:
                 self.results_ok = False  # not allowed: asking again changes nothing
                 return
             if not self.results_failing:
-                say(f"test results unavailable for now ({exc}); trying again when the next test ends")
+                say(f"test results unavailable for now ({exc}); trying again")
             self.results_failing = True
             return
         self.results_failing = False
@@ -275,16 +289,21 @@ class Follower:
             self.catch_up = 0  # every test the console counts is recorded
         fresh = []
         for test in rows:
-            # A row whose outcome or attempt changes is printed again.
-            key = json.dumps([test.get(k) for k in
-                              ("execution_id", "suite", "name", "attempt", "outcome", "recorded_at")])
+            sid = SESSION_ID.search(f"{test.get('execution_id') or ''} {test.get('suite') or ''}")
+            test = dict(test, session=sid.group(1) if sid else None)
+            # One line per session and outcome: a row rewritten in place (the
+            # pipeline publishes the results again) is not printed twice, a
+            # changed outcome or attempt is.
+            key = json.dumps([test["session"] or test.get("execution_id") or test.get("suite") or test.get("name"),
+                              test.get("attempt"), test.get("outcome")])
             if key not in self.reported:
                 self.reported.add(key)
                 fresh.append(test)
         for test in sorted(fresh, key=lambda t: str(t.get("recorded_at") or "")):
-            sid = SESSION_ID.search(f"{test.get('execution_id') or ''} {test.get('suite') or ''}")
-            group = self.session_group.get(sid.group(1)) if sid else None
-            name = (self.names.get(group) or group) if group else (test.get("suite") or test.get("name") or "?")
+            group = self.session_group.get(test["session"]) if test["session"] else None
+            name = ((self.names.get(group) or group) if group
+                    else f"session {test['session']}" if test["session"]
+                    else test.get("suite") or test.get("name") or "?")
             outcome = str(test.get("outcome") or "?").upper()
             attempt = test.get("attempt")
             extra = []
@@ -299,14 +318,14 @@ class Follower:
         return self.results_ok and self.recorded < (self.done or 0)
 
     def poll(self):
-        ended = any([self.on_line(line) for line in self.console.read()])
-        if ended:
+        due = any([self.on_line(line) for line in self.console.read()])
+        if due:
             self.catch_up = CATCH_UP_POLLS
         if not self.console.more:
             self.report_results(FINAL_RESULTS_RETRY_SECONDS)
-        elif ended:
+        elif due:
             self.report_results()
-        elif self.catch_up > 0:  # a test ended but its row was not there yet
+        elif self.catch_up > 0:  # reporting, and not every row is there yet
             self.catch_up -= 1
             self.report_results()
 
