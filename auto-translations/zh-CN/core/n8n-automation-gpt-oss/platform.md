@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 # 平台配置
 
-本文档描述了运行此 playbook 所需的预期平台配置。
+本文档描述了运行此操作手册所需的预期平台配置。
 
 ## 前提条件
 
@@ -19,20 +19,20 @@ SPDX-License-Identifier: MIT
 
 | 组件 | 版本 | 说明 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | 在 AMD Ryzen™ AI Halo Developer Platform 上已预安装并可在 PATH 中使用；在所有其他设备上必须手动安装 |
+| **Node.js** | 22.16+ | 在 AMD Ryzen™ AI Halo Developer Platform 上已预先安装并在 PATH 中可用；在所有其他设备上必须手动安装 |
 | **Lemonade Server** | latest | 运行于 `http://localhost:13305/api/v1` |
 
 ### Linux
 
 | 组件 | 版本 | 说明 |
 |-----------|---------|-------|
-| **Node.js** | 22.16+ | 在 AMD Ryzen™ AI Halo Developer Platform 上已预安装并可在 PATH 中使用；在所有其他设备上必须手动安装 |
+| **Node.js** | 22.16+ | 在 AMD Ryzen™ AI Halo Developer Platform 上已预先安装并在 PATH 中可用；在所有其他设备上必须手动安装 |
 | **Lemonade Server** | latest | 运行于 `http://localhost:13305/api/v1` |
 
 
 ## Lemonade LLM
 
-Lemonade server 应处于运行状态，并加载适合设备的模型（有关适用于您设备的 `lemonade run` 命令，请参阅 README）：
+Lemonade server 应处于运行状态，并加载与设备相应的模型（有关适用于你设备的 `lemonade run` 命令，请参阅 README）：
 
 | 设备 | 端点 | 模型 |
 |--------|----------|-------|

@@ -46,7 +46,8 @@ By the end of this playbook you will be able to:
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
 - [Podman](https://podman.io/docs/installation) (Optional, for sandboxing Hermes Agent)
-  ```bash 
+  ```bash
+  sudo apt update && sudo apt upgrade -y
   sudo apt-get install -y podman
   ```
 <!-- @os:end -->
@@ -55,14 +56,19 @@ By the end of this playbook you will be able to:
 - A PC running **Windows 10/11**
 - At least **12 GB of RAM** (64 GB+ recommended for larger models)
 - **~10–30 GB of free disk space** for model weights
-- Podman (Optional, for sandboxing Hermes Agent). Install inside WSL:
-  ```bash 
-  sudo apt-get install -y podman
-  ```
+- Podman (Optional, for sandboxing Hermes Agent). Podman runs *inside* WSL, so
+  install it after you set WSL up — see [Install Podman in WSL](#install-podman-in-wsl).
 <!-- @os:end -->
 
 <!-- @device:halo_box -->
-> Podman is pre-installed on Halo Box and no setup is required
+<!-- @os:linux -->
+> Podman is pre-installed on the Ryzen AI Halo and no setup is required.
+<!-- @os:end -->
+<!-- @os:windows -->
+> **Note:** Podman being pre-installed on the Ryzen AI Halo applies to the Windows host
+> only. WSL is a separate Linux environment, so Podman still has to be installed inside
+> it before sandboxing will work — see [Install Podman in WSL](#install-podman-in-wsl).
+<!-- @os:end -->
 <!-- @device:end -->
 
 <!-- @require = dependency docs rendered on the website; @prereq = CI-only, validated and auto-installed before tests (never rendered) -->
@@ -246,7 +252,9 @@ We run Hermes Agent inside WSL and connect it to Lemonade running natively on Wi
 
 ### Install WSL and Ubuntu
 
-Open PowerShell as Administrator and install the WSL kernel:
+Open PowerShell as Administrator. If WSL is not already present, install the kernel
+(on systems that ship with WSL — including the Ryzen AI Halo — this is a no-op and can
+be skipped):
 
 ```powershell
 wsl --install --no-distribution
@@ -269,11 +277,22 @@ systemd=true
 EOF
 ```
 
-Restart WSL:
+Restart WSL. Name the distribution explicitly — a bare `wsl` reopens the system
+default, which on many systems is a newer Ubuntu than the one this playbook uses:
 
 ```powershell
 wsl --shutdown
-wsl
+wsl -d Ubuntu-24.04
+```
+
+### Install Podman in WSL
+
+Podman runs inside WSL, so install it there (optional, needed only for sandboxing).
+Update the package lists first — `apt-get install` fails on a fresh distro without it:
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt-get install -y podman
 ```
 
 ### Bridge Lemonade from Windows into WSL
@@ -386,7 +405,7 @@ finally {
 <!-- @os:end -->
 
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sudo bash -s -- --skip-setup
 ```
 
 The `--skip-setup` flag skips the interactive setup wizard so you can configure the model backend manually in the next step.
@@ -468,7 +487,9 @@ finally {
 
 ## Configure Hermes to Use Lemonade
 
-Hermes stores its model configuration in `~/.hermes/config.yaml`. You can either use the interactive `hermes model` picker or can write the config directly.
+Hermes stores its model configuration in `~/.hermes/config.yaml`. You can either use the interactive `hermes model` picker or write the config directly.
+
+> **Only one option is needed, not both.** These options show you how to build the config.yaml file. Refer to the end of the section for what the final config.yaml file should be.
 
 ### Option 1: Interactive picker
 
@@ -527,7 +548,7 @@ custom_providers:
 
 ```bash
 mkdir -p ~/.hermes
-cat >> ~/.hermes/config.yaml <<'EOF'
+cat > ~/.hermes/config.yaml <<'EOF'
 model:
   default: Qwen3.6-35B-A3B-GGUF
   provider: custom
@@ -589,7 +610,7 @@ Inside your WSL terminal, get the Windows host IP and write the config:
 WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
 
 mkdir -p ~/.hermes
-cat >> ~/.hermes/config.yaml <<EOF
+cat > ~/.hermes/config.yaml <<EOF
 model:
   default: Qwen3.6-35B-A3B-GGUF
   provider: custom
@@ -795,9 +816,11 @@ finally {
 Then configure Hermes to use Podman as the container runtime and set the terminal backend:
 
 ```bash
-echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
+# Point Hermes at Podman (skipped if the line is already there).
+grep -q '^HERMES_DOCKER_BINARY=' ~/.hermes/.env 2>/dev/null || echo "HERMES_DOCKER_BINARY=/usr/bin/podman" >> ~/.hermes/.env
 
-cat >> ~/.hermes/config.yaml <<'EOF'
+# Add the terminal block to the existing config (skipped if it is already there).
+grep -q '^terminal:' ~/.hermes/config.yaml || cat >> ~/.hermes/config.yaml <<'EOF'
 terminal:
   backend: docker
   docker_image: hermes-sandbox:bookworm-slim
@@ -907,6 +930,66 @@ Hermes will now spin up a persistent sandbox container and route all `terminal` 
 > **Verify the sandbox is working:** Start Hermes (`hermes`) and ask it to `run hostname` - you should see a short container ID instead of your machine's hostname. You can also ask it to `rm -rf <path-to-a-dummy-file/folder>`: Hermes will confirm the deletion, but the folder will still be on your host. The command ran inside the container's isolated `$HOME`, not yours.
 
 > **Need stronger isolation?** Hermes also provides an official Docker image (`nousresearch/hermes-agent`) that runs the entire agent process inside a container - gateway, tools, and all. See the [Hermes Docker documentation](https://hermes-agent.nousresearch.com/docs/user-guide/docker) for setup details.
+
+---
+
+## Full Configuration Reference
+
+The final `~/.hermes/config.yaml` should look like this when you are done.
+
+<!-- @os:linux -->
+```bash
+mkdir -p ~/.hermes
+cat > ~/.hermes/config.yaml <<'EOF'
+model:
+  default: Qwen3.6-35B-A3B-GGUF
+  provider: custom
+  base_url: http://127.0.0.1:13305/api/v1
+  api_key: lemonade
+custom_providers:
+  - name: local-lemonade
+    base_url: http://127.0.0.1:13305/api/v1
+    api_key: lemonade
+    model: Qwen3.6-35B-A3B-GGUF
+    models:
+      Qwen3.6-35B-A3B-GGUF:
+        context_length: 262144
+terminal:
+  backend: docker
+  docker_image: hermes-sandbox:bookworm-slim
+EOF
+```
+<!-- @os:end -->
+
+<!-- @os:windows -->
+```bash
+WINDOWS_HOST=$(ip route show default | awk '{print $3}' | head -1)
+
+mkdir -p ~/.hermes
+cat > ~/.hermes/config.yaml <<EOF
+model:
+  default: Qwen3.6-35B-A3B-GGUF
+  provider: custom
+  base_url: http://$WINDOWS_HOST:13305/api/v1
+  api_key: lemonade
+custom_providers:
+  - name: local-lemonade
+    base_url: http://$WINDOWS_HOST:13305/api/v1
+    api_key: lemonade
+    model: Qwen3.6-35B-A3B-GGUF
+    models:
+      Qwen3.6-35B-A3B-GGUF:
+        context_length: 262144
+terminal:
+  backend: docker
+  docker_image: hermes-sandbox:bookworm-slim
+EOF
+```
+
+> **Note**: The WSL gateway address changes when WSL restarts. If Hermes stops reaching Lemonade after a reboot, re-run the command above to refresh `base_url` with the current IP.
+<!-- @os:end -->
+
+> The `terminal:` block applies only if you set up the Podman sandbox above. Leave it out if you are running Hermes directly on the host.
 
 ---
 

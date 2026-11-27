@@ -4,21 +4,24 @@
 # SPDX-License-Identifier: MIT
 
 """
-Test Matrix Builder
-===================
+Test Selection
+==============
 
-Builds the CI test matrix for test-playbooks.yml.
+Picks the playbook entries a pull request has to test, for
+test-playbooks-orchestrai.yml. Each entry is one playbook on one OS and device;
+`--keys` prints them as [locale, playbook, platform, device], which
+orchestrai_matrix.py --only runs.
 
 Modes:
-    --mode all                              every entry (nightly cron)
-    --mode playbook --playbook-id <id>      one playbook (workflow_dispatch)
+    --mode all                              every entry
+    --mode playbook --playbook-id <id>      one playbook
     --mode changed --base <sha>             only entries whose tests changed (pull_request)
 
 How --mode changed works:
     1. Materialise the base revision (git archive) into a temp tree.
     2. Harness check: if any file that governs how tests execute differs between
        base and head, run the FULL matrix. This is deny-by-default over
-       .github/scripts/ and test-playbooks.yml, minus HARNESS_EXCLUDED.
+       .github/scripts/, minus HARNESS_EXCLUDED.
     3. Otherwise the extractor is identical on both sides, so compute a per-entry
        signature with THIS checkout's extractor against each tree and diff them.
        An entry runs if it is new, its matrix identity changed, its signature
@@ -47,22 +50,23 @@ import run_playbook_tests as R  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE_TIMEOUT = 120
 
-# GitHub Actions refuses a matrix above 256 jobs; fail here with a clear message
-# rather than at workflow-expansion time
-MATRIX_JOB_LIMIT = 256
-
 # Files that govern how tests execute. Deny-by-default: anything added under
 # these prefixes is covered without anyone remembering. Editing any of them
 # forces the full matrix, so signatures never have to model harness behaviour.
-# runners.json is in the list because build_matrix_entries() now reads it to drop
-# devices with no runner group, so adding or removing a machine changes the
-# matrix shape, not just where a job lands.
-HARNESS_PREFIXES = (".github/scripts/", ".github/workflows/test-playbooks.yml",
-                    ".github/runners.json")
+# The OrchestrAI machines run .github/scripts/run_playbook_tests.py from the
+# commit under test (ucicd-test-library sys_func-playbook_runner).
+HARNESS_PREFIXES = (".github/scripts/",)
 
 # Files under those prefixes that provably cannot change a playbook test verdict.
 # Omitting one only costs a needless full run; wrongly adding one hides a real
-# change, so each entry is justified by test-playbooks.yml not depending on it.
+# change, so each entry is justified by the playbook runner not depending on it.
+# The OrchestrAI CI plumbing (orchestrai_*, the workflows, orchestrai-config.yml)
+# decides where and on what a playbook runs, not what it executes; a change to it
+# is tested with `!orc`, not by sending every playbook to every machine.
+# Directories under those prefixes whose files nothing runs: the device runner
+# scripts kept for reference (archive/README.md).
+HARNESS_EXCLUDED_DIRS = (".github/scripts/archive/",)
+
 HARNESS_EXCLUDED = frozenset({
     ".github/scripts/translate_playbook.py",       # translation tooling
     ".github/scripts/disclaimers.json",            # translation tooling
@@ -70,85 +74,24 @@ HARNESS_EXCLUDED = frozenset({
     ".github/scripts/check_copyright.py",          # check-copyright.yml
     ".github/scripts/validate_playbooks.py",       # validate-playbooks.yml
     ".github/scripts/fetch_github_issues.py",      # fetch-github-issues.yml
-    ".github/scripts/select_runners.py",           # not referenced by test-playbooks.yml
-    ".github/scripts/create_failure_issues.py",    # if: failure() on main, post-verdict
+    ".github/scripts/create_failure_issues.py",    # opens issues after the verdict
     ".github/scripts/test_build_test_matrix.py",   # separate selector-tests job
     ".github/scripts/gen_issue_template_playbooks.py",  # validate-playbooks.yml
+    ".github/scripts/orchestrai_batch_verdict.py", # OrchestrAI workflows
+    ".github/scripts/orchestrai_command.py",       # OrchestrAI workflows
+    ".github/scripts/orchestrai_keys.py",          # OrchestrAI workflows
     ".github/scripts/orchestrai_matrix.py",        # OrchestrAI workflows
+    ".github/scripts/orchestrai_prepare_matrices.py",  # OrchestrAI workflows
     ".github/scripts/orchestrai_report.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_trigger.py",       # OrchestrAI workflows
     ".github/scripts/orchestrai_verdict.py",       # OrchestrAI workflows
+    ".github/scripts/orchestrai_wait_build.sh",    # OrchestrAI workflows
 })
-
-RUNNERS_JSON = REPO_ROOT / ".github" / "runners.json"
-
 
 def annotate(level: str, message: str) -> None:
     """Report on stderr only; stdout is reserved for the matrix JSON."""
     prefix = f"::{level}::" if os.environ.get("GITHUB_ACTIONS") else ""
     print(f"{prefix}{message}", file=sys.stderr)
-
-
-def _load_runner_catalog() -> list[dict]:
-    """Load runners.json as [{name, os, group, labels}], labels a set per runner.
-
-    ``labels`` is every label unique to a single machine — its hostname (the
-    ``name`` field, always included) plus any extra unique labels declared in
-    runners.json (e.g. IP, alias). Non-unique labels (the device group, gfx/arch
-    tags, lease tags) are deliberately excluded there: a shared label cannot pin
-    a job to one runner, so allowing it as a target would be misleading.
-    """
-    try:
-        data = json.loads(RUNNERS_JSON.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        print(f"FATAL: cannot read {RUNNERS_JSON} to validate --runner-label: {exc}",
-              file=sys.stderr)
-        sys.exit(1)
-    catalog: list[dict] = []
-    for runner in data:
-        name = runner.get("name")
-        if not name:
-            continue
-        labels = {str(lbl) for lbl in runner.get("labels", [])}
-        labels.add(name)
-        catalog.append({
-            "name": name,
-            "os": str(runner.get("os", "")),
-            "group": str(runner.get("group", "")),
-            "labels": labels,
-        })
-    return catalog
-
-
-def validate_runner_label(label: str, platform: str, device: str) -> None:
-    """Fail fast unless *label* names a runner matching *platform* and *device*.
-
-    Validation is authoritative against runners.json: a label absent from every
-    matching runner's label set is treated as a typo and rejected, rather than
-    silently producing a runs-on that no runner satisfies.
-    """
-    os_label = "Windows" if platform == "windows" else "Linux"
-    catalog = _load_runner_catalog()
-    pool = [r for r in catalog
-            if r["os"].lower() == os_label.lower()
-            and r["group"].lower() == device.lower()]
-    valid = sorted({lbl for r in pool for lbl in r["labels"]})
-    if label in valid:
-        return
-
-    owner = next((r for r in catalog if label in r["labels"]), None)
-    if owner is not None:
-        print(f"FATAL: runner label '{label}' belongs to runner '{owner['name']}' "
-              f"({owner['os']}/{owner['group']}), which does not match the selected "
-              f"{os_label}/{device}. Choose a label for a {os_label}/{device} runner.",
-              file=sys.stderr)
-    else:
-        pretty = ", ".join(valid) if valid else "<none configured>"
-        print(f"FATAL: runner label '{label}' is not a known label for any "
-              f"{os_label}/{device} runner. Valid labels: {pretty}. If a runner was "
-              f"recently added or relabeled, update .github/runners.json.",
-              file=sys.stderr)
-    sys.exit(1)
 
 
 def harness_files(root: Path) -> dict[str, bytes]:
@@ -165,7 +108,7 @@ def harness_files(root: Path) -> dict[str, bytes]:
             rel = str(path.relative_to(root)).replace(os.sep, "/")
             if "__pycache__" in path.relative_to(root).parts or rel.endswith(".pyc"):
                 continue
-            if rel in HARNESS_EXCLUDED:
+            if rel in HARNESS_EXCLUDED or rel.startswith(HARNESS_EXCLUDED_DIRS):
                 continue
             mode = b"\x01" if os.access(path, os.X_OK) else b"\x00"
             content = path.read_bytes().replace(b"\r\n", b"\n")
@@ -248,32 +191,15 @@ def select_changed(base_tree: Path) -> list[dict]:
     return selected
 
 
-def tree_digest(path: Path) -> str:
-    """Hash a localized content subtree for conservative change detection."""
-    if not path.is_dir():
-        return ""
-    digest = hashlib.sha256()
-    for child in sorted(p for p in path.rglob("*") if p.is_file()):
-        digest.update(str(child.relative_to(path)).replace(os.sep, "/").encode())
-        digest.update(hashlib.sha256(child.read_bytes()).digest())
-    return digest.hexdigest()
-
-
 def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> list[dict]:
-    """Select localized entries whose overlay, metadata, or dependencies changed."""
+    """select_changed() for a locale: signatures of the materialized overlay.
+
+    Same rule as English, so a prose edit to an English playbook, its overlay, or
+    a shared dependency selects nothing; only a change to what would execute does.
+    """
     if harness_changed(base_tree):
         annotate("notice", "Test harness changed; running the full localized matrix")
         return head
-
-    head_dependencies = REPO_ROOT / "localized-playbooks" / locale / "dependencies"
-    base_dependencies = base_tree / "localized-playbooks" / locale / "dependencies"
-    if tree_digest(head_dependencies) != tree_digest(base_dependencies):
-        annotate("notice", "Localized dependencies changed; running the full matrix")
-        return head
-
-    english_dependencies_changed = tree_digest(
-        REPO_ROOT / "playbooks" / "dependencies"
-    ) != tree_digest(base_tree / "playbooks" / "dependencies")
 
     try:
         base_entries = R.build_localized_matrix_entries(base_tree, locale)
@@ -284,31 +210,29 @@ def select_localized_changed(base_tree: Path, locale: str, head: list[dict]) -> 
     base_by_key = {
         (e["playbook"], e["platform"], e["arch"]): e for e in base_entries
     }
-    selected = []
+    selected, skipped = [], 0
     for entry in head:
         key = (entry["playbook"], entry["platform"], entry["arch"])
+        label = f"{locale}/{key[0]} ({key[1]}/{key[2]})"
         prior = base_by_key.get(key)
-        changed = prior != entry
-        for category in ("core", "supplemental"):
-            rel = Path("localized-playbooks") / locale / category / entry["playbook"]
-            if tree_digest(REPO_ROOT / rel) != tree_digest(base_tree / rel):
-                changed = True
-                break
-            if not entry.get("localized_only", True):
-                english_rel = Path("playbooks") / category / entry["playbook"]
-                if tree_digest(REPO_ROOT / english_rel) != tree_digest(
-                    base_tree / english_rel
-                ):
-                    changed = True
-                    break
-        if not entry.get("localized_only", True) and english_dependencies_changed:
-            changed = True
-        if changed:
-            selected.append(entry)
-    annotate(
-        "notice",
-        f"Selected {len(selected)} localized entries; skipped {len(head) - len(selected)} unchanged",
-    )
+        if prior is None:
+            annotate("notice", f"New localized matrix entry {label}")
+        elif prior != entry:
+            annotate("notice", f"Localized matrix metadata changed for {label}")
+        else:
+            head_sig = R.localized_entry_signature(
+                REPO_ROOT, locale, *key, entry["localized_only"])
+            base_sig = R.localized_entry_signature(
+                base_tree, locale, *key, prior["localized_only"])
+            if head_sig is None or base_sig is None:
+                annotate("warning", f"Cannot prove {label} unchanged; running it")
+            elif head_sig != base_sig:
+                annotate("notice", f"Tests changed for {label}")
+            else:
+                skipped += 1
+                continue
+        selected.append(entry)
+    annotate("notice", f"Selected {len(selected)} localized entries; skipped {skipped} unchanged")
     return selected
 
 
@@ -323,9 +247,9 @@ def main() -> None:
                         help="Keep only entries for this OS")
     parser.add_argument("--device", choices=sorted(R.VALID_DEVICES),
                         help="Keep only entries for this device")
-    parser.add_argument("--runner-label",
-                        help="Append this label to every entry's runner selection "
-                             "so a specific self-hosted runner can be targeted")
+    parser.add_argument("--keys", action="store_true",
+                        help="Print the selected entries as a sorted JSON list of "
+                             "[locale, playbook, platform, device] (\"\" = English)")
     parser.add_argument(
         "--locale",
         default="",
@@ -387,42 +311,9 @@ def main() -> None:
         print(f"FATAL: no matrix entries match the requested filter(s): {filt}", file=sys.stderr)
         sys.exit(1)
 
-    # Targeting a single runner only makes sense once the OS and device are
-    # pinned, because the label is ANDed with them: a halo hostname on an stx
-    # entry matches no runner and the job would queue forever. Require both.
-    if args.runner_label:
-        if not args.platform or not args.device:
-            print("FATAL: --runner-label requires both --platform and --device "
-                  "(a specific OS and device, not 'all') so the label resolves to "
-                  "exactly one runner", file=sys.stderr)
-            sys.exit(1)
-        # Validate the label against the maintained fleet so a typo fails fast
-        # here instead of leaving a job queued for a runner that never appears.
-        validate_runner_label(args.runner_label, args.platform, args.device)
-
-    # Keep a localized entry's pool label separate from a manually requested
-    # machine label. English entries retain runner_label for compatibility with
-    # the upstream matrix schema, while the workflow uses target_runner_label
-    # when it needs to display the explicitly selected machine.
-    for entry in entries:
-        entry["runner_label"] = entry.get("runner_label") or args.runner_label or ""
-        entry["target_runner_label"] = args.runner_label or ""
-
-    # Append the extra label to runs-on. GitHub schedules a job on a runner only
-    # if the runner carries every label in runs-on, so a label unique to one
-    # machine pins the job to it.
-    if args.runner_label:
-        for entry in entries:
-            labels = json.loads(entry["runner"])
-            if args.runner_label not in labels:
-                labels.append(args.runner_label)
-            entry["runner"] = json.dumps(labels)
-
-    # Fail here rather than let Actions reject the oversized matrix with a vague error
-    if len(entries) > MATRIX_JOB_LIMIT:
-        print(f"FATAL: {len(entries)} entries exceeds the GitHub Actions matrix cap "
-              f"of {MATRIX_JOB_LIMIT}; split the workflow", file=sys.stderr)
-        sys.exit(1)
+    if args.keys:
+        entries = sorted({(e.get("locale", ""), e["playbook"], e["platform"], e["arch"])
+                          for e in entries})
 
     matrix = json.dumps(entries)
     output_path = args.github_output or (

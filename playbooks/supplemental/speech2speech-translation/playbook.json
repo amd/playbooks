@@ -134,7 +134,34 @@
   "recommendedSystemMemory": 16,
   "validatedVersions": {
     "reference": {
-      "linux": {}
+      "linux": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      },
+      "windows": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      }
+    },
+    "apu": {
+      "linux": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      },
+      "windows": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      }
+    },
+    "gpu": {
+      "linux": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      },
+      "windows": {
+        "Transformers": "5.10.1",
+        "Gradio": "Latest"
+      }
     }
   },
   "primaryModel": "SeamlessM4T v2 Large",
@@ -146,6 +173,5 @@
       "type": "amd"
     }
   ],
-  "published_date": "2025-12-29",
-  "updated_date": "2026-10-09"
+  "published_date": "2025-12-29"
 }

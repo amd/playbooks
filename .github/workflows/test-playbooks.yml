@@ -2,166 +2,19 @@
 # 
 # SPDX-License-Identifier: MIT
 
-name: Test Playbooks
+# The checks of the playbook test tooling that need no hardware. The playbooks
+# themselves are tested on hardware through OrchestrAI:
+# test-playbooks-orchestrai.yml (each PR, nightly, manual) and `!orc` on a PR.
+name: Playbook Test Tooling
 
 on:
-  schedule:
-    - cron: '0 8 * * *'    # 01:00 PDT (UTC-7); 02:00 PST (UTC-8)
-  workflow_dispatch:
-    inputs:
-      locale:
-        description: 'Locale to test (leave empty for canonical English)'
-        required: false
-        type: string
-      playbook_id:
-        description: 'Specific playbook ID (leave empty to test all)'
-        required: false
-        type: string
-      platform:
-        description: 'Restrict to one OS (leave "all" for every OS the playbook supports)'
-        required: false
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - linux
-          - windows
-      device:
-        description: 'Restrict to one device (leave "all" for every device the playbook supports)'
-        required: false
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - halo
-          - grgh
-          - mdsh
-          - stx
-          - krk
-          - grgp
-          - mdsp
-          - r9700
-          - rx7900xt
-          - rx9070xt
-      runner_label:
-        description: 'Extra runner label to target one specific self-hosted runner (e.g. its hostname/IP/alias label). Use ONLY when platform ≠ all && device ≠ all. Leave empty to let GitHub pick any matching runner.'
-        required: false
-        type: string
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
-  # Required so the failure-reporting step can open issues on behalf of the
-  # workflow. Note we still gate the issue creation step itself on
-  # github.ref == 'refs/heads/main' so PR runs never create issues.
-  issues: write
 
 jobs:
-  detect-changes:
-    name: Detect Changed Playbooks
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    outputs:
-      english_matrix: ${{ steps.build-matrix.outputs.english_matrix }}
-      localized_matrix: ${{ steps.build-matrix.outputs.localized_matrix }}
-      has_english_entries: ${{ steps.build-matrix.outputs.has_english_entries }}
-      has_localized_entries: ${{ steps.build-matrix.outputs.has_localized_entries }}
-      detection_ok: ${{ steps.build-matrix.outputs.detection_ok }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Pin Python so the builder's tarfile filter="data" (3.12+) is always
-      # available; matches the selector-tests job.
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      # Build independently bounded canonical English and localized matrices.
-      # English selection uses extracted test signatures; localized selection
-      # conservatively tracks the effective overlay and dependency trees.
-      # Manual runs select exactly one content tree: an empty locale means
-      # canonical English, while a non-empty locale selects that localized tree.
-      # Automatic PR and scheduled runs retain the combined English + zh-CN
-      # coverage that predates the manual single-locale selector.
-      # Event data goes through env, never inline, so PR-controlled strings
-      # (playbook ids, device names) cannot reach the shell directly.
-      - name: Build test matrix
-        id: build-matrix
-        env:
-          PLAYBOOK_INPUT: ${{ github.event.inputs.playbook_id }}
-          PLATFORM_INPUT: ${{ github.event.inputs.platform }}
-          DEVICE_INPUT: ${{ github.event.inputs.device }}
-          RUNNER_LABEL_INPUT: ${{ github.event.inputs.runner_label }}
-          LOCALE_INPUT: ${{ inputs.locale }}
-          EVENT_NAME: ${{ github.event_name }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          set -euo pipefail
-          # workflow_dispatch filters. These inputs only exist on manual runs;
-          # on pull_request / cron they are empty and no filter is applied.
-          # Assembled into an array so PR-safe env values are never re-split.
-          filters=()
-          if [ -n "$PLATFORM_INPUT" ] && [ "$PLATFORM_INPUT" != "all" ]; then
-            filters+=(--platform "$PLATFORM_INPUT")
-          fi
-          if [ -n "$DEVICE_INPUT" ] && [ "$DEVICE_INPUT" != "all" ]; then
-            filters+=(--device "$DEVICE_INPUT")
-          fi
-          if [ -n "$RUNNER_LABEL_INPUT" ]; then
-            filters+=(--runner-label "$RUNNER_LABEL_INPUT")
-          fi
-
-          if [ -n "$PLAYBOOK_INPUT" ]; then
-            args=(--mode playbook --playbook-id "$PLAYBOOK_INPUT")
-          elif [ "$EVENT_NAME" = "pull_request" ]; then
-            args=(--mode changed --base "$PR_BASE_SHA")
-          else
-            args=(--mode all)
-          fi
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            if [ -z "$LOCALE_INPUT" ]; then
-              ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
-              LOCALIZED='[]'
-              TARGET_DESCRIPTION="canonical English"
-            else
-              if [[ ! "$LOCALE_INPUT" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]] || [ ! -d "localized-playbooks/$LOCALE_INPUT" ]; then
-                echo "::error::Localized content directory does not exist: localized-playbooks/$LOCALE_INPUT"
-                exit 1
-              fi
-              ENGLISH='[]'
-              LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$LOCALE_INPUT" --allow-empty)
-              TARGET_DESCRIPTION="$LOCALE_INPUT localized"
-            fi
-          else
-            # Automated runs preserve the existing combined English + zh-CN coverage.
-            AUTO_LOCALE="zh-CN"
-            ENGLISH=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --allow-empty)
-            LOCALIZED=$(python3 .github/scripts/build_test_matrix.py "${args[@]}" "${filters[@]}" --locale "$AUTO_LOCALE" --allow-empty)
-            TARGET_DESCRIPTION="English or $AUTO_LOCALE localized"
-          fi
-          if [ "$ENGLISH" = "[]" ] && [ "$LOCALIZED" = "[]" ] && { [ -n "$PLAYBOOK_INPUT" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; }; then
-            echo "::error::No $TARGET_DESCRIPTION matrix entries match the requested playbook/filter combination"
-            exit 1
-          fi
-          ENGLISH_MATRIX="$ENGLISH" \
-          ENGLISH_BATCHES='{}' \
-          LOCALIZED_MATRIX="$LOCALIZED" \
-          LOCALIZED_BATCHES='{}' \
-          python3 .github/scripts/orchestrai_prepare_matrices.py
-          echo "detection_ok=true" >> "$GITHUB_OUTPUT"
-
-      - name: Display test matrices
-        env:
-          ENGLISH_MATRIX: ${{ steps.build-matrix.outputs.english_matrix }}
-          LOCALIZED_MATRIX: ${{ steps.build-matrix.outputs.localized_matrix }}
-        run: |
-          echo "English test matrix: $ENGLISH_MATRIX"
-          echo "Localized test matrix: $LOCALIZED_MATRIX"
-
   # Guards the selector itself: a false negative here silently stops testing
   # playbooks, so these run on every PR before anything is skipped.
   selector-tests:
@@ -182,286 +35,43 @@ jobs:
       - name: Run prereq validator tests
         run: python3 .github/scripts/test_prereq_validate.py
 
-  test-playbooks:
-    name: "Test ${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }} (${{ matrix.platform }}/${{ matrix.arch }})${{ matrix.target_runner_label != '' && format(' @{0}', matrix.target_runner_label) || '' }}${{ matrix.required && ' ✦' || '' }}"
-    needs: detect-changes
-    if: needs.detect-changes.outputs.has_english_entries == 'true'
-    runs-on: ${{ fromJson(matrix.runner) }}
-    continue-on-error: ${{ !matrix.required }}
-    env:
-      PYTHONUTF8: 1
-      PYTHONIOENCODING: utf-8
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.detect-changes.outputs.english_matrix) }}
-
+  # The playbook runner drives Windows PowerShell 5.1 (powershell.exe) on the
+  # Windows machines; Ubuntu only has pwsh 7, so the 5.1 setup checks run here.
+  powershell-setup-tests:
+    name: PowerShell Setup Tests (Windows PowerShell 5.1)
+    runs-on: windows-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ (matrix.playbook == 'open-webui-chat' || matrix.playbook == 'vllm-inference') && '3.12' || '3.13' }}
-
-      - name: Install test dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-
-      # Free the GPU before every job: (a) unload any loaded models, and
-      # (b) reclaim VRAM from stray GPU processes left by a prior job.
-      # Best-effort and time-bounded, so a stuck cleanup never wedges the job.
-      - name: Free GPU before tests (Linux)
-        if: matrix.platform == 'linux'
+          python-version: '3.13'
+      - name: Check powershell.exe is Windows PowerShell 5.1
+        run: powershell -NoProfile -Command 'if ($PSVersionTable.PSVersion.Major -ne 5) { exit 1 }'
+      - name: Run PowerShell setup tests
         shell: bash
-        continue-on-error: true
-        timeout-minutes: 5
+        working-directory: .github/scripts
+        # Fail on any skip: every test in the class, including the execution-policy one, must run here.
         run: |
-          lemonade unload || true
-          lms unload --all || true
-          # Only unload ollama models if the server is already running. Running any
-          # ollama command otherwise starts the server, which can inherit this
-          # step's stdout and block it. This leaves the server running, same as the
-          # lemonade/lms unloads above.
-          if pgrep -x ollama >/dev/null 2>&1; then
-            ollama ps 2>/dev/null | awk 'NR>1{print $1}' | while read -r m; do [ -n "$m" ] && ollama stop "$m" 2>/dev/null || true; done || true
-          fi
-          # Kill stray user-owned python processes still holding the GPU. Runs
-          # before our tests, and never touches our own process tree or other
-          # users' processes. Uses /proc and sysfs so it does not depend on
-          # fuser or rocm-smi being installed.
-          log_vram() {
-            local smi
-            smi=$(command -v rocm-smi || ls /opt/rocm*/bin/rocm-smi 2>/dev/null | head -n1) || true
-            if [ -n "$smi" ] && "$smi" --showmeminfo vram 2>/dev/null; then
-              return
-            fi
-            local d found=0
-            for d in /sys/class/drm/card*/device; do
-              [ -r "$d/mem_info_vram_used" ] || continue
-              found=1
-              echo "  $d: $(( $(cat "$d/mem_info_vram_used") / 1048576 )) MiB used of $(( $(cat "$d/mem_info_vram_total") / 1048576 )) MiB"
-            done
-            [ "$found" = 1 ] || echo "  (no VRAM info available: rocm-smi and sysfs both missing)"
-          }
-
-          echo "GPU VRAM before reclaim:"; log_vram
-          # Ancestor set of this shell so we never kill ourselves.
-          self=$$; ancestors=" $self "; p=$self
-          while p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); [ -n "$p" ] && [ "$p" != 0 ]; do
-            ancestors="$ancestors$p "
-          done
-          # PIDs holding the GPU compute (/dev/kfd) or render (/dev/dri/renderD*) nodes.
-          pids=$(
-            for fd in /proc/[0-9]*/fd/*; do
-              case "$(readlink "$fd" 2>/dev/null)" in
-                /dev/kfd|/dev/dri/renderD*) pid=${fd#/proc/}; echo "${pid%%/*}" ;;
-              esac
-            done | sort -u
-          )
-          me=$(id -un)
-          termed=""
-          for pid in $pids; do
-            case "$ancestors" in *" $pid "*) continue ;; esac
-            comm=$(ps -o comm= -p "$pid" 2>/dev/null || true)
-            owner=$(ps -o user= -p "$pid" 2>/dev/null | tr -d ' ' || true)
-            # Only user-owned python training processes; leave root/system alone.
-            if [ "$owner" = "$me" ]; then
-              case "$comm" in
-                python|python3|pt_main_thread)
-                  echo "Killing stray GPU process $pid ($comm, owner $owner)"
-                  kill -TERM "$pid" 2>/dev/null || true
-                  termed="$termed $pid"
-                  ;;
-              esac
-            fi
-          done
-          if [ -n "$termed" ]; then
-            sleep 3
-            # Escalate only on the PIDs we sent SIGTERM to.
-            for pid in $termed; do
-              kill -0 "$pid" 2>/dev/null && kill -KILL "$pid" 2>/dev/null || true
-            done
-          fi
-          echo "GPU VRAM after reclaim:"; log_vram
-
-      - name: Free GPU before tests (Windows)
-        if: matrix.platform == 'windows'
-        shell: powershell
-        continue-on-error: true
-        timeout-minutes: 5
-        run: |
-          try { lemonade unload } catch {}
-          try { lms unload --all } catch {}
-          # Only unload ollama models if the server is already running. Running any
-          # ollama command otherwise auto-starts the server, which inherits this
-          # step's stdout handle and hangs the job (the pipeline never sees EOF).
-          if (Get-Process ollama -ErrorAction SilentlyContinue) {
-            try {
-              $models = & ollama ps 2>$null | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0] } | Where-Object { $_ }
-              foreach ($m in $models) { & ollama stop $m 2>$null | Out-Null }
-            } catch {}
-          }
-          exit 0
-
-      # Validate the runner has this playbook's prerequisites, and self-heal by
-      # installing anything missing, BEFORE running the tests. A missing model
-      # or dependency that can't be resolved fails here as a clearly-labelled
-      # provisioning issue instead of surfacing as a confusing test failure.
-      # Allow ample time: a first-time cold model pull can be slow.
-      - name: Validate & provision prerequisites (Windows)
-        if: matrix.platform == 'windows'
-        shell: powershell
-        timeout-minutes: 90
-        env:
-          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
-          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
-        run: |
-          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}"
-
-      - name: Validate & provision prerequisites (Linux)
-        if: matrix.platform == 'linux'
-        shell: bash
-        timeout-minutes: 90
-        env:
-          # Internal model mirror; unset on forks, where prereqs fall back to upstream.
-          ARTIFACTORY_BASE: ${{ secrets.ARTIFACTORY_BASE }}
-        run: |
-          python .github/scripts/prereq_validate.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}"
-
-      - name: Extract and run tests (Windows)
-        if: matrix.platform == 'windows'
-        id: run_tests_windows
-        shell: powershell
-        run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform windows --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
-
-      - name: Extract and run tests (Linux)
-        if: matrix.platform == 'linux'
-        id: run_tests_linux
-        shell: bash
-        run: |
-          python .github/scripts/run_playbook_tests.py --playbook "${{ matrix.playbook }}" --platform linux --device "${{ matrix.arch }}" --locale "${{ matrix.locale }}" --localized-only "${{ matrix.localized_only || 'false' }}"
-
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.locale && format('{0}-', matrix.locale) || '' }}${{ matrix.playbook }}-${{ matrix.platform }}-${{ matrix.arch }}
-          path: test-results/
-          if-no-files-found: ignore
-
-      # Open / update a tracking issue for every failed test, but ONLY on the
-      # main branch. PRs (whose base is main) intentionally don't trigger this:
-      # those failures are usually the PR author's responsibility and would
-      # otherwise spam the tracker. `failure()` only fires when a previous step
-      # in this job failed, so passing matrix entries are skipped automatically.
-      #
-      # We invoke python directly (no shell-specific line continuations) so the
-      # same step works on both Windows and Linux self-hosted runners.
-      - name: Create failure issues (Linux)
-        if: failure() && matrix.platform == 'linux' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUNNER_NAME: ${{ runner.name }}
-        run: |
-          python .github/scripts/create_failure_issues.py \
-            --repo "${{ github.repository }}" \
-            --playbook "${{ matrix.playbook }}" \
-            --workflow-file "test-playbooks.yml" \
-            --locale "${{ matrix.locale }}" \
-            --localized-only "${{ matrix.localized_only || 'false' }}" \
-            --runner-labels "${{ matrix.runner_labels }}" \
-            --runner-name "${{ runner.name }}" \
-            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --sha "${{ github.sha }}"
-
-      - name: Create failure issues (Windows)
-        if: failure() && matrix.platform == 'windows' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        shell: powershell
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUNNER_NAME: ${{ runner.name }}
-        run: |
-          python .github/scripts/create_failure_issues.py `
-            --repo "${{ github.repository }}" `
-            --playbook "${{ matrix.playbook }}" `
-            --workflow-file "test-playbooks.yml" `
-            --locale "${{ matrix.locale }}" `
-            --localized-only "${{ matrix.localized_only || 'false' }}" `
-            --runner-labels "${{ matrix.runner_labels }}" `
-            --runner-name "${{ runner.name }}" `
-            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" `
-            --sha "${{ github.sha }}"
-
-      - name: Test Summary (Windows)
-        if: always() && matrix.platform == 'windows'
-        shell: powershell
-        run: |
-          $summary = @"
-          ### Test Results for ``${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}`` (${{ matrix.platform }}/${{ matrix.arch }})
-
-          Requested runner label: ``${{ matrix.target_runner_label || 'any matching runner' }}``
-
-          See the test artifacts for detailed logs.
-          "@
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $summary
-
-      - name: Test Summary (Linux)
-        if: always() && matrix.platform == 'linux'
-        shell: bash
-        run: |
-          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
-          ### Test Results for `${{ matrix.locale && format('[localized] {0}/', matrix.locale) || '' }}${{ matrix.playbook }}` (${{ matrix.platform }}/${{ matrix.arch }})
-
-          Requested runner label: `${{ matrix.target_runner_label || 'any matching runner' }}`
-
-          See the test artifacts for detailed logs.
-          EOF
-
-  test-localized-playbooks:
-    name: Localized Playbooks
-    needs: detect-changes
-    if: needs.detect-changes.outputs.has_localized_entries == 'true'
-    uses: ./.github/workflows/native-test-matrix.yml
-    with:
-      matrix_json: ${{ needs.detect-changes.outputs.localized_matrix }}
-    secrets: inherit
+          python -m unittest -v test_run_playbook_tests.PowerShellSetupFailureTest 2>&1 | tee unittest.log
+          ! grep -q "skipped" unittest.log
 
   test-gate:
     name: Test Gate (Required Tests)
-    needs: [detect-changes, selector-tests, test-playbooks, test-localized-playbooks]
+    needs: [selector-tests, powershell-setup-tests]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      # An empty matrix and a crashed matrix builder both leave test-playbooks
-      # 'skipped', so the gate must check detection succeeded before treating
-      # "nothing ran" as success.
       - name: Check required tests
         run: |
-          echo "detect-changes result: ${{ needs.detect-changes.result }} (detection_ok=${{ needs.detect-changes.outputs.detection_ok }})"
           echo "selector-tests result: ${{ needs.selector-tests.result }}"
-          echo "English playbooks result: ${{ needs.test-playbooks.result }}"
-          echo "Localized playbooks result: ${{ needs.test-localized-playbooks.result }}"
+          echo "PowerShell setup tests result: ${{ needs.powershell-setup-tests.result }}"
+          if [ "${{ needs.powershell-setup-tests.result }}" != "success" ]; then
+            echo "::error::PowerShell setup tests failed on Windows PowerShell 5.1"
+            exit 1
+          fi
           if [ "${{ needs.selector-tests.result }}" != "success" ]; then
             echo "::error::Test-selection regression tests failed; skip decisions cannot be trusted"
             exit 1
           fi
-          if [ "${{ needs.detect-changes.result }}" != "success" ] || [ "${{ needs.detect-changes.outputs.detection_ok }}" != "true" ]; then
-            echo "::error::Could not determine which tests to run; refusing to pass"
-            exit 1
-          fi
-          if [ "${{ needs.detect-changes.outputs.has_english_entries }}" = "true" ] \
-             && [ "${{ needs.test-playbooks.result }}" != "success" ]; then
-            echo "::error::Required English tests did not complete successfully"
-            exit 1
-          fi
-          if [ "${{ needs.detect-changes.outputs.has_localized_entries }}" = "true" ] \
-             && [ "${{ needs.test-localized-playbooks.result }}" != "success" ]; then
-            echo "::error::Required localized tests did not complete successfully"
-            exit 1
-          fi
-          echo "All required tests passed (or no tests were needed)"
+          echo "All required tests passed"

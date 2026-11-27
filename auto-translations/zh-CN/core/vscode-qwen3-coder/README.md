@@ -16,26 +16,26 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:stx,krk,rx7900xt,rx9070xt,r9700 -->
 > [!NOTE]
-> 本手册要求系统至少配备 **32GB** 内存。
+> 本教程至少需要 **32GB** 的系统内存。
 <!-- @device:end -->
 
 ## 概述
 
-编码代理是强大的工具，它通过与基于大语言模型（LLM）的 AI 代理协作，为开发者赋能。它们可以嵌入到开发环境中，例如终端或 VS Code，从而无缝融入开发者的工作流程。
+编程智能体是一种强大的工具,通过让开发者与由大语言模型(LLM)驱动的 AI 智能体协作,从而提升开发效率。它们可以嵌入到开发环境中,比如终端或 VS Code,从而无缝融入开发者的工作流程。
 
-本教程演示如何使用 Cline、VS Code 和 LM Studio 在本地机器上完全运行编码代理。
+本教程演示了如何使用 Cline、VS Code 和 LM Studio,完全在本地机器上运行一个编程智能体。
 
 <!-- @device:halo_box -->
-> **注意：** 部分 AMD Ryzen AI Halo 系统已预装本手册所需的模型，而其他系统则未预装。两种情况均受支持。当您到达**启动并配置 LM Studio** 部分时，请检查该模型是否已在 LM Studio 中可用——如果已有，可以直接加载；如果没有，则需先在其中下载。
+> **注意:** 部分 AMD Ryzen AI Halo 系统已预装本教程所需的模型,而其他系统则没有。两种情况都受支持。当你进行到 **Launch and Configure LM Studio** 部分时,请检查该模型是否已经在 LM Studio 中可用——如果已经可用,可以直接加载;如果没有,请先在那里下载。
 <!-- @device:end -->
 
-## 您将学到什么
+## 你将学到什么
 
-* 如何使用搭载 Cline 编码代理的 VS Code 来辅助软件工程任务。
-* 如何配置 Cline 以与 LM Studio 通信，实现编码代理的本地推理。
-* 如何使用本地编码代理解决实际的软件工程任务。
+* 如何运行配合 Cline 编程智能体的 VS Code,以辅助完成软件工程任务。
+* 如何配置 Cline,使其与 LM Studio 通信,实现编程智能体的本地推理。
+* 如何使用本地编程智能体解决实际的软件工程任务。
 
-<!-- @device:halo_box,halo,stx,krk -->
+<!-- @device:halo_box,halo,grgh,stx,krk -->
 ## 设置内存配置
 
 <!-- @require:memory-config -->
@@ -43,7 +43,7 @@ SPDX-License-Identifier: MIT
 
 <!-- @device:halo_box -->
 ## 检查软件更新
-> **注意**：如果未安装 VS Code，您可以通过 Ryzen AI Developer Center 进行安装。
+> **注意**:如果尚未安装 VS Code,你可以通过 Ryzen AI Developer Center 进行安装。
 
 <!-- @require:software-update -->
 <!-- @device:end -->
@@ -56,25 +56,25 @@ SPDX-License-Identifier: MIT
 
 ## 启动并配置 LM Studio
 
-我们将使用 LM Studio 来托管驱动编码代理的 LLM。
+我们将使用 LM Studio 来提供驱动该编程智能体的 LLM 服务。
 
-- 在搜索栏中搜索 `LM Studio` 并启动应用程序。您将看到如下页面。
+- 在搜索栏中搜索 `LM Studio` 并启动该应用。你将看到如下页面。
 
 ![LM Studio 初始界面](assets/initial-lm-studio.png)
 
-接下来，我们需要在系统上加载 LLM。我们将使用具有较大上下文长度的 `Qwen3-Coder-30B-A3B` 模型。如果该模型尚未安装，请使用模型选项卡（搜索图标）先下载；出厂时已预装该模型的系统可以直接加载。
-- 点击 LM Studio 窗口顶部的搜索栏，或按 `CTRL+L`。点击 `Manually choose model load parameters` 开关，然后点击 Qwen3-Coder-30B-A3B 模型。
-- 将上下文长度从 `4096` 改为 `32768`，并确保 `GPU Offload` 处于最大值。然后，点击 `Load Model`
+接下来,我们需要在系统上加载 LLM。我们将使用具有较大上下文长度的 `Qwen3-Coder-30B-A3B` 模型。如果该模型尚未安装,可以使用 Model 选项卡(搜索图标)先下载;而预装了该模型的系统可以直接加载。
+- 点击 LM Studio 窗口顶部的搜索栏,或按 `CTRL+L`。点击切换开关 `Manually choose model load parameters`,然后点击 Qwen3-Coder-30B-A3B 模型。
+- 将上下文长度从 `4096` 改为 `32768`,并确保 `GPU Offload` 处于最大值。然后点击 `Load Model`
 
 ![选择模型](assets/model-list-zoomed.png)
 
-我们使用较大的上下文长度，以便代理能够处理大型代码库并记住已进行的更改。
+我们使用较大的上下文长度,以便智能体能够处理大型代码库并记住已做出的更改。
 
 ![配置模型](assets/selecting-model-zoomed.png)
 
-接下来，我们需要启用 LM Studio Server。
-- 点击 LM Studio 左侧的 Developer 选项卡，或按 `CTRL+2`。
-- 勾选状态开关，确保其设置为 `Running`。
+接下来,我们需要启用 LM Studio Server。
+- 在 LM Studio 左侧点击 Developer 选项卡,或按 `CTRL+2`。
+- 勾选状态开关,并确保其设置为 `Running`。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-server-up-windows timeout=120 hidden=True -->
@@ -161,13 +161,13 @@ lms chat "$ID" -p "Reply with exactly: OK"
 
 ## 启动并配置 VS Code
 
-我们将在 VS Code 中安装 Cline 扩展，并将其连接到刚才创建的 LM Studio 服务器。
-- 在搜索栏中搜索 `VS Code` 并启动应用程序。
-- 点击 VS Code 左侧列中的 `Extensions` 图标，搜索 `Cline`。然后，点击 `Install` 按钮。
+我们将在 VS Code 中安装 Cline 扩展,并将其连接到我们刚刚搭建的 LM Studio 服务器。
+- 在搜索栏中搜索 `VS Code` 并启动该应用。
+- 点击 VS Code 左侧栏的 `Extensions` 图标,搜索 `Cline`。然后点击 `Install` 按钮。
 
 ![安装 Cline 扩展](assets/installing-cline-vscode-extension.png)
 
-- 左侧应会出现 Cline 图标。点击它以打开 Cline。此时会弹出一个窗口，询问 `How will you use Cline?`。由于我们将使用通过 LM Studio 运行的本地 LLM，请选择 `Bring my own API Key` 并点击 `Continue`。
+- 左侧应该会出现一个 Cline 图标。点击该图标打开 Cline。会弹出一个窗口,询问 `How will you use Cline?`。由于我们将使用通过 LM Studio 运行的本地 LLM,请选择 `Bring my own API Key` 并点击 `Continue`。
 
 <!-- @os:windows -->
 <!-- @test:id=cline-install-and-verify-windows timeout=300 hidden=True -->
@@ -189,32 +189,32 @@ code --list-extensions | grep -i "saoudrizwan.claude-dev"
 
 ![创建账户](assets/cline-how-will-you-use-cline-zoomed.png)
 
-接下来，我们需要配置 Cline 以与我们设置的 LM Studio 服务器通信。
-- 将 API Provider 设置为 `LM Studio`，模型设置为 `Qwen3-Coder-30B-A3B-GGUF`。
+接下来,我们需要配置 Cline,使其与我们搭建好的 LM Studio 服务器通信。
+- 将 API Provider 设置为 `LM Studio`,模型设置为 `Qwen3-Coder-30B-A3B-GGUF`。
 
->**提示**：可能已有更新的模型可用。如有需要，可以考虑下载并切换到 Qwen3.6 系列模型。
+>**提示**:可能会有更新的模型可用。如果需要,可以考虑下载并切换到 Qwen3.6 系列模型。
 
 
 ![模型配置](assets/cline-model-configuration-zoomed.png)
 
-## 创建您的第一个项目
+## 创建你的第一个项目
 
-让我们使用本地代理来创建一个网站！打开 VSCode，选择您希望 Cline 创建文件的目录。
-- 为此，请在 VS Code 左上角点击 `File -> Open Folder`，并选择一个类似 `Documents` 的文件夹。
+让我们使用本地智能体来创建一个网站!将 VS Code 打开到你选择的目录,Cline 将在该目录中创建文件。
+- 为此,请在 VS Code 左上角选择 `File -> Open Folder`,然后选择一个文件夹,比如 `Documents`。
 
 ![VS Code 空文件夹](assets/open-cline-test.png)
 
-现在我们可以向本地编码代理发送提示了。
-- 点击左侧列中的 Cline 扩展，输入一个提示以启动代理。例如，我们使用以下提示：
+现在我们准备好向本地编程智能体发出提示词了。
+- 点击左侧栏的 Cline 扩展,输入一个提示词以启动智能体。例如,我们可以使用以下提示词:
 ```code
 Create a website showcasing the ability to run local large-language models on an AMD device.
 ```
 
-代理随后将根据提示开始创建文件。作为用户，您可以在 VS Code 中观看代码的生成过程，如下所示。每次 Cline 想要创建文件时，您可能都需要点击 `Save`。
+随后,智能体将根据提示词开始创建文件。作为用户,你可以在 VS Code 中观看代码的生成过程,如下图所示。每当 Cline 想要创建一个文件时,你可能都需要点击 `Save`。
 
 ![Cline 代码生成](assets/cline-code-generation.png)
 
-生成软件后，代理的任务即告完成，您可以运行该应用程序。在本例中，代理写入了三个文件：`index.html`、`script.js` 和 `styles.css`。只需双击 HTML 文件，即可加载并与生成的网站进行交互。
+生成软件之后,智能体的工作就完成了,你可以运行该应用程序。在这个例子中,智能体写入了三个文件:`index.html`、`script.js` 和 `styles.css`。只需双击该 HTML 文件,我们就可以加载并与生成的网站进行交互。
 
 <!-- @os:windows -->
 <!-- @test:id=lmstudio-coding-prompt-endpoint-windows timeout=300 hidden=True -->
@@ -289,20 +289,20 @@ lms server stop
 <!-- @os:end -->
 ## 后续步骤
 
-在生成网站之后，您可以继续与 Cline 协作来改进网站。以下是两个可能的改进方向：
+生成网站之后,你可以继续与 Cline 协作来改进该网站。以下是两个可能的改进方向:
 
-- **文档**：只需向代理提示 `Add a README`，代理即可生成记录该网站的 `README.md` 文件。
-- **动画**：向模型提示 `Add an animation that visually represents a large language model running on a laptop.`，即可为网站生成一个动画。
+- **文档编写**: 只需用 `Add a README` 提示词提示智能体,智能体就会生成一份记录该网站的 `README.md` 文件。
+- **动画效果**: 使用提示词 `Add an animation that visually represents a large language model running on a laptop.`(添加一个直观展示大语言模型在笔记本电脑上运行的动画。) 让模型为网站生成一个动画。
 
-我们鼓励读者尝试使用此设置生成其他应用程序。以下是我们尝试过的一些有趣示例：
+我们鼓励读者尝试使用这套方案来生成其他应用程序。以下是我们尝试过的一些有趣示例:
 
-- **复古街机游戏**：尝试一些其他提示。使用以下提示让代理使用 `PyGame` 软件包以 Python 创建复古风格的游戏也很有意思：
+- **复古街机游戏**: 可以尝试一些其他提示词。让智能体使用 `PyGame` 包用 Python 创建复古风格的游戏也会很有趣,可以使用以下提示词:
 
 ```code
 Create a simple pong game using the PyGame python package.
 ```
 
-- **数据分析**：编码代理特别有用的一个领域是脚本编写和数据分析。以下提示用于展示本地模型生成股价可视化数据分析软件的能力：
+- **数据分析**: 编程智能体特别擅长的一个领域是脚本编写和数据分析。以下提示词可以展示本地模型生成股票价格可视化数据分析软件的能力:
 
 ```code
 Write a Python script that fetches daily price data for AMD (ticker: AMD) from an online API (use the yfinance library so no API key is needed). Loads the last 365 calendar days of data into a Pandas DataFrame. Computes 20-day and 50-day simple moving averages of the closing price. Store the data in a sqlite database and when the script is first run check to see if the sqlite database contains the requested data, if not, fetch it from the API. Plots a single matplotlib line chart with: Close, SMA-20, and SMA-50. Include a title, axis labels, and a legend. Saves the figure to amd_price_sma.png in the current directory and prints the path when done. Allow the user to pass in command line arguments for the total time period of data, the time period for the simple moving average to calculate, as well as to provide different tickers.
@@ -310,8 +310,8 @@ Write a Python script that fetches daily price data for AMD (ticker: AMD) from a
 
 ## 资源
 
-以下是了解编码代理、Cline 以及在 上运行工作负载的更多资源：
+以下是一些了解编程智能体、Cline 以及在 上运行工作负载的更多信息的附加资源:
 
-* 有关 AMD 与 LM Studio 合作伙伴关系及集成的更多信息：https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
-* AMD 博客，介绍如何在 AMD Ryzen™ AI 和 Radeon™ 显卡上运行 Cline：https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
-* Cline 博客，介绍如何在 AI PC 上本地运行编码代理：https://cline.bot/blog/local-models-amd
+* 关于 AMD 与 LM Studio 合作及集成的更多信息: https://www.amd.com/en/ecosystem/isv/consumer-partners/lm-studio.html
+* AMD 博客介绍如何在 AMD Ryzen™ AI 和 Radeon™ 显卡上运行 Cline: https://www.amd.com/en/blogs/2025/how-to-vibe-coding-locally-with-amd-ryzen-ai-and-radeon.html
+* Cline 博客介绍如何在 AI PC 上本地运行编程智能体: https://cline.bot/blog/local-models-amd

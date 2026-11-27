@@ -79,6 +79,26 @@ def _resolve_model_path(model_name: str) -> str:
 MODEL_NAME = _resolve_model_path(MODEL_NAME)
 
 
+def _load_training_split():
+    # Read the dataset's parquet from the local HF cache when CI primed it, so
+    # load_dataset makes no Hub API call (rate-limited without a token); else
+    # load it from the Hub as usual. Only "not cached" falls back: a cached
+    # parquet that fails to load is an error, not a reason to call the Hub.
+    from huggingface_hub import snapshot_download
+    from huggingface_hub.errors import LocalEntryNotFoundError
+    try:
+        local = snapshot_download(DATASET_NAME, repo_type="dataset", local_files_only=True)
+    except LocalEntryNotFoundError:
+        log(f"Dataset {DATASET_NAME} is not in the local Hugging Face cache; loading it from the Hub")
+        return load_dataset(DATASET_NAME, split=DATASET_SPLIT)
+    files = sorted(str(p) for p in Path(local).glob("data/*.parquet"))
+    if not files:
+        log(f"Cached snapshot {local} has no data/*.parquet; loading {DATASET_NAME} from the Hub")
+        return load_dataset(DATASET_NAME, split=DATASET_SPLIT)
+    log(f"Loading {DATASET_NAME} from the local Hugging Face cache: {', '.join(files)}")
+    return load_dataset("parquet", data_files=files, split=DATASET_SPLIT)
+
+
 def log(msg: str):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -112,7 +132,7 @@ def load_model():
 # =========================
 def prepare_dataset(tokenizer):
     log("Loading dataset...")
-    dataset = load_dataset(DATASET_NAME, split=DATASET_SPLIT)
+    dataset = _load_training_split()
 
     log("Standardizing dataset format...")
     dataset = standardize_data_formats(dataset)

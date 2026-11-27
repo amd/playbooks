@@ -48,10 +48,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 HARNESS = (
     ".github/scripts/run_playbook_tests.py",
     ".github/scripts/build_test_matrix.py",
-    ".github/workflows/test-playbooks.yml",
-    # The builder reads this to drop devices with no runner group, so the
-    # fixture needs it or every device falls through unfiltered.
-    ".github/runners.json",
 )
 
 
@@ -69,38 +65,12 @@ def make_repo(path: Path) -> None:
     git("config", "commit.gpgsign", "false", cwd=path)
 
 
-# Synthetic runner groups pre-registered in the fixture's runners.json. The
-# builder drops devices with no runner group, so tests that invent a device need
-# it to exist in the catalog — and it has to be there in the BASE commit, since
-# runners.json is harness state and editing it mid-test forces the full matrix.
-FIXTURE_EXTRA_GROUPS = ("newdev", *(f"dev{i}" for i in range(200)))
-
-
 def graft_harness(dest: Path) -> None:
     """Copy the working tree's harness into dest so both sides match byte-for-byte."""
     for rel in HARNESS:
         target = dest / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO_ROOT / rel, target)
-    register_fixture_groups(dest)
-
-
-def register_fixture_groups(dest: Path) -> None:
-    """Append the synthetic test groups to the fixture's runner catalog."""
-    runners = dest / ".github" / "runners.json"
-    catalog = json.loads(runners.read_text(encoding="utf-8"))
-    catalog += [
-        {"name": f"fixture-{group}", "os": os_name, "group": group, "labels": []}
-        for group in FIXTURE_EXTRA_GROUPS
-        for os_name in ("Linux", "Windows")
-    ]
-    runners.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
-
-
-def fixture_runner_groups(fixture: Path) -> set[str]:
-    """Device groups the fixture's catalog actually has machines for."""
-    catalog = json.loads((fixture / ".github" / "runners.json").read_text(encoding="utf-8"))
-    return {r["group"] for r in catalog if r.get("group")}
 
 
 def populate_from_rev(dest: Path, rev: str) -> None:
@@ -119,10 +89,11 @@ def populate_from_worktree(dest: Path) -> None:
     shutil.copytree(REPO_ROOT / "playbooks", dest / "playbooks", symlinks=True)
 
 
-def select(fixture: Path, base: str = "HEAD") -> list[dict]:
+def select(fixture: Path, base: str = "HEAD", *extra: str) -> list[dict]:
     """Run the fixture's own copy of the builder and return selected entries."""
     proc = subprocess.run(
-        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed", "--base", base],
+        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed",
+         "--base", base, *extra],
         cwd=fixture, capture_output=True, text=True,
     )
     if proc.returncode != 0:
@@ -130,12 +101,16 @@ def select(fixture: Path, base: str = "HEAD") -> list[dict]:
     return json.loads(proc.stdout)
 
 
-def full_count(fixture: Path) -> int:
+def select_all(fixture: Path, *extra: str) -> list[dict]:
     proc = subprocess.run(
-        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all"],
+        [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all", *extra],
         cwd=fixture, capture_output=True, text=True, check=True,
     )
-    return len(json.loads(proc.stdout))
+    return json.loads(proc.stdout)
+
+
+def full_count(fixture: Path, *extra: str) -> int:
+    return len(select_all(fixture, *extra))
 
 
 class FixtureCase(unittest.TestCase):
@@ -188,8 +163,33 @@ class FixtureCase(unittest.TestCase):
         self.assertEqual(select(self.fx), [])
 
     def test_harness_change_forces_full_matrix(self):
-        self.edit(".github/workflows/test-playbooks.yml", lambda c: c + "\n# touched\n")
+        self.edit(".github/scripts/build_test_matrix.py", lambda c: c + "\n# touched\n")
         self.assertEqual(len(select(self.fx)), self.total)
+
+    def test_orchestrai_plumbing_change_selects_nothing(self):
+        """Where a playbook runs is not what it executes: `!orc` tests such a change."""
+        plumbing = (".github/workflows/test-playbooks-orchestrai.yml",
+                    ".github/orchestrai-config.yml", ".github/scripts/orchestrai_matrix.py")
+        for rel in plumbing:
+            path = self.fx / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("# v1\n")
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", "add OrchestrAI plumbing", cwd=self.fx)
+        for rel in plumbing:
+            (self.fx / rel).write_text("# v2\n")
+        self.assertEqual(select(self.fx), [])
+
+    def test_an_archived_script_change_selects_nothing(self):
+        """Nothing runs the device runner scripts kept in scripts/archive/."""
+        rel = ".github/scripts/archive/select_runners.py"
+        path = self.fx / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# v1\n")
+        git("add", "-A", cwd=self.fx)
+        git("commit", "-qm", "archive a script", cwd=self.fx)
+        path.write_text("# v2\n")
+        self.assertEqual(select(self.fx), [])
 
     def test_runner_change_forces_full_matrix(self):
         """The defect that motivated this design: editing the extractor must not cancel."""
@@ -225,41 +225,6 @@ class FixtureCase(unittest.TestCase):
         self.assertTrue(got, "entries with an unresolvable @var must be queued")
         self.assertTrue(all(e["playbook"] == pb for e in got))
 
-    def test_oversized_matrix_fails_loudly(self):
-        """More than 256 jobs must fail in the builder, not at Actions expansion."""
-        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
-        meta = json.loads(pj.read_text())
-        meta["tested_platforms"] = {f"dev{i}": ["linux", "windows"] for i in range(200)}
-        pj.write_text(json.dumps(meta, indent=2))
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
-             "--github-output", os.devnull],
-            cwd=self.fx, capture_output=True, text=True,
-        )
-        self.assertNotEqual(proc.returncode, 0)
-        self.assertIn("256", proc.stderr)
-
-    def test_device_without_a_runner_group_is_dropped(self):
-        """A device no machine serves must not reach the matrix.
-
-        Its runs-on would match no runner, so the job queues until it times out
-        rather than failing — indistinguishable from a hung test. Such devices
-        are covered by the OrchestrAI workflow instead.
-        """
-        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
-        meta = json.loads(pj.read_text())
-        meta["tested_platforms"]["unserved"] = ["linux", "windows"]
-        pj.write_text(json.dumps(meta, indent=2))
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
-             "--github-output", os.devnull],
-            cwd=self.fx, capture_output=True, text=True, check=True,
-        )
-        entries = json.loads(proc.stdout)
-        self.assertEqual(len(entries), self.total, "an unserved device must add no jobs")
-        self.assertNotIn("unserved", {e["arch"] for e in entries})
-        self.assertIn("unserved", proc.stderr)
-
     def test_new_device_is_selected_even_though_signature_matches(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
@@ -267,6 +232,28 @@ class FixtureCase(unittest.TestCase):
         pj.write_text(json.dumps(meta, indent=2))
         got = select(self.fx)
         self.assertEqual([(e["platform"], e["arch"]) for e in got], [("linux", "newdev")])
+
+    def add_tested_device(self, device):
+        pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
+        meta = json.loads(pj.read_text())
+        meta["tested_platforms"][device] = ["linux"]
+        pj.write_text(json.dumps(meta, indent=2))
+        return pj.parent.name
+
+    def test_every_declared_device_is_selected(self):
+        """OrchestrAI tests every device; none is left out for want of a runner."""
+        pb = self.add_tested_device("unserved")
+        got = {(e["playbook"], e["platform"], e["arch"]) for e in select(self.fx)}
+        self.assertEqual(got, {(pb, "linux", "unserved")})
+
+    def test_keys_list_each_selected_entry_once(self):
+        """--keys hands the exact entries on: a PR that changed a playbook on one
+        device and OS does not run it on the others."""
+        pb = self.add_tested_device("unserved")
+        proc = subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "changed",
+             "--base", "HEAD", "--keys"], cwd=self.fx, capture_output=True, text=True, check=True)
+        self.assertEqual(json.loads(proc.stdout), [["", pb, "linux", "unserved"]])
 
     def test_required_flag_flip_is_selected(self):
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
@@ -314,10 +301,7 @@ class FixtureCase(unittest.TestCase):
         """Dropping a device from tested_platforms must still run the lost entry."""
         pj = next((self.fx / "playbooks" / "core").glob("*/playbook.json"))
         meta = json.loads(pj.read_text())
-        # Only a device with a runner group reaches the matrix at all; one
-        # without is absent on both sides, so dropping it selects nothing.
-        groups = fixture_runner_groups(self.fx)
-        dev = sorted(d for d in meta["tested_platforms"] if d in groups)[0]
+        dev = sorted(meta["tested_platforms"])[0]
         lost = meta["tested_platforms"].pop(dev)
         pj.write_text(json.dumps(meta, indent=2))
         got = select(self.fx)
@@ -418,55 +402,112 @@ class FixtureCase(unittest.TestCase):
         self.assertEqual({e["playbook"] for e in got}, consumers)
 
 
-class LocalizedRunnerLabelCase(unittest.TestCase):
-    """The locale, platform/device, and optional host labels must stay distinct."""
+class LocalizedFixtureCase(unittest.TestCase):
+    """--locale selection must follow the English rule: only what executes counts.
 
-    @staticmethod
-    def build(*args) -> list[dict]:
-        proc = subprocess.run(
-            [sys.executable, ".github/scripts/build_test_matrix.py", *args],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        return json.loads(proc.stdout)
+    Motivated by PRs that edited English prose or a shared dependency and queued
+    every inheriting zh-CN entry, because the selector hashed whole directories.
+    """
 
-    def test_localized_entries_use_standard_dimensions_plus_locale(self):
-        entries = self.build("--mode", "all", "--locale", "zh-CN")
-        self.assertTrue(entries)
-        for entry in entries:
-            os_label = "Windows" if entry["platform"] == "windows" else "Linux"
-            expected = ["self-hosted", os_label, entry["arch"], "localized-zh-cn"]
-            self.assertEqual(json.loads(entry["runner"]), expected)
-            self.assertEqual(entry["runner_label"], "localized-zh-cn")
-            self.assertEqual(entry["target_runner_label"], "")
-            self.assertEqual(entry["runner_labels"], ",".join(expected))
+    LOCALE = "zh-CN"
+    TEST_TAG = re.compile(r"(<!-- @test:[^>]+ -->\s*```\w*\n)")
 
-    def test_manual_target_does_not_replace_locale_label(self):
-        entries = self.build("--mode", "all", "--locale", "zh-CN")
-        candidate = entries[0]
-        os_label = "Windows" if candidate["platform"] == "windows" else "Linux"
-        catalog = json.loads((REPO_ROOT / ".github/runners.json").read_text(encoding="utf-8"))
-        runner = next(
-            item for item in catalog
-            if item["os"] == os_label and item["group"] == candidate["arch"]
-        )
-        targeted = self.build(
-            "--mode", "playbook",
-            "--playbook-id", candidate["playbook"],
-            "--locale", "zh-CN",
-            "--platform", candidate["platform"],
-            "--device", candidate["arch"],
-            "--runner-label", runner["name"],
-        )
-        self.assertTrue(targeted)
-        for entry in targeted:
-            labels = json.loads(entry["runner"])
-            self.assertEqual(entry["runner_label"], "localized-zh-cn")
-            self.assertEqual(entry["target_runner_label"], runner["name"])
-            self.assertIn("localized-zh-cn", labels)
-            self.assertIn(runner["name"], labels)
+    @classmethod
+    def setUpClass(cls):
+        if not (REPO_ROOT / "localized-playbooks" / cls.LOCALE).is_dir():
+            raise unittest.SkipTest(f"no localized-playbooks/{cls.LOCALE}")
+        cls._tmp = tempfile.TemporaryDirectory(prefix="matrix-localized-")
+        cls.fx = Path(cls._tmp.name) / "repo"
+        make_repo(cls.fx)
+        populate_from_worktree(cls.fx)
+        shutil.copytree(REPO_ROOT / "localized-playbooks", cls.fx / "localized-playbooks",
+                        symlinks=True)
+        # Its eol=lf rule keeps git archive (the base side) byte-identical to the
+        # working tree under core.autocrlf=true, as it is in the real repo
+        shutil.copy2(REPO_ROOT / ".gitattributes", cls.fx / ".gitattributes")
+        graft_harness(cls.fx)
+        git("add", "-A", cwd=cls.fx)  # safe: throwaway repo, not the source tree
+        git("commit", "-qm", "base", cwd=cls.fx)
+        cls.base_sha = git("rev-parse", "HEAD", cwd=cls.fx).stdout.strip()
+        cls.total = full_count(cls.fx, "--locale", cls.LOCALE)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    def tearDown(self):
+        git("reset", "-q", "--hard", self.base_sha, cwd=self.fx, check=False)
+        git("clean", "-qfd", cwd=self.fx, check=False)
+
+    def select(self) -> list[dict]:
+        return select(self.fx, "HEAD", "--locale", self.LOCALE, "--allow-empty")
+
+    def append(self, rel: str, text: str) -> None:
+        p = self.fx / rel
+        p.write_text(p.read_text(encoding="utf-8") + text, encoding="utf-8")
+
+    def inheriting_playbook(self) -> str:
+        """A localized id that layers over English (localized_only false)."""
+        entries = json.loads(subprocess.run(
+            [sys.executable, ".github/scripts/build_test_matrix.py", "--mode", "all",
+             "--locale", self.LOCALE],
+            cwd=self.fx, capture_output=True, text=True, check=True).stdout)
+        pb = next((e["playbook"] for e in entries if not e["localized_only"]), None)
+        if pb is None:
+            self.skipTest("no inheriting localized playbook")
+        return pb
+
+    def test_clean_tree_selects_nothing(self):
+        self.assertEqual(self.select(), [])
+
+    def test_english_dependency_prose_edit_selects_nothing(self):
+        """The reported case: a shared-dependency wording fix queued every overlay."""
+        deps = sorted((self.fx / "playbooks/dependencies").glob("*.md"))
+        self.assertTrue(deps)
+        for dep in deps:
+            self.append(str(dep.relative_to(self.fx)), "\nA typo fix.\n")
+        self.assertEqual(self.select(), [])
+
+    def test_english_readme_prose_edit_selects_nothing(self):
+        pb = self.inheriting_playbook()
+        readme = next((self.fx / "playbooks").glob(f"*/{pb}/README.md"))
+        self.append(str(readme.relative_to(self.fx)), "\nA typo fix.\n")
+        self.assertEqual(self.select(), [])
+
+    def test_overlay_prose_edit_selects_nothing(self):
+        for readme in (self.fx / "localized-playbooks" / self.LOCALE).glob("*/*/README.md"):
+            self.append(str(readme.relative_to(self.fx)), "\n拼写修正。\n")
+        self.assertEqual(self.select(), [])
+
+    def test_overlay_test_change_selects_that_playbook_only(self):
+        for readme in sorted((self.fx / "localized-playbooks" / self.LOCALE).glob("*/*/README.md")):
+            content = readme.read_text(encoding="utf-8")
+            if not self.TEST_TAG.search(content):
+                continue
+            readme.write_text(self.TEST_TAG.sub(r"\1echo probe\n", content, count=1),
+                              encoding="utf-8")
+            got = self.select()
+            if got:
+                self.assertEqual({e["playbook"] for e in got}, {readme.parent.name})
+                return
+            # Block scoped to a device this fleet does not run; try the next one
+            git("checkout", "-q", "--", ".", cwd=self.fx)
+        self.skipTest("no overlay @test block reaches a matrix entry")
+
+    def test_localized_dependency_test_change_is_selected(self):
+        touched = False
+        for dep in (self.fx / "localized-playbooks" / self.LOCALE / "dependencies").glob("*.md"):
+            content = dep.read_text(encoding="utf-8")
+            if self.TEST_TAG.search(content):
+                touched = True
+                dep.write_text(self.TEST_TAG.sub(r"\1echo probe\n", content), encoding="utf-8")
+        if not touched:
+            self.skipTest("no @test block in localized dependencies")
+        self.assertTrue(self.select(), "localized dependency tests are not signed")
+
+    def test_harness_change_forces_full_matrix(self):
+        self.append(".github/scripts/run_playbook_tests.py", "\n# touched\n")
+        self.assertEqual(len(self.select()), self.total)
 
 
 class UnreachableBaseCase(unittest.TestCase):
@@ -629,7 +670,7 @@ if __name__ == "__main__":
     args, rest = ap.parse_known_args()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite([loader.loadTestsFromTestCase(FixtureCase),
-                                loader.loadTestsFromTestCase(LocalizedRunnerLabelCase),
+                                loader.loadTestsFromTestCase(LocalizedFixtureCase),
                                 loader.loadTestsFromTestCase(UnreachableBaseCase)])
     if not args.quick:
         suite.addTests(loader.loadTestsFromTestCase(ReplayCase))

@@ -579,6 +579,18 @@ ls -1t ComfyUI/output/*.png | head -n 5
 <!-- @os:end -->
 
 
+<!-- @os:linux -->
+## Optimizing Attention for Performance
+
+Now that you've generated an image, you can tune how ComfyUI computes **attention** to get the best performance on your AMD GPU. On ROCm, the attention backend — selected by launch flags such as `--use-pytorch-cross-attention` (used in the launch step above) or `--use-flash-attention` — has a significant impact on generation speed, memory usage, and stability.
+
+For a practical, AMD-specific breakdown of the available backends (PyTorch SDPA/AOTriton, Flash Attention/CK Tile, Sage Attention, and xformers), how each maps to ROCm, and which flag to choose for your workload, see the optional AMD ROCm blog:
+
+> **Optional — for best performance:** [Understanding Attention Algorithms and Their Backends for Image and Video Generation](https://rocm.blogs.amd.com/software-tools-optimization/comfyui-fa-backends/README.html)
+
+As a quick rule of thumb from that guide: `--use-pytorch-cross-attention` (PyTorch SDPA) is the safest default on AMD, while `--use-flash-attention` typically delivers the best raw performance. Relaunch ComfyUI with a different flag and compare generation times to find what works best for your model and GPU.
+<!-- @os:end -->
+
 ## Adjusting Generation Parameters
 
 ### KSampler Settings

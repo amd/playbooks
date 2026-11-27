@@ -42,6 +42,10 @@ This guide outlines the correct usage of AMD product names and trademarks in all
 - **First mention:** AMD Radeon™ 7000 Series Graphics
 - **Subsequent:** Radeon 7000 Series or RX 7900 XT
 
+#### Radeon PRO W7900 (Device ID: `w7900`)
+- **First mention:** AMD Radeon™ PRO W7900
+- **Subsequent:** Radeon PRO W7900 or W7900
+
 #### Radeon RX 9070 XT (Device ID: `rx9070xt`)
 - **First mention:** AMD Radeon™ 9000 Series Graphics
 - **Subsequent:** Radeon 9000 Series or RX 9070 XT

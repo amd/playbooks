@@ -41,8 +41,9 @@ test_path_template: "L4-sys/playbooks/{platform}/sys_func-playbook_runner"
 # repo variable as a JSON map, e.g.:
 #   {"halo":["<tag>"],"stx":["<tag>"],"rx7900xt":["<tag>"]}
 # Every device a playbook.json declares must appear in that map, or the matrix
-# builder skips it with a warning. Keep the device set in sync with the native
-# runner's VALID_DEVICES in .github/scripts/run_playbook_tests.py.
+# builder skips it with a warning. A device outside the runner's VALID_DEVICES
+# (.github/scripts/run_playbook_tests.py), such as a box SKU, needs a
+# device_runs_as entry below.
 device_to_tags: {}
 
 # Device -> gfx target. The TheRock tarball is multi-arch, so this is only used
@@ -55,6 +56,7 @@ device_to_gfx:
   stx:      "gfx1150"
   krk:      "gfx1103"
   rx7900xt: "gfx110X"
+  w7900:    "gfx110X"   # Navi 31, like rx7900xt
   rx9070xt: "gfx120X"
   r9700:    "gfx120X"
   # TODO: gfx targets for unreleased SKUs unknown until hardware is available.
@@ -79,8 +81,24 @@ device_families:
   stx:      "ryzen_apu"
   krk:      "ryzen_apu"
   rx7900xt: "radeon"
+  w7900:    "radeon"
   rx9070xt: "radeon"
   r9700:    "radeon"
+
+# A pull request's automatic run (DEVICE_SCOPE=representative) tests each
+# changed playbook on one device per family and OS instead of every device it
+# declares: per OS, the first device in its family's list below that the
+# playbook tests there, preferring one where it is required. A playbook on halo
+# and rx9070xt for Linux and Windows runs four times, not fourteen. A device
+# missing from its family's list comes after the listed ones; a family with no
+# list keeps all its devices. The nightly, manual runs and `!orc` (every device
+# the changed playbooks declare) are unchanged. Ordered by how many machines
+# OrchestrAI has in Markham (halo 76, rx9070xt 60, stx 31, rx7900xt 5,
+# r9700 5). w7900 (9) stays last: it is a 48 GB workstation card, so a PR
+# checks the consumer card a playbook names before it.
+pr_devices:
+  ryzen_apu: [halo, stx, krk, grgh, halo_box]
+  radeon: [rx9070xt, rx7900xt, r9700, w7900]
 
 # ---------------------------------------------------------------------------
 # Scheduling policy
@@ -99,9 +117,11 @@ extra_tags:
 # (gpt-oss-120b on Halo, a small model on the smaller devices — qwen3.5-9b for
 # lmstudio, Qwen3.5-4B for pytorch-rocm, gpt-oss-20b for n8n), so they only need
 # 128 GB for the big halo-class runs — the small-device runs fit in normal RAM.
-# grgh (Gorgon Halo) is in the same bucket: its @device/@var scopes resolve the
-# same halo-class models, and the fleet is 128 GB or 192 GB, so it carries the
-# same tag. Tagging ram_128gb ONLY on halo/halo_box/grgh lets them run on every
+# grgh (Gorgon Halo) runs the same halo-class models (its @device/@var scopes
+# resolve them), but its machines have 192 GB and carry no ram_* tag, so it
+# runs these playbooks untagged and is left out of extra_tag_devices[ram_128gb]
+# below (a ram_128gb batch on grgh could never be placed).
+# Tagging ram_128gb ONLY on halo/halo_box lets them run on every
 # device (no tag elsewhere → tags_for() falls back to the empty extra_tags entry)
 # instead of being dropped from the non-128 GB devices by extra_tag_devices.
 # Unsloth uses the same Halo tagging, while its known-OOM STX combination is
@@ -120,38 +140,34 @@ extra_tags:
 # was marked timed out, while openclaw passed on the 128 GB batch the same night.
 # The two are already treated as a pair in skip_playbook_devices below.
 device_extra_tags:
+  # grgh's machines (192 GB; DT574 reports 188 GiB to the OS) carry no ram_*
+  # tag, so the 128 GB requirement in extra_tags would drop its batch.
+  deepseek-v4-flash-ds4:
+    grgh: []
   unsloth-llms-finetuning:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   lmstudio-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   pytorch-rocm-llms:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   n8n-automation-gpt-oss:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   vscode-qwen3-coder:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   gaia-agents:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   openclaw-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   hermes-lemonade-server:
     halo:     ["ram_128gb"]
     halo_box: ["ram_128gb"]
-    grgh:     ["ram_128gb"]
   # Fixed Qwen3.6-35B-A3B-GGUF needs more than 32 GB hosts expose; krk is mixed
   # (16/32/64 GB), so pin krk runs to its 64 GB hosts.
   github-slack-development-digest:
@@ -162,7 +178,7 @@ device_extra_tags:
 # Devices that actually satisfy a given extra tag. A batch requesting an extra
 # tag on a device NOT listed here is dropped (the broker could never satisfy it).
 extra_tag_devices:
-  ram_128gb: ["halo", "halo_box", "grgh"]
+  ram_128gb: ["halo", "halo_box"]
   ram_64gb: ["krk"]
 
 # Extra tags that only add capacity: a machine with them can run everything the
@@ -171,6 +187,67 @@ extra_tag_devices:
 # machine instead of two (they run one after another on it). Remove a tag here
 # to keep its batches separate.
 superset_tags: ["ram_64gb", "ram_128gb"]
+
+# Sites a device's batches may be placed at (OrchestrAI site ids; a device not
+# listed may run at any site). Every device stays in Markham: HYD machines are
+# slow to provision and fetch from Artifactory/PyPI caches far from them, and
+# HYD KRKs are 32 GB. Sites: maas-mkm-mnb, maas-mkm-cs (Markham), maas-hyd-ha
+# (Hyderabad).
+device_site_ids:
+  krk:      &markham ["maas-mkm-mnb", "maas-mkm-cs"]
+  halo:     *markham
+  halo_box: *markham
+  stx:      *markham
+  rx7900xt: *markham
+  w7900:    *markham
+  rx9070xt: *markham
+  r9700:    *markham
+  grgh:     *markham
+
+# Device -> name shown on its batch jobs and in the results grid
+# ("Halo · Windows (19 playbooks)"). A device not listed shows its id.
+device_names:
+  halo:     "Halo"
+  halo_box: "Halo Box"
+  grgh:     "Gorgon Halo"
+  stx:      "Strix"
+  krk:      "Krackan"
+  rx7900xt: "RX 7900 XT"
+  w7900:    "PRO W7900"
+  rx9070xt: "RX 9070 XT"
+  r9700:    "R9700"
+
+# Device -> the device its playbooks run as. Machines are still chosen by the
+# device's own tags and sites, but PLAYBOOK_DEVICE names the other device, so
+# README @device blocks, @var values and the test library's per-device
+# dependencies treat it exactly like that one. It does not mean the two are the
+# same card. Box SKUs (halo_box, grgh_box, mdsh_box) are display-only names that
+# run_playbook_tests.py rejects (it exits 2 before any test), so they run as the
+# device of their silicon. Their README @device blocks are then not tested: a
+# box runs its device's blocks, which install everything on the stock CI image.
+# grgh (Gorgon Halo) is not here: it runs as itself. READMEs name it next to
+# halo, and so do the test library's per-playbook dependency lists
+# (SW-Infra-EMU/ucicd-test-library#7297), so it gets halo's models.
+# w7900 (PRO W7900, 48 GB) is not here: it runs as itself. It shares Navi 31
+# with rx7900xt (20 GB), so a README that wants the same steps on both names
+# both: <!-- @device:rx7900xt,w7900 -->.
+device_runs_as:
+  halo_box: halo
+  grgh_box: grgh
+  mdsh_box: mdsh
+
+# Device -> platform -> OS image its sessions request instead of the platform's
+# default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
+# installed on demand, so a device whose only machine runs another OS needs an
+# image on the broker's on-demand list. grgh's machines have no stock image:
+# DT574 runs the custom Windows 11 Zenith image and DT575 the custom Debian 13
+# Rex A16 AFO image (v2: no suspend at the idle login screen), so each batch
+# asks for exactly its image and finds the machine already running it; change
+# these together with the machines' images.
+device_os_images:
+  grgh:
+    linux: "custom/debian-13-rex-a16-afo-v2-custom-test"
+    windows: "windows/windows-11-26300-9457-halo-zenith-v4-custom-test"
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
 # playbook.json tested_platforms declares. Always treated as non-required.
@@ -306,12 +383,13 @@ skip_playbook_devices:
 # Per-run pipeline settings
 # ---------------------------------------------------------------------------
 run_settings:
-  # minutes, whole batch. superset_tags folds a device's untagged playbooks into
-  # its 64/128 GB batch (~20 in a row on Halo), so this is as high as the Test
-  # jobs' 330-minute build wait allows while keeping 30 min for the build to
-  # wind down. Raising it means raising that wait, which must stay under
-  # GitHub's 360-minute job timeout.
-  max_duration: 300
+  # minutes, whole batch. A batch runs every playbook of its device and OS in a
+  # row, English and localized (superset_tags folds the untagged ones into the
+  # 64/128 GB batch): about 30 on Halo, ~340 min on Windows. The Test jobs wait
+  # this + 30 min for the build (orchestrai_wait_build.sh reads it here); their
+  # timeout-minutes and RETRY_START_LIMIT_MINUTES in
+  # test-playbooks-orchestrai.yml and orchestrai-pr-command.yml budget for 480.
+  max_duration: 480
   max_test_case_duration: 90   # minutes, single playbook
   # Minutes the Control Plane queues a batch for machines (including quota
   # waits) before dropping it as NOT_RUN. Not counted in max_duration.
