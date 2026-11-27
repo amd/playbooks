@@ -5,6 +5,7 @@
 
 """Print the active ROCm PyTorch environment and fail if no AMD GPU is visible."""
 
+import os
 import platform
 import sys
 
@@ -37,6 +38,7 @@ def main() -> None:
         ("Python", sys.version.split()[0]),
         ("Interpreter", sys.executable),
         ("PyTorch", torch.__version__),
+        ("PyTorch location", os.path.dirname(torch.__file__)),
         ("ROCm / HIP", torch.version.hip or "unavailable"),
         ("Visible AMD GPUs", str(gpu_count)),
     ]
