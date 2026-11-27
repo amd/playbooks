@@ -704,7 +704,7 @@ $env:PYTHONIOENCODING = "utf-8"  # a traceback must not fail to print to the log
 
 $port = 8080
 $url = "http://127.0.0.1:$port/health"
-$readyTimeoutSec = 240
+$readyTimeoutSec = 270
 $logOut = Join-Path $work "openwebui-ci-out.log"
 $logErr = Join-Path $work "openwebui-ci-err.log"
 $bodyFile = Join-Path $work "openwebui-ci-health.txt"
@@ -715,8 +715,10 @@ function Format-SafeLines([string[]]$lines) {
   if (-not $lines -or $lines.Count -eq 0) { return "  (empty)" }
   $safe = foreach ($l in $lines) {
     $s = $l -replace "\x1b\[[0-9;?]*[A-Za-z]", ""
-    $s = $s -replace '(?i)((secret|token|password|passwd|api[_-]?key|authorization)[A-Za-z_]*["'']?\s*[:=]\s*["'']?)[^\s"'',]+', '$1<redacted>'
-    $s = $s -replace '(?i)(bearer\s+)\S+', '$1<redacted>'
+    # The whole value of a secret-looking key: a quoted value up to its closing quote, else one word,
+    # an auth scheme ("Bearer sk-...") included; then any other Bearer token
+    $s = $s -replace '(?i)((?:secret|token|password|passwd|api[_-]?key|authorization)[A-Za-z_]*["'']?\s*[:=]\s*)(?:(")(?:[^"\\]|\\.)*"?|('')[^'']*''?|(?:(?:bearer|basic)\s+)?[^\s"'',;}]+)', '$1$2$3<redacted>$2$3'
+    $s = $s -replace '(?i)\b(bearer\s+)[^\s"'',;}]+', '$1<redacted>'
     $s = $s -replace '(://[^/\s:@]+:)[^@\s/]+@', '$1<redacted>@'
     if ($s.Length -gt 300) { $s = $s.Substring(0, 300) + " ..." }
     "  $s"
@@ -782,26 +784,26 @@ Write-Host "open-webui $version; python: $py; server: $ow serve --port $port; wo
 # still has that line, provide the folder for this run only.
 $driveTmp = Join-Path ([IO.Path]::GetPathRoot($work)) "tmp"
 $managedPy = Join-Path $venv "Lib\site-packages\open_webui\utils\machines\managed.py"
+$tmpBug = [bool]((Test-Path $managedPy) -and (Select-String -LiteralPath $managedPy -SimpleMatch "dir='/tmp'))" -Quiet))
 $createdTmp = $false
 $tmpBefore = @()
-if ((Test-Path $managedPy) -and (Select-String -LiteralPath $managedPy -SimpleMatch "dir='/tmp'))" -Quiet)) {
-  if (Test-Path $driveTmp) {
-    $tmpBefore = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
-  } else {
-    New-Item -ItemType Directory -Path $driveTmp | Out-Null
-    $createdTmp = $true
-    Write-Host "WARNING: open-webui $version needs $driveTmp to start (upstream bug open-webui#35075); created it for this run"
-  }
+if ($tmpBug -and (Test-Path $driveTmp)) {
+  $tmpBefore = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
 }
 
 $started = Get-Date
 $p = $null
-$ok = $false
 $failure = $null
 $exitCode = $null
 $stoppedByTest = $false
 $probes = New-Object System.Collections.Generic.List[string]
 try {
+  if ($tmpBug -and -not (Test-Path $driveTmp)) {
+    try { New-Item -ItemType Directory -Path $driveTmp -ErrorAction Stop | Out-Null }
+    catch { throw "could not create $driveTmp, which open-webui $version needs to start (upstream bug open-webui#35075): $($_.Exception.Message)" }
+    $createdTmp = $true
+    Write-Host "WARNING: open-webui $version needs $driveTmp to start (upstream bug open-webui#35075); created it for this run"
+  }
   $p = Start-Process -FilePath $ow -ArgumentList "serve --port $port" -WorkingDirectory $work -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
   $null = $p.Handle  # keeps ExitCode readable after the process exits
   Write-Host "Started open-webui (PID $($p.Id)); waiting up to $readyTimeoutSec s for HTTP 2xx from $url"
@@ -822,7 +824,7 @@ try {
     $result = "curl exit $curlExit, HTTP $code"
     if ($body) { $result += ", body $($body.Trim())" }
     if ($result -ne $last) { $probes.Add("  $elapsed s: $result"); $last = $result }
-    if ($code -match '^2\d\d$' -and $body -match '"status"\s*:\s*true') { $ok = $true; break }
+    if ($code -match '^2\d\d$' -and $body -match '"status"\s*:\s*true') { break }
     if ($elapsed -ge $readyTimeoutSec) {
       $failure = "Open WebUI did not answer $url with HTTP 2xx within $readyTimeoutSec s (PID $($p.Id) still running)"
       break
@@ -855,14 +857,22 @@ finally {
       if ($failure) { $failure += "; $msg" } else { $failure = $msg }
     }
   }
-  # Remove only what this run created: its open-webui-* folders, then <drive>:\tmp if the test made it and it is empty
-  if (Test-Path -LiteralPath $driveTmp) {
-    Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue |
-      Where-Object { $tmpBefore -notcontains $_.FullName -and $_.CreationTime -ge $started.AddSeconds(-2) } |
-      Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+  # Only under the open-webui#35075 workaround, remove only what this run created: the open-webui-*
+  # folders that appeared during the run, then <drive>:\tmp if the test made it and it is empty
+  if ($tmpBug -and (Test-Path -LiteralPath $driveTmp)) {
+    $kept = @()
+    $ours = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue |
+      Where-Object { $tmpBefore -notcontains $_.FullName -and $_.CreationTime -ge $started.AddSeconds(-2) })
+    foreach ($d in $ours) {
+      try { Remove-Item -LiteralPath $d.FullName -Recurse -Force -ErrorAction Stop }
+      catch { $kept += $d.FullName; Write-Host "Could not remove $($d.FullName), which this run created: $($_.Exception.Message)" }
+    }
     if ($createdTmp) {
       try { [IO.Directory]::Delete($driveTmp, $false) }  # fails, and keeps the folder, when anything else is in it
-      catch { Write-Host "Kept $driveTmp, which this test created: something else wrote to it during the run" }
+      catch {
+        if ($kept.Count) { Write-Host "Kept $driveTmp, which this test created: it still holds $($kept -join ', ')" }
+        else { Write-Host "Kept $driveTmp, which this test created: something else wrote to it during the run" }
+      }
     }
   }
 }
