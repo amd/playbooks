@@ -61,9 +61,11 @@ jobs:
       contents: read
       pull-requests: write
       issues: write
+      checks: write  # one check run per batch
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     outputs:
       batch_matrix: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+      check_ids: ${{ steps.checks.outputs.check_ids }}
       has_entries: ${{ steps.prepare-matrices.outputs.has_entries }}
       run_ids: ${{ steps.trigger.outputs.run_ids }}
       run_urls: ${{ steps.trigger.outputs.run_urls }}
@@ -226,6 +228,22 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .orc/.github/scripts/orchestrai_trigger.py --config .orc/.github/orchestrai-config.yml
 
+      # One check run per batch on the PR head (orchestrai_trigger.py --checks-*), so the
+      # PR's Checks tab shows each batch while Wait for OrchestrAI holds the
+      # batch jobs back. Visibility only: never fails.
+      - name: Create a check run per batch
+        id: checks
+        if: steps.trigger.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_PREFIX: OrchestrAI !orc
+          BATCH_MATRIX: ${{ steps.prepare-matrices.outputs.batch_matrix }}
+          RUN_URLS: ${{ steps.trigger.outputs.run_urls }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: python3 .orc/.github/scripts/orchestrai_trigger.py --checks-create
+
       # A newer !orc cancels this one (concurrency above). Runs already started
       # would otherwise keep queueing for or holding machines for hours; the
       # cancel-runs job below covers a cancel after this job has finished. A
@@ -244,9 +262,19 @@ jobs:
           RUN_IDS=$(python3 -I -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .orc/.github/scripts/orchestrai_trigger.py --cancel
 
+      - name: Cancel the check runs this command created
+        if: (cancelled() || failure()) && steps.checks.outputs.check_ids != ''
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ steps.checks.outputs.check_ids }}
+        run: python3 .orc/.github/scripts/orchestrai_trigger.py --checks-cancel
+
   # One job waits for all of the command's runs, so the command holds one slot
   # of the small wait runner pool instead of one per batch for hours (see
-  # test-playbooks-orchestrai.yml). It never fails the command.
+  # test-playbooks-orchestrai.yml). It never fails the command. As it polls,
+  # it moves each batch's check run along (orchestrai_trigger.py --checks-*).
   await-runs:
     name: Wait for OrchestrAI
     needs: command
@@ -254,6 +282,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
+      checks: write  # each batch's check run
       id-token: write  # GitHub OIDC token: read the runs' status
     timeout-minutes: 960
     steps:
@@ -264,6 +293,9 @@ jobs:
       - name: Wait for every batch's run to end
         continue-on-error: true
         env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_ID_MAP: ${{ needs.command.outputs.check_ids }}
+          RUN_URL_MAP: ${{ needs.command.outputs.run_urls }}
           RUN_ID_MAP: ${{ needs.command.outputs.run_ids }}
           ORCHESTRAI_V2_CI_API_URL: ${{ vars.ORCHESTRAI_V2_CI_API_URL }}
           ORCHESTRAI_V2_OIDC_AUDIENCE: ${{ vars.ORCHESTRAI_V2_OIDC_AUDIENCE }}
@@ -285,6 +317,7 @@ jobs:
     runs-on: ${{ vars.ORCHESTRAI_WAIT_RUNNER }}
     permissions:
       contents: read
+      checks: write  # finish this batch's check run
       id-token: write  # GitHub OIDC token: poll this batch's OrchestrAI run
     # The Test job waits for its batch to get machines (acquire_timeout, 360 min,
     # + 30 min) and then for the build itself (max_duration, 480 min, + 30):
@@ -358,6 +391,28 @@ jobs:
           ORCHESTRAI_V2_WORKSPACE: ${{ vars.ORCHESTRAI_V2_WORKSPACE }}
         run: python3 .github/scripts/orchestrai_trigger.py --cancel
 
+      # The batch's check run gets its verdict; a cancelled job marks it
+      # cancelled. Never fails the job.
+      - name: Finish the batch's check run
+        if: "!cancelled()"
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_ID: ${{ fromJson(needs.command.outputs.check_ids || '{}')[matrix.batch_id] }}
+          BATCH_JSON: ${{ toJson(matrix) }}
+          RUN_URL: ${{ fromJson(needs.command.outputs.run_urls || '{}')[matrix.batch_id] }}
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-finish test-results/batch.json
+
+      - name: Cancel the batch's check run
+        if: cancelled()
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ fromJson(needs.command.outputs.check_ids || '{}')[matrix.batch_id] }}
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
+
       - name: Batch result
         if: always()
         env:
@@ -385,6 +440,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      checks: write  # mark the batches' check runs cancelled
       id-token: write  # GitHub OIDC token for the OrchestrAI Control Plane CI API
     steps:
       # The controller's revision (this workflow's), not the PR head.
@@ -401,6 +457,14 @@ jobs:
         run: |
           RUN_IDS=$(python3 -c 'import json,os; print(" ".join(json.loads(os.environ["RUN_ID_MAP"]).values()))') \
             python3 .github/scripts/orchestrai_trigger.py --cancel
+      # Every batch's check run still open; finished ones keep their verdict.
+      - name: Cancel the check runs
+        if: always() && needs.command.outputs.check_ids != ''
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_IDS: ${{ needs.command.outputs.check_ids }}
+        run: python3 .github/scripts/orchestrai_trigger.py --checks-cancel
 
   report:
     needs: [command, test-batches]

@@ -601,9 +601,10 @@ class WorkflowWiring(unittest.TestCase):
                 steps = job.get("steps") or []
                 for i, step in enumerate(steps):
                     run = step.get("run") or ""
-                    # --await-build, --await-runs, --run-status and --cancel only call the Control Plane.
+                    # --await-build, --await-runs, --run-status and --cancel only call the
+                    # Control Plane, and --checks-* only GitHub.
                     if ("orchestrai_trigger.py" in run and "--await-build" not in run
-                            and "--await-runs" not in run
+                            and "--await-runs" not in run and "--checks-" not in run
                             and "--run-status" not in run and "--cancel" not in run):
                         before = " ".join(s.get("run") or "" for s in steps[:i])
                         self.assertIn("pyyaml", before.lower(), f"{name}:{job_id}: {step.get('name')}")

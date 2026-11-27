@@ -349,7 +349,7 @@ class Workflows(unittest.TestCase):
 
     def test_a_cancelled_job_cancels_its_first_and_retry_runs(self):
         job = self.load("test-playbooks-orchestrai.yml")["jobs"]["test-batches"]
-        cancels = [s for s in job["steps"] if "--cancel" in s.get("run", "")]
+        cancels = [s for s in job["steps"] if "orchestrai_trigger.py --cancel" in s.get("run", "")]
         step, retry = cancels
         self.assertEqual(step["if"], "cancelled()")
         # Nothing before it keeps working once the job is cancelled.
