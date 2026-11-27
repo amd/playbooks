@@ -239,11 +239,14 @@ device_runs_as:
 # Device -> platform -> OS image its sessions request instead of the platform's
 # default (ORCHESTRAI_V2_<PLATFORM>_IMAGE). Stock (warm-pool) images are never
 # installed on demand, so a device whose only machine runs another OS needs an
-# image on the broker's on-demand list. grgh's only machine (DT574) runs the
-# custom Windows 11 image below, so its Windows batch asks for exactly that one
-# and never reimages it; change this together with the machine's image.
+# image on the broker's on-demand list. grgh's machines have no stock image:
+# DT574 runs the custom Windows 11 Zenith image and DT575 the custom Debian 13
+# Rex A16 AFO image (v2: no suspend at the idle login screen), so each batch
+# asks for exactly its image and finds the machine already running it; change
+# these together with the machines' images.
 device_os_images:
   grgh:
+    linux: "custom/debian-13-rex-a16-afo-v2-custom-test"
     windows: "windows/windows-11-26300-9457-halo-zenith-v4-custom-test"
 
 # Additional (device, platforms) entries to test for a playbook, beyond what its
