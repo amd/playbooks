@@ -28,6 +28,9 @@ REQUIREMENTS = [
     "unilab-rl==1.0.0",
     "unisim-core==1.0.0",
     "tensordict==0.14.3",
+    # UniLab 1.0 accepts any rsl-rl-lib>=5; 6.0 changed the logger API and
+    # breaks training (AttributeError in rsl_rl/utils/logger.py).
+    "rsl-rl-lib<6",
 ]
 
 
