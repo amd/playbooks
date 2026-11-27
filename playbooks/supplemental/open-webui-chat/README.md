@@ -705,6 +705,7 @@ $env:PYTHONIOENCODING = "utf-8"  # a traceback must not fail to print to the log
 $port = 8080
 $url = "http://127.0.0.1:$port/health"
 $readyTimeoutSec = 270
+$healthy = 'healthy (HTTP 2xx with {"status": true})'
 $logOut = Join-Path $work "openwebui-ci-out.log"
 $logErr = Join-Path $work "openwebui-ci-err.log"
 $bodyFile = Join-Path $work "openwebui-ci-health.txt"
@@ -715,11 +716,23 @@ function Format-SafeLines([string[]]$lines) {
   if (-not $lines -or $lines.Count -eq 0) { return "  (empty)" }
   $safe = foreach ($l in $lines) {
     $s = $l -replace "\x1b\[[0-9;?]*[A-Za-z]", ""
-    # The whole value of a secret-looking key: a quoted value up to its closing quote, else one word,
-    # an auth scheme ("Bearer sk-...") included; then any other Bearer token
-    $s = $s -replace '(?i)((?:secret|token|password|passwd|api[_-]?key|authorization)[A-Za-z_]*["'']?\s*[:=]\s*)(?:(")(?:[^"\\]|\\.)*"?|('')[^'']*''?|(?:(?:bearer|basic)\s+)?[^\s"'',;}]+)', '$1$2$3<redacted>$2$3'
-    $s = $s -replace '(?i)\b(bearer\s+)[^\s"'',;}]+', '$1<redacted>'
-    $s = $s -replace '(://[^/\s:@]+:)[^@\s/]+@', '$1<redacted>@'
+    # Credentials in URLs: https://user:password@host
+    $s = $s -replace '(://[^/\s:@]+:)[^@\s]+@', '$1<redacted>@'
+    # The whole value of a secret-looking key (OPENAI_API_KEYS=, "api_key":, Authorization:, ...).
+    # Quoted: up to the closing quote, escaped quotes included. Unquoted: the rest of the line after
+    # password/secret/authorization-like keys (values with spaces, "Digest a=b, c=d"), else up to the
+    # next space or quote (so "sk-a;sk-b" and "a,password=b" go whole).
+    $lineKeys = 'password|passwd|passphrase|secret|credential|authorization|cookie'
+    $wordKeys = 'token|api[_-]?key|access[_-]?key|private[_-]?key'
+    $key = '(?:' + $lineKeys + '|' + $wordKeys + ')[A-Za-z0-9_-]*\\?["'']?\s*[:=]\s*'
+    $s = $s -replace ('(' + $key + ')(?:(\\?")(?:[^"\\]|\\.)*"?|(\\?'')(?:[^''\\]|\\.)*''?)'), '$1$2$3<redacted>$2$3'
+    $s = $s -replace ('((?:' + $lineKeys + ')[A-Za-z0-9_-]*\\?["'']?\s*[:=]\s*)(?!\\?["''])\S.*$'), '$1<redacted>'
+    $s = $s -replace ('(' + $key + ')(?!\\?["''])(?!<redacted>)[^\s"'']+'), '$1<redacted>'
+    # Tokens recognisable without a key: Bearer values, OpenAI, GitHub, Hugging Face, JWT, AWS access keys
+    $s = $s -replace '\b(bearer\s+\\?["'']?)(?!<redacted>)[^\s"''\\]+', '$1<redacted>'
+    $s = $s -replace '(?<![A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[opsur]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|hf_[A-Za-z0-9]{16,})', '<redacted>'
+    $s = $s -replace '\beyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*', '<redacted>'
+    $s = $s -creplace '(?<![A-Za-z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Za-z0-9])', '<redacted>'
     if ($s.Length -gt 300) { $s = $s.Substring(0, 300) + " ..." }
     "  $s"
   }
@@ -806,13 +819,13 @@ try {
   }
   $p = Start-Process -FilePath $ow -ArgumentList "serve --port $port" -WorkingDirectory $work -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
   $null = $p.Handle  # keeps ExitCode readable after the process exits
-  Write-Host "Started open-webui (PID $($p.Id)); waiting up to $readyTimeoutSec s for HTTP 2xx from $url"
+  Write-Host "Started open-webui (PID $($p.Id)); waiting up to $readyTimeoutSec s for $url to report $healthy"
   $last = ""
   while ($true) {
     $elapsed = [int]((Get-Date) - $started).TotalSeconds
     if ($p.HasExited) {
       $exitCode = $p.ExitCode
-      $failure = "Open WebUI exited during startup with exit code $exitCode after $elapsed s (see the server log below)"
+      $failure = "Open WebUI exited during startup with exit code $exitCode after $elapsed s (see the server log above)"
       break
     }
     Remove-Item $bodyFile -Force -ErrorAction SilentlyContinue
@@ -826,7 +839,7 @@ try {
     if ($result -ne $last) { $probes.Add("  $elapsed s: $result"); $last = $result }
     if ($code -match '^2\d\d$' -and $body -match '"status"\s*:\s*true') { break }
     if ($elapsed -ge $readyTimeoutSec) {
-      $failure = "Open WebUI did not answer $url with HTTP 2xx within $readyTimeoutSec s (PID $($p.Id) still running)"
+      $failure = "Open WebUI did not report $healthy at $url within $readyTimeoutSec s (PID $($p.Id) still running)"
       break
     }
     Start-Sleep -Seconds 1
@@ -880,21 +893,27 @@ finally {
 $elapsed = [int]((Get-Date) - $started).TotalSeconds
 if ($failure) {
   $exitText = if ($null -ne $exitCode) { "$exitCode" } elseif ($stoppedByTest) { "n/a (still running, stopped by this test)" } else { "n/a (not started)" }
-  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitText)"
+  # Log tails first, the summary last: the test runner keeps only the end of a long output
+  Write-Host "Server stdout (last 25 lines, $logOut):"
+  Write-Host (Get-SafeLogTail $logOut 25)
+  Write-Host "Server stderr (last 50 lines, $logErr):"
+  Write-Host (Get-SafeLogTail $logErr 50)
   Write-Host "Health probes (changes only):"
   if ($probes.Count) { Write-Host ($probes -join "`n") } else { Write-Host "  (none)" }
-  $errorLines = @(Select-String -LiteralPath $logErr, $logOut -Pattern '(Error|Exception)\b' -ErrorAction SilentlyContinue | Select-Object -Last 5 | ForEach-Object { $_.Line })
+  $errorLines = @()
+  foreach ($log in @($logErr, $logOut)) {
+    if ($errorLines.Count -eq 0 -and (Test-Path -LiteralPath $log)) {
+      $errorLines = @(Select-String -LiteralPath $log -Pattern '(Error|Exception)\b' -ErrorAction SilentlyContinue | Select-Object -Last 5 | ForEach-Object { $_.Line })
+    }
+  }
   if ($errorLines.Count) {
     Write-Host "Last error lines:"
     Write-Host (Format-SafeLines $errorLines)
   }
-  Write-Host "Server stderr (last 60 lines, $logErr):"
-  Write-Host (Get-SafeLogTail $logErr 60)
-  Write-Host "Server stdout (last 30 lines, $logOut):"
-  Write-Host (Get-SafeLogTail $logOut 30)
+  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitText)"
   throw $failure
 }
-Write-Host "OK: Open WebUI answered $url with HTTP 2xx after $elapsed s; server stopped"
+Write-Host "OK: Open WebUI reported $healthy at $url after $elapsed s; server stopped"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
