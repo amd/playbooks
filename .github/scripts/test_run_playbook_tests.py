@@ -299,5 +299,116 @@ class LocalizedMetadataTest(unittest.TestCase):
                 rpt.load_merged_metadata("zh-CN", "supplemental", "pb", root)
 
 
+@unittest.skipUnless(shutil.which("git"), "git is not installed")
+class LocalizedOverlaySourcesTest(unittest.TestCase):
+    """A localized run copies the English playbook, never what English runs left in it.
+
+    English runs work in the playbook's own assets/ folder of the shared
+    checkout, so after one the folder holds its venv and its LlamaFactory
+    clone. The localized run on the same machine must start without them.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name) / "repo"
+        self.english = self.root / "playbooks" / "supplemental" / "pb"
+        (self.english / "assets").mkdir(parents=True)
+        (self.english / "README.md").write_text("english", encoding="utf-8")
+        (self.english / "playbook.json").write_text("{}", encoding="utf-8")
+        (self.english / "assets" / "config.yaml").write_text("tracked", encoding="utf-8")
+        loc = self.root / "localized-playbooks" / "zh-CN" / "supplemental" / "pb"
+        loc.mkdir(parents=True)
+        (loc / "README.md").write_text("localized", encoding="utf-8")
+        self._git("init", "-q")
+        self._git("add", "-A")
+        self._git("-c", "user.name=t", "-c", "user.email=t@example.com",
+                  "commit", "-q", "-m", "init")
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def _git(self, *args):
+        subprocess.run(["git", "-C", str(self.root), *args], check=True,
+                       capture_output=True)
+
+    def _english_run_leftovers(self):
+        assets = self.english / "assets"
+        (assets / "LlamaFactory" / "src").mkdir(parents=True)
+        (assets / "LlamaFactory" / "src" / "train.py").write_text("x", encoding="utf-8")
+        (assets / "llamafactory-env" / "Scripts").mkdir(parents=True)
+        (assets / "llamafactory-env" / "pyvenv.cfg").write_text("home = x", encoding="utf-8")
+        (assets / "saves").mkdir()
+        (assets / "saves" / "adapter.bin").write_bytes(b"\0")
+
+    def _materialize(self):
+        dest = Path(tempfile.mkdtemp(dir=self._tmp.name, prefix="localized-playbook-"))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            path = rpt.materialize_localized_playbook(
+                "zh-CN", "pb", dest, localized_only=False, repo_root=self.root)
+        return path, out.getvalue()
+
+    def test_english_leftovers_are_not_copied(self):
+        self._english_run_leftovers()
+        path, out = self._materialize()
+        self.assertFalse((path / "assets" / "LlamaFactory").exists())
+        self.assertFalse((path / "assets" / "llamafactory-env").exists())
+        self.assertFalse((path / "assets" / "saves").exists())
+        self.assertEqual((path / "assets" / "config.yaml").read_text(encoding="utf-8"), "tracked")
+        self.assertEqual((path / "playbook.json").read_text(encoding="utf-8"), "{}")
+        self.assertEqual((path / "README.md").read_text(encoding="utf-8"), "localized")
+        self.assertIn("LlamaFactory", out)
+
+    def test_english_leftovers_stay_where_they_are(self):
+        # Nothing of the English run is removed: it is the English checkout.
+        self._english_run_leftovers()
+        self._materialize()
+        self.assertTrue((self.english / "assets" / "LlamaFactory" / "src" / "train.py").is_file())
+        self.assertTrue((self.english / "assets" / "llamafactory-env" / "pyvenv.cfg").is_file())
+
+    def test_a_failed_english_run_does_not_reach_the_localized_run(self):
+        # A clone interrupted half way leaves a non-empty folder.
+        (self.english / "assets" / "LlamaFactory" / ".git").mkdir(parents=True)
+        path, _ = self._materialize()
+        self.assertFalse((path / "assets" / "LlamaFactory").exists())
+
+    def test_runner_patches_to_tracked_files_are_kept(self):
+        # setup-playbook rewrites README timeouts in place, without committing.
+        (self.english / "assets" / "config.yaml").write_text("patched", encoding="utf-8")
+        path, _ = self._materialize()
+        self.assertEqual((path / "assets" / "config.yaml").read_text(encoding="utf-8"), "patched")
+
+    def test_each_localized_run_starts_clean(self):
+        # localized -> localized: a run's own output stays in its temporary copy.
+        first, _ = self._materialize()
+        (first / "assets" / "LlamaFactory").mkdir()
+        self._english_run_leftovers()
+        second, _ = self._materialize()
+        self.assertFalse((second / "assets" / "LlamaFactory").exists())
+        self.assertNotEqual(first, second)
+
+    def test_localized_run_leaves_english_untouched(self):
+        # localized -> English: the localized copy never writes to the checkout.
+        path, _ = self._materialize()
+        (path / "assets" / "LlamaFactory").mkdir()
+        self.assertFalse((self.english / "assets" / "LlamaFactory").exists())
+        status = subprocess.run(["git", "-C", str(self.root), "status", "--porcelain"],
+                                check=True, capture_output=True, text=True).stdout
+        self.assertEqual(status, "")
+
+    def test_without_git_the_whole_folder_is_copied(self):
+        self._english_run_leftovers()
+        (self.root / ".git").rename(self.root / "not-a-git-dir")
+        path, _ = self._materialize()
+        self.assertTrue((path / "assets" / "config.yaml").is_file())
+        self.assertTrue((path / "assets" / "LlamaFactory").is_dir())
+
+    def test_strict_overlay_copies_no_english_files(self):
+        dest = Path(tempfile.mkdtemp(dir=self._tmp.name))
+        path = rpt.materialize_localized_playbook(
+            "zh-CN", "pb", dest, localized_only=True, repo_root=self.root)
+        self.assertEqual(sorted(p.name for p in path.iterdir()), ["README.md"])
+
+
 if __name__ == "__main__":
     unittest.main()
