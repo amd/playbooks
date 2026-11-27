@@ -64,7 +64,8 @@ HTTP_TIMEOUT = 120
 WIND_DOWN_SECONDS = 30 * 60
 # How long one read of the test results retries; a failed read is tried again
 # on the next polls of the report stage (CATCH_UP_POLLS), and when the build ends.
-RESULTS_RETRY_SECONDS = 60
+# Short, so an outage does not hold up the console's lines for long.
+RESULTS_RETRY_SECONDS = 20
 # From the report stage, the results are read on each poll until every test the
 # console counted has its row, at most this many polls (5 min).
 CATCH_UP_POLLS = 10
@@ -206,6 +207,7 @@ class Follower:
         self.reported = set()     # rows already printed
         self.results_ok = bool(run_id and cp)
         self.results_failing = False
+        self.refusals = 0         # 401/403 answers in a row
         # Polls left to read the results again after a test ended: its row can
         # be recorded a little after the console's count moves.
         self.catch_up = 0
@@ -271,17 +273,23 @@ class Follower:
             answer = trigger.api(self.cp, "GET", f"/runs/{urllib.parse.quote(self.run_id, safe='')}/tests",
                                  retry_seconds=retry_seconds)
         except ValueError as exc:
-            # 401/403 is final, even when an earlier attempt of the same call
-            # failed (then api() raises a plain ValueError, not Refused).
+            # 401/403 twice in a row is final (one can be a token that was not
+            # valid yet), even when an earlier attempt of the same call failed
+            # (then api() raises a plain ValueError, not Refused).
             if re.search(r"HTTP 40[13]\b", str(exc)):
-                say(f"test results not readable ({exc}); the next step shows every outcome")
-                self.results_ok = False  # not allowed: asking again changes nothing
-                return
+                self.refusals += 1
+                if self.refusals >= 2:
+                    say(f"test results not readable ({exc}); the next step shows every outcome")
+                    self.results_ok = False  # not allowed: asking again changes nothing
+                    return
+            else:
+                self.refusals = 0
             if not self.results_failing:
                 say(f"test results unavailable for now ({exc}); trying again")
             self.results_failing = True
             return
         self.results_failing = False
+        self.refusals = 0
         rows = answer.get("tests") if isinstance(answer.get("tests"), list) else []
         rows = [t for t in rows if isinstance(t, dict)]
         self.recorded = len(rows)

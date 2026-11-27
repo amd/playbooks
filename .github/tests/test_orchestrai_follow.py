@@ -136,12 +136,19 @@ class Follower(unittest.TestCase):
         self.assertIn("comfyui-image-gen", out)  # printed once the API answered again
         self.assertEqual(len(calls), 3)
 
-    def test_a_refusal_stops_reading_the_results(self):
-        console = FakeConsole(CONSOLE, REPORT, "", "")
+    def test_a_refusal_twice_in_a_row_stops_reading_the_results(self):
+        console = FakeConsole(CONSOLE, REPORT, "", "", "")
         refused = follow.trigger.Refused("HTTP 403 forbidden: no results:read")
-        _, out, calls = self.run_polls(console, [refused])
-        self.assertEqual(len(calls), 1)
-        self.assertIn("test results not readable", out)
+        _, out, calls = self.run_polls(console, [refused, refused])
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(out.count("test results not readable"), 1)
+
+    def test_one_refusal_is_tried_again(self):
+        # A token that was not valid yet: the next read works.
+        refused = follow.trigger.Refused("HTTP 401 unauthorized")
+        _, out, calls = self.run_polls(FakeConsole(CONSOLE, REPORT, "", ""), [refused, TESTS, TESTS])
+        self.assertNotIn("not readable", out)
+        self.assertIn("comfyui-image-gen", out)
 
     def test_a_row_that_changes_is_printed_again(self):
         failed = {"tests": [row("sess-1795656621871974896", "failed")]}
@@ -248,11 +255,10 @@ class Follower(unittest.TestCase):
 
     def test_a_403_after_a_failed_attempt_still_stops_reading(self):
         # api() raises a plain ValueError when an earlier attempt of the call failed.
-        first, second = CONSOLE.split("[2026-11-26T01:44:05.185Z]")
-        console = FakeConsole(first, "[2026-11-26T01:44:05.185Z]" + second, "", "")
+        console = FakeConsole(CONSOLE, REPORT, "", "", "")
         late_403 = ValueError("CI API GET /runs/r1/tests: HTTP 403 forbidden: no results:read")
-        _, out, calls = self.run_polls(console, [late_403])
-        self.assertEqual(len(calls), 1)
+        _, out, calls = self.run_polls(console, [late_403, late_403])
+        self.assertEqual(len(calls), 2)
         self.assertIn("test results not readable", out)
 
     def test_a_repeated_tracking_line_keeps_the_names(self):
