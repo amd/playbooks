@@ -61,8 +61,10 @@ HARNESS_PREFIXES = (".github/scripts/",)
 # Omitting one only costs a needless full run; wrongly adding one hides a real
 # change, so each entry is justified by the playbook runner not depending on it.
 # The OrchestrAI CI plumbing (orchestrai_*, the workflows, orchestrai-config.yml)
-# decides where and on what a playbook runs, not what it executes; a change to it
-# is tested with `!orc`, not by sending every playbook to every machine.
+# decides where and on what a playbook runs, not what it executes. A change to
+# it runs the entries it makes run differently, or a sample of them
+# (orchestrai_config_changes.py), not every playbook on every machine. `!orc`
+# cannot test it: it always runs main's config and scripts.
 # Directories under those prefixes whose files nothing runs: the device runner
 # scripts kept for reference (archive/README.md).
 HARNESS_EXCLUDED_DIRS = (".github/scripts/archive/",)
@@ -79,6 +81,7 @@ HARNESS_EXCLUDED = frozenset({
     ".github/scripts/gen_issue_template_playbooks.py",  # validate-playbooks.yml
     ".github/scripts/orchestrai_batch_verdict.py", # OrchestrAI workflows
     ".github/scripts/orchestrai_command.py",       # OrchestrAI workflows
+    ".github/scripts/orchestrai_config_changes.py",  # OrchestrAI workflows
     ".github/scripts/orchestrai_keys.py",          # OrchestrAI workflows
     ".github/scripts/orchestrai_matrix.py",        # OrchestrAI workflows
     ".github/scripts/orchestrai_prepare_matrices.py",  # OrchestrAI workflows

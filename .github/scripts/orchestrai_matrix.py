@@ -119,7 +119,8 @@ def runs_same_tests(entry, device, root):
 
 
 def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_playbooks=None,
-          root=None, languages=None, cover_localized=True, device_scope="all", only=None):
+          root=None, languages=None, cover_localized=True, device_scope="all", only=None,
+          keep=None):
     """Matrix entries and batches for English and localized playbooks.
 
     Without localized_playbooks, `playbooks` are in `locale` ("" = English):
@@ -138,6 +139,11 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
     keeps just those entries: a pull request's run tests the entries whose
     tests it changed (build_test_matrix.py), not every OS and device of a
     playbook it touched. None keeps every entry.
+
+    keep, a set of the same keys, are entries the representative device scope
+    keeps whatever device it picks: a change to the OrchestrAI config that
+    makes an entry run differently is tested on that entry's device
+    (orchestrai_config_changes.py).
     """
     if device_scope not in DEVICE_SCOPES:
         raise ValueError(f"device scope must be one of {', '.join(DEVICE_SCOPES)}, "
@@ -283,7 +289,9 @@ def build(playbooks, cfg, devices=None, platforms=None, locale="", localized_pla
 
     # 4b') A pull request's run: one device per family and OS (pr_devices).
     if device_scope == "representative":
-        kept = representative(matrix, cfg)
+        chosen = representative(matrix, cfg)
+        kept = [e for e in matrix if e in chosen
+                or (e.get("locale", ""), e["playbook"], e["platform"], e["arch"]) in (keep or ())]
         left_out = sorted({f"{e['arch']} ({e['platform']})" for e in matrix if e not in kept})
         if left_out:
             print(f"::notice::One device per family and OS for a pull request; not tested "
@@ -469,6 +477,11 @@ def main():
              "empty keeps every entry (env ONLY_ENTRIES)",
     )
     ap.add_argument(
+        "--keep", default=os.environ.get("KEEP_ENTRIES", ""),
+        help='JSON list of [locale, playbook, platform, device] the representative device '
+             "scope keeps whatever device it picks (env KEEP_ENTRIES)",
+    )
+    ap.add_argument(
         "--locale",
         default=os.environ.get("LOCALE", ""),
         help="Locale under localized-playbooks; empty selects canonical English",
@@ -513,18 +526,23 @@ def main():
         localized = None if args.localized_playbooks is None else parse_ids(args.localized_playbooks)
         anything = bool(playbooks or localized)
 
-    only = None
-    if args.only.strip():
+    def parse_entries(name, raw):
+        if not raw.strip():
+            return None
         try:
-            only = {tuple(item) for item in json.loads(args.only)}
+            entries = {tuple(item) for item in json.loads(raw)}
         except (json.JSONDecodeError, TypeError) as exc:
-            print(f"::error::--only is not a JSON list of [locale, playbook, platform, device]: {exc}",
+            print(f"::error::--{name} is not a JSON list of [locale, playbook, platform, device]: "
+                  f"{exc}", file=sys.stderr)
+            sys.exit(1)
+        if any(len(item) != 4 for item in entries):
+            print(f"::error::--{name} entries must be [locale, playbook, platform, device]",
                   file=sys.stderr)
             sys.exit(1)
-        if any(len(item) != 4 for item in only):
-            print("::error::--only entries must be [locale, playbook, platform, device]",
-                  file=sys.stderr)
-            sys.exit(1)
+        return entries
+
+    only = parse_entries("only", args.only)
+    keep = parse_entries("keep", args.keep)
 
     cfg = load_config(args.config)
     # Internal MAAS broker tags are not committed to this (public) repo; they
@@ -548,7 +566,7 @@ def main():
         matrix, batches = build(playbooks, cfg, devices=devices, platforms=platforms,
                                 locale=args.locale, localized_playbooks=localized,
                                 languages=languages, cover_localized=not args.no_cover_localized,
-                                device_scope=args.device_scope, only=only)
+                                device_scope=args.device_scope, only=only, keep=keep)
 
     out = os.environ.get("GITHUB_OUTPUT")
     if out:

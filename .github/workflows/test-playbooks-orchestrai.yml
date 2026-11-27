@@ -12,7 +12,10 @@
 # - pull_request: the playbooks whose tests the PR changed (build_test_matrix.py),
 #   at the PR's head commit, on one device per family (APU, Radeon) and OS
 #   (pr_devices in orchestrai-config.yml); `!orc` on the PR tests every
-#   declared device. A newer push cancels the older run. Fork PRs get no
+#   declared device. A change to orchestrai-config.yml or the OrchestrAI
+#   scripts also runs the entries it makes run differently, with the PR's
+#   config and scripts (orchestrai_config_changes.py). A newer push cancels
+#   the older run. Fork PRs get no
 #   secrets or OIDC token, so they are not tested here; `!orc` refuses them too.
 # - schedule: every playbook, English and zh-CN. A playbook that fails opens a
 #   ci-test-failure issue (create_failure_issues.py).
@@ -92,8 +95,10 @@ on:
         description: 'amd/playbooks branch, tag or commit to test'
         type: string
         default: main
-  # Each push tests only the playbooks whose tests changed; a prose edit tests
-  # nothing. `!orc` on the PR (orchestrai-pr-command.yml) tests more on demand.
+  # Each push tests only the playbooks whose tests changed, and the entries a
+  # change to the OrchestrAI config or scripts makes run differently; a prose
+  # edit tests nothing. `!orc` on the PR (orchestrai-pr-command.yml) tests more
+  # on demand, with main's config and scripts.
   pull_request:
 
 permissions:
@@ -163,6 +168,7 @@ jobs:
           LOCALE_INPUT: ${{ inputs.locale }}
           EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          ORCHESTRAI_DEVICE_TAGS: ${{ vars.ORCHESTRAI_DEVICE_TAGS }}
         run: |
           # BOTH: test English and zh-CN together, as automated runs and a
           # manual run with locale "all" do; otherwise one language.
@@ -200,7 +206,10 @@ jobs:
             # branched off: a prose edit selects nothing, a change to a shared
             # dependency selects every playbook that uses it, and a change to the
             # test runner selects all (build_test_matrix.py). Commits main gained
-            # since are not the PR's. ONLY keeps the run to those entries.
+            # since are not the PR's. A change to orchestrai-config.yml or the
+            # OrchestrAI scripts adds the entries it makes run differently, each
+            # on its own device (KEEP), or a sample when it reaches many
+            # (orchestrai_config_changes.py). ONLY keeps the run to those entries.
             if ! BASE=$(git merge-base "$PR_BASE_SHA" HEAD); then
               echo "::error::cannot find where the PR branched off $PR_BASE_SHA"; exit 1
             fi
@@ -208,9 +217,10 @@ jobs:
               --keys --allow-empty --github-output /dev/null)
             LOCALIZED_KEYS=$(python3 .github/scripts/build_test_matrix.py --mode changed --base "$BASE" \
               --locale "$LOCALE" --keys --allow-empty --github-output /dev/null)
-            ENGLISH=$(jq -c '[.[][1]] | unique' <<< "$ENGLISH_KEYS")
-            LOCALIZED=$(jq -c '[.[][1]] | unique' <<< "$LOCALIZED_KEYS")
-            ONLY=$(jq -c -s 'add' <<< "$ENGLISH_KEYS $LOCALIZED_KEYS")
+            KEEP=$(python3 .github/scripts/orchestrai_config_changes.py --base "$BASE" --locale "$LOCALE")
+            ONLY=$(jq -c -s 'add | unique' <<< "$ENGLISH_KEYS $LOCALIZED_KEYS $KEEP")
+            ENGLISH=$(jq -c '[.[] | select(.[0] == "") | .[1]] | unique' <<< "$ONLY")
+            LOCALIZED=$(jq -c '[.[] | select(.[0] != "") | .[1]] | unique' <<< "$ONLY")
           else
             if [ "$BOTH" != true ] && [ -z "$LOCALE" ]; then
               ENGLISH=$(find playbooks/core playbooks/supplemental -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sed 's|playbooks/[^/]*/||' | sort -u | jq -R -s -c 'split("\n") | map(select(length > 0))')
@@ -227,6 +237,7 @@ jobs:
           echo "localized=${LOCALIZED:-[]}" >> "$GITHUB_OUTPUT"
           echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
           echo "only=${ONLY:-}" >> "$GITHUB_OUTPUT"
+          echo "keep=${KEEP:-}" >> "$GITHUB_OUTPUT"
 
       # The machines test playbook_repo@playbook_ref (orchestrai_trigger.py), and
       # a manual run may name another commit than this checkout. The localized
@@ -267,6 +278,7 @@ jobs:
           COVER_LOCALIZED: ${{ steps.tested.outputs.cover }}
           DEVICE_SCOPE: ${{ github.event_name == 'pull_request' && 'representative' || 'all' }}
           ONLY_ENTRIES: ${{ steps.detect.outputs.only }}
+          KEEP_ENTRIES: ${{ steps.detect.outputs.keep }}
           PLAYBOOKS: ${{ steps.detect.outputs.english }}
           LOCALE: ${{ steps.detect.outputs.locale }}
           LOCALIZED_PLAYBOOKS: ${{ steps.detect.outputs.localized }}
