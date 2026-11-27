@@ -1,0 +1,82 @@
+{
+  "id": "reachy-mini-teach-skills",
+  "title": "Interactive AI Robot using Reachy Mini",
+  "description": "Chat with an expressive Reachy Mini robot, give it a voice and let it see, with its language and vision model running on the Radeon iGPU through Ollama. No robot needed: it runs in simulation.",
+  "time": 30,
+  "supported_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "tested_platforms": {
+    "halo": [
+      "linux"
+    ]
+  },
+  "published_platforms": {
+    "halo_box": [
+      "linux",
+      "windows"
+    ],
+    "halo": [
+      "linux",
+      "windows"
+    ],
+    "stx": [
+      "linux",
+      "windows"
+    ],
+    "krk": [
+      "linux",
+      "windows"
+    ]
+  },
+  "difficulty": "beginner",
+  "isNew": true,
+  "isFeatured": false,
+  "developed": true,
+  "published": false,
+  "tags": [
+    "physical-ai",
+    "llm",
+    "inference",
+    "rocm",
+    "ollama",
+    "vision",
+    "robotics",
+    "tts",
+    "reachy-mini"
+  ],
+  "coverImage": "assets/reachy-app.jpg",
+  "recommendedSystemMemory": 16,
+  "primaryModel": "Qwen3.5-2B",
+  "authors": [
+    {
+      "name": "Thomas Zerbs",
+      "github": "thomaszerbs",
+      "github_url": "https://github.com/thomaszerbs",
+      "type": "amd"
+    },
+    {
+      "name": "Leonardo Ravaglia",
+      "github": "leonardorav",
+      "github_url": "https://github.com/leonardorav",
+      "type": "amd"
+    }
+  ],
+  "published_date": "2026-11-06",
+  "updated_date": "2026-11-06"
+}
