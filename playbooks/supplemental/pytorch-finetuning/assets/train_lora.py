@@ -65,6 +65,33 @@ def cleanup_gpu_memory():
         print(f"[Warning] during cleanup: {e}")
 
 
+def load_train_split(repo_id):
+    """load_dataset(repo_id, split="train"); offline, read the dataset's file from the Hugging Face cache.
+
+    Even with HF_DATASETS_OFFLINE=1, load_dataset(repo_id) reads only the datasets
+    library's own prepared cache, not files already in the Hugging Face hub cache
+    (as CI primes them with snapshot_download). So offline, when the cached snapshot
+    holds exactly one .jsonl file, load that file. Online, or with any other cache
+    layout, load_dataset(repo_id) runs as usual.
+    """
+    offline = any(os.environ.get(v, "").upper() in ("1", "ON", "YES", "TRUE")
+                  for v in ("HF_DATASETS_OFFLINE", "HF_HUB_OFFLINE"))
+    if offline:
+        from pathlib import Path
+        from huggingface_hub import snapshot_download
+        from huggingface_hub.errors import LocalEntryNotFoundError
+
+        try:
+            snapshot = Path(snapshot_download(repo_id, repo_type="dataset", local_files_only=True))
+        except LocalEntryNotFoundError:
+            snapshot = None
+        files = sorted(snapshot.glob("*.jsonl")) if snapshot else []
+        if len(files) == 1:
+            print(f"Offline: loading {repo_id} at revision {snapshot.name} from the Hugging Face cache")
+            return load_dataset("json", data_files=str(files[0]), split="train")
+    return load_dataset(repo_id, split="train")
+
+
 # -----------------------
 # Model Configuration
 # -----------------------
@@ -107,7 +134,7 @@ if QUICK_TRAIN and os.environ.get("QUICK_TRAIN_MODEL"):
 n_samples = 8 if QUICK_TRAIN else 1000
 if QUICK_TRAIN:
     print("QUICK_TRAIN=1: using 1 step and a tiny dataset (smoke test).")
-ds = load_dataset("databricks/databricks-dolly-15k", split="train").shuffle(seed=42).select(range(n_samples))
+ds = load_train_split("databricks/databricks-dolly-15k").shuffle(seed=42).select(range(n_samples))
 
 def format_chat(ex):
     if "messages" in ex:
