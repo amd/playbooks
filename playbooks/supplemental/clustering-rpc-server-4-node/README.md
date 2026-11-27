@@ -373,7 +373,13 @@ On each of Machines 2, 3, and 4, start the RPC server to expose its GPU resource
 |------|---------|
 | `-p` | Port to broadcast the RPC server on |
 | `-c` | Enables a local cache for large tensors, avoiding repeated network transfers during model loading |
-| `--host` | IP address to bind the RPC server to (`0.0.0.0` for all interfaces) |
+| `--host` | IP address to bind the RPC server to (`0.0.0.0` for all interfaces — bind to the worker's cluster IP instead where possible; see the security note above) |
+
+> **Security: the RPC server has no authentication.** Anyone who can reach port 50053 can use that machine's GPU and memory, and the llama.cpp project warns never to run the RPC server on an open network. The `--host 0.0.0.0` commands above bind the server on *every* network interface — including Wi-Fi and other LANs — not just the cluster switch. To limit the exposure:
+>
+> - Bind the RPC server to the worker's cluster-network IP instead: `--host <RPC_WORKER_IP>` (the same address the controller passes to `--rpc`).
+> - Keep the cluster machines on the dedicated switch only, and disconnect them from Wi-Fi and other networks while the RPC server is running — or firewall port 50053 so only the controller can reach it.
+> - Stop the RPC server as soon as you finish; do not leave it running unattended.
 
 For more options, refer to the [llama.cpp RPC documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/rpc/README.md).
 
@@ -497,6 +503,6 @@ For full parameter usage, refer to the [llama-cli documentation](https://github.
 
 ## Next Steps
 
-- **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081` with any placeholder API key (e.g., `none`) to connect to your cluster
+- **Connect third-party applications**: `llama-server` exposes an OpenAI-compatible API. Point any OpenAI-compatible application (such as Open WebUI) at `http://<HOST_IP>:8081` to connect to your cluster. The commands in this playbook start `llama-server` without an API key, so only do this on the isolated cluster network. If Machine 1 is connected to any shared network, restart `llama-server` with `--api-key <YOUR_API_KEY>` added and enter that key in the connecting application instead of a placeholder
 - **Explore other models**: Browse quantized GGUFs on [Hugging Face](https://huggingface.co/models?search=gguf) to find models that fit within your cluster's combined GPU memory
 - **Scale beyond four nodes**: Add further Ryzen AI Halo systems as additional RPC workers to access models beyond the 1 trillion parameter scale. Pass additional endpoints to `--rpc` as a comma-separated list (e.g., `--rpc <RPC_WORKER_2_IP>:50053,<RPC_WORKER_3_IP>:50053,<RPC_WORKER_4_IP>:50053,<RPC_WORKER_5_IP>:50053`)
