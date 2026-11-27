@@ -699,23 +699,342 @@ New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
 $env:DATA_DIR = $dataDir
 $env:WEBUI_AUTH = "False" # Disable auth for CI
 $env:ENABLE_PERSISTENT_CONFIG = "False" # Ensure environment-variable config applies for the run and isn't overridden by persistent settings
+$env:PYTHONUNBUFFERED = "1"      # keep the server log complete when it is stopped
+$env:PYTHONIOENCODING = "utf-8"  # a traceback must not fail to print to the log file
 
+$port = 8080
+$url = "http://127.0.0.1:$port/health"
+$readyTimeoutSec = 270
+$healthy = 'healthy (HTTP 2xx with {"status": true})'
 $logOut = Join-Path $work "openwebui-ci-out.log"
 $logErr = Join-Path $work "openwebui-ci-err.log"
-$p = Start-Process -FilePath $ow -ArgumentList "serve --port 8080" -NoNewWindow -PassThru -RedirectStandardOutput $logOut -RedirectStandardError $logErr
+$bodyFile = Join-Path $work "openwebui-ci-health.txt"
+# A previous run's file that cannot be removed is never read as this run's: use new names instead
+$stale = @(foreach ($f in @($logOut, $logErr, $bodyFile)) {
+  if (Test-Path -LiteralPath $f) { try { Remove-Item -LiteralPath $f -Force -ErrorAction Stop } catch { $f } }
+})
+if ($stale.Count) {
+  $tag = "{0:yyyyMMdd-HHmmss}-{1}" -f (Get-Date), $PID
+  $logOut = Join-Path $work "openwebui-ci-out-$tag.log"
+  $logErr = Join-Path $work "openwebui-ci-err-$tag.log"
+  $bodyFile = Join-Path $work "openwebui-ci-health-$tag.txt"
+  Write-Host "Could not remove $($stale -join ', ') from an earlier run; this run writes $logOut, $logErr and $bodyFile"
+}
+$ownLogs = @{}
+
+# The server starts without the variables whose name or value looks secret, so its log cannot print
+# them; it keeps what it needs to run and the settings above
+$keepNames = '^(PATH|PATHEXT|SystemRoot|SystemDrive|windir|TEMP|TMP|USERPROFILE|APPDATA|LOCALAPPDATA|ComSpec|NUMBER_OF_PROCESSORS|PROCESSOR_\w+|DATA_DIR|WEBUI_AUTH|ENABLE_PERSISTENT_CONFIG|PYTHONUNBUFFERED|PYTHONIOENCODING)$'
+$secretName = 'KEY|TOKEN|SECRET|PASSWORD|PASSWD|PWD|CREDENTIAL|AUTH|COOKIE|SAS|CONNECTION_STRING|PRIVATE'
+$tokenShape = '(?<![A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[opsur]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|hf_[A-Za-z0-9]{16,}|eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}|(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Za-z0-9]))'
+$withheld = @{}
+$parentEnv = [Environment]::GetEnvironmentVariables()
+foreach ($name in @($parentEnv.Keys)) {
+  $value = [string]$parentEnv[$name]
+  if ($name -match $keepNames) { continue }
+  if (($name -match $secretName -and $name -notmatch '^(OLD)?PWD$') -or $value -cmatch $tokenShape -or
+      $value -match '[A-Za-z][A-Za-z0-9+.-]*://[^\s/@]*:[^\s]*@') { $withheld[$name] = $value }
+}
+
+# Printed text is masked by the exact values of those variables (also each item of a list, the part
+# after "=", JSON- or URL-escaped, and the password of a URL in them), longest first
+$masks = New-Object System.Collections.Generic.List[string]
+function Add-Mask([string]$v) { if ($v -and $v.Trim().Length -ge 6 -and -not $masks.Contains($v)) { $masks.Add($v) } }
+foreach ($value in $withheld.Values) {
+  foreach ($part in @($value) + @($value -split '[\r\n;,]+')) {
+    Add-Mask $part
+    if ($part.IndexOf('=') -gt 0) { Add-Mask $part.Substring($part.IndexOf('=') + 1) }  # AccountKey=...
+    Add-Mask ($part.Replace('\', '\\').Replace('"', '\"'))
+    Add-Mask ([Uri]::EscapeDataString($part))
+    foreach ($m in [regex]::Matches($part, '://[^\s/@]*:([^\s]*)@')) {
+      Add-Mask $m.Groups[1].Value
+      try { Add-Mask ([Uri]::UnescapeDataString($m.Groups[1].Value)) } catch { }
+    }
+  }
+}
+$maskList = @($masks | Sort-Object Length -Descending)
+
+# Text without terminal colours or anything that looks like a credential. Exact values first, then
+# patterns as a backstop on at most 2,000 characters: everything after a secret-looking key, flag or
+# header name, Bearer, URL credentials up to the last @, and token shapes. Only ASCII whitespace ends a
+# value, so a non-breaking space inside one does not.
+function Protect-Text([string]$s) {
+  if (-not $s) { return "" }
+  $s = $s -replace "\x1b\[[0-9;?]*[A-Za-z]", ""
+  foreach ($m in $maskList) { $s = $s.Replace($m, "<redacted>") }
+  if ($s.Length -gt 2000) { $s = $s.Substring(0, 2000) }
+  $sp = '[ \t\r\n\f\v]'
+  $key = '(?:passw(?:or)?d|passphrase|pwd|secret|credential|auth|cookie|token|key|sas|sig|private|connection[_-]?string)[A-Za-z0-9_-]*(?<!error|exception|warning)'
+  $s = $s -replace ('(' + $key + '\\?["'']?' + $sp + '*[:=]).*'), '$1<redacted>'
+  $s = $s -replace ('(' + $key + '\\?["'']' + $sp + '*,' + $sp + '*).*'), '$1<redacted>'
+  $s = $s -replace ('((?<![A-Za-z0-9-])--?[A-Za-z0-9_-]*' + $key + $sp + '+).*'), '$1<redacted>'
+  $s = $s -replace ('(?<![A-Za-z0-9])(bearer' + $sp + '+).*'), '$1<redacted>'
+  $s = $s -replace '(?<![A-Za-z0-9+.-])([A-Za-z][A-Za-z0-9+.-]*://)[^ \t\r\n\f\v]*@', '$1<redacted>@'
+  $s = $s -replace '(?<![A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{16,}|gh[opsur]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|hf_[A-Za-z0-9]{16,})', '<redacted>'
+  $s = $s -replace '(?<![A-Za-z0-9])eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}(?:\.[A-Za-z0-9_-]*)?', '<redacted>'
+  $s = $s -creplace '(?<![A-Za-z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Za-z0-9])', '<redacted>'
+  return $s
+}
+
+function Format-SafeLines([string[]]$lines) {
+  if (-not $lines -or $lines.Count -eq 0) { return "  (empty)" }
+  $safe = foreach ($l in $lines) {
+    $s = Protect-Text $l
+    if ($s.Length -gt 300) { $s = $s.Substring(0, 300) + " ..." }
+    "  $s"
+  }
+  return ($safe -join "`n")
+}
+
+function Get-SafeLogTail([string]$path, [int]$count) {
+  if (-not $ownLogs[$path] -or -not (Test-Path -LiteralPath $path)) { return "  (no log file)" }
+  return Format-SafeLines @(Get-Content -LiteralPath $path -Encoding UTF8 -Tail $count -ErrorAction SilentlyContinue)
+}
+
+# Every process of this run: the server's descendants, kept across snapshots so that one whose parent
+# has exited is still known, plus (with $scanVenv) any process started with the server from the venv,
+# or from its base Python (which multiprocessing runs) without a living parent. Each is known by PID and
+# start time, so that a PID Windows later gives to another process is not mistaken for it. Returns the
+# process list, or $null when it could not be read.
+$tracked = @{}
+$venvPrefix = $venv.TrimEnd('\') + '\'
+$basePrefix = $null
+$venvCfg = Join-Path $venv "pyvenv.cfg"
+if (Test-Path -LiteralPath $venvCfg) {
+  $home_ = @(Get-Content -LiteralPath $venvCfg | Where-Object { $_ -match '^\s*home\s*=' }) | Select-Object -First 1
+  if ($home_) { $basePrefix = ($home_ -replace '^\s*home\s*=\s*', '').Trim().TrimEnd('\') + '\' }
+}
+function Update-Tracked([bool]$scanVenv) {
+  $all = @(Get-CimInstance Win32_Process -Property ProcessId, ParentProcessId, CreationDate, ExecutablePath, CommandLine -ErrorAction SilentlyContinue)
+  if ($all.Count -eq 0) { return $null }
+  $byPid = @{}
+  foreach ($c in $all) { $byPid[[int]$c.ProcessId] = $c }
+  $queue = New-Object System.Collections.Generic.Queue[object]
+  if ($scanVenv) {
+    foreach ($c in $all) {
+      if ($null -eq $c.CreationDate -or $c.CreationDate -lt $serverStart -or [int]$c.ProcessId -eq $PID) { continue }
+      $exe = [string]$c.ExecutablePath
+      $parent = $byPid[[int]$c.ParentProcessId]
+      if ($exe.StartsWith($venvPrefix, [StringComparison]::OrdinalIgnoreCase) -or
+          ([string]$c.CommandLine).IndexOf($venvPrefix, [StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+          ($basePrefix -and $exe.StartsWith($basePrefix, [StringComparison]::OrdinalIgnoreCase) -and
+           (-not $parent -or $parent.CreationDate -gt $c.CreationDate))) {
+        $tracked["$($c.ProcessId)|$($c.CreationDate.Ticks)"] = [pscustomobject]@{ Id = [int]$c.ProcessId; StartTime = $c.CreationDate; Held = $false }
+      }
+    }
+  }
+  $queue.Enqueue([pscustomobject]@{ Id = $p.Id; StartTime = $serverStart; Held = $true })  # $p holds its PID
+  foreach ($t in @($tracked.Values)) { $queue.Enqueue($t) }
+  while ($queue.Count) {
+    $parent = $queue.Dequeue()
+    $now = $byPid[$parent.Id]
+    foreach ($c in $all) {
+      if ([int]$c.ParentProcessId -ne $parent.Id -or [int]$c.ProcessId -eq $parent.Id -or $null -eq $c.CreationDate) { continue }
+      if ($c.CreationDate -lt $parent.StartTime) { continue }
+      # The parent's PID now belongs to another process: its later children are not ours
+      if (-not $parent.Held -and $now -and $now.CreationDate -ne $parent.StartTime -and $c.CreationDate -ge $now.CreationDate) { continue }
+      $k = "$($c.ProcessId)|$($c.CreationDate.Ticks)"
+      if (-not $tracked.ContainsKey($k)) {
+        $tracked[$k] = [pscustomobject]@{ Id = [int]$c.ProcessId; StartTime = $c.CreationDate; Held = $false }
+        $queue.Enqueue($tracked[$k])
+      }
+    }
+  }
+  return $all
+}
+
+# The tracked processes that still run: same PID and same start time
+function Get-LiveTracked($all) {
+  $byPid = @{}
+  foreach ($c in $all) { $byPid[[int]$c.ProcessId] = $c }
+  return @($tracked.Values | Where-Object { $c = $byPid[$_.Id]; $c -and $c.CreationDate -eq $_.StartTime })
+}
+
+$listener = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($listener) {
+  $owner = Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
+  throw "Port $port is already in use by PID $($listener.OwningProcess) ($($owner.ProcessName)); /health would not test this server."
+}
+
+$py = Join-Path $venv "Scripts\python.exe"
+# Informational only: a failing probe (or Python writing to stderr) must not stop the test
+$eap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 try {
-  $ok = $false
-  for ($i=0; $i -lt 90; $i++) {
-    $health = curl.exe -s --max-time 2 http://127.0.0.1:8080/health
-    if ($health) { $ok = $true; break }
+  $versionOut = @(& $py -c "import importlib.metadata as m; print(m.version('open-webui'))" 2>$null)
+  if ($LASTEXITCODE -eq 0 -and $versionOut.Count) { $version = Protect-Text ([string]$versionOut[-1]).Trim() }
+  else { $version = "(version unknown: probe exit code $LASTEXITCODE)" }
+}
+catch { $version = "(version unknown: $(Protect-Text $_.Exception.Message))" }
+finally { $ErrorActionPreference = $eap }
+Write-Host "open-webui $version; python: $py; server: $ow serve --port $port; working directory: $work; DATA_DIR: $dataDir"
+
+# Known open-webui 0.13.5 bug (open-webui/open-webui#35075, fixed upstream by #35077, not yet released):
+# importing the server creates a temp folder under the hard-coded '/tmp', i.e. <drive>:\tmp on Windows,
+# so startup fails with FileNotFoundError where that folder does not exist. While the installed version
+# still has that line, provide the folder for this run only.
+$driveTmp = Join-Path ([IO.Path]::GetPathRoot($work)) "tmp"
+$managedPy = Join-Path $venv "Lib\site-packages\open_webui\utils\machines\managed.py"
+$tmpBug = [bool]((Test-Path $managedPy) -and (Select-String -LiteralPath $managedPy -SimpleMatch "dir='/tmp'))" -Quiet))
+$createdTmp = $false
+$tmpBefore = @()
+if ($tmpBug -and (Test-Path -LiteralPath $driveTmp -PathType Container)) {
+  Write-Host "WARNING: open-webui $version still has upstream bug open-webui#35075 and needs $driveTmp to start; it exists on this machine"
+  $tmpBefore = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+}
+
+$started = Get-Date
+$serverStart = $started
+$p = $null
+$copies = @()
+$streams = @()
+$failure = $null
+$exitCode = $null
+$stoppedByTest = $false
+$probes = New-Object System.Collections.Generic.List[string]
+try {
+  if ($tmpBug -and -not (Test-Path -LiteralPath $driveTmp -PathType Container)) {
+    try { New-Item -ItemType Directory -Path $driveTmp -ErrorAction Stop | Out-Null }
+    catch { throw "could not create $driveTmp, which open-webui $version needs to start (upstream bug open-webui#35075): $($_.Exception.Message)" }
+    $createdTmp = $true
+    Write-Host "WARNING: open-webui $version needs $driveTmp to start (upstream bug open-webui#35075); created it for this run"
+  }
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = $ow
+  $psi.Arguments = "serve --port $port"
+  $psi.WorkingDirectory = $work
+  $psi.UseShellExecute = $false
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError = $true
+  foreach ($name in $withheld.Keys) { $psi.EnvironmentVariables.Remove($name) }
+  Write-Host "Starting open-webui without $($withheld.Count) environment variables whose name or value looks secret"
+  foreach ($log in @($logOut, $logErr)) {
+    $streams += New-Object IO.FileStream($log, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::ReadWrite)
+    $ownLogs[$log] = $true
+  }
+  $serverStart = Get-Date
+  $p = [Diagnostics.Process]::Start($psi)
+  $null = $p.Handle  # keeps the PID ours and ExitCode readable after the process exits
+  $serverStart = $p.StartTime
+  $copies = @($p.StandardOutput.BaseStream.CopyToAsync($streams[0]), $p.StandardError.BaseStream.CopyToAsync($streams[1]))
+  Write-Host "Started open-webui (PID $($p.Id)); waiting up to $readyTimeoutSec s for $url to report $healthy"
+  $last = ""
+  while ($true) {
+    $elapsed = [int]((Get-Date) - $started).TotalSeconds
+    $null = Update-Tracked $false
+    if ($p.HasExited) {
+      $exitCode = $p.ExitCode
+      $failure = "Open WebUI exited during startup with exit code $exitCode after $elapsed s (see the server log above)"
+      break
+    }
+    Remove-Item -LiteralPath $bodyFile -Force -ErrorAction SilentlyContinue
+    $code = & curl.exe -s -o $bodyFile -w '%{http_code}' --max-time 3 --noproxy 127.0.0.1 $url
+    $curlExit = $LASTEXITCODE
+    $body = ""
+    if ($curlExit -eq 0 -and (Test-Path -LiteralPath $bodyFile)) { $body = [string](Get-Content -LiteralPath $bodyFile -Raw -ErrorAction SilentlyContinue) }
+    if ($body.Length -gt 200) { $body = $body.Substring(0, 200) }
+    $result = "curl exit $curlExit, HTTP $code"
+    if ($body) { $result += ", body $(($body -replace '[\r\n]+', ' ').Trim())" }
+    if ($result -ne $last) { $probes.Add("$elapsed s: $result"); $last = $result }
+    if ($code -match '^2\d\d$' -and $body -match '"status"\s*:\s*true') { break }
+    if ($elapsed -ge $readyTimeoutSec) {
+      $failure = "Open WebUI did not report $healthy at $url within $readyTimeoutSec s (PID $($p.Id) still running)"
+      break
+    }
     Start-Sleep -Seconds 1
   }
-  if (-not $ok) { throw "Open WebUI not ready on http://127.0.0.1:8080" }
-  Write-Host "OK: Open WebUI is responding on /health"
+}
+catch {
+  $failure = "Could not run open-webui: $($_.Exception.Message)"
 }
 finally {
-  if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
+  if ($p) {
+    if ($p.HasExited) { if ($null -eq $exitCode) { $exitCode = $p.ExitCode } } else { $stoppedByTest = $true }
+    # Stop the server and every process of this run, then check that none is left
+    $left = @()
+    $listed = $false
+    for ($w = 0; $w -lt 20; $w++) {
+      if (-not $p.HasExited) { try { $p.Kill() } catch { } }
+      $all = Update-Tracked $true
+      $listed = $null -ne $all
+      $left = @(if ($listed) { Get-LiveTracked $all })
+      if ($listed -and $left.Count -eq 0 -and $p.HasExited) { break }
+      foreach ($c in $left) { Stop-Process -Id $c.Id -Force -ErrorAction SilentlyContinue }
+      Start-Sleep -Milliseconds 500
+    }
+    $ids = @($left | ForEach-Object { $_.Id })
+    if (-not $p.HasExited) { $ids = @($p.Id) + $ids }
+    $msg = $null
+    $held = $null
+    if ($ids.Count -gt 0) { $msg = "Open WebUI processes still running after cleanup: $($ids -join ', ')" }
+    elseif (-not $listed) { $msg = "Could not list processes to check that Open WebUI stopped" }
+    # The server's output closes when no process holds it any more: one still open after this means a
+    # process of this run that the checks above did not find is still running
+    $deadline = (Get-Date).AddSeconds(5)
+    foreach ($t in $copies) {
+      try { if (-not $t.Wait([int][Math]::Max(0, ($deadline - (Get-Date)).TotalMilliseconds))) { $held = "a process started by Open WebUI still holds its output after cleanup" } }
+      catch { }
+    }
+    if ($held -and -not $msg) { $msg = $held }
+    if ($msg) { if ($failure) { $failure += "; $msg" } else { $failure = $msg } }
+  }
+  foreach ($s in $streams) { try { $s.Dispose() } catch { } }
+  # Only under the open-webui#35075 workaround, remove only what this run created: the open-webui-*
+  # folders that appeared during the run, then <drive>:\tmp if the test made it and it is empty
+  if ($tmpBug -and (Test-Path -LiteralPath $driveTmp -PathType Container)) {
+    $kept = @()
+    $ours = @(Get-ChildItem -LiteralPath $driveTmp -Directory -Filter "open-webui-*" -ErrorAction SilentlyContinue |
+      Where-Object { $tmpBefore -notcontains $_.FullName -and $_.CreationTime -ge $started.AddSeconds(-2) })
+    foreach ($d in $ours) {
+      # A link is removed, never followed. Windows PowerShell's .NET removes a junction inside the folder
+      # but still reports an error, so a folder that is still there is tried once more.
+      $recurse = -not ($d.Attributes -band [IO.FileAttributes]::ReparsePoint)
+      try {
+        try { [IO.Directory]::Delete($d.FullName, $recurse) }
+        catch { if (Test-Path -LiteralPath $d.FullName) { [IO.Directory]::Delete($d.FullName, $recurse) } }
+      }
+      catch { $kept += $d.FullName; Write-Host "Could not remove $($d.FullName), which this run created: $(Protect-Text $_.Exception.Message)" }
+    }
+    if ($createdTmp) {
+      try { [IO.Directory]::Delete($driveTmp, $false) }  # fails, and keeps the folder, when anything else is in it
+      catch {
+        if ($kept.Count) { Write-Host "Kept $driveTmp, which this test created: it still holds $($kept -join ', ')" }
+        else { Write-Host "Kept $driveTmp, which this test created: something else wrote to it during the run" }
+      }
+    }
+  }
 }
+
+$elapsed = [int]((Get-Date) - $started).TotalSeconds
+if ($failure) {
+  $exitText = if ($null -ne $exitCode) { "$exitCode" } elseif ($stoppedByTest) { "n/a (still running, stopped by this test)" } else { "n/a (not started)" }
+  # Log tails first, the summary last: the test runner keeps only the end of a long output
+  Write-Host "Server stdout (last 25 lines, $logOut):"
+  Write-Host (Get-SafeLogTail $logOut 25)
+  Write-Host "Server stderr (last 50 lines, $logErr):"
+  Write-Host (Get-SafeLogTail $logErr 50)
+  Write-Host "Health probes (changes only$(if ($probes.Count -gt 15) { ': first 5 and last 10' })):"
+  if ($probes.Count -gt 15) {
+    Write-Host (Format-SafeLines @($probes[0..4]))
+    Write-Host "  ... $($probes.Count - 15) more ..."
+    Write-Host (Format-SafeLines @($probes[($probes.Count - 10)..($probes.Count - 1)]))
+  }
+  elseif ($probes.Count) { Write-Host (Format-SafeLines @($probes)) }
+  else { Write-Host "  (none)" }
+  $errorLines = @()
+  foreach ($log in @($logErr, $logOut)) {
+    if ($errorLines.Count -eq 0 -and $ownLogs[$log] -and (Test-Path -LiteralPath $log)) {
+      $errorLines = @(Select-String -LiteralPath $log -Pattern '(Error|Exception)\b' -ErrorAction SilentlyContinue | Select-Object -Last 5 | ForEach-Object { $_.Line })
+    }
+  }
+  if ($errorLines.Count) {
+    Write-Host "Last error lines:"
+    Write-Host (Format-SafeLines $errorLines)
+  }
+  Write-Host "Open WebUI startup failed after $elapsed s (PID $(if ($p) { $p.Id } else { 'none' }); exit code $exitText)"
+  throw (Protect-Text $failure)
+}
+Write-Host "OK: Open WebUI reported $healthy at $url after $elapsed s; server stopped"
 ```
 <!-- @test:end --> 
 <!-- @os:end --> 
